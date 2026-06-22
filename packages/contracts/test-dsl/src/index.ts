@@ -11,22 +11,21 @@
  * - Each assertion independently records expected and actual values.
  * - Drafts cannot enter CI suites until published.
  */
-import { z } from 'zod';
+
 import {
-  EntityIdSchema,
+  ConfidenceLevelSchema,
   ContentHashSchema,
-  SemanticVersionSchema,
-  InstantSchema,
-  SourceLocationSchema,
   DiagnosticSchema,
+  EntityIdSchema,
   HttpMethodSchema,
   HttpStatusCodeSchema,
-  MediaTypeSchema,
-  SideEffectLevelSchema,
-  ConfidenceLevelSchema,
-  VariableRefSchema,
   ImmutableVersionMetaSchema,
+  InstantSchema,
+  MediaTypeSchema,
+  SemanticVersionSchema,
+  SideEffectLevelSchema,
 } from '@tap/contracts-common';
+import { z } from 'zod';
 
 // ─── Schema Version ─────────────────────────────────────────────
 

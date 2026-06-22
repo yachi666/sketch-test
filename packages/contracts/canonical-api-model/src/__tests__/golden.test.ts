@@ -6,7 +6,7 @@
  * to the schema must pass these tests or intentionally update the goldens.
  */
 import { describe, expect, test } from 'vitest';
-import { CanonicalApiModelSchema, type CanonicalApiModel } from '../index';
+import { type CanonicalApiModel, CanonicalApiModelSchema } from '../index';
 
 const VALID_FIXTURE: CanonicalApiModel = {
   schemaVersion: 'tap.canonical-api/v1',

@@ -14,17 +14,17 @@
  * - Sensitive data is redacted on the Runner side before upload.
  * - Lease expiry does not auto-create a second concurrent execution.
  */
-import { z } from 'zod';
+
 import {
-  EntityIdSchema,
   ContentHashSchema,
-  SemanticVersionSchema,
-  InstantSchema,
+  EntityIdSchema,
   HttpMethodSchema,
   HttpStatusCodeSchema,
+  InstantSchema,
+  SemanticVersionSchema,
   SideEffectLevelSchema,
-  VariableRefSchema,
 } from '@tap/contracts-common';
+import { z } from 'zod';
 
 // ─── Schema Version ─────────────────────────────────────────────
 

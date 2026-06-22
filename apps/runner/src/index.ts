@@ -20,11 +20,12 @@
  * - All events are assigned monotonic sequence numbers.
  * - Retries record each attempt independently.
  */
+
+import type { EntityId, Instant } from '@tap/contracts-common';
 import type {
   AssertionEvaluatedEvent,
   ExecutionPlan,
   FrozenStep,
-  FrozenTeardownStep,
   ResponseReceivedEvent,
   RunEvent,
   RunFinishedEvent,
@@ -34,7 +35,6 @@ import type {
   VariableExtractedEvent,
 } from '@tap/runner-protocol';
 import { RunEventSchema } from '@tap/runner-protocol';
-import type { EntityId, Instant } from '@tap/contracts-common';
 
 // ─── Variable Store ───────────────────────────────────────────────
 
@@ -84,7 +84,7 @@ function createVariableStore(env: Record<string, string> = {}): VariableStore {
         // Handle dot notation: ${env.baseUrl}, ${steps.createUser.userId}
         const parts = name.split('.');
         if (parts.length >= 2) {
-          const varName = parts[parts.length - 1]!;
+          const varName = parts.at(-1) ?? '';
           const entry = store.get(varName);
           return String(entry?.value ?? entry ?? `\${${name}}`);
         }
@@ -172,13 +172,12 @@ function redactObject(obj: Record<string, unknown>): void {
  */
 function jsonPathGet(obj: unknown, path: string): unknown {
   // Remove leading "$."
-  let expr = path.replace(/^\$\.?/, '');
+  const expr = path.replace(/^\$\.?/, '');
 
   // Split by "." but preserve brackets
   const segments: string[] = [];
   let current = '';
-  for (let i = 0; i < expr.length; i++) {
-    const ch = expr[i]!;
+  for (const ch of expr) {
     if (ch === '.' && !current.includes('[')) {
       segments.push(current);
       current = '';
@@ -195,8 +194,8 @@ function jsonPathGet(obj: unknown, path: string): unknown {
     // Handle array index: field[0]
     const arrayMatch = segment.match(/^(\w+)\[(\d+|\*)\]$/);
     if (arrayMatch) {
-      const fieldName = arrayMatch[1]!;
-      const index = arrayMatch[2]!;
+      const fieldName = arrayMatch[1] ?? '';
+      const index = arrayMatch[2] ?? '';
       const record = currentObj as Record<string, unknown>;
       const arr = record[fieldName];
       if (!Array.isArray(arr)) return undefined;
@@ -402,7 +401,7 @@ interface StepExecutionResult {
 async function executeStep(
   step: FrozenStep,
   variables: VariableStore,
-  stepIndex: number,
+  _stepIndex: number,
   runId: EntityId,
   attempt: number,
   traceId?: string,
@@ -700,6 +699,7 @@ export async function executePlan(
 
   // Execute main steps
   for (let i = 0; i < plan.steps.length; i++) {
+    // biome-ignore lint/style/noNonNullAssertion: loop condition guarantees index is in bounds
     const step = plan.steps[i]!;
 
     if (!step.enabled) {
@@ -805,6 +805,7 @@ export function validateEvent(event: unknown): RunEvent | null {
 
 // ─── Re-exports ───────────────────────────────────────────────────
 
+export type { AssertionResult, StepExecutionResult, VariableStore };
 export {
   createVariableStore,
   evaluateAssertions,
@@ -814,4 +815,3 @@ export {
   redactHeaders,
   redactObject,
 };
-export type { AssertionResult, StepExecutionResult, VariableStore };

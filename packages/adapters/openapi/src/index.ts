@@ -158,7 +158,7 @@ function endpointId(method: string, path: string): EntityId {
 
 /** Build a stable schema id from a JSON Pointer-like path. */
 function schemaPath(...segments: string[]): string {
-  return '/schemas/' + segments.join('/');
+  return `/schemas/${segments.join('/')}`;
 }
 
 /** Normalize path parameters: OpenAPI uses {param}, we use :param for stable display. */
@@ -186,7 +186,7 @@ function extractSchemas(
 
   if (!rawSchemas) return { schemas, diagnostics };
 
-  function walk(obj: unknown, path: string, displayName?: string): string | null {
+  function walk(obj: unknown, path: string, _displayName?: string): string | null {
     if (typeof obj !== 'object' || obj === null) return null;
 
     const s = obj as Record<string, unknown>;
@@ -454,7 +454,7 @@ function mapEndpoints(
           // Handle "default" and range responses like "2XX"
           let statusCode: HttpStatusCode;
           const parsed = parseInt(statusStr, 10);
-          if (!isNaN(parsed) && parsed >= 100 && parsed <= 599) {
+          if (!Number.isNaN(parsed) && parsed >= 100 && parsed <= 599) {
             statusCode = parsed as HttpStatusCode;
           } else if (statusStr === 'default') {
             statusCode = 200 as HttpStatusCode; // default → 200 for mapping purposes

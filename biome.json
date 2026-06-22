@@ -18,9 +18,32 @@
       "style": {
         "useConst": "error",
         "useTemplate": "warn"
+      },
+      "complexity": {
+        "useLiteralKeys": "off"
+      },
+      "a11y": {
+        "useAriaPropsSupportedByRole": "off",
+        "useSemanticElements": "off",
+        "noStaticElementInteractions": "off"
       }
     }
   },
+  "overrides": [
+    {
+      "includes": ["**/__tests__/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noNonNullAssertion": "off"
+          },
+          "suspicious": {
+            "noTemplateCurlyInString": "off"
+          }
+        }
+      }
+    }
+  ],
   "javascript": {
     "formatter": {
       "semicolons": "always",

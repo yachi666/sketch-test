@@ -5,8 +5,9 @@
  * sensitive data redaction, and event validation. Integration tests
  * against the Hermetic Fixture Server are separate.
  */
+
+import type { FrozenStep } from '@tap/runner-protocol';
 import { describe, expect, test } from 'vitest';
-import { RunEventSchema, type FrozenStep } from '@tap/runner-protocol';
 import {
   createVariableStore,
   evaluateAssertions,

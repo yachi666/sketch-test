@@ -53,14 +53,13 @@ import { UsersThree } from '@phosphor-icons/react/UsersThree';
 import { X } from '@phosphor-icons/react/X';
 import { XCircle } from '@phosphor-icons/react/XCircle';
 import {
+  type ElementType,
   startTransition,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type ElementType,
-  type FormEvent,
 } from 'react';
 import {
   endpoints,
@@ -69,8 +68,8 @@ import {
   initialSteps,
   makeLogs,
   responseFixture,
-  workflows,
   workflowStepsMap,
+  workflows,
 } from './data';
 import type { ExecutionLog, RunState, TestCase, ViewId, WorkflowMeta, WorkflowStep } from './types';
 
@@ -1856,7 +1855,7 @@ export function App() {
 
   const topbarTitle = isCanvas ? `业务流程 · ${activeWorkflow?.name ?? '编排'}` : viewLabels[view];
 
-  let content;
+  let content: React.ReactNode;
   if (view === 'workflows' && isCanvas) {
     content = (
       <WorkflowWorkspace

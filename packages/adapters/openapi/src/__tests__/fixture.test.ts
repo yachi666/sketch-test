@@ -5,8 +5,9 @@
  * golden fixture. The adapter must produce a valid CanonicalApiModel
  * with correct endpoint counts, schema references, and diagnostics.
  */
-import { describe, expect, test } from 'vitest';
+
 import { CanonicalApiModelSchema } from '@tap/canonical-api-model';
+import { describe, expect, test } from 'vitest';
 import { importOpenApi, type OpenApiDocument } from '../index';
 
 // ─── Fixture Server OpenAPI Spec (minimal inline copy) ────────────

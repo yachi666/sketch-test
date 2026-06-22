@@ -11,20 +11,20 @@
  * - Diagnostics are first-class — warnings must not be silently dropped.
  * - Published ApiVersions are immutable.
  */
-import { z } from 'zod';
+
 import {
-  EntityIdSchema,
   ContentHashSchema,
-  SemanticVersionSchema,
-  InstantSchema,
-  SourceLocationSchema,
   DiagnosticSchema,
+  EntityIdSchema,
   HttpMethodSchema,
   HttpStatusCodeSchema,
-  MediaTypeSchema,
-  DiagnosticSeveritySchema,
   ImmutableVersionMetaSchema,
+  InstantSchema,
+  MediaTypeSchema,
+  SemanticVersionSchema,
+  SourceLocationSchema,
 } from '@tap/contracts-common';
+import { z } from 'zod';
 
 // ─── Schema Version ─────────────────────────────────────────────
 
@@ -61,6 +61,7 @@ export const SchemaRefSchema = z.object({
 });
 export type SchemaRef = z.infer<typeof SchemaRefSchema>;
 
+// biome-ignore lint/suspicious/noExplicitAny: self-referencing recursive Zod schema
 export const ApiSchemaNodeSchema: z.ZodType<any> = z.lazy(() =>
   z.object({
     /** Stable, canonical path identifier. */

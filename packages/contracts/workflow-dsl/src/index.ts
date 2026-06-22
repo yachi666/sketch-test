@@ -12,16 +12,15 @@
  * - Teardown forms an independent phase with configurable failure strategy.
  * - The Runner never directly executes mutable editor documents.
  */
-import { z } from 'zod';
+
 import {
-  EntityIdSchema,
   ContentHashSchema,
-  InstantSchema,
-  HttpStatusCodeSchema,
-  VariableRefSchema,
-  ImmutableVersionMetaSchema,
   DiagnosticSchema,
+  EntityIdSchema,
+  HttpStatusCodeSchema,
+  ImmutableVersionMetaSchema,
 } from '@tap/contracts-common';
+import { z } from 'zod';
 
 // ─── Schema Version ─────────────────────────────────────────────
 
