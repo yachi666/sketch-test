@@ -1,4 +1,4 @@
-import type { EntityId, HttpMethod } from '@sketch-test/contracts-common';
+import type { EntityId, HttpMethod, VariableScope } from '@sketch-test/contracts-common';
 
 // ─── Navigation ─────────────────────────────────────────────────
 
@@ -65,6 +65,8 @@ export interface WorkflowStep {
   expectedStatus: number;
   /** Assertion expression, e.g. "$.code = 0". */
   assertion: string;
+  /** Source endpoint id from the API catalog (null for manual inline steps). */
+  sourceEndpointId?: EntityId;
 }
 
 // ─── Execution Log (UI model — aligns with RunEvent concepts) ──
@@ -108,4 +110,32 @@ export interface TestCase {
   source: TestSource;
   status: TestStatus;
   lastRun: string;
+}
+
+// ─── Variable (UI model — aligns with VariableRef / contracts-common) ─
+
+/** Supported variable types for the UI. */
+export type VariableType = 'plain' | 'secret' | 'dataset';
+
+/** A managed variable in the platform. */
+export interface Variable {
+  id: EntityId;
+  /** Variable name (e.g. "baseUrl", "accessToken"). */
+  name: string;
+  /** Current value. Masked in UI for secret-typed variables. */
+  value: string;
+  /** Classification: plain variable, secret reference, or dataset. */
+  type: VariableType;
+  /** Scope: environment-global, workflow-scoped, or step-local. */
+  scope: VariableScope;
+  /** Whether this variable contains sensitive data (always true for secrets). */
+  sensitive: boolean;
+  /** Human-readable description. */
+  description: string;
+  /** ISO-8601 timestamp of last modification. */
+  updatedAt: string;
+  /** Who last modified this variable. */
+  updatedBy: string;
+  /** Which workflows reference this variable. */
+  usedIn: string[];
 }

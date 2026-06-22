@@ -1,0 +1,381 @@
+- generic [ref=e3]:
+  - complementary "主导航" [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e7]
+      - generic [ref=e10]:
+        - strong [ref=e11]: SketchTest
+        - generic [ref=e12]: API 自动化测试平台
+    - navigation [ref=e13]:
+      - button "工作台" [ref=e14] [cursor=pointer]:
+        - img [ref=e15]
+        - generic [ref=e17]: 工作台
+      - button "项目管理" [ref=e18] [cursor=pointer]:
+        - img [ref=e19]
+        - generic [ref=e21]: 项目管理
+      - button "业务流程 核心功能" [ref=e22] [cursor=pointer]:
+        - img [ref=e23]
+        - generic [ref=e26]: 业务流程
+        - generic "核心功能" [ref=e27]
+      - button "接口管理" [ref=e28] [cursor=pointer]:
+        - img [ref=e29]
+        - generic [ref=e31]: 接口管理
+      - button "用例管理" [ref=e32] [cursor=pointer]:
+        - img [ref=e33]
+        - generic [ref=e35]: 用例管理
+      - button "测试计划" [ref=e36] [cursor=pointer]:
+        - img [ref=e37]
+        - generic [ref=e39]: 测试计划
+      - button "环境管理" [ref=e40] [cursor=pointer]:
+        - img [ref=e41]
+        - generic [ref=e43]: 环境管理
+      - button "变量管理" [ref=e44] [cursor=pointer]:
+        - img [ref=e45]
+        - generic [ref=e47]: 变量管理
+      - button "报告中心" [ref=e48] [cursor=pointer]:
+        - img [ref=e49]
+        - generic [ref=e51]: 报告中心
+      - button "AI Agent Beta" [ref=e52] [cursor=pointer]:
+        - img [ref=e53]
+        - generic [ref=e55]: AI Agent
+        - generic [ref=e56]: Beta
+      - button "团队管理" [ref=e57] [cursor=pointer]:
+        - img [ref=e58]
+        - generic [ref=e60]: 团队管理
+      - button "回收站" [ref=e61] [cursor=pointer]:
+        - img [ref=e62]
+        - generic [ref=e64]: 回收站
+    - button "QA QA_team QA 工程师" [ref=e66] [cursor=pointer]:
+      - generic [ref=e67]: QA
+      - generic [ref=e68]:
+        - strong [ref=e69]: QA_team
+        - generic [ref=e70]: QA 工程师
+      - img [ref=e71]
+  - generic [ref=e73]:
+    - banner [ref=e74]:
+      - generic [ref=e76]:
+        - generic [ref=e77]: SketchTest 演示项目 /
+        - heading "业务流程 · 创建订单并支付" [level=1] [ref=e337]:
+          - text: 业务流程 · 创建订单并支付
+          - img [ref=e79]
+        - paragraph [ref=e81]: 更新于 2026-06-21 10:30 · 创建人 QA_team
+      - generic [ref=e82]:
+        - button "保存草稿" [ref=e83] [cursor=pointer]:
+          - img [ref=e84]
+          - text: 保存草稿
+        - button "调试运行" [ref=e86] [cursor=pointer]:
+          - img [ref=e87]
+          - text: 调试运行
+        - button "调试" [ref=e89] [cursor=pointer]:
+          - img [ref=e90]
+          - text: 调试
+        - generic [ref=e92]:
+          - generic [ref=e93]: 测试环境
+          - combobox "测试环境" [ref=e94] [cursor=pointer]:
+            - option "环境：测试环境" [selected]
+            - option "环境：预发布环境"
+            - option "环境：生产只读"
+          - img
+        - button "导入 OpenAPI" [ref=e95] [cursor=pointer]:
+          - img [ref=e96]
+        - button "导出流程" [ref=e98] [cursor=pointer]:
+          - img [ref=e99]
+        - button "通知" [ref=e101] [cursor=pointer]:
+          - img [ref=e102]
+        - button "设置" [ref=e104] [cursor=pointer]:
+          - img [ref=e105]
+    - generic [ref=e338]:
+      - generic [ref=e339]:
+        - region "流程编排画布" [ref=e340]:
+          - button "返回流程列表" [ref=e341] [cursor=pointer]:
+            - img [ref=e342]
+            - text: 返回流程列表
+          - generic [ref=e344]:
+            - strong [ref=e345]: 业务流程：创建订单并支付
+            - generic [ref=e346]: 拖动步骤可以重新编排
+          - generic "流程版本信息" [ref=e347]:
+            - strong [ref=e348]: BLUEPRINT LAB
+            - generic [ref=e349]: "PROJECT: 创建订单并支付"
+            - generic [ref=e350]: "VERSION: v1.0.0"
+            - generic [ref=e351]: "DRAWN BY: QA_TEAM"
+          - generic [ref=e352]:
+            - strong [ref=e353]: 流程说明
+            - generic [ref=e354]: 自动提取关键变量，完成业务闭环验证。
+          - list [ref=e355]:
+            - listitem [ref=e356]:
+              - button "编辑步骤 1 创建用户" [ref=e357] [cursor=pointer]:
+                - generic [ref=e358]: "1"
+                - generic [ref=e359]: REST
+                - img [ref=e361]
+                - strong [ref=e364]: 创建用户
+                - generic [ref=e365]:
+                  - emphasis [ref=e366]: POST
+                  - text: /api/users
+              - generic [ref=e367]:
+                - generic [ref=e368]: 提取变量
+                - strong [ref=e369]: userId
+                - code [ref=e370]: $.data.userId
+              - generic [ref=e371]:
+                - generic [ref=e372]: 断言
+                - strong [ref=e373]:
+                  - img [ref=e374]
+                  - text: 状态码 = 201
+                - code [ref=e376]: $.code = 0
+              - generic [ref=e377]:
+                - generic [ref=e378]: 使用 userId
+                - img [ref=e379]
+            - listitem [ref=e381]:
+              - button "编辑步骤 2 登录" [ref=e382] [cursor=pointer]:
+                - generic [ref=e383]: "2"
+                - generic [ref=e384]: REST
+                - img [ref=e386]
+                - strong [ref=e389]: 登录
+                - generic [ref=e390]:
+                  - emphasis [ref=e391]: POST
+                  - text: /api/auth/login
+              - generic [ref=e392]:
+                - generic [ref=e393]: 提取变量
+                - strong [ref=e394]: accessToken
+                - code [ref=e395]: $.data.accessToken
+              - generic [ref=e396]:
+                - generic [ref=e397]: 断言
+                - strong [ref=e398]:
+                  - img [ref=e399]
+                  - text: 状态码 = 200
+                - code [ref=e401]: $.code = 0
+              - generic [ref=e402]:
+                - generic [ref=e403]: 使用 accessToken
+                - img [ref=e404]
+            - listitem [ref=e406]:
+              - button "编辑步骤 3 创建订单" [ref=e407] [cursor=pointer]:
+                - generic [ref=e408]: "3"
+                - generic [ref=e409]: REST
+                - img [ref=e411]
+                - strong [ref=e414]: 创建订单
+                - generic [ref=e415]:
+                  - emphasis [ref=e416]: POST
+                  - text: /api/orders
+              - generic [ref=e417]:
+                - generic [ref=e418]: 提取变量
+                - strong [ref=e419]: orderId
+                - code [ref=e420]: $.data.orderId
+              - generic [ref=e421]:
+                - generic [ref=e422]: 断言
+                - strong [ref=e423]:
+                  - img [ref=e424]
+                  - text: 状态码 = 201
+                - code [ref=e426]: $.code = 0
+              - generic [ref=e427]:
+                - generic [ref=e428]: 使用 orderId
+                - img [ref=e429]
+            - listitem [ref=e431]:
+              - button "编辑步骤 4 支付" [ref=e432] [cursor=pointer]:
+                - generic [ref=e433]: "4"
+                - generic [ref=e434]: REST
+                - img [ref=e436]
+                - strong [ref=e439]: 支付
+                - generic [ref=e440]:
+                  - emphasis [ref=e441]: POST
+                  - text: /api/payments
+              - generic [ref=e442]:
+                - generic [ref=e443]: 提取变量
+                - strong [ref=e444]: paymentId
+                - code [ref=e445]: $.data.paymentId
+              - generic [ref=e446]:
+                - generic [ref=e447]: 断言
+                - strong [ref=e448]:
+                  - img [ref=e449]
+                  - text: 状态码 = 200
+                - code [ref=e451]: $.code = 0
+              - generic [ref=e452]:
+                - generic [ref=e453]: 使用 paymentId
+                - img [ref=e454]
+            - listitem [ref=e456]:
+              - button "编辑步骤 5 验证状态" [ref=e457] [cursor=pointer]:
+                - generic [ref=e458]: "5"
+                - generic [ref=e459]: REST
+                - img [ref=e461]
+                - strong [ref=e464]: 验证状态
+                - generic [ref=e465]:
+                  - emphasis [ref=e466]: GET
+                  - text: "/api/orders/{orderId}"
+              - generic [ref=e467]:
+                - generic [ref=e468]: 提取变量
+                - strong [ref=e469]: status
+                - code [ref=e470]: $.data.status
+              - generic [ref=e471]:
+                - generic [ref=e472]: 断言
+                - strong [ref=e473]:
+                  - img [ref=e474]
+                  - text: 状态码 = 200
+                - code [ref=e476]: $.data.status = 已支付
+              - generic [ref=e705]:
+                - generic [ref=e706]: 使用 status
+                - img [ref=e707]
+            - listitem [ref=e709]:
+              - button "编辑步骤 6 支付订单" [ref=e710] [cursor=pointer]:
+                - generic [ref=e711]: "6"
+                - generic [ref=e712]: REST
+                - img [ref=e714]
+                - strong [ref=e717]: 支付订单
+                - generic [ref=e718]:
+                  - emphasis [ref=e719]: POST
+                  - text: /api/payments
+              - generic [ref=e720]:
+                - generic [ref=e721]: 提取变量
+                - strong [ref=e722]: newId
+                - code [ref=e723]: $.data
+              - generic [ref=e724]:
+                - generic [ref=e725]: 断言
+                - strong [ref=e726]:
+                  - img [ref=e727]
+                  - text: 状态码 = 201
+                - code [ref=e729]: $.code = 0
+          - generic [ref=e477]:
+            - generic "图例" [ref=e478]:
+              - strong [ref=e479]: 图例
+              - generic [ref=e480]:
+                - img [ref=e481]
+                - text: 执行流
+              - generic [ref=e483]:
+                - img [ref=e484]
+                - text: 断言通过
+              - generic [ref=e486]:
+                - img [ref=e487]
+                - text: 断言失败
+            - button "添加步骤" [ref=e489] [cursor=pointer]:
+              - img [ref=e490]
+              - text: 添加步骤
+        - complementary "步骤配置" [ref=e492]:
+          - generic [ref=e493]:
+            - strong [ref=e494]: 步骤配置
+            - button "收起步骤配置" [ref=e495] [cursor=pointer]:
+              - img [ref=e496]
+          - generic [ref=e498]:
+            - generic [ref=e499]: +
+            - strong [ref=e500]: 支付订单
+            - generic [ref=e501]: REST
+          - tablist "步骤配置分类" [ref=e502]:
+            - tab "基础配置" [selected] [ref=e503] [cursor=pointer]
+            - tab "请求参数" [ref=e504] [cursor=pointer]
+            - tab "预处理" [ref=e505] [cursor=pointer]
+            - tab "后处理" [ref=e506] [cursor=pointer]
+          - generic [ref=e507]:
+            - generic [ref=e508]:
+              - text: 步骤名称
+              - textbox "步骤名称" [ref=e509]: 支付订单
+            - generic [ref=e510]:
+              - text: 请求方法
+              - combobox "请求方法" [ref=e511] [cursor=pointer]:
+                - option "GET"
+                - option "POST" [selected]
+                - option "PUT"
+                - option "DELETE"
+            - generic [ref=e512]:
+              - text: 请求地址
+              - textbox "请求地址" [ref=e513]: "{{baseUrl}}/api/payments"
+            - group "请求头（Headers）" [ref=e514]:
+              - generic [ref=e515]: 请求头（Headers）
+              - generic [ref=e516]:
+                - img [ref=e517]
+                - code [ref=e519]: Content-Type
+                - generic [ref=e520]: application/json
+              - generic [ref=e521]:
+                - img [ref=e522]
+                - code [ref=e524]: Authorization
+                - generic [ref=e525]: "Bearer {{accessToken}}"
+              - button "添加参数" [ref=e526] [cursor=pointer]:
+                - img [ref=e527]
+                - text: 添加参数
+            - group "提取变量" [ref=e529]:
+              - generic [ref=e530]: 提取变量
+              - generic [ref=e531]:
+                - text: 变量名
+                - textbox "变量名" [ref=e532]: newId
+              - generic [ref=e533]:
+                - text: JSONPath
+                - textbox "JSONPath" [ref=e534]: $.data
+            - group "断言" [ref=e535]:
+              - generic [ref=e536]: 断言
+              - generic [ref=e537]:
+                - text: 期望状态码
+                - spinbutton "期望状态码" [ref=e538]: "201"
+              - generic [ref=e539]:
+                - text: 表达式
+                - textbox "表达式" [ref=e540]: $.code = 0
+              - button "添加断言" [ref=e541] [cursor=pointer]:
+                - img [ref=e542]
+                - text: 添加断言
+          - button "删除当前步骤" [ref=e544] [cursor=pointer]:
+            - img [ref=e545]
+            - text: 删除当前步骤
+      - region "执行控制台" [ref=e547]:
+        - generic [ref=e548]:
+          - strong [ref=e549]: 执行日志
+          - generic [ref=e550]:
+            - generic [ref=e551]: 筛选步骤
+            - combobox "筛选步骤" [ref=e552] [cursor=pointer]:
+              - option "全部步骤" [selected]
+              - option "仅失败"
+              - option "仅通过"
+          - button "清空" [ref=e553] [cursor=pointer]:
+            - img [ref=e554]
+            - text: 清空
+          - button "导出日志" [ref=e556] [cursor=pointer]:
+            - img [ref=e557]
+            - text: 导出日志
+          - button "收起" [ref=e559] [cursor=pointer]:
+            - text: 收起
+            - img [ref=e560]
+        - generic [ref=e562]:
+          - table "执行日志列表" [ref=e563]:
+            - row "--:--:-- 步骤 1 创建用户 POST /api/users — —" [ref=e564] [cursor=pointer]:
+              - img [ref=e566]
+              - time [ref=e568]: "--:--:--"
+              - generic [ref=e569]: 步骤 1
+              - strong [ref=e570]: 创建用户
+              - code [ref=e571]: POST /api/users
+              - generic [ref=e572]: —
+              - generic [ref=e573]: —
+            - row "--:--:-- 步骤 2 登录 POST /api/auth/login — —" [ref=e574] [cursor=pointer]:
+              - img [ref=e576]
+              - time [ref=e578]: "--:--:--"
+              - generic [ref=e579]: 步骤 2
+              - strong [ref=e580]: 登录
+              - code [ref=e581]: POST /api/auth/login
+              - generic [ref=e582]: —
+              - generic [ref=e583]: —
+            - row "--:--:-- 步骤 3 创建订单 POST /api/orders — —" [ref=e584] [cursor=pointer]:
+              - img [ref=e586]
+              - time [ref=e588]: "--:--:--"
+              - generic [ref=e589]: 步骤 3
+              - strong [ref=e590]: 创建订单
+              - code [ref=e591]: POST /api/orders
+              - generic [ref=e592]: —
+              - generic [ref=e593]: —
+            - row "--:--:-- 步骤 4 支付 POST /api/payments — —" [ref=e594] [cursor=pointer]:
+              - img [ref=e596]
+              - time [ref=e598]: "--:--:--"
+              - generic [ref=e599]: 步骤 4
+              - strong [ref=e600]: 支付
+              - code [ref=e601]: POST /api/payments
+              - generic [ref=e602]: —
+              - generic [ref=e603]: —
+            - 'row "--:--:-- 步骤 5 验证状态 GET /api/orders/{orderId} — —" [ref=e604] [cursor=pointer]':
+              - img [ref=e606]
+              - time [ref=e608]: "--:--:--"
+              - generic [ref=e609]: 步骤 5
+              - strong [ref=e610]: 验证状态
+              - code [ref=e611]: "GET /api/orders/{orderId}"
+              - generic [ref=e612]: —
+              - generic [ref=e613]: —
+          - generic [ref=e614]:
+            - tablist [ref=e615]:
+              - tab "响应" [selected] [ref=e616] [cursor=pointer]
+              - tab "断言" [ref=e617] [cursor=pointer]
+              - tab "提取变量" [ref=e618] [cursor=pointer]
+              - generic [ref=e619]: 200 OK 210 ms 512 B
+              - button "复制响应" [ref=e620] [cursor=pointer]:
+                - img [ref=e621]
+            - generic [ref=e623]: "{ \"code\": 0, \"data\": { \"orderId\": \"123456\", \"status\": \"待支付\", \"amount\": 199.00, \"createTime\": \"2026-06-21 10:30:58\" }, \"message\": \"success\" }"
+  - status:
+    - img

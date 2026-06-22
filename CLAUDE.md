@@ -78,27 +78,10 @@ sketch-test/
 
 ## Domain language
 
-Use the canonical terms from [CONTEXT.md](CONTEXT.md). Key distinctions:
+Use the canonical terms and product principles from [CONTEXT.md](CONTEXT.md). Key reminders:
 
-| Say | Don't Say |
-|-----|-----------|
-| TestCaseVersion | test case (ambiguous: draft or published?) |
-| WorkflowVersion | workflow (ambiguous: editor doc or published?) |
-| CanonicalApiModel | API spec, API document, parsed API |
-| ExecutionPlan | compiled workflow, frozen workflow |
-| RunSnapshot | run config, run params |
-| RunEvent | execution log, run log |
-| StepRun | step execution, run step |
-| GeneratedDraft | AI test, generated test |
-
-**Product principles** (from CONTEXT.md):
-1. Evidence-first — all conclusions trace back to sources
-2. Draft-first — AI/rule-generated content enters as drafts
-3. Flow over count — critical business flow coverage > test case count
-4. Reproducibility-first — failures retain enough info to replay
-5. Secure by default — secrets never in plain text
-6. Adapter architecture — everything outputs CanonicalApiModel
-7. Control/execution separation — Runners deployed in same network as SUT
+- Published versions (ApiVersion, TestCaseVersion, WorkflowVersion, EnvironmentVersion, DatasetVersion) are **immutable**.
+- The seven product principles are non-negotiable — evidence-first, draft-first, flow over count, reproducibility-first, secure by default, adapter architecture, control/execution separation.
 
 ## Testing
 

@@ -1,6 +1,6 @@
-> AGENTS.md is read by Claude Code as a fallback when CLAUDE.md is absent.
-> Since this repo now has `CLAUDE.md`, AGENTS.md should stay lean and focus on
-> agent instruction routing only.
+> AGENTS.md is loaded by Claude Code alongside CLAUDE.md for agent skill routing.
+> Keep it lean: route to specialized instruction docs, don't duplicate
+> project-level conventions from CLAUDE.md.
 
 ## Agent instructions
 

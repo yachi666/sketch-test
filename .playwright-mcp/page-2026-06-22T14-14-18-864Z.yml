@@ -1,0 +1,301 @@
+- generic [ref=e3]:
+  - complementary "主导航" [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e7]
+      - generic [ref=e10]:
+        - strong [ref=e11]: SketchTest
+        - generic [ref=e12]: API 自动化测试平台
+    - navigation [ref=e13]:
+      - button "工作台" [ref=e14] [cursor=pointer]:
+        - img [ref=e15]
+        - generic [ref=e17]: 工作台
+      - button "项目管理" [ref=e18] [cursor=pointer]:
+        - img [ref=e19]
+        - generic [ref=e21]: 项目管理
+      - button "业务流程 核心功能" [active] [ref=e22] [cursor=pointer]:
+        - img [ref=e23]
+        - generic [ref=e26]: 业务流程
+        - generic "核心功能" [ref=e27]
+      - button "接口管理" [ref=e28] [cursor=pointer]:
+        - img [ref=e29]
+        - generic [ref=e31]: 接口管理
+      - button "用例管理" [ref=e32] [cursor=pointer]:
+        - img [ref=e33]
+        - generic [ref=e35]: 用例管理
+      - button "测试计划" [ref=e36] [cursor=pointer]:
+        - img [ref=e37]
+        - generic [ref=e39]: 测试计划
+      - button "环境管理" [ref=e40] [cursor=pointer]:
+        - img [ref=e41]
+        - generic [ref=e43]: 环境管理
+      - button "变量管理" [ref=e44] [cursor=pointer]:
+        - img [ref=e45]
+        - generic [ref=e47]: 变量管理
+      - button "报告中心" [ref=e48] [cursor=pointer]:
+        - img [ref=e49]
+        - generic [ref=e51]: 报告中心
+      - button "AI Agent Beta" [ref=e52] [cursor=pointer]:
+        - img [ref=e53]
+        - generic [ref=e55]: AI Agent
+        - generic [ref=e56]: Beta
+      - button "团队管理" [ref=e57] [cursor=pointer]:
+        - img [ref=e58]
+        - generic [ref=e60]: 团队管理
+      - button "回收站" [ref=e61] [cursor=pointer]:
+        - img [ref=e62]
+        - generic [ref=e64]: 回收站
+    - button "QA QA_team QA 工程师" [ref=e66] [cursor=pointer]:
+      - generic [ref=e67]: QA
+      - generic [ref=e68]:
+        - strong [ref=e69]: QA_team
+        - generic [ref=e70]: QA 工程师
+      - img [ref=e71]
+  - generic [ref=e73]:
+    - banner [ref=e74]:
+      - generic [ref=e76]:
+        - generic [ref=e77]: SketchTest 演示项目 /
+        - heading "业务流程" [level=1] [ref=e78]:
+          - text: 业务流程
+          - img [ref=e79]
+        - paragraph [ref=e81]: 更新于 2026-06-21 10:30 · 创建人 QA_team
+      - generic [ref=e82]:
+        - button "保存草稿" [ref=e83] [cursor=pointer]:
+          - img [ref=e84]
+          - text: 保存草稿
+        - button "调试运行" [ref=e86] [cursor=pointer]:
+          - img [ref=e87]
+          - text: 调试运行
+        - button "调试" [ref=e89] [cursor=pointer]:
+          - img [ref=e90]
+          - text: 调试
+        - generic [ref=e92]:
+          - generic [ref=e93]: 测试环境
+          - combobox "测试环境" [ref=e94] [cursor=pointer]:
+            - option "环境：测试环境" [selected]
+            - option "环境：预发布环境"
+            - option "环境：生产只读"
+          - img
+        - button "导入 OpenAPI" [ref=e95] [cursor=pointer]:
+          - img [ref=e96]
+        - button "导出流程" [ref=e98] [cursor=pointer]:
+          - img [ref=e99]
+        - button "通知" [ref=e101] [cursor=pointer]:
+          - img [ref=e102]
+        - button "设置" [ref=e104] [cursor=pointer]:
+          - img [ref=e105]
+    - main [ref=e107]:
+      - generic [ref=e108]:
+        - generic [ref=e109]:
+          - text: BUSINESS PROCESSES
+          - heading "业务流程" [level=2] [ref=e110]
+          - paragraph [ref=e111]: 每个业务流程是一个多接口 API 序列，覆盖正常路径和异常路径，支持变量传递、条件、重试和清理。
+        - button "新建流程" [ref=e112] [cursor=pointer]:
+          - img [ref=e113]
+          - text: 新建流程
+      - generic [ref=e115]:
+        - generic [ref=e116]:
+          - button "全部 (8)" [ref=e117] [cursor=pointer]
+          - button "正常流程 (5)" [ref=e118] [cursor=pointer]
+          - button "异常路径 (3)" [ref=e119] [cursor=pointer]
+        - generic [ref=e120]:
+          - img [ref=e121]
+          - generic [ref=e123]: 搜索业务流程
+          - textbox "搜索业务流程" [ref=e124]:
+            - /placeholder: 搜索名称、标签或 BP 编号
+      - region "业务流程列表" [ref=e125]:
+        - button "BP-01 健康 用户注册与认证 注册新用户并完成登录认证，验证身份令牌的有效性。 3 步骤 可清理写入 变量链路 userId accessToken 认证 用户 Happy Path 最近执行 10 分钟前" [ref=e126] [cursor=pointer]:
+          - generic [ref=e127]:
+            - generic [ref=e128]: BP-01
+            - generic [ref=e129]: 健康
+          - heading "用户注册与认证" [level=3] [ref=e130]
+          - paragraph [ref=e131]: 注册新用户并完成登录认证，验证身份令牌的有效性。
+          - generic [ref=e132]:
+            - generic "步骤数" [ref=e133]:
+              - img [ref=e134]
+              - text: 3 步骤
+            - generic "副作用等级：可清理写入" [ref=e136]:
+              - img [ref=e137]
+              - text: 可清理写入
+          - generic [ref=e139]:
+            - generic [ref=e140]: 变量链路
+            - code [ref=e142]: userId
+            - generic [ref=e143]:
+              - img [ref=e144]
+              - code [ref=e146]: accessToken
+          - generic [ref=e147]:
+            - generic [ref=e148]:
+              - generic [ref=e149]: 认证
+              - generic [ref=e150]: 用户
+              - generic [ref=e151]: Happy Path
+            - time [ref=e152]: 最近执行 10 分钟前
+        - button "BP-02 需关注 创建订单并支付 用户登录后创建订单并完成支付，验证订单状态流转。 5 步骤 不可逆 变量链路 accessToken orderId paymentId 订单 支付 核心流程 最近执行 8 分钟前" [ref=e153] [cursor=pointer]:
+          - generic [ref=e154]:
+            - generic [ref=e155]: BP-02
+            - generic [ref=e156]: 需关注
+          - heading "创建订单并支付" [level=3] [ref=e157]
+          - paragraph [ref=e158]: 用户登录后创建订单并完成支付，验证订单状态流转。
+          - generic [ref=e159]:
+            - generic "步骤数" [ref=e160]:
+              - img [ref=e161]
+              - text: 5 步骤
+            - generic "副作用等级：不可逆" [ref=e163]:
+              - img [ref=e164]
+              - text: 不可逆
+          - generic [ref=e166]:
+            - generic [ref=e167]: 变量链路
+            - code [ref=e169]: accessToken
+            - generic [ref=e170]:
+              - img [ref=e171]
+              - code [ref=e173]: orderId
+            - generic [ref=e174]:
+              - img [ref=e175]
+              - code [ref=e177]: paymentId
+          - generic [ref=e178]:
+            - generic [ref=e179]:
+              - generic [ref=e180]: 订单
+              - generic [ref=e181]: 支付
+              - generic [ref=e182]: 核心流程
+            - time [ref=e183]: 最近执行 8 分钟前
+        - button "BP-03 健康 订单生命周期管理 创建订单、查询详情、取消订单的完整生命周期。 3 步骤 可清理写入 变量链路 orderId status 订单 生命周期 CRUD 最近执行 12 分钟前" [ref=e184] [cursor=pointer]:
+          - generic [ref=e185]:
+            - generic [ref=e186]: BP-03
+            - generic [ref=e187]: 健康
+          - heading "订单生命周期管理" [level=3] [ref=e188]
+          - paragraph [ref=e189]: 创建订单、查询详情、取消订单的完整生命周期。
+          - generic [ref=e190]:
+            - generic "步骤数" [ref=e191]:
+              - img [ref=e192]
+              - text: 3 步骤
+            - generic "副作用等级：可清理写入" [ref=e194]:
+              - img [ref=e195]
+              - text: 可清理写入
+          - generic [ref=e197]:
+            - generic [ref=e198]: 变量链路
+            - code [ref=e200]: orderId
+            - generic [ref=e201]:
+              - img [ref=e202]
+              - code [ref=e204]: status
+          - generic [ref=e205]:
+            - generic [ref=e206]:
+              - generic [ref=e207]: 订单
+              - generic [ref=e208]: 生命周期
+              - generic [ref=e209]: CRUD
+            - time [ref=e210]: 最近执行 12 分钟前
+        - button "BP-04 健康 用户信息查询与更新 登录后查询当前用户信息，验证只读接口的权限控制。 2 步骤 只读 变量链路 accessToken userId 用户 查询 只读 最近执行 15 分钟前" [ref=e211] [cursor=pointer]:
+          - generic [ref=e212]:
+            - generic [ref=e213]: BP-04
+            - generic [ref=e214]: 健康
+          - heading "用户信息查询与更新" [level=3] [ref=e215]
+          - paragraph [ref=e216]: 登录后查询当前用户信息，验证只读接口的权限控制。
+          - generic [ref=e217]:
+            - generic "步骤数" [ref=e218]:
+              - img [ref=e219]
+              - text: 2 步骤
+            - generic "副作用等级：只读" [ref=e221]:
+              - img [ref=e222]
+              - text: 只读
+          - generic [ref=e224]:
+            - generic [ref=e225]: 变量链路
+            - code [ref=e227]: accessToken
+            - generic [ref=e228]:
+              - img [ref=e229]
+              - code [ref=e231]: userId
+          - generic [ref=e232]:
+            - generic [ref=e233]:
+              - generic [ref=e234]: 用户
+              - generic [ref=e235]: 查询
+              - generic [ref=e236]: 只读
+            - time [ref=e237]: 最近执行 15 分钟前
+        - button "BP-05 草稿 支付状态轮询 发起支付后轮询订单状态直至支付完成，验证异步回调模式。 2 步骤 不可逆 变量链路 paymentId orderId status 支付 轮询 异步" [ref=e238] [cursor=pointer]:
+          - generic [ref=e239]:
+            - generic [ref=e240]: BP-05
+            - generic [ref=e241]: 草稿
+          - heading "支付状态轮询" [level=3] [ref=e242]
+          - paragraph [ref=e243]: 发起支付后轮询订单状态直至支付完成，验证异步回调模式。
+          - generic [ref=e244]:
+            - generic "步骤数" [ref=e245]:
+              - img [ref=e246]
+              - text: 2 步骤
+            - generic "副作用等级：不可逆" [ref=e248]:
+              - img [ref=e249]
+              - text: 不可逆
+          - generic [ref=e251]:
+            - generic [ref=e252]: 变量链路
+            - code [ref=e254]: paymentId
+            - generic [ref=e255]:
+              - img [ref=e256]
+              - code [ref=e258]: orderId
+            - generic [ref=e259]:
+              - img [ref=e260]
+              - code [ref=e262]: status
+          - generic [ref=e264]:
+            - generic [ref=e265]: 支付
+            - generic [ref=e266]: 轮询
+            - generic [ref=e267]: 异步
+        - button "BP-06 健康 异常路径：重复支付保护 对同一订单重复发起支付，验证幂等性保护和错误响应。 2 步骤 不可逆 变量链路 orderId status 支付 幂等 异常 最近执行 20 分钟前" [ref=e268] [cursor=pointer]:
+          - generic [ref=e269]:
+            - generic [ref=e270]: BP-06
+            - generic [ref=e271]: 健康
+          - heading "异常路径：重复支付保护" [level=3] [ref=e272]
+          - paragraph [ref=e273]: 对同一订单重复发起支付，验证幂等性保护和错误响应。
+          - generic [ref=e274]:
+            - generic "步骤数" [ref=e275]:
+              - img [ref=e276]
+              - text: 2 步骤
+            - generic "副作用等级：不可逆" [ref=e278]:
+              - img [ref=e279]
+              - text: 不可逆
+          - generic [ref=e281]:
+            - generic [ref=e282]: 变量链路
+            - code [ref=e284]: orderId
+            - generic [ref=e285]:
+              - img [ref=e286]
+              - code [ref=e288]: status
+          - generic [ref=e289]:
+            - generic [ref=e290]:
+              - generic [ref=e291]: 支付
+              - generic [ref=e292]: 幂等
+              - generic [ref=e293]: 异常
+            - time [ref=e294]: 最近执行 20 分钟前
+        - button "BP-07 健康 异常路径：认证失败处理 使用错误凭证登录，验证 401 响应和错误信息格式。 1 步骤 只读 无变量传递 认证 401 异常 最近执行 25 分钟前" [ref=e295] [cursor=pointer]:
+          - generic [ref=e296]:
+            - generic [ref=e297]: BP-07
+            - generic [ref=e298]: 健康
+          - heading "异常路径：认证失败处理" [level=3] [ref=e299]
+          - paragraph [ref=e300]: 使用错误凭证登录，验证 401 响应和错误信息格式。
+          - generic [ref=e301]:
+            - generic "步骤数" [ref=e302]:
+              - img [ref=e303]
+              - text: 1 步骤
+            - generic "副作用等级：只读" [ref=e305]:
+              - img [ref=e306]
+              - text: 只读
+          - generic [ref=e309]: 无变量传递
+          - generic [ref=e310]:
+            - generic [ref=e311]:
+              - generic [ref=e312]: 认证
+              - generic [ref=e313]: "401"
+              - generic [ref=e314]: 异常
+            - time [ref=e315]: 最近执行 25 分钟前
+        - button "BP-08 健康 异常路径：参数校验失败 发送缺少必填字段的请求，验证 400 响应和字段级错误。 1 步骤 只读 无变量传递 校验 400 异常 最近执行 30 分钟前" [ref=e316] [cursor=pointer]:
+          - generic [ref=e317]:
+            - generic [ref=e318]: BP-08
+            - generic [ref=e319]: 健康
+          - heading "异常路径：参数校验失败" [level=3] [ref=e320]
+          - paragraph [ref=e321]: 发送缺少必填字段的请求，验证 400 响应和字段级错误。
+          - generic [ref=e322]:
+            - generic "步骤数" [ref=e323]:
+              - img [ref=e324]
+              - text: 1 步骤
+            - generic "副作用等级：只读" [ref=e326]:
+              - img [ref=e327]
+              - text: 只读
+          - generic [ref=e330]: 无变量传递
+          - generic [ref=e331]:
+            - generic [ref=e332]:
+              - generic [ref=e333]: 校验
+              - generic [ref=e334]: "400"
+              - generic [ref=e335]: 异常
+            - time [ref=e336]: 最近执行 30 分钟前
+  - status:
+    - img

@@ -1,4 +1,11 @@
-import type { ApiEndpoint, ExecutionLog, TestCase, WorkflowMeta, WorkflowStep } from './types';
+import type {
+  ApiEndpoint,
+  ExecutionLog,
+  TestCase,
+  Variable,
+  WorkflowMeta,
+  WorkflowStep,
+} from './types';
 
 export const initialSteps: WorkflowStep[] = [
   {
@@ -12,6 +19,7 @@ export const initialSteps: WorkflowStep[] = [
     variablePath: '$.data.userId',
     expectedStatus: 201,
     assertion: '$.code = 0',
+    sourceEndpointId: 'e1',
   },
   {
     id: 'login',
@@ -24,6 +32,7 @@ export const initialSteps: WorkflowStep[] = [
     variablePath: '$.data.accessToken',
     expectedStatus: 200,
     assertion: '$.code = 0',
+    sourceEndpointId: 'e2',
   },
   {
     id: 'create-order',
@@ -36,6 +45,7 @@ export const initialSteps: WorkflowStep[] = [
     variablePath: '$.data.orderId',
     expectedStatus: 201,
     assertion: '$.code = 0',
+    sourceEndpointId: 'e3',
   },
   {
     id: 'pay',
@@ -48,6 +58,7 @@ export const initialSteps: WorkflowStep[] = [
     variablePath: '$.data.paymentId',
     expectedStatus: 200,
     assertion: '$.code = 0',
+    sourceEndpointId: 'e4',
   },
   {
     id: 'verify',
@@ -60,6 +71,7 @@ export const initialSteps: WorkflowStep[] = [
     variablePath: '$.data.status',
     expectedStatus: 200,
     assertion: '$.data.status = 已支付',
+    sourceEndpointId: 'e5',
   },
 ];
 
@@ -259,6 +271,7 @@ export const workflowStepsMap: Record<string, WorkflowStep[]> = {
       variablePath: '$.data.userId',
       expectedStatus: 201,
       assertion: '$.code = 0',
+      sourceEndpointId: 'e1',
     },
     {
       id: 'bp01-login',
@@ -271,6 +284,7 @@ export const workflowStepsMap: Record<string, WorkflowStep[]> = {
       variablePath: '$.data.accessToken',
       expectedStatus: 200,
       assertion: '$.code = 0',
+      sourceEndpointId: 'e2',
     },
     {
       id: 'bp01-me',
@@ -297,6 +311,7 @@ export const workflowStepsMap: Record<string, WorkflowStep[]> = {
       variablePath: '$.data.userId',
       expectedStatus: 201,
       assertion: '$.code = 0',
+      sourceEndpointId: 'e1',
     },
     {
       id: 'login',
@@ -309,6 +324,7 @@ export const workflowStepsMap: Record<string, WorkflowStep[]> = {
       variablePath: '$.data.accessToken',
       expectedStatus: 200,
       assertion: '$.code = 0',
+      sourceEndpointId: 'e2',
     },
     {
       id: 'create-order',
@@ -321,6 +337,7 @@ export const workflowStepsMap: Record<string, WorkflowStep[]> = {
       variablePath: '$.data.orderId',
       expectedStatus: 201,
       assertion: '$.code = 0',
+      sourceEndpointId: 'e3',
     },
     {
       id: 'pay',
@@ -333,6 +350,7 @@ export const workflowStepsMap: Record<string, WorkflowStep[]> = {
       variablePath: '$.data.paymentId',
       expectedStatus: 200,
       assertion: '$.code = 0',
+      sourceEndpointId: 'e4',
     },
     {
       id: 'verify',
@@ -345,6 +363,7 @@ export const workflowStepsMap: Record<string, WorkflowStep[]> = {
       variablePath: '$.data.status',
       expectedStatus: 200,
       assertion: '$.data.status = 已支付',
+      sourceEndpointId: 'e5',
     },
   ],
   'wf-bp03': [
@@ -359,6 +378,7 @@ export const workflowStepsMap: Record<string, WorkflowStep[]> = {
       variablePath: '$.data.orderId',
       expectedStatus: 201,
       assertion: '$.code = 0',
+      sourceEndpointId: 'e3',
     },
     {
       id: 'bp03-query',
@@ -371,6 +391,7 @@ export const workflowStepsMap: Record<string, WorkflowStep[]> = {
       variablePath: '$.data.status',
       expectedStatus: 200,
       assertion: '$.data.orderId != null',
+      sourceEndpointId: 'e5',
     },
     {
       id: 'bp03-delete',
@@ -383,6 +404,7 @@ export const workflowStepsMap: Record<string, WorkflowStep[]> = {
       variablePath: '$.message',
       expectedStatus: 200,
       assertion: '$.code = 0',
+      sourceEndpointId: 'e6',
     },
   ],
   'wf-bp04': [
@@ -397,6 +419,7 @@ export const workflowStepsMap: Record<string, WorkflowStep[]> = {
       variablePath: '$.data.accessToken',
       expectedStatus: 200,
       assertion: '$.code = 0',
+      sourceEndpointId: 'e2',
     },
     {
       id: 'bp04-query',
@@ -423,6 +446,7 @@ export const workflowStepsMap: Record<string, WorkflowStep[]> = {
       variablePath: '$.data.paymentId',
       expectedStatus: 200,
       assertion: '$.code = 0',
+      sourceEndpointId: 'e4',
     },
     {
       id: 'bp05-poll',
@@ -435,6 +459,7 @@ export const workflowStepsMap: Record<string, WorkflowStep[]> = {
       variablePath: '$.data.status',
       expectedStatus: 200,
       assertion: '$.data.status = 已支付',
+      sourceEndpointId: 'e5',
     },
   ],
   'wf-bp06': [
@@ -449,6 +474,7 @@ export const workflowStepsMap: Record<string, WorkflowStep[]> = {
       variablePath: '$.data.paymentId',
       expectedStatus: 200,
       assertion: '$.code = 0',
+      sourceEndpointId: 'e4',
     },
     {
       id: 'bp06-dup',
@@ -461,6 +487,7 @@ export const workflowStepsMap: Record<string, WorkflowStep[]> = {
       variablePath: '$.code',
       expectedStatus: 409,
       assertion: '$.code != 0',
+      sourceEndpointId: 'e4',
     },
   ],
   'wf-bp07': [
@@ -475,6 +502,7 @@ export const workflowStepsMap: Record<string, WorkflowStep[]> = {
       variablePath: '$.code',
       expectedStatus: 401,
       assertion: '$.code != 0',
+      sourceEndpointId: 'e2',
     },
   ],
   'wf-bp08': [
@@ -489,6 +517,7 @@ export const workflowStepsMap: Record<string, WorkflowStep[]> = {
       variablePath: '$.errors',
       expectedStatus: 400,
       assertion: '$.code != 0',
+      sourceEndpointId: 'e1',
     },
   ],
 };
@@ -515,3 +544,105 @@ export const responseFixture = `{
   },
   "message": "success"
 }`;
+
+// ─── Variables ─────────────────────────────────────────────────
+
+export const initialVariables: Variable[] = [
+  {
+    id: 'var-baseUrl',
+    name: 'baseUrl',
+    value: 'https://test.api.sketch.dev',
+    type: 'plain',
+    scope: 'environment',
+    sensitive: false,
+    description: '测试环境的基础 URL，所有接口请求的前缀。',
+    updatedAt: '2026-06-20 14:30',
+    updatedBy: 'QA_team',
+    usedIn: ['BP-01', 'BP-02', 'BP-03', 'BP-04'],
+  },
+  {
+    id: 'var-accessToken',
+    name: 'accessToken',
+    value: 'sk_test_A7s9Kx21Ym8pQ3rL5nV',
+    type: 'secret',
+    scope: 'step',
+    sensitive: true,
+    description: '登录后提取的访问令牌，用于后续请求的 Authorization 头。',
+    updatedAt: '2026-06-17 09:15',
+    updatedBy: 'QA_team',
+    usedIn: ['BP-02', 'BP-04'],
+  },
+  {
+    id: 'var-apiTimeout',
+    name: 'apiTimeout',
+    value: '30000',
+    type: 'plain',
+    scope: 'workflow',
+    sensitive: false,
+    description: 'API 请求超时时间（毫秒），默认 30 秒。',
+    updatedAt: '2026-06-19 16:45',
+    updatedBy: 'QA_team',
+    usedIn: ['BP-01', 'BP-02', 'BP-03', 'BP-04', 'BP-05', 'BP-06'],
+  },
+  {
+    id: 'var-maxRetries',
+    name: 'maxRetries',
+    value: '3',
+    type: 'plain',
+    scope: 'workflow',
+    sensitive: false,
+    description: '失败步骤的最大重试次数，超出后标记流程失败。',
+    updatedAt: '2026-06-16 11:00',
+    updatedBy: 'QA_team',
+    usedIn: ['BP-02', 'BP-05', 'BP-06'],
+  },
+  {
+    id: 'var-stagingBaseUrl',
+    name: 'stagingBaseUrl',
+    value: 'https://staging.api.sketch.dev',
+    type: 'plain',
+    scope: 'environment',
+    sensitive: false,
+    description: '预发布环境的基础 URL，用于上线前验证。',
+    updatedAt: '2026-06-15 08:20',
+    updatedBy: 'QA_team',
+    usedIn: [],
+  },
+  {
+    id: 'var-dbReadOnly',
+    name: 'dbReadOnlyToken',
+    value: 'sk_ro_3fA8zL2kQ9xM6wV',
+    type: 'secret',
+    scope: 'environment',
+    sensitive: true,
+    description: '生产只读环境的数据库访问令牌，仅限查询操作。',
+    updatedAt: '2026-06-14 13:30',
+    updatedBy: 'QA_team',
+    usedIn: ['BP-04'],
+  },
+  {
+    id: 'var-userDataset',
+    name: 'testUsers',
+    value:
+      '{"admin":{"username":"admin","password":"***"},"guest":{"username":"guest","password":"***"}}',
+    type: 'dataset',
+    scope: 'environment',
+    sensitive: true,
+    description: '测试用户数据集，包含不同角色的登录凭证。',
+    updatedAt: '2026-06-13 10:00',
+    updatedBy: 'QA_team',
+    usedIn: ['BP-01', 'BP-07'],
+  },
+  {
+    id: 'var-pollInterval',
+    name: 'pollIntervalMs',
+    value: '2000',
+    type: 'plain',
+    scope: 'workflow',
+    sensitive: false,
+    description: '轮询间隔（毫秒），用于支付状态等异步场景。',
+    updatedAt: '2026-06-18 15:20',
+    updatedBy: 'QA_team',
+    usedIn: ['BP-05'],
+  },
+];

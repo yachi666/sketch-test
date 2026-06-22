@@ -22,6 +22,7 @@ import { DotsNine } from '@phosphor-icons/react/DotsNine';
 import { DotsThree } from '@phosphor-icons/react/DotsThree';
 import { DownloadSimple } from '@phosphor-icons/react/DownloadSimple';
 import { Eye } from '@phosphor-icons/react/Eye';
+import { EyeSlash } from '@phosphor-icons/react/EyeSlash';
 import { FileArrowUp } from '@phosphor-icons/react/FileArrowUp';
 import { FileCode } from '@phosphor-icons/react/FileCode';
 import { FloppyDisk } from '@phosphor-icons/react/FloppyDisk';
@@ -31,7 +32,10 @@ import { GearSix } from '@phosphor-icons/react/GearSix';
 import { GitBranch } from '@phosphor-icons/react/GitBranch';
 import { GitCommit } from '@phosphor-icons/react/GitCommit';
 import { House } from '@phosphor-icons/react/House';
+import { Info } from '@phosphor-icons/react/Info';
+import { Key } from '@phosphor-icons/react/Key';
 import { Lightning } from '@phosphor-icons/react/Lightning';
+import { LinkSimple } from '@phosphor-icons/react/LinkSimple';
 import { Lock } from '@phosphor-icons/react/Lock';
 import { MagnifyingGlass } from '@phosphor-icons/react/MagnifyingGlass';
 import { PencilSimple } from '@phosphor-icons/react/PencilSimple';
@@ -45,13 +49,16 @@ import { SidebarSimple } from '@phosphor-icons/react/SidebarSimple';
 import { SlidersHorizontal } from '@phosphor-icons/react/SlidersHorizontal';
 import { Sparkle } from '@phosphor-icons/react/Sparkle';
 import { Stack } from '@phosphor-icons/react/Stack';
+import { Table } from '@phosphor-icons/react/Table';
 import { Trash } from '@phosphor-icons/react/Trash';
 import { TrashSimple } from '@phosphor-icons/react/TrashSimple';
 import { UploadSimple } from '@phosphor-icons/react/UploadSimple';
 import { User } from '@phosphor-icons/react/User';
 import { UsersThree } from '@phosphor-icons/react/UsersThree';
+import { Warning } from '@phosphor-icons/react/Warning';
 import { X } from '@phosphor-icons/react/X';
 import { XCircle } from '@phosphor-icons/react/XCircle';
+import type { VariableScope } from '@sketch-test/contracts-common';
 import {
   type ElementType,
   startTransition,
@@ -66,12 +73,24 @@ import {
   initialCases,
   initialLogs,
   initialSteps,
+  initialVariables,
   makeLogs,
   responseFixture,
   workflowStepsMap,
   workflows,
 } from './data';
-import type { ExecutionLog, RunState, TestCase, ViewId, WorkflowMeta, WorkflowStep } from './types';
+import type {
+  ApiEndpoint,
+  ExecutionLog,
+  RunState,
+  StepTone,
+  TestCase,
+  Variable,
+  VariableType,
+  ViewId,
+  WorkflowMeta,
+  WorkflowStep,
+} from './types';
 
 const viewLabels: Record<ViewId, string> = {
   overview: '工作台',
@@ -744,7 +763,7 @@ function BottomConsole({
         </button>
         <button type="button" onClick={onToggle}>
           {collapsed ? '展开' : '收起'}{' '}
-          <CaretDown className={collapsed ? 'rotate-180' : ''} size={15} />
+          <CaretDown className={collapsed ? '' : 'rotate-180'} size={15} />
         </button>
       </div>
       {!collapsed ? (
@@ -852,24 +871,46 @@ function WorkflowWorkspace({
   onBack: () => void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const selectedStep = steps.find((step) => step.id === selectedId) ?? steps[0];
   const updateSelected = (patch: Partial<WorkflowStep>) =>
     setSteps((current) =>
       current.map((step) => (step.id === selectedStep.id ? { ...step, ...patch } : step)),
     );
-  const addStep = () => {
+  const handleEndpointSelect = (ep: ApiEndpoint) => {
+    setPickerOpen(false);
     const id = `step-${Date.now()}`;
+    // Blank step — user chose the custom option
+    if (!ep.id) {
+      const newStep: WorkflowStep = {
+        id,
+        name: '新建步骤',
+        method: 'GET',
+        path: '/api/new-endpoint',
+        icon: 'verify',
+        tone: 'brown',
+        variableName: 'result',
+        variablePath: '$.data',
+        expectedStatus: 200,
+        assertion: '$.code = 0',
+      };
+      setSteps((current) => [...current, newStep]);
+      setSelectedId(id);
+      return;
+    }
+    // Pre-fill from selected endpoint
     const newStep: WorkflowStep = {
       id,
-      name: '新建步骤',
-      method: 'GET',
-      path: '/api/new-endpoint',
-      icon: 'verify',
-      tone: 'brown',
-      variableName: 'result',
+      name: ep.summary,
+      method: ep.method,
+      path: ep.path,
+      icon: methodIcon(ep.method),
+      tone: methodTone(ep.method),
+      variableName: methodDefaultStatus(ep.method) === 201 ? 'newId' : 'result',
       variablePath: '$.data',
-      expectedStatus: 200,
+      expectedStatus: methodDefaultStatus(ep.method),
       assertion: '$.code = 0',
+      sourceEndpointId: ep.id,
     };
     setSteps((current) => [...current, newStep]);
     setSelectedId(id);
@@ -883,6 +924,12 @@ function WorkflowWorkspace({
   };
   return (
     <div className="workflow-workspace">
+      <EndpointPickerDialog
+        open={pickerOpen}
+        endpoints={endpoints}
+        onSelect={handleEndpointSelect}
+        onClose={() => setPickerOpen(false)}
+      />
       <div className="workflow-upper">
         <WorkflowCanvas
           steps={steps}
@@ -890,7 +937,7 @@ function WorkflowWorkspace({
           logs={logs}
           workflowName={workflowName}
           onSelect={setSelectedId}
-          onAdd={addStep}
+          onAdd={() => setPickerOpen(true)}
           onBack={onBack}
         />
         <Inspector step={selectedStep} onChange={updateSelected} onDelete={deleteStep} />
@@ -1508,64 +1555,588 @@ function EnvironmentView() {
   );
 }
 
-function VariablesView() {
+// ─── Variable Helpers ─────────────────────────────────────────────
+
+const VARIABLE_TYPE_LABEL: Record<VariableType, string> = {
+  plain: '普通变量',
+  secret: 'Secret',
+  dataset: '数据集',
+};
+
+const VARIABLE_TYPE_ICON: Record<VariableType, ElementType> = {
+  plain: BracketsCurly,
+  secret: Key,
+  dataset: Table,
+};
+
+const SCOPE_LABEL: Record<VariableScope, string> = {
+  environment: '环境',
+  workflow: '工作流',
+  step: '步骤',
+  secret: 'Secret',
+};
+
+// ─── Variable Dialog (Create / Edit) ──────────────────────────────
+
+function VariableDialog({
+  open,
+  mode,
+  variable,
+  onSave,
+  onClose,
+}: {
+  open: boolean;
+  mode: 'create' | 'edit';
+  variable: Variable | null;
+  onSave: (v: Variable) => void;
+  onClose: () => void;
+}) {
+  const [name, setName] = useState('');
+  const [value, setValue] = useState('');
+  const [type, setType] = useState<VariableType>('plain');
+  const [scope, setScope] = useState<VariableScope>('environment');
+  const [sensitive, setSensitive] = useState(false);
+  const [description, setDescription] = useState('');
+  const [showValue, setShowValue] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const nameRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open && mode === 'edit' && variable) {
+      setName(variable.name);
+      setValue(variable.value);
+      setType(variable.type);
+      setScope(variable.scope);
+      setSensitive(variable.sensitive);
+      setDescription(variable.description);
+      setShowValue(false);
+      setErrors({});
+    } else if (open && mode === 'create') {
+      setName('');
+      setValue('');
+      setType('plain');
+      setScope('environment');
+      setSensitive(false);
+      setDescription('');
+      setShowValue(false);
+      setErrors({});
+    }
+  }, [open, mode, variable]);
+
+  useEffect(() => {
+    if (open) {
+      const timer = window.setTimeout(() => nameRef.current?.focus(), 80);
+      return () => window.clearTimeout(timer);
+    }
+  }, [open]);
+
+  if (!open) return null;
+
+  const validate = (): boolean => {
+    const next: Record<string, string> = {};
+    if (!name.trim()) next['name'] = '变量名不能为空';
+    else if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name.trim()))
+      next['name'] = '变量名只能包含字母、数字和下划线，且必须以字母或下划线开头';
+    if (!value && type !== 'dataset') next['value'] = '变量值不能为空';
+    if (type === 'secret') {
+      setSensitive(true);
+    }
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const handleSave = () => {
+    if (!validate()) return;
+    const now = new Date().toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    const saved: Variable = {
+      id: variable?.id ?? `var-${Date.now()}`,
+      name: name.trim(),
+      value,
+      type,
+      scope,
+      sensitive,
+      description: description.trim(),
+      updatedAt: now,
+      updatedBy: 'QA_team',
+      usedIn: variable?.usedIn ?? [],
+    };
+    onSave(saved);
+    onClose();
+  };
+
+  return (
+    <div
+      className="modal-backdrop"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <section
+        className="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="variable-dialog-title"
+      >
+        <div className="modal-heading">
+          <div>
+            <span className="eyebrow">{mode === 'create' ? 'NEW VARIABLE' : 'EDIT VARIABLE'}</span>
+            <h2 id="variable-dialog-title">
+              {mode === 'create' ? '新建变量' : `编辑 ${variable?.name ?? ''}`}
+            </h2>
+          </div>
+          <button className="icon-button" type="button" onClick={onClose} aria-label="关闭">
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="variable-dialog-body">
+          {/* Variable name */}
+          <label className="variable-field">
+            <span className="field-label">
+              变量名 <span className="required">*</span>
+            </span>
+            <input
+              ref={nameRef}
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (errors['name']) setErrors((prev) => ({ ...prev, name: '' }));
+              }}
+              placeholder="例如：baseUrl, accessToken"
+              className={errors['name'] ? 'input--error' : ''}
+              spellCheck={false}
+            />
+            {errors['name'] ? <span className="field-error">{errors['name']}</span> : null}
+          </label>
+
+          {/* Variable value */}
+          <label className="variable-field">
+            <span className="field-label">变量值</span>
+            <div className="value-input-group">
+              <input
+                type={sensitive && !showValue ? 'password' : 'text'}
+                value={value}
+                onChange={(e) => {
+                  setValue(e.target.value);
+                  if (errors['value']) setErrors((prev) => ({ ...prev, value: '' }));
+                }}
+                placeholder={type === 'dataset' ? 'JSON 格式数据...' : '输入变量值...'}
+                className={errors['value'] ? 'input--error' : ''}
+                spellCheck={false}
+              />
+              {sensitive ? (
+                <button
+                  type="button"
+                  className="toggle-visibility"
+                  onClick={() => setShowValue((v) => !v)}
+                  aria-label={showValue ? '隐藏值' : '显示值'}
+                  title={showValue ? '隐藏值' : '显示值'}
+                >
+                  {showValue ? <EyeSlash size={17} /> : <Eye size={17} />}
+                </button>
+              ) : null}
+            </div>
+            {errors['value'] ? <span className="field-error">{errors['value']}</span> : null}
+          </label>
+
+          {/* Type & Scope row */}
+          <div className="variable-field-row">
+            <label className="variable-field">
+              <span className="field-label">类型</span>
+              <select value={type} onChange={(e) => setType(e.target.value as VariableType)}>
+                <option value="plain">普通变量</option>
+                <option value="secret">Secret</option>
+                <option value="dataset">数据集</option>
+              </select>
+            </label>
+            <label className="variable-field">
+              <span className="field-label">作用域</span>
+              <select value={scope} onChange={(e) => setScope(e.target.value as VariableScope)}>
+                <option value="environment">环境</option>
+                <option value="workflow">工作流</option>
+                <option value="step">步骤</option>
+                <option value="secret">Secret</option>
+              </select>
+            </label>
+          </div>
+
+          {/* Sensitive checkbox */}
+          <label className="checkbox-field">
+            <input
+              type="checkbox"
+              checked={sensitive}
+              onChange={(e) => setSensitive(e.target.checked)}
+              disabled={type === 'secret'}
+            />
+            <span>
+              <strong>敏感变量</strong>
+              <small>值将在日志和控制台中自动脱敏，运行时不落盘。</small>
+            </span>
+          </label>
+
+          {/* Description */}
+          <label className="variable-field">
+            <span className="field-label">描述</span>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="变量的用途和注意事项..."
+              rows={3}
+            />
+          </label>
+
+          {/* Usage info (edit mode only) */}
+          {mode === 'edit' && variable && variable.usedIn.length > 0 ? (
+            <div className="variable-usage-info">
+              <LinkSimple size={15} />
+              <span>
+                被 {variable.usedIn.length} 个流程引用：
+                {variable.usedIn.map((bp) => (
+                  <code key={bp}>{bp}</code>
+                ))}
+              </span>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="modal-actions">
+          <button className="button button--ghost" type="button" onClick={onClose}>
+            取消
+          </button>
+          <button className="button button--primary" type="button" onClick={handleSave}>
+            <Check size={17} />
+            {mode === 'create' ? '创建变量' : '保存修改'}
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// ─── Delete Confirmation Dialog ─────────────────────────────────
+
+function DeleteVariableDialog({
+  open,
+  variable,
+  onConfirm,
+  onClose,
+}: {
+  open: boolean;
+  variable: Variable | null;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (open) cancelRef.current?.focus();
+  }, [open]);
+  if (!open || !variable) return null;
+
+  const hasReferences = variable.usedIn.length > 0;
+
+  return (
+    <div
+      className="modal-backdrop"
+      role="presentation"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <section
+        className="modal"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="delete-variable-title"
+      >
+        <div className="modal-heading">
+          <div>
+            <span className="eyebrow">CONFIRM DELETION</span>
+            <h2 id="delete-variable-title">删除变量</h2>
+          </div>
+          <button
+            className="icon-button"
+            ref={cancelRef}
+            type="button"
+            onClick={onClose}
+            aria-label="关闭"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="delete-confirm-body">
+          <Warning size={36} weight="duotone" className="delete-warn-icon" />
+          <p>
+            确定要删除变量 <code>{variable.name}</code> 吗？此操作不可撤销。
+          </p>
+          {hasReferences ? (
+            <div className="notice notice--warning">
+              <Info size={18} />
+              <span>
+                <strong>该变量仍被 {variable.usedIn.length} 个流程引用</strong>
+                <small>
+                  {variable.usedIn.join('、')}
+                  。删除后这些流程将无法解析该变量引用。
+                </small>
+              </span>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="modal-actions">
+          <button className="button button--ghost" type="button" onClick={onClose}>
+            取消
+          </button>
+          <button className="button button--danger" type="button" onClick={onConfirm}>
+            <TrashSimple size={17} />
+            确认删除
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// ─── Variables View ──────────────────────────────────────────────
+
+function VariablesView({
+  variables,
+  onCreate,
+  onUpdate,
+  onDelete,
+}: {
+  variables: Variable[];
+  onCreate: (v: Variable) => void;
+  onUpdate: (v: Variable) => void;
+  onDelete: (id: string) => void;
+}) {
+  const [query, setQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | VariableType>('all');
+  const [scopeFilter, setScopeFilter] = useState<'all' | VariableScope>('all');
+
+  // Dialog states
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
+  const [editingVariable, setEditingVariable] = useState<Variable | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Variable | null>(null);
+
+  const openCreate = () => {
+    setDialogMode('create');
+    setEditingVariable(null);
+    setDialogOpen(true);
+  };
+
+  const openEdit = (v: Variable) => {
+    setDialogMode('edit');
+    setEditingVariable(v);
+    setDialogOpen(true);
+  };
+
+  const handleSave = (v: Variable) => {
+    if (dialogMode === 'create') onCreate(v);
+    else onUpdate(v);
+  };
+
+  const handleDelete = () => {
+    if (!deleteTarget) return;
+    onDelete(deleteTarget.id);
+    setDeleteTarget(null);
+  };
+
+  const filtered = variables.filter((v) => {
+    const matchesQuery =
+      v.name.toLowerCase().includes(query.toLowerCase()) ||
+      v.description.toLowerCase().includes(query.toLowerCase()) ||
+      v.value.toLowerCase().includes(query.toLowerCase());
+    const matchesType = typeFilter === 'all' || v.type === typeFilter;
+    const matchesScope = scopeFilter === 'all' || v.scope === scopeFilter;
+    return matchesQuery && matchesType && matchesScope;
+  });
+
+  const typeCounts = {
+    all: variables.length,
+    plain: variables.filter((v) => v.type === 'plain').length,
+    secret: variables.filter((v) => v.type === 'secret').length,
+    dataset: variables.filter((v) => v.type === 'dataset').length,
+  };
+
   return (
     <main className="page-view">
+      <VariableDialog
+        open={dialogOpen}
+        mode={dialogMode}
+        variable={editingVariable}
+        onSave={handleSave}
+        onClose={() => setDialogOpen(false)}
+      />
+      <DeleteVariableDialog
+        open={deleteTarget !== null}
+        variable={deleteTarget}
+        onConfirm={handleDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
+
       <div className="page-intro">
         <div>
           <span className="eyebrow">VARIABLES</span>
           <h2>变量管理</h2>
-          <p>管理普通变量、数据集与 Secret 引用，支持版本化引用。</p>
+          <p>
+            管理普通变量、数据集与 Secret 引用，支持按环境和流程作用域隔离。 共 {variables.length}{' '}
+            个变量。
+          </p>
         </div>
-        <button className="button button--primary" type="button">
+        <button className="button button--primary" type="button" onClick={openCreate}>
           <Plus size={18} />
           新建变量
         </button>
       </div>
-      <section className="table-panel">
-        <div className="table-toolbar">
-          <label className="search-field">
-            <MagnifyingGlass size={16} />
-            <span className="sr-only">搜索变量</span>
-            <input placeholder="搜索变量名或值" />
-          </label>
-          <span className="toolbar-spacer" />
-          <button className="button button--outline" type="button">
-            <SlidersHorizontal size={17} />
-            筛选
-          </button>
+
+      {/* Filter bar */}
+      <div className="variable-filter-bar">
+        <div className="filter-tabs">
+          {(
+            [
+              ['all', '全部'],
+              ['plain', '普通变量'],
+              ['secret', 'Secret'],
+              ['dataset', '数据集'],
+            ] as const
+          ).map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              className={`filter-tab ${typeFilter === key ? 'filter-tab--active' : ''}`}
+              onClick={() => setTypeFilter(key)}
+            >
+              {label}
+              <span className="filter-count">({typeCounts[key]})</span>
+            </button>
+          ))}
         </div>
-        <div className="data-table">
+        <span className="toolbar-spacer" />
+        <label className="search-field" style={{ minWidth: 200 }}>
+          <MagnifyingGlass size={16} />
+          <span className="sr-only">搜索变量</span>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="搜索变量名、值或描述"
+          />
+        </label>
+        <label className="select-wrap">
+          <span className="sr-only">作用域筛选</span>
+          <select
+            value={scopeFilter}
+            onChange={(e) => setScopeFilter(e.target.value as 'all' | VariableScope)}
+          >
+            <option value="all">全部作用域</option>
+            <option value="environment">环境</option>
+            <option value="workflow">工作流</option>
+            <option value="step">步骤</option>
+            <option value="secret">Secret</option>
+          </select>
+          <CaretDown size={15} aria-hidden />
+        </label>
+      </div>
+
+      {/* Main table */}
+      <section className="table-panel">
+        <div className="data-table variables-table">
           <div className="data-row data-row--head">
             <span>变量名</span>
             <span>类型</span>
             <span>作用域</span>
+            <span>值</span>
+            <span>描述</span>
+            <span>引用</span>
             <span>最近更新</span>
             <span>操作</span>
           </div>
-          {[
-            ['baseUrl', '普通变量', '环境', '2 天前'],
-            ['accessToken', 'Secret 引用', '步骤', '5 天前'],
-            ['userId', '普通变量', '步骤', '1 周前'],
-            ['apiTimeout', '普通变量', '工作流', '3 天前'],
-            ['maxRetries', '普通变量', '工作流', '6 天前'],
-          ].map(([name, type, scope, updated]) => (
-            <div className="data-row" key={name}>
-              <span>
-                <code>{name}</code>
-              </span>
-              <span className="source-tag">
-                {type === 'Secret 引用' ? <Lock size={14} /> : <BracketsCurly size={14} />} {type}
-              </span>
-              <span>
-                <span className="env-tag">{scope}</span>
-              </span>
-              <span>{updated}</span>
-              <button className="icon-button" type="button" aria-label={`编辑 ${name}`}>
-                <PencilSimple size={17} />
-              </button>
+          {filtered.length === 0 ? (
+            <div className="empty-module" style={{ border: 'none', minHeight: 240 }}>
+              <BracketsCurly size={42} weight="duotone" />
+              <h3>
+                {query || typeFilter !== 'all' || scopeFilter !== 'all'
+                  ? '没有匹配的变量'
+                  : '暂无变量'}
+              </h3>
+              <p>
+                {query || typeFilter !== 'all' || scopeFilter !== 'all'
+                  ? '试试调整搜索条件或筛选器。'
+                  : '点击右上角"新建变量"创建第一个变量。'}
+              </p>
             </div>
-          ))}
+          ) : (
+            filtered.map((v) => {
+              const TypeIcon = VARIABLE_TYPE_ICON[v.type];
+              return (
+                <div className="data-row" key={v.id}>
+                  <span>
+                    <code className="variable-name-code">{v.name}</code>
+                    {v.sensitive ? (
+                      <span className="sensitive-dot" title="敏感变量，日志中自动脱敏">
+                        <EyeSlash size={11} weight="fill" />
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="source-tag">
+                    <TypeIcon size={14} /> {VARIABLE_TYPE_LABEL[v.type]}
+                  </span>
+                  <span>
+                    <span className={`scope-badge scope-badge--${v.scope}`}>
+                      {SCOPE_LABEL[v.scope]}
+                    </span>
+                  </span>
+                  <span className="variable-value-cell">
+                    <code className={v.sensitive ? 'value-masked' : ''}>
+                      {v.sensitive ? '••••••••••••' : v.value}
+                    </code>
+                  </span>
+                  <span className="variable-desc-cell" title={v.description}>
+                    {v.description}
+                  </span>
+                  <span>
+                    {v.usedIn.length > 0 ? (
+                      <span className="usage-count" title={v.usedIn.join('、')}>
+                        <LinkSimple size={12} /> {v.usedIn.length}
+                      </span>
+                    ) : (
+                      <span className="usage-count usage-count--none">—</span>
+                    )}
+                  </span>
+                  <span className="variable-time-cell">{v.updatedAt}</span>
+                  <span className="variable-actions-cell">
+                    <button
+                      className="icon-button"
+                      type="button"
+                      onClick={() => openEdit(v)}
+                      aria-label={`编辑 ${v.name}`}
+                      title="编辑"
+                    >
+                      <PencilSimple size={16} />
+                    </button>
+                    <button
+                      className="icon-button icon-button--danger"
+                      type="button"
+                      onClick={() => setDeleteTarget(v)}
+                      aria-label={`删除 ${v.name}`}
+                      title="删除"
+                    >
+                      <TrashSimple size={16} />
+                    </button>
+                  </span>
+                </div>
+              );
+            })
+          )}
         </div>
       </section>
     </main>
@@ -1576,7 +2147,6 @@ function GenericView({ view }: { view: ViewId }) {
   const details: Partial<Record<ViewId, [string, string, ElementType]>> = {
     projects: ['项目管理', '集中管理服务、成员与质量目标。', Folders],
     plans: ['测试计划', '组合用例与流程，形成 CI 质量门禁。', CalendarCheck],
-    variables: ['变量管理', '管理普通变量、数据集与 Secret 引用。', BracketsCurly],
     team: ['团队管理', '配置成员、角色和最小权限。', UsersThree],
     trash: ['回收站', '保留已归档资产并支持审计恢复。', Trash],
   };
@@ -1607,6 +2177,166 @@ function GenericView({ view }: { view: ViewId }) {
         </button>
       </section>
     </main>
+  );
+}
+
+function methodTone(method: string): StepTone {
+  if (method === 'POST') return 'green';
+  if (method === 'GET') return 'brown';
+  if (method === 'DELETE') return 'brick';
+  if (method === 'PUT' || method === 'PATCH') return 'amber';
+  return 'violet';
+}
+
+function methodIcon(method: string): WorkflowStep['icon'] {
+  if (method === 'POST') return 'cart';
+  if (method === 'GET') return 'verify';
+  if (method === 'DELETE') return 'card';
+  if (method === 'PUT' || method === 'PATCH') return 'lock';
+  return 'verify';
+}
+
+function methodDefaultStatus(method: string): number {
+  if (method === 'POST') return 201;
+  return 200;
+}
+
+function EndpointPickerDialog({
+  open,
+  endpoints: catalog,
+  onSelect,
+  onClose,
+}: {
+  open: boolean;
+  endpoints: ApiEndpoint[];
+  onSelect: (endpoint: ApiEndpoint) => void;
+  onClose: () => void;
+}) {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const [query, setQuery] = useState('');
+
+  useEffect(() => {
+    if (open) {
+      searchRef.current?.focus();
+      setQuery('');
+    }
+  }, [open]);
+
+  if (!open) return null;
+
+  const filtered = catalog.filter((ep) =>
+    `${ep.method} ${ep.path} ${ep.summary}`.toLowerCase().includes(query.toLowerCase()),
+  );
+
+  return (
+    <div
+      className="modal-backdrop"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <section className="modal" role="dialog" aria-modal="true" aria-labelledby="picker-title">
+        <div className="modal-heading">
+          <div>
+            <span className="eyebrow">ADD STEP FROM CATALOG</span>
+            <h2 id="picker-title">选择接口</h2>
+          </div>
+          <button
+            className="icon-button"
+            ref={closeButtonRef}
+            type="button"
+            onClick={onClose}
+            aria-label="关闭"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="endpoint-picker-body">
+          <div className="endpoint-picker-search">
+            <label className="search-field">
+              <MagnifyingGlass size={16} />
+              <span className="sr-only">搜索接口</span>
+              <input
+                ref={searchRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="搜索方法、路径或摘要..."
+              />
+            </label>
+          </div>
+
+          <div className="endpoint-picker-hint">
+            <PlugsConnected size={16} />
+            <span>从接口目录中选择一个端点，步骤将自动填充请求方法、路径和默认断言。</span>
+          </div>
+
+          <div className="endpoint-picker-list">
+            {/* Custom blank step option */}
+            <button
+              type="button"
+              className="endpoint-picker-item endpoint-picker-item--blank"
+              onClick={() =>
+                onSelect({
+                  id: '',
+                  method: 'GET',
+                  path: '',
+                  summary: '自定义空白步骤',
+                  coverage: 0,
+                  cases: 0,
+                })
+              }
+            >
+              <Plus size={20} />
+              <span className="picker-endpoint-info">
+                <code>自定义空白步骤</code>
+                <span>手动填写请求方法和路径</span>
+              </span>
+            </button>
+
+            {filtered.length === 0 ? (
+              <div className="endpoint-picker-empty">
+                <MagnifyingGlass size={28} />
+                <p>没有匹配的接口</p>
+              </div>
+            ) : (
+              filtered.map((ep) => (
+                <button
+                  key={ep.id}
+                  type="button"
+                  className="endpoint-picker-item"
+                  onClick={() => onSelect(ep)}
+                >
+                  <em className={`method method--${ep.method.toLowerCase()}`}>{ep.method}</em>
+                  <span className="picker-endpoint-info">
+                    <code>{ep.path}</code>
+                    <span>{ep.summary}</span>
+                  </span>
+                  <span>
+                    {ep.coverage > 0 ? (
+                      <span className="picker-coverage">
+                        <span className="progress">
+                          <i style={{ width: `${ep.coverage}%` }} />
+                        </span>
+                        {ep.coverage}%
+                      </span>
+                    ) : null}
+                  </span>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="modal-actions">
+          <button className="button button--ghost" type="button" onClick={onClose}>
+            取消
+          </button>
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -1713,6 +2443,7 @@ export function App() {
   const [importOpen, setImportOpen] = useState(false);
   const [imported, setImported] = useState(false);
   const [cases, setCases] = useState(initialCases);
+  const [variables, setVariables] = useState<Variable[]>(initialVariables);
   const [toast, setToast] = useState('');
   const runningRef = useRef(false);
 
@@ -1884,7 +2615,37 @@ export function App() {
   else if (view === 'reports') content = <ReportsView onRerun={() => void runWorkflow()} />;
   else if (view === 'agent') content = <AgentView />;
   else if (view === 'environments') content = <EnvironmentView />;
-  else if (view === 'variables') content = <VariablesView />;
+  else if (view === 'variables')
+    content = (
+      <VariablesView
+        variables={variables}
+        onCreate={(v) =>
+          setVariables((prev) => {
+            const next = [v, ...prev];
+            localStorage.setItem('sketchtest.variables', JSON.stringify(next));
+            notify(`变量 "${v.name}" 已创建`);
+            return next;
+          })
+        }
+        onUpdate={(v) =>
+          setVariables((prev) => {
+            const next = prev.map((x) => (x.id === v.id ? v : x));
+            localStorage.setItem('sketchtest.variables', JSON.stringify(next));
+            notify(`变量 "${v.name}" 已更新`);
+            return next;
+          })
+        }
+        onDelete={(id) =>
+          setVariables((prev) => {
+            const target = prev.find((x) => x.id === id);
+            const next = prev.filter((x) => x.id !== id);
+            localStorage.setItem('sketchtest.variables', JSON.stringify(next));
+            if (target) notify(`变量 "${target.name}" 已删除`);
+            return next;
+          })
+        }
+      />
+    );
   else content = <GenericView view={view} />;
 
   return (

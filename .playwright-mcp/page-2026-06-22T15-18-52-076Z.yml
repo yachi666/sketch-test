@@ -1,0 +1,277 @@
+- generic [ref=e3]:
+  - complementary "主导航" [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e7]
+      - generic [ref=e10]:
+        - strong [ref=e11]: SketchTest
+        - generic [ref=e12]: API 自动化测试平台
+    - navigation [ref=e13]:
+      - button "工作台" [ref=e14] [cursor=pointer]:
+        - img [ref=e15]
+        - generic [ref=e17]: 工作台
+      - button "项目管理" [ref=e18] [cursor=pointer]:
+        - img [ref=e19]
+        - generic [ref=e21]: 项目管理
+      - button "业务流程 核心功能" [ref=e22] [cursor=pointer]:
+        - img [ref=e23]
+        - generic [ref=e26]: 业务流程
+        - generic "核心功能" [ref=e27]
+      - button "接口管理" [ref=e28] [cursor=pointer]:
+        - img [ref=e29]
+        - generic [ref=e31]: 接口管理
+      - button "用例管理" [ref=e32] [cursor=pointer]:
+        - img [ref=e33]
+        - generic [ref=e35]: 用例管理
+      - button "测试计划" [ref=e36] [cursor=pointer]:
+        - img [ref=e37]
+        - generic [ref=e39]: 测试计划
+      - button "环境管理" [ref=e40] [cursor=pointer]:
+        - img [ref=e41]
+        - generic [ref=e43]: 环境管理
+      - button "变量管理" [active] [ref=e44] [cursor=pointer]:
+        - img [ref=e45]
+        - generic [ref=e47]: 变量管理
+      - button "报告中心" [ref=e48] [cursor=pointer]:
+        - img [ref=e49]
+        - generic [ref=e51]: 报告中心
+      - button "AI Agent Beta" [ref=e52] [cursor=pointer]:
+        - img [ref=e53]
+        - generic [ref=e55]: AI Agent
+        - generic [ref=e56]: Beta
+      - button "团队管理" [ref=e57] [cursor=pointer]:
+        - img [ref=e58]
+        - generic [ref=e60]: 团队管理
+      - button "回收站" [ref=e61] [cursor=pointer]:
+        - img [ref=e62]
+        - generic [ref=e64]: 回收站
+    - button "QA QA_team QA 工程师" [ref=e66] [cursor=pointer]:
+      - generic [ref=e67]: QA
+      - generic [ref=e68]:
+        - strong [ref=e69]: QA_team
+        - generic [ref=e70]: QA 工程师
+      - img [ref=e71]
+  - generic [ref=e73]:
+    - banner [ref=e74]:
+      - generic [ref=e76]:
+        - generic [ref=e77]: SketchTest 演示项目 /
+        - heading "变量管理" [level=1] [ref=e338]:
+          - text: 变量管理
+          - img [ref=e79]
+        - paragraph [ref=e81]: 更新于 2026-06-21 10:30 · 创建人 QA_team
+      - generic [ref=e82]:
+        - button "保存草稿" [ref=e83] [cursor=pointer]:
+          - img [ref=e84]
+          - text: 保存草稿
+        - button "调试运行" [ref=e86] [cursor=pointer]:
+          - img [ref=e87]
+          - text: 调试运行
+        - button "调试" [ref=e89] [cursor=pointer]:
+          - img [ref=e90]
+          - text: 调试
+        - generic [ref=e92]:
+          - generic [ref=e93]: 测试环境
+          - combobox "测试环境" [ref=e94] [cursor=pointer]:
+            - option "环境：测试环境" [selected]
+            - option "环境：预发布环境"
+            - option "环境：生产只读"
+          - img
+        - button "导入 OpenAPI" [ref=e95] [cursor=pointer]:
+          - img [ref=e96]
+        - button "导出流程" [ref=e98] [cursor=pointer]:
+          - img [ref=e99]
+        - button "通知" [ref=e101] [cursor=pointer]:
+          - img [ref=e102]
+        - button "设置" [ref=e104] [cursor=pointer]:
+          - img [ref=e105]
+    - main [ref=e339]:
+      - generic [ref=e340]:
+        - generic [ref=e341]:
+          - text: VARIABLES
+          - heading "变量管理" [level=2] [ref=e342]
+          - paragraph [ref=e343]: 管理普通变量、数据集与 Secret 引用，支持按环境和流程作用域隔离。 共 8 个变量。
+        - button "新建变量" [ref=e344] [cursor=pointer]:
+          - img [ref=e345]
+          - text: 新建变量
+      - generic [ref=e347]:
+        - generic [ref=e348]:
+          - button "全部(8)" [ref=e349] [cursor=pointer]:
+            - text: 全部
+            - generic [ref=e350]: (8)
+          - button "普通变量(5)" [ref=e351] [cursor=pointer]:
+            - text: 普通变量
+            - generic [ref=e352]: (5)
+          - button "Secret(2)" [ref=e353] [cursor=pointer]:
+            - text: Secret
+            - generic [ref=e354]: (2)
+          - button "数据集(1)" [ref=e355] [cursor=pointer]:
+            - text: 数据集
+            - generic [ref=e356]: (1)
+        - generic [ref=e357]:
+          - img [ref=e358]
+          - generic [ref=e360]: 搜索变量
+          - textbox "搜索变量" [ref=e361]:
+            - /placeholder: 搜索变量名、值或描述
+        - generic [ref=e362]:
+          - generic [ref=e363]: 作用域筛选
+          - combobox "作用域筛选" [ref=e364] [cursor=pointer]:
+            - option "全部作用域" [selected]
+            - option "环境"
+            - option "工作流"
+            - option "步骤"
+            - option "Secret"
+          - img
+      - generic [ref=e366]:
+        - generic [ref=e367]:
+          - generic [ref=e368]: 变量名
+          - generic [ref=e369]: 类型
+          - generic [ref=e370]: 作用域
+          - generic [ref=e371]: 值
+          - generic [ref=e372]: 描述
+          - generic [ref=e373]: 引用
+          - generic [ref=e374]: 最近更新
+          - generic [ref=e375]: 操作
+        - generic [ref=e376]:
+          - code [ref=e378]: baseUrl
+          - generic [ref=e379]:
+            - img [ref=e380]
+            - text: 普通变量
+          - generic [ref=e383]: 环境
+          - code [ref=e385]: https://test.api.sketch.dev
+          - generic "测试环境的基础 URL，所有接口请求的前缀。" [ref=e386]
+          - generic "BP-01、BP-02、BP-03、BP-04" [ref=e388]:
+            - img [ref=e389]
+            - text: "4"
+          - generic [ref=e391]: 2026-06-20 14:30
+          - generic [ref=e392]:
+            - button "编辑 baseUrl" [ref=e393] [cursor=pointer]:
+              - img [ref=e394]
+            - button "删除 baseUrl" [ref=e396] [cursor=pointer]:
+              - img [ref=e397]
+        - generic [ref=e399]:
+          - generic [ref=e400]:
+            - code [ref=e401]: accessToken
+            - generic "敏感变量，日志中自动脱敏" [ref=e402]:
+              - img [ref=e403]
+          - generic [ref=e405]:
+            - img [ref=e406]
+            - text: Secret
+          - generic [ref=e409]: 步骤
+          - code [ref=e411]: ••••••••••••
+          - generic "登录后提取的访问令牌，用于后续请求的 Authorization 头。" [ref=e412]
+          - generic "BP-02、BP-04" [ref=e414]:
+            - img [ref=e415]
+            - text: "2"
+          - generic [ref=e417]: 2026-06-17 09:15
+          - generic [ref=e418]:
+            - button "编辑 accessToken" [ref=e419] [cursor=pointer]:
+              - img [ref=e420]
+            - button "删除 accessToken" [ref=e422] [cursor=pointer]:
+              - img [ref=e423]
+        - generic [ref=e425]:
+          - code [ref=e427]: apiTimeout
+          - generic [ref=e428]:
+            - img [ref=e429]
+            - text: 普通变量
+          - generic [ref=e432]: 工作流
+          - code [ref=e434]: "30000"
+          - generic "API 请求超时时间（毫秒），默认 30 秒。" [ref=e435]
+          - generic "BP-01、BP-02、BP-03、BP-04、BP-05、BP-06" [ref=e437]:
+            - img [ref=e438]
+            - text: "6"
+          - generic [ref=e440]: 2026-06-19 16:45
+          - generic [ref=e441]:
+            - button "编辑 apiTimeout" [ref=e442] [cursor=pointer]:
+              - img [ref=e443]
+            - button "删除 apiTimeout" [ref=e445] [cursor=pointer]:
+              - img [ref=e446]
+        - generic [ref=e448]:
+          - code [ref=e450]: maxRetries
+          - generic [ref=e451]:
+            - img [ref=e452]
+            - text: 普通变量
+          - generic [ref=e455]: 工作流
+          - code [ref=e457]: "3"
+          - generic "失败步骤的最大重试次数，超出后标记流程失败。" [ref=e458]
+          - generic "BP-02、BP-05、BP-06" [ref=e460]:
+            - img [ref=e461]
+            - text: "3"
+          - generic [ref=e463]: 2026-06-16 11:00
+          - generic [ref=e464]:
+            - button "编辑 maxRetries" [ref=e465] [cursor=pointer]:
+              - img [ref=e466]
+            - button "删除 maxRetries" [ref=e468] [cursor=pointer]:
+              - img [ref=e469]
+        - generic [ref=e471]:
+          - code [ref=e473]: stagingBaseUrl
+          - generic [ref=e474]:
+            - img [ref=e475]
+            - text: 普通变量
+          - generic [ref=e478]: 环境
+          - code [ref=e480]: https://staging.api.sketch.dev
+          - generic "预发布环境的基础 URL，用于上线前验证。" [ref=e481]
+          - generic [ref=e483]: —
+          - generic [ref=e484]: 2026-06-15 08:20
+          - generic [ref=e485]:
+            - button "编辑 stagingBaseUrl" [ref=e486] [cursor=pointer]:
+              - img [ref=e487]
+            - button "删除 stagingBaseUrl" [ref=e489] [cursor=pointer]:
+              - img [ref=e490]
+        - generic [ref=e492]:
+          - generic [ref=e493]:
+            - code [ref=e494]: dbReadOnlyToken
+            - generic "敏感变量，日志中自动脱敏" [ref=e495]:
+              - img [ref=e496]
+          - generic [ref=e498]:
+            - img [ref=e499]
+            - text: Secret
+          - generic [ref=e502]: 环境
+          - code [ref=e504]: ••••••••••••
+          - generic "生产只读环境的数据库访问令牌，仅限查询操作。" [ref=e505]
+          - generic "BP-04" [ref=e507]:
+            - img [ref=e508]
+            - text: "1"
+          - generic [ref=e510]: 2026-06-14 13:30
+          - generic [ref=e511]:
+            - button "编辑 dbReadOnlyToken" [ref=e512] [cursor=pointer]:
+              - img [ref=e513]
+            - button "删除 dbReadOnlyToken" [ref=e515] [cursor=pointer]:
+              - img [ref=e516]
+        - generic [ref=e518]:
+          - generic [ref=e519]:
+            - code [ref=e520]: testUsers
+            - generic "敏感变量，日志中自动脱敏" [ref=e521]:
+              - img [ref=e522]
+          - generic [ref=e524]:
+            - img [ref=e525]
+            - text: 数据集
+          - generic [ref=e528]: 环境
+          - code [ref=e530]: ••••••••••••
+          - generic "测试用户数据集，包含不同角色的登录凭证。" [ref=e531]
+          - generic "BP-01、BP-07" [ref=e533]:
+            - img [ref=e534]
+            - text: "2"
+          - generic [ref=e536]: 2026-06-13 10:00
+          - generic [ref=e537]:
+            - button "编辑 testUsers" [ref=e538] [cursor=pointer]:
+              - img [ref=e539]
+            - button "删除 testUsers" [ref=e541] [cursor=pointer]:
+              - img [ref=e542]
+        - generic [ref=e544]:
+          - code [ref=e546]: pollIntervalMs
+          - generic [ref=e547]:
+            - img [ref=e548]
+            - text: 普通变量
+          - generic [ref=e551]: 工作流
+          - code [ref=e553]: "2000"
+          - generic "轮询间隔（毫秒），用于支付状态等异步场景。" [ref=e554]
+          - generic "BP-05" [ref=e556]:
+            - img [ref=e557]
+            - text: "1"
+          - generic [ref=e559]: 2026-06-18 15:20
+          - generic [ref=e560]:
+            - button "编辑 pollIntervalMs" [ref=e561] [cursor=pointer]:
+              - img [ref=e562]
+            - button "删除 pollIntervalMs" [ref=e564] [cursor=pointer]:
+              - img [ref=e565]
+  - status:
+    - img
