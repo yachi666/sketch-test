@@ -1,5 +1,5 @@
 name: Setup pnpm + Node.js
-description: Checkout, install pnpm, setup Node.js, and install dependencies
+description: Install pnpm, setup Node.js, and install dependencies
 
 inputs:
   node-version:
@@ -10,7 +10,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v5
     - uses: pnpm/action-setup@v6
     - uses: actions/setup-node@v6
       with:
