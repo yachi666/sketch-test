@@ -1,0 +1,23 @@
+{
+  "name": "@sketch-test/adapter-har",
+  "version": "0.0.0",
+  "private": true,
+  "description": "HAR (HTTP Archive) v1.2 → CanonicalApiModel adapter",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "lint": "biome check",
+    "test": "vitest run",
+    "clean": "rm -rf dist/"
+  },
+  "dependencies": {
+    "@sketch-test/contracts-common": "workspace:*",
+    "@sketch-test/canonical-api-model": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
