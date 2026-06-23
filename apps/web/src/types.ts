@@ -91,8 +91,156 @@ export interface ApiEndpoint {
   method: HttpMethod;
   path: string;
   summary: string;
+  /** Longer description from the spec. */
+  description?: string;
   coverage: number;
   cases: number;
+  /** Tags from the OpenAPI spec, e.g. ["用户", "认证"]. */
+  tags: string[];
+  /** Whether this endpoint is marked deprecated in the spec. */
+  deprecated: boolean;
+  /** Which API version this endpoint belongs to. */
+  versionId?: EntityId;
+}
+
+// ─── API Version ────────────────────────────────────────────────
+
+/** A published, immutable API version created by importing an OpenAPI spec. */
+export interface ApiVersionInfo {
+  id: EntityId;
+  /** Human-readable label, e.g. "openapi.yaml · v2.3.1". */
+  label: string;
+  /** Source type: openapi, raml, etc. */
+  sourceType: 'openapi' | 'raml' | 'manual';
+  /** Original file name. */
+  fileName: string;
+  /** Semantic version from the spec. */
+  version: string;
+  /** Number of endpoints in this version. */
+  endpointCount: number;
+  /** Number of schemas in this version. */
+  schemaCount: number;
+  /** When this version was imported. */
+  importedAt: string;
+  /** Whether this is the currently active version. */
+  isActive: boolean;
+}
+
+// ─── Endpoint Detail (aligned with canonical EndpointSchema) ────
+
+export interface ApiParameter {
+  id: string;
+  name: string;
+  in: 'path' | 'query' | 'header' | 'cookie';
+  description?: string;
+  required: boolean;
+  deprecated: boolean;
+  /** Schema type for simple parameters. */
+  type?: string;
+  /** Example value. */
+  example?: string;
+  /** Enum of allowed values. */
+  enum?: string[];
+}
+
+export interface ApiRequestBody {
+  id: string;
+  description?: string;
+  required: boolean;
+  /** Media type → schema reference. */
+  contentTypes: string[];
+  /** Schema reference path, e.g. "/schemas/CreateUserRequest". */
+  schemaRef?: string;
+}
+
+export interface ApiResponseDef {
+  id: string;
+  statusCode: number;
+  description: string;
+  /** Media type → schema reference. */
+  contentTypes: string[];
+  /** Schema reference path. */
+  schemaRef?: string;
+}
+
+export interface EndpointDetail {
+  endpointId: EntityId;
+  method: HttpMethod;
+  path: string;
+  summary: string;
+  description?: string;
+  deprecated: boolean;
+  tags: string[];
+  parameters: ApiParameter[];
+  requestBodies: ApiRequestBody[];
+  responses: ApiResponseDef[];
+  /** Security requirements, e.g. [{ "BearerAuth": [] }]. */
+  security?: Record<string, string[]>[];
+}
+
+// ─── Schema Viewer ──────────────────────────────────────────────
+
+export type JsonType = 'string' | 'number' | 'integer' | 'boolean' | 'array' | 'object' | 'null';
+
+export interface SchemaDisplayNode {
+  /** Canonical path, e.g. "/schemas/User". */
+  id: string;
+  /** Human-readable name. */
+  displayName: string;
+  type?: JsonType;
+  format?: string;
+  description?: string;
+  example?: unknown;
+  nullable?: boolean;
+  deprecated?: boolean;
+  /** For string types. */
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
+  enum?: unknown[];
+  /** For numeric types. */
+  minimum?: number;
+  maximum?: number;
+  /** For array types. */
+  items?: SchemaDisplayNode;
+  /** For object types. */
+  properties?: Record<string, SchemaDisplayNode>;
+  required?: string[];
+}
+
+// ─── API Version Diff ───────────────────────────────────────────
+
+export type ChangeType = 'added' | 'removed' | 'modified' | 'deprecated';
+
+export interface ApiChangeItem {
+  changeType: ChangeType;
+  endpointId: EntityId;
+  /** HTTP method + path for display. */
+  path: string;
+  /** Human-readable description of the change. */
+  description: string;
+  /** Whether this is a potentially breaking change. */
+  breaking: boolean;
+  /** Which test cases are affected. */
+  affectedTestCases: number;
+  /** Which workflows are affected. */
+  affectedWorkflows: number;
+}
+
+export interface ApiVersionDiff {
+  baseVersionId: EntityId;
+  baseVersionLabel: string;
+  targetVersionId: EntityId;
+  targetVersionLabel: string;
+  /** Summary counts. */
+  summary: {
+    addedEndpoints: number;
+    removedEndpoints: number;
+    modifiedEndpoints: number;
+    breakingChanges: number;
+  };
+  /** All endpoint-level changes. */
+  changes: ApiChangeItem[];
 }
 
 // ─── Test Case (UI model — aligns with TestDefinition) ──────────
@@ -247,7 +395,10 @@ export interface Environment {
  * Resolve the effective value of a variable given the active environment.
  * Checks per-environment override first, then falls back to defaultValue.
  */
-export function resolveVariableValue(variable: Variable, activeEnvironmentId: string | null): string {
+export function resolveVariableValue(
+  variable: Variable,
+  activeEnvironmentId: string | null,
+): string {
   if (activeEnvironmentId && variable.overrides[activeEnvironmentId]) {
     return variable.overrides[activeEnvironmentId];
   }

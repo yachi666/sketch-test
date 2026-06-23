@@ -197,7 +197,11 @@ export type VariableRef = z.infer<typeof VariableRefSchema>;
  */
 export const VariableDefinitionSchema = z.object({
   id: EntityIdSchema,
-  name: z.string().min(1).max(128).regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/),
+  name: z
+    .string()
+    .min(1)
+    .max(128)
+    .regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/),
   type: VariableTypeSchema,
   scope: VariableScopeSchema,
   /** Default value used when no environment override exists. */

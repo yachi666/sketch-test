@@ -77,14 +77,20 @@ import {
   initialRuns,
   initialSteps,
   initialVariables,
+  apiSchemas,
+  apiVersions,
+  endpointDetails,
   makeLogs,
   responseFixture,
   testPlans,
+  versionDiff,
   workflowStepsMap,
   workflows,
 } from './data';
+import { ApiView } from './views/ApiView';
 import type {
   ApiEndpoint,
+  EndpointDetail,
   Environment,
   ExecutionLog,
   RunMeta,
@@ -878,6 +884,7 @@ function WorkflowWorkspace({
   logs,
   workflowName,
   onBack,
+  endpoints: catalogEndpoints,
 }: {
   steps: WorkflowStep[];
   setSteps: React.Dispatch<React.SetStateAction<WorkflowStep[]>>;
@@ -886,6 +893,7 @@ function WorkflowWorkspace({
   logs: ExecutionLog[];
   workflowName: string;
   onBack: () => void;
+  endpoints: ApiEndpoint[];
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -943,7 +951,7 @@ function WorkflowWorkspace({
     <div className="workflow-workspace">
       <EndpointPickerDialog
         open={pickerOpen}
-        endpoints={endpoints}
+        endpoints={catalogEndpoints}
         onSelect={handleEndpointSelect}
         onClose={() => setPickerOpen(false)}
       />
@@ -1172,88 +1180,6 @@ function OverviewView({
           </div>
         </section>
       </div>
-    </main>
-  );
-}
-
-function ApiView({ onImport, imported }: { onImport: () => void; imported: boolean }) {
-  const [query, setQuery] = useState('');
-  const filtered = endpoints.filter((item) =>
-    `${item.method} ${item.path} ${item.summary}`.toLowerCase().includes(query.toLowerCase()),
-  );
-  return (
-    <main className="page-view">
-      <div className="page-intro">
-        <div>
-          <span className="eyebrow">API CATALOG</span>
-          <h2>接口资产</h2>
-          <p>统一管理 OpenAPI 版本、覆盖率和变更影响。</p>
-        </div>
-        <button className="button button--primary" type="button" onClick={onImport}>
-          <FileArrowUp size={18} />
-          导入文档
-        </button>
-      </div>
-      {imported ? (
-        <div className="notice notice--success">
-          <CheckCircle size={20} weight="fill" />
-          <span>
-            <strong>openapi.yaml 已导入</strong>已识别 6 个接口和 18 个 Schema。
-          </span>
-        </div>
-      ) : null}
-      <section className="table-panel">
-        <div className="table-toolbar">
-          <label className="search-field">
-            <MagnifyingGlass size={18} />
-            <span className="sr-only">搜索接口</span>
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="搜索路径或摘要"
-            />
-          </label>
-          <span className="toolbar-spacer" />
-          <button className="button button--outline" type="button">
-            <SlidersHorizontal size={17} />
-            筛选
-          </button>
-          <button className="button button--outline" type="button">
-            <GitBranch size={17} />
-            比较版本
-          </button>
-        </div>
-        <div className="data-table">
-          <div className="data-row data-row--head">
-            <span>方法</span>
-            <span>路径与摘要</span>
-            <span>覆盖率</span>
-            <span>用例</span>
-            <span>操作</span>
-          </div>
-          {filtered.map((api) => (
-            <div className="data-row" key={api.id}>
-              <span>
-                <em className={`method method--${api.method.toLowerCase()}`}>{api.method}</em>
-              </span>
-              <span>
-                <code>{api.path}</code>
-                <small>{api.summary}</small>
-              </span>
-              <span>
-                <span className="progress">
-                  <i style={{ width: `${api.coverage}%` }} />
-                </span>
-                <small>{api.coverage}%</small>
-              </span>
-              <strong>{api.cases}</strong>
-              <button className="icon-button" type="button" aria-label={`查看 ${api.path}`}>
-                <Eye size={18} />
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
     </main>
   );
 }
@@ -2005,8 +1931,8 @@ function EnvironmentView({
           <span className="eyebrow">ENVIRONMENTS</span>
           <h2>环境管理</h2>
           <p>
-            每个环境拥有独立的服务地址和密文引用。切换环境时所有环境级变量自动切换。
-            共 {environments.length} 个环境。
+            每个环境拥有独立的服务地址和密文引用。切换环境时所有环境级变量自动切换。 共{' '}
+            {environments.length} 个环境。
           </p>
         </div>
         <button
@@ -2173,8 +2099,7 @@ function EnvironmentDialog({
   const validate = (): boolean => {
     const next: Record<string, string> = {};
     if (!name.trim()) next['name'] = '环境名称不能为空';
-    if (isProduction && !tags.includes('production'))
-      setIsProduction(false); // production env must include 'production' tag
+    if (isProduction && !tags.includes('production')) setIsProduction(false); // production env must include 'production' tag
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -2330,7 +2255,13 @@ function DeleteEnvironmentDialog({
             <span className="eyebrow">CONFIRM DELETION</span>
             <h2 id="delete-env-title">删除环境</h2>
           </div>
-          <button className="icon-button" ref={cancelRef} type="button" onClick={onClose} aria-label="关闭">
+          <button
+            className="icon-button"
+            ref={cancelRef}
+            type="button"
+            onClick={onClose}
+            aria-label="关闭"
+          >
             <X size={20} />
           </button>
         </div>
@@ -2344,7 +2275,9 @@ function DeleteEnvironmentDialog({
             <Info size={18} />
             <span>
               <strong>删除环境后</strong>
-              <small>所有变量中针对该环境的覆盖值将失效，依赖该环境的运行记录将保留但不活跃。</small>
+              <small>
+                所有变量中针对该环境的覆盖值将失效，依赖该环境的运行记录将保留但不活跃。
+              </small>
             </span>
           </div>
         </div>
@@ -2544,8 +2477,7 @@ function VariableDialog({
                 value={defaultValue}
                 onChange={(e) => {
                   setDefaultValue(e.target.value);
-                  if (errors['defaultValue'])
-                    setErrors((prev) => ({ ...prev, defaultValue: '' }));
+                  if (errors['defaultValue']) setErrors((prev) => ({ ...prev, defaultValue: '' }));
                 }}
                 placeholder={type === 'dataset' ? 'JSON 格式数据...' : '输入默认值...'}
                 className={errors['defaultValue'] ? 'input--error' : ''}
@@ -3170,6 +3102,8 @@ function EndpointPickerDialog({
                   summary: '自定义空白步骤',
                   coverage: 0,
                   cases: 0,
+                  tags: [],
+                  deprecated: false,
                 })
               }
             >
@@ -3224,97 +3158,6 @@ function EndpointPickerDialog({
   );
 }
 
-function ImportDialog({
-  open,
-  onClose,
-  onImport,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onImport: () => void;
-}) {
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const [source, setSource] = useState<'file' | 'url'>('file');
-  const [url, setUrl] = useState('https://example.com/openapi.yaml');
-  useEffect(() => {
-    if (open) closeButtonRef.current?.focus();
-  }, [open]);
-  if (!open) return null;
-  return (
-    <div
-      className="modal-backdrop"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-    >
-      <section className="modal" role="dialog" aria-modal="true" aria-labelledby="import-title">
-        <div className="modal-heading">
-          <div>
-            <span className="eyebrow">API SOURCE</span>
-            <h2 id="import-title">导入 OpenAPI</h2>
-          </div>
-          <button
-            className="icon-button"
-            ref={closeButtonRef}
-            type="button"
-            onClick={onClose}
-            aria-label="关闭"
-          >
-            <X size={20} />
-          </button>
-        </div>
-        <div className="segmented">
-          <button
-            type="button"
-            className={source === 'file' ? 'active' : ''}
-            onClick={() => setSource('file')}
-          >
-            <FileArrowUp size={17} />
-            上传文件
-          </button>
-          <button
-            type="button"
-            className={source === 'url' ? 'active' : ''}
-            onClick={() => setSource('url')}
-          >
-            <PlugsConnected size={17} />
-            远程 URL
-          </button>
-        </div>
-        {source === 'file' ? (
-          <label className="drop-zone">
-            <input type="file" accept=".yaml,.yml,.json" />
-            <FileArrowUp size={36} weight="duotone" />
-            <strong>拖入 YAML 或 JSON 文件</strong>
-            <span>支持 OpenAPI 2.0 / 3.0 / 3.1，最大 10 MB</span>
-          </label>
-        ) : (
-          <label className="modal-field">
-            文档地址
-            <input value={url} onChange={(event) => setUrl(event.target.value)} />
-          </label>
-        )}
-        <div className="import-preview">
-          <CheckCircle size={20} weight="fill" />
-          <span>
-            <strong>导入后自动生成</strong>接口目录、Schema、正向/负向/边界测试草稿
-          </span>
-        </div>
-        <div className="modal-actions">
-          <button className="button button--ghost" type="button" onClick={onClose}>
-            取消
-          </button>
-          <button className="button button--primary" type="button" onClick={onImport}>
-            <UploadSimple size={17} />
-            校验并导入
-          </button>
-        </div>
-      </section>
-    </div>
-  );
-}
-
 export function App() {
   const [view, setView] = useState<ViewId>('workflows');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -3341,8 +3184,9 @@ export function App() {
     }
     return initialEnvironments[0].id;
   });
-  const [importOpen, setImportOpen] = useState(false);
   const [imported, setImported] = useState(false);
+  const [apiEndpoints, setApiEndpoints] = useState<ApiEndpoint[]>(endpoints);
+  const [apiDetails, setApiDetails] = useState<Record<string, EndpointDetail>>(endpointDetails);
   const [cases, setCases] = useState(initialCases);
   const [variables, setVariables] = useState<Variable[]>(() => {
     try {
@@ -3466,7 +3310,6 @@ export function App() {
         } else if (isReportDetail) {
           setActiveRunId(null);
         } else {
-          setImportOpen(false);
           setSidebarOpen(false);
         }
       }
@@ -3493,10 +3336,46 @@ export function App() {
   };
   const importApi = () => {
     setImported(true);
-    setImportOpen(false);
     setView('apis');
     notify('OpenAPI 导入成功 · 已创建 6 个接口资产');
   };
+
+  // ─── API CRUD handlers ──────────────────────────────────────
+
+  const handleCreateEndpoint = useCallback(
+    (endpoint: ApiEndpoint, detail: EndpointDetail) => {
+      setApiEndpoints((prev) => [...prev, endpoint]);
+      setApiDetails((prev) => ({ ...prev, [endpoint.id]: detail }));
+      notify(`接口 ${endpoint.method} ${endpoint.path} 已创建`);
+    },
+    [notify],
+  );
+
+  const handleUpdateEndpoint = useCallback(
+    (endpoint: ApiEndpoint, detail: EndpointDetail) => {
+      setApiEndpoints((prev) =>
+        prev.map((ep) => (ep.id === endpoint.id ? { ...ep, ...endpoint } : ep)),
+      );
+      setApiDetails((prev) => ({ ...prev, [endpoint.id]: detail }));
+      notify(`接口 ${endpoint.method} ${endpoint.path} 已更新`);
+    },
+    [notify],
+  );
+
+  const handleDeleteEndpoint = useCallback(
+    (endpointId: string) => {
+      const ep = apiEndpoints.find((e) => e.id === endpointId);
+      setApiEndpoints((prev) => prev.filter((ep) => ep.id !== endpointId));
+      setApiDetails((prev) => {
+        const next = { ...prev };
+        delete next[endpointId];
+        return next;
+      });
+      if (ep) notify(`接口 ${ep.method} ${ep.path} 已删除`);
+    },
+    [apiEndpoints, notify],
+  );
+
   const generateCases = () => {
     const generated: TestCase[] = [
       {
@@ -3537,6 +3416,7 @@ export function App() {
         logs={logs}
         workflowName={activeWorkflow?.name ?? '业务流程'}
         onBack={backToList}
+        endpoints={apiEndpoints}
       />
     );
   } else if (view === 'workflows') {
@@ -3545,12 +3425,25 @@ export function App() {
     content = (
       <OverviewView
         onNavigate={navigate}
-        onImport={() => setImportOpen(true)}
+        onImport={() => navigate('apis')}
         onOpenWorkflow={openWorkflow}
       />
     );
   else if (view === 'apis')
-    content = <ApiView onImport={() => setImportOpen(true)} imported={imported} />;
+    content = (
+      <ApiView
+        endpoints={apiEndpoints}
+        versions={apiVersions}
+        details={apiDetails}
+        schemas={apiSchemas}
+        diff={versionDiff}
+        imported={imported}
+        onImport={importApi}
+        onCreate={handleCreateEndpoint}
+        onUpdate={handleUpdateEndpoint}
+        onDelete={handleDeleteEndpoint}
+      />
+    );
   else if (view === 'cases') content = <CasesView cases={cases} onGenerate={generateCases} />;
   else if (view === 'reports')
     content = isReportDetail ? (
@@ -3676,7 +3569,7 @@ export function App() {
           onMenu={() => setSidebarOpen(true)}
           onSave={saveDraft}
           onRun={() => void runWorkflow()}
-          onImport={() => setImportOpen(true)}
+          onImport={() => navigate('apis')}
           environments={environments}
           activeEnvironmentId={activeEnvironmentId}
           onEnvironment={(envId) => {
@@ -3686,7 +3579,6 @@ export function App() {
         />
         {content}
       </div>
-      <ImportDialog open={importOpen} onClose={() => setImportOpen(false)} onImport={importApi} />
       <div className={`toast ${toast ? 'toast--visible' : ''}`} role="status" aria-live="polite">
         <CheckCircle size={18} weight="fill" />
         {toast}
