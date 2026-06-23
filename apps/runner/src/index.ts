@@ -134,32 +134,71 @@ function redactHeaders(headers: Record<string, string>): Record<string, string> 
 
 function redactBody(body: unknown, maxPreviewLength = 4096): string | undefined {
   if (body === undefined || body === null) return undefined;
-  try {
-    const str = typeof body === 'string' ? body : JSON.stringify(body);
-    // Simple field-level redaction for JSON bodies
+  // Object body — redactObject returns a copy (body is shared with assertion code downstream).
+  if (typeof body === 'object') {
+    const redacted = redactObject(body);
+    return JSON.stringify(redacted).slice(0, maxPreviewLength);
+  }
+  // String body — parse, redact in place (freshly parsed, no other references), stringify.
+  if (typeof body === 'string') {
     try {
-      const parsed = JSON.parse(str);
+      const parsed = JSON.parse(body);
       if (typeof parsed === 'object' && parsed !== null) {
-        redactObject(parsed);
+        redactObjectInPlace(parsed);
         return JSON.stringify(parsed).slice(0, maxPreviewLength);
       }
     } catch {
-      // Not JSON, redact as plain text if it contains sensitive patterns
+      // Not JSON, return as-is.
     }
-    return str.slice(0, maxPreviewLength);
-  } catch {
-    return String(body).slice(0, maxPreviewLength);
+    return body.slice(0, maxPreviewLength);
+  }
+  return String(body).slice(0, maxPreviewLength);
+}
+
+/** Mutate obj in place, redacting sensitive fields. Only safe when obj is not shared. */
+function redactObjectInPlace(obj: unknown): void {
+  if (Array.isArray(obj)) {
+    for (const item of obj) redactObjectInPlace(item);
+    return;
+  }
+  if (typeof obj !== 'object' || obj === null) return;
+  const record = obj as Record<string, unknown>;
+  for (const key of Object.keys(record)) {
+    if (SENSITIVE_JSON_FIELDS.has(key) || SENSITIVE_JSON_FIELDS.has(key.toLowerCase())) {
+      record[key] = '***REDACTED***';
+    } else {
+      const val = record[key];
+      if (typeof val === 'object' && val !== null) {
+        redactObjectInPlace(val);
+      }
+    }
   }
 }
 
-function redactObject(obj: Record<string, unknown>): void {
-  for (const key of Object.keys(obj)) {
+function redactObject(obj: unknown): unknown {
+  // Preserve array structure — Object.keys on arrays would convert them to plain objects.
+  if (Array.isArray(obj)) {
+    return obj.map((item) => redactObject(item));
+  }
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+  const input = obj as Record<string, unknown>;
+  const result: Record<string, unknown> = {};
+  for (const key of Object.keys(input)) {
     if (SENSITIVE_JSON_FIELDS.has(key) || SENSITIVE_JSON_FIELDS.has(key.toLowerCase())) {
-      obj[key] = '***REDACTED***';
-    } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-      redactObject(obj[key] as Record<string, unknown>);
+      result[key] = '***REDACTED***';
+    } else {
+      const val = input[key];
+      // Only recurse into objects/arrays — primitives pass through directly.
+      if (typeof val === 'object' && val !== null) {
+        result[key] = redactObject(val);
+      } else {
+        result[key] = val;
+      }
     }
   }
+  return result;
 }
 
 // ─── JSONPath (Simplified) ────────────────────────────────────────

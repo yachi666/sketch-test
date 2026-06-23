@@ -1,5 +1,11 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.5.0/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "master"
+  },
   "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "formatter": {
     "enabled": true,
@@ -45,6 +51,17 @@
     }
   ],
   "javascript": {
+    "globals": [
+      "describe",
+      "test",
+      "expect",
+      "it",
+      "beforeEach",
+      "afterEach",
+      "beforeAll",
+      "afterAll",
+      "vi"
+    ],
     "formatter": {
       "semicolons": "always",
       "quoteStyle": "single",

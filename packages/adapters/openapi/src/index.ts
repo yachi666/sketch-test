@@ -166,7 +166,16 @@ function normalizePath(path: string): string {
   return path.replace(/\{([^}]+)\}/g, ':$1');
 }
 
-const NOW: Instant = new Date().toISOString() as Instant;
+// ─── Source Context ────────────────────────────────────────────────
+
+/** Immutable context threaded through all mapping functions in a single import. */
+interface SourceContext {
+  sourceId: EntityId;
+  sourceLabel: string;
+  sourceVersion: SemanticVersion;
+  sourceHash: ContentHash;
+  ingestedAt: Instant;
+}
 
 // ─── Schema Extraction ────────────────────────────────────────────
 
@@ -176,11 +185,9 @@ const NOW: Instant = new Date().toISOString() as Instant;
  */
 function extractSchemas(
   rawSchemas: Record<string, unknown> | undefined,
-  sourceId: EntityId,
-  sourceLabel: string,
-  sourceVersion: SemanticVersion,
-  sourceHash: ContentHash,
+  ctx: SourceContext,
 ): { schemas: Record<string, ApiSchemaNode>; diagnostics: Diagnostic[] } {
+  const { sourceId, sourceLabel, sourceVersion, sourceHash, ingestedAt } = ctx;
   const schemas: Record<string, ApiSchemaNode> = {};
   const diagnostics: Diagnostic[] = [];
 
@@ -237,7 +244,7 @@ function extractSchemas(
         sourceVersion,
         sourceHash,
         location: `#/components/schemas${path.slice('/schemas'.length)}`,
-        ingestedAt: NOW,
+        ingestedAt,
       },
     };
 
@@ -310,12 +317,10 @@ function extractSchemas(
 
 function mapParameter(
   param: OpenApiParameter,
-  sourceId: EntityId,
-  sourceLabel: string,
-  sourceVersion: SemanticVersion,
-  sourceHash: ContentHash,
+  ctx: SourceContext,
   endpointPath: string,
 ): Parameter {
+  const { sourceId, sourceLabel, sourceVersion, sourceHash, ingestedAt } = ctx;
   const locMap: Record<string, ParameterLocation> = {
     path: 'path',
     query: 'query',
@@ -343,7 +348,7 @@ function mapParameter(
       sourceVersion,
       sourceHash,
       location: `paths.${endpointPath}.parameters.${param.name}`,
-      ingestedAt: NOW,
+      ingestedAt,
     },
   };
 
@@ -354,11 +359,9 @@ function mapParameter(
 
 function mapEndpoints(
   paths: Record<string, Record<string, OpenApiOperation>> | undefined,
-  sourceId: EntityId,
-  sourceLabel: string,
-  sourceVersion: SemanticVersion,
-  sourceHash: ContentHash,
+  ctx: SourceContext,
 ): { endpoints: Endpoint[]; diagnostics: Diagnostic[] } {
+  const { sourceId, sourceLabel, sourceVersion, sourceHash, ingestedAt } = ctx;
   const endpoints: Endpoint[] = [];
   const diagnostics: Diagnostic[] = [];
 
@@ -394,9 +397,7 @@ function mapEndpoints(
       const parameters: Parameter[] = [];
       if (operation.parameters) {
         for (const param of operation.parameters) {
-          parameters.push(
-            mapParameter(param, sourceId, sourceLabel, sourceVersion, sourceHash, rawPath),
-          );
+          parameters.push(mapParameter(param, ctx, rawPath));
         }
       }
 
@@ -442,7 +443,7 @@ function mapEndpoints(
             sourceVersion,
             sourceHash,
             location: `$.paths.${rawPath}.${rawMethod}.requestBody`,
-            ingestedAt: NOW,
+            ingestedAt,
           },
         });
       }
@@ -514,7 +515,7 @@ function mapEndpoints(
               sourceVersion,
               sourceHash,
               location: `$.paths.${rawPath}.${rawMethod}.responses.${statusStr}`,
-              ingestedAt: NOW,
+              ingestedAt,
             },
           });
         }
@@ -546,7 +547,7 @@ function mapEndpoints(
             sourceVersion,
             sourceHash,
             location: `$.paths.${rawPath}.${rawMethod}`,
-            ingestedAt: NOW,
+            ingestedAt,
           },
         ],
       });
@@ -569,11 +570,9 @@ function mapEndpoints(
 
 function mapSecuritySchemes(
   rawSchemes: Record<string, OpenApiSecurityScheme> | undefined,
-  sourceId: EntityId,
-  sourceLabel: string,
-  sourceVersion: SemanticVersion,
-  sourceHash: ContentHash,
+  ctx: SourceContext,
 ): { securitySchemes: SecurityScheme[]; diagnostics: Diagnostic[] } {
+  const { sourceId, sourceLabel, sourceVersion, sourceHash, ingestedAt } = ctx;
   const securitySchemes: SecurityScheme[] = [];
   const diagnostics: Diagnostic[] = [];
 
@@ -624,7 +623,7 @@ function mapSecuritySchemes(
         sourceVersion,
         sourceHash,
         location: `#/components/securitySchemes/${name}`,
-        ingestedAt: NOW,
+        ingestedAt,
       },
     };
 
@@ -657,6 +656,18 @@ export function importOpenApi(doc: OpenApiDocument, options: OpenApiAdapterOptio
   const sourceVersion = doc.info.version as SemanticVersion;
   const sourceId = `openapi-${options.sourceLabel.replace(/[^a-zA-Z0-9_-]/g, '-')}` as EntityId;
 
+  // Compute ingestion timestamp once at import start — all entities from the
+  // same import share the same timestamp, preserving batch-import semantics.
+  const ingestedAt = new Date().toISOString() as Instant;
+
+  const ctx: SourceContext = {
+    sourceId,
+    sourceLabel: options.sourceLabel,
+    sourceVersion,
+    sourceHash: options.sourceHash,
+    ingestedAt,
+  };
+
   // Validate OpenAPI version
   const oaVersion = doc.openapi;
   if (!oaVersion.startsWith('3.')) {
@@ -683,13 +694,7 @@ export function importOpenApi(doc: OpenApiDocument, options: OpenApiAdapterOptio
   }
 
   // Extract schemas
-  const { schemas, diagnostics: schemaDiags } = extractSchemas(
-    doc.components?.schemas,
-    sourceId,
-    options.sourceLabel,
-    sourceVersion,
-    options.sourceHash,
-  );
+  const { schemas, diagnostics: schemaDiags } = extractSchemas(doc.components?.schemas, ctx);
   diagnostics.push(...schemaDiags);
 
   // Map servers
@@ -714,21 +719,12 @@ export function importOpenApi(doc: OpenApiDocument, options: OpenApiAdapterOptio
   // Map security schemes
   const { securitySchemes, diagnostics: secDiags } = mapSecuritySchemes(
     doc.components?.securitySchemes,
-    sourceId,
-    options.sourceLabel,
-    sourceVersion,
-    options.sourceHash,
+    ctx,
   );
   diagnostics.push(...secDiags);
 
   // Map endpoints
-  const { endpoints, diagnostics: epDiags } = mapEndpoints(
-    doc.paths,
-    sourceId,
-    options.sourceLabel,
-    sourceVersion,
-    options.sourceHash,
-  );
+  const { endpoints, diagnostics: epDiags } = mapEndpoints(doc.paths, ctx);
   diagnostics.push(...epDiags);
 
   // Determine source type based on OpenAPI version
@@ -743,7 +739,7 @@ export function importOpenApi(doc: OpenApiDocument, options: OpenApiAdapterOptio
     sourceHash: options.sourceHash,
     parserName: '@sketch-test/adapter-openapi',
     parserVersion: options.parserVersion ?? ('0.1.0' as SemanticVersion),
-    ingestedAt: NOW,
+    ingestedAt,
   };
 
   const hasErrors = diagnostics.some((d) => d.severity === 'error');

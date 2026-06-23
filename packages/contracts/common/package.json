@@ -10,12 +10,14 @@
   },
   "scripts": {
     "check": "tsc --noEmit",
-    "lint": "biome check"
+    "lint": "biome check",
+    "test": "vitest run"
   },
   "dependencies": {
     "zod": "catalog:"
   },
   "devDependencies": {
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

@@ -17,6 +17,7 @@ import {
   ContentHashSchema,
   DiagnosticSchema,
   EntityIdSchema,
+  HttpMethodSchema,
   HttpStatusCodeSchema,
   ImmutableVersionMetaSchema,
 } from '@sketch-test/contracts-common';
@@ -41,7 +42,7 @@ export const StepTestRefSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('inline'),
     /** Inline test definition (will be frozen at publish time). */
-    method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']),
+    method: HttpMethodSchema,
     url: z.string().min(1).max(4096),
     headers: z.record(z.string(), z.string()).optional(),
     body: z.unknown().optional(),
@@ -65,16 +66,20 @@ export const RetryConfigSchema = z.object({
 });
 export type RetryConfig = z.infer<typeof RetryConfigSchema>;
 
-export const PollConfigSchema = z.object({
-  /** Polling interval in milliseconds. */
-  intervalMs: z.number().int().positive().max(60_000).default(2000),
-  /** Hard deadline: maximum polling duration. */
-  maxDurationMs: z.number().int().positive().max(600_000),
-  /** Or maximum number of polls. One of maxDurationMs or maxAttempts must be set. */
-  maxAttempts: z.number().int().positive().max(10_000).optional(),
-  /** Expression that must evaluate to true to stop polling. */
-  untilExpression: z.string().min(1).max(1024),
-});
+export const PollConfigSchema = z
+  .object({
+    /** Polling interval in milliseconds. */
+    intervalMs: z.number().int().positive().max(60_000).default(2000),
+    /** Hard deadline: maximum polling duration. */
+    maxDurationMs: z.number().int().positive().max(600_000).optional(),
+    /** Maximum number of polls. */
+    maxAttempts: z.number().int().positive().max(10_000).optional(),
+    /** Expression that must evaluate to true to stop polling. */
+    untilExpression: z.string().min(1).max(1024),
+  })
+  .refine((data) => data.maxDurationMs != null || data.maxAttempts != null, {
+    message: 'At least one of maxDurationMs or maxAttempts must be set.',
+  });
 export type PollConfig = z.infer<typeof PollConfigSchema>;
 
 export const ConditionConfigSchema = z.object({
@@ -112,28 +117,45 @@ export type StepInput = z.infer<typeof StepInputSchema>;
 /**
  * A single step in a workflow. Steps execute sequentially in V1.
  */
-export const WorkflowStepSchema = z.object({
-  /** Unique id within the workflow. */
-  id: EntityIdSchema,
-  /** Human-readable name. */
-  name: z.string().min(1).max(256),
-  /** What test to execute. */
-  useTest: StepTestRefSchema,
-  /** Input mappings from previous steps or environment. */
-  inputs: z.array(StepInputSchema).optional(),
-  /** Condition for execution. */
-  condition: ConditionConfigSchema.optional(),
-  /** Retry configuration. */
-  retry: RetryConfigSchema.optional(),
-  /** Polling configuration (step repeats until condition or timeout). */
-  poll: PollConfigSchema.optional(),
-  /** What to do if this step fails. */
-  onFailure: FailureStrategySchema.default('stop'),
-  /** Whether this step is enabled. */
-  enabled: z.boolean().default(true),
-  /** Human-readable description. */
-  description: z.string().max(1024).optional(),
-});
+export const WorkflowStepSchema = z
+  .object({
+    /** Unique id within the workflow. */
+    id: EntityIdSchema,
+    /** Human-readable name. */
+    name: z.string().min(1).max(256),
+    /** What test to execute. */
+    useTest: StepTestRefSchema,
+    /** Input mappings from previous steps or environment. */
+    inputs: z.array(StepInputSchema).optional(),
+    /** Condition for execution. */
+    condition: ConditionConfigSchema.optional(),
+    /** Retry configuration. */
+    retry: RetryConfigSchema.optional(),
+    /** Polling configuration (step repeats until condition or timeout). */
+    poll: PollConfigSchema.optional(),
+    /** What to do if this step fails. */
+    onFailure: FailureStrategySchema.default('stop'),
+    /** Target step label when onFailure is 'goto'. */
+    gotoLabel: z.string().min(1).max(256).optional(),
+    /** Whether this step is enabled. */
+    enabled: z.boolean().default(true),
+    /** Human-readable description. */
+    description: z.string().max(1024).optional(),
+  })
+  .refine(
+    (data) => !(data.onFailure === 'goto' && (!data.gotoLabel || data.gotoLabel.trim() === '')),
+    {
+      message: 'gotoLabel is required when onFailure is "goto".',
+      path: ['gotoLabel'],
+    },
+  )
+  .refine(
+    (data) => !(data.onFailure !== 'goto' && data.gotoLabel != null && data.gotoLabel !== ''),
+    {
+      message: 'gotoLabel must not be set unless onFailure is "goto".',
+      path: ['gotoLabel'],
+    },
+  );
 export type WorkflowStep = z.infer<typeof WorkflowStepSchema>;
 
 // ─── Teardown Phase ─────────────────────────────────────────────

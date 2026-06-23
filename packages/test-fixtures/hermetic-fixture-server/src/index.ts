@@ -204,7 +204,8 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
     if (!user) {
       return json(res, 401, { code: 'AUTH_FAILED', message: '邮箱或密码错误' });
     }
-    const token = `tok-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    // Deterministic token: uses fixed clock + random sequence from LCG (seed 42)
+    const token = `tok-${FIXED_NOW.getTime()}-${fixedRandom().toString(36).slice(2)}`;
     tokens.set(token, user.id);
     return json(res, 200, {
       code: 0,

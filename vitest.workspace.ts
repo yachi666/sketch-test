@@ -5,4 +5,5 @@ export default defineWorkspace([
   'packages/adapters/*',
   'packages/test-fixtures/*',
   'apps/runner',
+  'apps/web',
 ]);

@@ -10,13 +10,15 @@
   },
   "scripts": {
     "check": "tsc --noEmit",
-    "lint": "biome check"
+    "lint": "biome check",
+    "test": "vitest run"
   },
   "dependencies": {
     "@sketch-test/contracts-common": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

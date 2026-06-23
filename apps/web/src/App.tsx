@@ -87,6 +87,17 @@ import {
   workflowStepsMap,
   workflows,
 } from './data';
+import {
+  LS_ACTIVE_ENV_KEY,
+  LS_ACTIVE_WORKFLOW_KEY,
+  LS_ENVIRONMENTS_KEY,
+  LS_VARIABLES_KEY,
+  LS_WORKFLOW_KEY,
+  lsGet,
+  lsGetJSON,
+  lsSet,
+  lsSetJSON,
+} from './lib/storage';
 import type {
   ApiEndpoint,
   EndpointDetail,
@@ -140,6 +151,8 @@ const navItems: Array<{ id: ViewId; label: string; icon: ElementType; accent?: b
 
 const sleep = (milliseconds: number) =>
   new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+
+// ─── Icons ────────────────────────────────────────────────────
 
 function stepIcon(icon: WorkflowStep['icon'], size = 38) {
   const props = { size, weight: 'duotone' as const, 'aria-hidden': true };
@@ -2748,12 +2761,13 @@ function VariablesView({
     setDeleteTarget(null);
   };
 
+  const q = query.toLowerCase();
   const filtered = variables.filter((v) => {
     const resolvedValue = resolveVariableValue(v, activeEnvironmentId);
     const matchesQuery =
-      v.name.toLowerCase().includes(query.toLowerCase()) ||
-      v.description.toLowerCase().includes(query.toLowerCase()) ||
-      resolvedValue.toLowerCase().includes(query.toLowerCase());
+      v.name.toLowerCase().includes(q) ||
+      v.description.toLowerCase().includes(q) ||
+      resolvedValue.toLowerCase().includes(q);
     const matchesType = typeFilter === 'all' || v.type === typeFilter;
     const matchesScope = scopeFilter === 'all' || v.scope === scopeFilter;
     return matchesQuery && matchesType && matchesScope;
@@ -3041,8 +3055,9 @@ function EndpointPickerDialog({
 
   if (!open) return null;
 
+  const q = query.toLowerCase();
   const filtered = catalog.filter((ep) =>
-    `${ep.method} ${ep.path} ${ep.summary}`.toLowerCase().includes(query.toLowerCase()),
+    `${ep.method} ${ep.path} ${ep.summary}`.toLowerCase().includes(q),
   );
 
   return (
@@ -3161,23 +3176,53 @@ function EndpointPickerDialog({
 export function App() {
   const [view, setView] = useState<ViewId>('workflows');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(null);
-  const [steps, setSteps] = useState<WorkflowStep[]>(initialSteps);
-  const [selectedId, setSelectedId] = useState(initialSteps[2].id);
+  const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(() => {
+    try {
+      const stored = lsGet(LS_ACTIVE_WORKFLOW_KEY);
+      if (stored) return stored;
+    } catch {
+      // ignore
+    }
+    return null;
+  });
+  const [steps, setSteps] = useState<WorkflowStep[]>(() =>
+    lsGetJSON<WorkflowStep[]>(LS_WORKFLOW_KEY, initialSteps, (parsed) =>
+      Array.isArray(parsed) &&
+      parsed.length > 0 &&
+      parsed.every((s) => s && typeof s === 'object' && 'id' in s)
+        ? (parsed as WorkflowStep[])
+        : null,
+    ),
+  );
+  const [selectedId, setSelectedId] = useState(() => {
+    // Pick the first step from restored workflow, or fall back to initial.
+    try {
+      const stored = lsGet(LS_WORKFLOW_KEY);
+      if (stored) {
+        const parsed: unknown = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const first = parsed[0] as Record<string, unknown>;
+          if (first && typeof first['id'] === 'string') return first['id'];
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return initialSteps[2].id;
+  });
   const [logs, setLogs] = useState<ExecutionLog[]>(initialLogs);
   const [runState, setRunState] = useState<RunState>('idle');
-  const [environments, setEnvironments] = useState<Environment[]>(() => {
-    try {
-      const stored = localStorage.getItem('sketchtest.environments');
-      if (stored) return JSON.parse(stored) as Environment[];
-    } catch {
-      // ignore parse errors
-    }
-    return initialEnvironments;
-  });
+  const [environments, setEnvironments] = useState<Environment[]>(() =>
+    lsGetJSON<Environment[]>(LS_ENVIRONMENTS_KEY, initialEnvironments, (parsed) =>
+      Array.isArray(parsed) &&
+      parsed.every((e) => e && typeof e === 'object' && 'id' in e && 'name' in e)
+        ? (parsed as Environment[])
+        : null,
+    ),
+  );
   const [activeEnvironmentId, setActiveEnvironmentId] = useState<string>(() => {
     try {
-      const stored = localStorage.getItem('sketchtest.activeEnvironmentId');
+      const stored = lsGet(LS_ACTIVE_ENV_KEY);
       if (stored) return stored;
     } catch {
       // ignore
@@ -3190,7 +3235,7 @@ export function App() {
   const [cases, setCases] = useState(initialCases);
   const [variables, setVariables] = useState<Variable[]>(() => {
     try {
-      const stored = localStorage.getItem('sketchtest.variables');
+      const stored = lsGet(LS_VARIABLES_KEY);
       if (stored) {
         const parsed: unknown = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -3245,8 +3290,8 @@ export function App() {
   }, []);
 
   const saveDraft = useCallback(() => {
-    localStorage.setItem('sketchtest.workflow', JSON.stringify(steps));
-    localStorage.setItem('sketchtest.activeWorkflow', activeWorkflowId ?? '');
+    lsSetJSON(LS_WORKFLOW_KEY, steps);
+    lsSet(LS_ACTIVE_WORKFLOW_KEY, activeWorkflowId ?? '');
     notify('草稿已保存 · 版本 v1.0.1');
   }, [steps, activeWorkflowId, notify]);
 
@@ -3474,13 +3519,13 @@ export function App() {
         activeEnvironmentId={activeEnvironmentId}
         onSetActive={(envId) => {
           setActiveEnvironmentId(envId);
-          localStorage.setItem('sketchtest.activeEnvironmentId', envId);
+          lsSet(LS_ACTIVE_ENV_KEY, envId);
           notify(`已切换到 ${environments.find((e) => e.id === envId)?.name ?? envId}`);
         }}
         onCreate={(env) =>
           setEnvironments((prev) => {
             const next = [env, ...prev];
-            localStorage.setItem('sketchtest.environments', JSON.stringify(next));
+            lsSetJSON(LS_ENVIRONMENTS_KEY, next);
             notify(`环境 "${env.name}" 已创建`);
             return next;
           })
@@ -3488,7 +3533,7 @@ export function App() {
         onUpdate={(env) =>
           setEnvironments((prev) => {
             const next = prev.map((x) => (x.id === env.id ? env : x));
-            localStorage.setItem('sketchtest.environments', JSON.stringify(next));
+            lsSetJSON(LS_ENVIRONMENTS_KEY, next);
             notify(`环境 "${env.name}" 已更新`);
             return next;
           })
@@ -3497,11 +3542,11 @@ export function App() {
           setEnvironments((prev) => {
             const target = prev.find((x) => x.id === envId);
             const next = prev.filter((x) => x.id !== envId);
-            localStorage.setItem('sketchtest.environments', JSON.stringify(next));
+            lsSetJSON(LS_ENVIRONMENTS_KEY, next);
             // If the deleted env was active, switch to the first remaining one
             if (activeEnvironmentId === envId && next.length > 0) {
               setActiveEnvironmentId(next[0].id);
-              localStorage.setItem('sketchtest.activeEnvironmentId', next[0].id);
+              lsSet(LS_ACTIVE_ENV_KEY, next[0].id);
             }
             // Also clean up overrides pointing to this environment
             setVariables((vars) => {
@@ -3510,7 +3555,7 @@ export function App() {
                 delete newOverrides[envId];
                 return { ...v, overrides: newOverrides };
               });
-              localStorage.setItem('sketchtest.variables', JSON.stringify(cleaned));
+              lsSetJSON(LS_VARIABLES_KEY, cleaned);
               return cleaned;
             });
             if (target) notify(`环境 "${target.name}" 已删除`);
@@ -3528,7 +3573,7 @@ export function App() {
         onCreate={(v) =>
           setVariables((prev) => {
             const next = [v, ...prev];
-            localStorage.setItem('sketchtest.variables', JSON.stringify(next));
+            lsSetJSON(LS_VARIABLES_KEY, next);
             notify(`变量 "${v.name}" 已创建`);
             return next;
           })
@@ -3536,7 +3581,7 @@ export function App() {
         onUpdate={(v) =>
           setVariables((prev) => {
             const next = prev.map((x) => (x.id === v.id ? v : x));
-            localStorage.setItem('sketchtest.variables', JSON.stringify(next));
+            lsSetJSON(LS_VARIABLES_KEY, next);
             notify(`变量 "${v.name}" 已更新`);
             return next;
           })
@@ -3545,7 +3590,7 @@ export function App() {
           setVariables((prev) => {
             const target = prev.find((x) => x.id === id);
             const next = prev.filter((x) => x.id !== id);
-            localStorage.setItem('sketchtest.variables', JSON.stringify(next));
+            lsSetJSON(LS_VARIABLES_KEY, next);
             if (target) notify(`变量 "${target.name}" 已删除`);
             return next;
           })
@@ -3574,7 +3619,7 @@ export function App() {
           activeEnvironmentId={activeEnvironmentId}
           onEnvironment={(envId) => {
             setActiveEnvironmentId(envId);
-            localStorage.setItem('sketchtest.activeEnvironmentId', envId);
+            lsSet(LS_ACTIVE_ENV_KEY, envId);
           }}
         />
         {content}
