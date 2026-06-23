@@ -143,7 +143,10 @@ export interface StoredApiEndpoint {
  * Persist a CanonicalApiModel to localStorage with versioned keys.
  * Creates a version entry and appends new endpoints (skipping duplicates by id).
  */
-export function saveApiImport(model: CanonicalApiModel, sourceId?: string): {
+export function saveApiImport(
+  model: CanonicalApiModel,
+  sourceId?: string,
+): {
   versionId: string;
   endpointCount: number;
 } {
