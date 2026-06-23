@@ -6,7 +6,7 @@
   "description": "SketchTest — REST API 自动化测试平台",
   "packageManager": "pnpm@11.8.0",
   "engines": {
-    "node": ">=20.0.0",
+    "node": ">=22.13.0",
     "pnpm": ">=11.8.0"
   },
   "scripts": {

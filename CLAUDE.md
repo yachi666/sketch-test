@@ -17,7 +17,7 @@ pnpm format                # Format all files (biome)
 pnpm clean                 # Remove all dist/ directories
 ```
 
-**Node** >= 20.0.0 · **pnpm** >= 9.0.0 · **Package manager** pnpm@11.8.0
+**Node** >= 22.13.0 · **pnpm** >= 11.8.0 · **Package manager** pnpm@11.8.0
 
 ## Monorepo map
 
