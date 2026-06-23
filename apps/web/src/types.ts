@@ -108,6 +108,8 @@ export interface ApiEndpoint {
 /** A published, immutable API version created by importing an OpenAPI spec. */
 export interface ApiVersionInfo {
   id: EntityId;
+  /** Which ApiSource this version belongs to. */
+  sourceId?: EntityId;
   /** Human-readable label, e.g. "openapi.yaml · v2.3.1". */
   label: string;
   /** Source type: openapi, raml, etc. */
@@ -124,6 +126,23 @@ export interface ApiVersionInfo {
   importedAt: string;
   /** Whether this is the currently active version. */
   isActive: boolean;
+}
+
+// ─── API Source (系统) ───────────────────────────────────────────
+
+/** A source system providing a set of API endpoints (e.g. "User Service", "Payment Service"). */
+export interface ApiSource {
+  id: EntityId;
+  /** Display name, e.g. "用户服务". */
+  name: string;
+  description?: string;
+  /** Original file or identifier, e.g. "user-service.yaml". */
+  sourceLabel: string;
+  sourceType: 'openapi' | 'raml' | 'manual';
+  /** Default server URL for this source system. */
+  defaultBaseUrl?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ─── Endpoint Detail (aligned with canonical EndpointSchema) ────
@@ -364,6 +383,8 @@ export interface Variable {
   type: VariableType;
   /** Scope: environment-global, workflow-scoped, or step-local. */
   scope: VariableScope;
+  /** When scope is 'source', which ApiSource this variable belongs to. */
+  sourceId?: EntityId;
   /** Whether this variable contains sensitive data (always true for secrets). */
   sensitive: boolean;
   /** Human-readable description. */
