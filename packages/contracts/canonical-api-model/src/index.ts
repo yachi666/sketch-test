@@ -262,6 +262,8 @@ export const EndpointSchema = z.object({
   security: z.array(z.record(z.string(), z.array(z.string()))).optional(),
   /** Locations in the source document(s). At least one is required. */
   sourceLocations: z.array(SourceLocationSchema).min(1),
+  /** Adapter-specific extra metadata (assertions, scripts, etc.). */
+  extra: z.record(z.string(), z.unknown()).optional(),
 });
 export type Endpoint = z.infer<typeof EndpointSchema>;
 

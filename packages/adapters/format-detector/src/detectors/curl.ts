@@ -7,7 +7,7 @@ export function detectCurl(content: unknown): DetectionResult | null {
   if (/^\s*curl\s+/i.test(content)) {
     return {
       format: 'curl',
-      confidence: 0.90,
+      confidence: 0.9,
       label: 'cURL command',
     };
   }

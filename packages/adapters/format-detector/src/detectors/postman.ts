@@ -61,6 +61,7 @@ export function detectPostman(content: unknown): DetectionResult | null {
       details: {
         endpointCount: Array.isArray(obj['item']) ? countEndpoints(obj['item']) : 0,
         hasVariables: Array.isArray(obj['variable']) && obj['variable'].length > 0,
+        hasAuth: obj['auth'] != null,
       },
     };
   }

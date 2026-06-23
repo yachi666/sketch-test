@@ -22,6 +22,7 @@ import type {
   ApiSourceType,
   CanonicalApiModel,
   Endpoint,
+  SecurityScheme,
 } from '@sketch-test/canonical-api-model';
 import {
   CANONICAL_API_MODEL_VERSION,
@@ -38,7 +39,8 @@ import { mapAuth } from './mapper/auth.js';
 import { flattenItems, mapToEndpoint } from './mapper/endpoints.js';
 import { mapWorkflowHints } from './mapper/folders.js';
 import type { SourceContext } from './mapper/shared.js';
-import { resolveVariables } from './mapper/variables.js';
+import { expandTemplate, resolveVariables } from './mapper/variables.js';
+import { extractAssertions } from './mapper/assertions.js';
 import { parseCollection } from './parser/collection.js';
 import { parseEnvironment } from './parser/environment.js';
 
@@ -62,6 +64,10 @@ export interface PostmanAdapterOptions {
       disabled?: boolean;
     }>;
   };
+  /** Whether to import auth schemes. Defaults to true. */
+  importAuth?: boolean;
+  /** Whether to flatten folders into endpoint tags. Defaults to true. */
+  foldersToTags?: boolean;
 }
 
 export interface ImportResult {
@@ -131,26 +137,98 @@ export function importPostmanCollection(
   // 4. Flatten items (folders → tags with folder paths)
   const flatItems = flattenItems(collection.item);
 
-  // 5. Extract collection-level auth
-  const {
-    securitySchemes,
-    securityRequirement,
-    diagnostics: authDiags,
-  } = mapAuth(undefined, collection.auth, ctx);
-  diagnostics.push(...authDiags);
+  // If foldersToTags is disabled, clear tags accumulated by flattenItems
+  if (options.foldersToTags === false) {
+    for (const fi of flatItems) {
+      fi.tags = [];
+      fi.folderPath = '';
+    }
+  }
 
-  // 6. Map each flat item to a canonical Endpoint
+  // 5. Extract collection-level auth (unless importAuth is explicitly disabled)
+  let securitySchemes: SecurityScheme[] = [];
+  let securityRequirement: Record<string, string[]> | undefined;
+  if (options.importAuth !== false) {
+    const authResult = mapAuth(undefined, collection.auth, ctx);
+    securitySchemes = authResult.securitySchemes;
+    securityRequirement = authResult.securityRequirement;
+    diagnostics.push(...authResult.diagnostics);
+  }
+
+  // 6. Expand templates in flat items using the resolved variable scope.
+  //    This must happen before endpoint mapping so that {{var}} patterns
+  //    in paths, headers, URL params, and auth are resolved.
+  for (const fi of flatItems) {
+    const req = fi.item.request;
+    if (!req) continue;
+
+    // Expand templates in URL
+    if (typeof req.url === 'string') {
+      req.url = expandTemplate(req.url, scope);
+    } else if (req.url?.raw) {
+      req.url.raw = expandTemplate(req.url.raw, scope);
+      if (req.url.path) {
+        req.url.path = req.url.path.map((p) => expandTemplate(p, scope));
+      }
+      if (req.url.query) {
+        for (const q of req.url.query) {
+          q.value = expandTemplate(q.value, scope);
+        }
+      }
+      if (req.url.variable) {
+        for (const v of req.url.variable) {
+          v.value = expandTemplate(v.value, scope);
+        }
+      }
+    }
+
+    // Expand templates in headers
+    if (req.header) {
+      for (const h of req.header) {
+        h.value = expandTemplate(h.value, scope);
+      }
+    }
+
+    // Expand templates in item-level auth params
+    if (req.auth) {
+      for (const key of Object.keys(req.auth)) {
+        if (key !== 'type' && typeof req.auth[key] === 'string') {
+          (req.auth as Record<string, unknown>)[key] = expandTemplate(
+            req.auth[key] as string,
+            scope,
+          );
+        }
+      }
+    }
+  }
+
+  // 7. Map each flat item to a canonical Endpoint
   const endpoints: Endpoint[] = [];
   for (const fi of flatItems) {
     const { endpoint, diagnostics: epDiags } = mapToEndpoint(fi, ctx);
+
+    // Extract assertions from Postman test scripts
+    if (fi.item.event) {
+      const { assertions, rawScripts } = extractAssertions(fi.item.event);
+      if (assertions.length > 0 || rawScripts.length > 0) {
+        endpoint.extra = { ...endpoint.extra };
+        if (assertions.length > 0) {
+          endpoint.extra['assertions'] = assertions;
+        }
+        if (rawScripts.length > 0) {
+          endpoint.extra['rawScripts'] = rawScripts;
+        }
+      }
+    }
+
     endpoints.push(endpoint);
     diagnostics.push(...epDiags);
   }
 
-  // 7. Extract workflow hints from folder structure
+  // 8. Extract workflow hints from folder structure
   const workflowHints = mapWorkflowHints(flatItems);
 
-  // 8. Build source metadata
+  // 9. Build source metadata
   const sourceType: ApiSourceType = 'manual';
   const metadata: ApiSourceMetadata = {
     sourceId: ctx.sourceId,

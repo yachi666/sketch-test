@@ -47,7 +47,7 @@ describe('importPostmanCollection', () => {
   it('produces deterministic endpoint IDs', () => {
     const result = importPostmanCollection(POSTMAN_ECHO_COLLECTION, OPTIONS);
     const ids = result.model!.endpoints.map((e) => e.id).sort();
-    expect(ids).toEqual(['GET-/basic-auth', 'GET-/get', 'GET-/{{path}}', 'POST-/post']);
+    expect(ids).toEqual(['GET-/basic-auth', 'GET-/get', 'GET-/get', 'POST-/post']);
   });
 
   // 5. Source locations present on all endpoints
