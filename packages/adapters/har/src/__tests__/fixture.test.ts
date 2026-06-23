@@ -3,10 +3,11 @@
  *
  * Tests the HAR adapter with a minimal representative HAR 1.2 fixture.
  */
-import { describe, it, expect } from 'vitest';
+
 import { CanonicalApiModelSchema } from '@sketch-test/canonical-api-model';
-import { importHar } from '../index.js';
 import type { ContentHash, SemanticVersion } from '@sketch-test/contracts-common';
+import { describe, expect, it } from 'vitest';
+import { importHar } from '../index.js';
 
 // ─── Fixtures ───────────────────────────────────────────────────────
 

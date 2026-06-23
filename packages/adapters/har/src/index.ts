@@ -406,7 +406,7 @@ export function importHar(har: unknown, options: HarAdapterOptions): ImportResul
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[i];
 
-    if (!entry || !entry.request || !entry.response) {
+    if (!entry?.request || !entry.response) {
       diagnostics.push({
         severity: 'warning',
         code: 'INVALID_HAR_ENTRY',
