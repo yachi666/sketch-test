@@ -157,11 +157,27 @@ export const endpoints: ApiEndpoint[] = [
   },
 ];
 
+// ─── API Sources ────────────────────────────────────────────────
+
+export const apiSources: import('./types').ApiSource[] = [
+  {
+    id: 'src-sketch-test',
+    name: 'SketchTest 平台',
+    description: 'SketchTest 演示用单体 API，包含用户、订单、支付接口。',
+    sourceLabel: 'openapi.yaml',
+    sourceType: 'openapi',
+    defaultBaseUrl: 'http://localhost:3800',
+    createdAt: '2026-06-15T10:00:00+08:00',
+    updatedAt: '2026-06-21T14:00:00+08:00',
+  },
+];
+
 // ─── API Versions ───────────────────────────────────────────────
 
 export const apiVersions: ApiVersionInfo[] = [
   {
     id: 'v1',
+    sourceId: 'src-sketch-test',
     label: 'openapi.yaml · v1.0.0',
     sourceType: 'openapi',
     fileName: 'openapi.yaml',
@@ -173,6 +189,7 @@ export const apiVersions: ApiVersionInfo[] = [
   },
   {
     id: 'v2',
+    sourceId: 'src-sketch-test',
     label: 'openapi.yaml · v2.3.1',
     sourceType: 'openapi',
     fileName: 'openapi.yaml',
@@ -1457,6 +1474,7 @@ export const initialVariables: Variable[] = [
   {
     id: 'var-userService',
     name: 'userService',
+    sourceId: 'src-sketch-test',
     defaultValue: 'http://localhost:8080',
     overrides: {
       'env-test': 'https://user.test.api.sketch.dev',
@@ -1474,6 +1492,7 @@ export const initialVariables: Variable[] = [
   {
     id: 'var-paymentService',
     name: 'paymentService',
+    sourceId: 'src-sketch-test',
     defaultValue: 'http://localhost:8081',
     overrides: {
       'env-test': 'https://pay.test.api.sketch.dev',
@@ -1491,6 +1510,7 @@ export const initialVariables: Variable[] = [
   {
     id: 'var-notifyService',
     name: 'notifyService',
+    sourceId: 'src-sketch-test',
     defaultValue: 'http://localhost:8082',
     overrides: {
       'env-test': 'https://notify.test.api.sketch.dev',
