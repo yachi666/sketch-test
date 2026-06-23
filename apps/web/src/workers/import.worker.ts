@@ -53,7 +53,19 @@ self.onmessage = async (e: MessageEvent<ImportMessage | CancelMessage>) => {
       const fileName = options['fileName'] as string;
 
       // Parse optional Postman environment file
-      let env;
+      /** Parsed Postman environment (JSON.parse → any → typed assignment). */
+      let env:
+        | {
+            name: string;
+            values: Array<{
+              key: string;
+              value: string;
+              type?: string;
+              description?: string;
+              disabled?: boolean;
+            }>;
+          }
+        | undefined;
       const { envContent } = e.data;
       if (envContent) {
         try {

@@ -95,8 +95,9 @@ export function expandTemplate(template: string, scope: VariableScope): string {
     }
 
     // Check for a known resolved variable
-    if (scope.variables.has(trimmed)) {
-      return scope.variables.get(trimmed)!;
+    const resolved = scope.variables.get(trimmed);
+    if (resolved !== undefined) {
+      return resolved;
     }
 
     // Unknown variable — keep original pattern and record as unresolved

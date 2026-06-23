@@ -13,7 +13,7 @@ export function detectOpenApi(content: unknown): DetectionResult | null {
       format: 'openapi',
       confidence: 0.98,
       version,
-      label: 'OpenAPI ' + fullVersion,
+      label: `OpenAPI ${fullVersion}`,
       details: {
         endpointCount: countPaths(obj['paths']),
       },

@@ -35,12 +35,12 @@ import type {
   Instant,
   SemanticVersion,
 } from '@sketch-test/contracts-common';
+import { extractAssertions } from './mapper/assertions.js';
 import { mapAuth } from './mapper/auth.js';
 import { flattenItems, mapToEndpoint } from './mapper/endpoints.js';
 import { mapWorkflowHints } from './mapper/folders.js';
 import type { SourceContext } from './mapper/shared.js';
 import { expandTemplate, resolveVariables } from './mapper/variables.js';
-import { extractAssertions } from './mapper/assertions.js';
 import { parseCollection } from './parser/collection.js';
 import { parseEnvironment } from './parser/environment.js';
 

@@ -57,7 +57,7 @@ export function detectPostman(content: unknown): DetectionResult | null {
       format: 'postman-collection',
       confidence: 0.98,
       version: v2Version,
-      label: 'Postman Collection v' + v2Version,
+      label: `Postman Collection v${v2Version}`,
       details: {
         endpointCount: Array.isArray(obj['item']) ? countEndpoints(obj['item']) : 0,
         hasVariables: Array.isArray(obj['variable']) && obj['variable'].length > 0,
