@@ -171,6 +171,10 @@ export type ImmutableVersionMeta = z.infer<typeof ImmutableVersionMetaSchema>;
 export const VariableScopeSchema = z.enum(['step', 'workflow', 'environment', 'secret']);
 export type VariableScope = z.infer<typeof VariableScopeSchema>;
 
+/** Variable type classification for the UI and runtime. */
+export const VariableTypeSchema = z.enum(['plain', 'secret', 'dataset']);
+export type VariableType = z.infer<typeof VariableTypeSchema>;
+
 export const VariableRefSchema = z.object({
   name: z.string().min(1).max(128),
   scope: VariableScopeSchema,
@@ -180,6 +184,78 @@ export const VariableRefSchema = z.object({
   sensitive: z.boolean().default(false),
 });
 export type VariableRef = z.infer<typeof VariableRefSchema>;
+
+/**
+ * A managed variable definition — the source of truth for a named variable.
+ *
+ * Variables have a default value (used during local development or when no
+ * environment is active) and optional per-environment overrides. When a test
+ * references `${env.userService}`, the runtime resolves it by checking the
+ * active environment's override first, then falling back to defaultValue.
+ *
+ * Published variables are immutable — changing a value creates a new version.
+ */
+export const VariableDefinitionSchema = z.object({
+  id: EntityIdSchema,
+  name: z.string().min(1).max(128).regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/),
+  type: VariableTypeSchema,
+  scope: VariableScopeSchema,
+  /** Default value used when no environment override exists. */
+  defaultValue: z.string().max(8192),
+  /** Per-environment value overrides keyed by environment id. */
+  overrides: z.record(EntityIdSchema, z.string().max(8192)).optional(),
+  /** Whether this variable contains sensitive data. True for all secrets. */
+  sensitive: z.boolean().default(false),
+  /** Human-readable description. */
+  description: z.string().max(1024).optional(),
+});
+export type VariableDefinition = z.infer<typeof VariableDefinitionSchema>;
+
+// ─── Environment ─────────────────────────────────────────────────
+
+/**
+ * An environment represents a deployment target with its base URL, variables,
+ * secret references, and executor constraints.
+ *
+ * Environments are mutable editing documents until published. Publishing
+ * creates an immutable EnvironmentVersion snapshot — runs reference that
+ * version for audit traceability.
+ */
+export const EnvironmentSchema = z.object({
+  id: EntityIdSchema,
+  name: z.string().min(1).max(128),
+  description: z.string().max(1024).optional(),
+  /** Human-readable tags for filtering, e.g. ["production", "read-only"]. */
+  tags: z.array(z.string().max(64)).optional(),
+  /**
+   * Variable values specific to this environment, keyed by variable name.
+   * These override the variable's defaultValue when this environment is active.
+   * For example: { "userService": "https://user.staging.api.com", "paymentService": "https://pay.staging.api.com" }
+   */
+  variables: z.record(z.string(), z.string()).optional(),
+  /** Secret references used by this environment (not the values themselves). */
+  secretRefs: z.array(z.string()).optional(),
+  /** Tags that constrain which executors can run tests against this environment. */
+  executorTags: z.array(z.string().max(64)).optional(),
+  /** Whether this is a production environment (triggers safety policies). */
+  isProduction: z.boolean().default(false),
+  /** ISO-8601 timestamp of last modification. */
+  updatedAt: z.string().optional(),
+  /** Who last modified this environment. */
+  updatedBy: z.string().max(128).optional(),
+});
+export type Environment = z.infer<typeof EnvironmentSchema>;
+
+/**
+ * An immutable snapshot of an environment configuration.
+ * Created when an environment is published. Runs reference this version
+ * for complete audit traceability.
+ */
+export const EnvironmentVersionSchema = EnvironmentSchema.omit({
+  updatedAt: true,
+  updatedBy: true,
+}).merge(ImmutableVersionMetaSchema);
+export type EnvironmentVersion = z.infer<typeof EnvironmentVersionSchema>;
 
 // ─── Pagination ─────────────────────────────────────────────────
 

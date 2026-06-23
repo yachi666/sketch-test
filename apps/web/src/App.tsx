@@ -6,6 +6,7 @@ import { BracketsCurly } from '@phosphor-icons/react/BracketsCurly';
 import { Bug } from '@phosphor-icons/react/Bug';
 import { CalendarCheck } from '@phosphor-icons/react/CalendarCheck';
 import { CaretDown } from '@phosphor-icons/react/CaretDown';
+import { CaretLeft } from '@phosphor-icons/react/CaretLeft';
 import { CaretRight } from '@phosphor-icons/react/CaretRight';
 import { ChartBar } from '@phosphor-icons/react/ChartBar';
 import { Check } from '@phosphor-icons/react/Check';
@@ -71,26 +72,35 @@ import {
 import {
   endpoints,
   initialCases,
+  initialEnvironments,
   initialLogs,
+  initialRuns,
   initialSteps,
   initialVariables,
   makeLogs,
   responseFixture,
+  testPlans,
   workflowStepsMap,
   workflows,
 } from './data';
 import type {
   ApiEndpoint,
+  Environment,
   ExecutionLog,
+  RunMeta,
   RunState,
+  RunStatus,
   StepTone,
   TestCase,
+  TestPlan,
+  TriggerType,
   Variable,
   VariableType,
   ViewId,
   WorkflowMeta,
   WorkflowStep,
 } from './types';
+import { resolveVariableValue } from './types';
 
 const viewLabels: Record<ViewId, string> = {
   overview: '工作台',
@@ -209,7 +219,8 @@ function Topbar({
   onSave,
   onRun,
   onImport,
-  environment,
+  environments,
+  activeEnvironmentId,
   onEnvironment,
 }: {
   title: string;
@@ -218,8 +229,9 @@ function Topbar({
   onSave: () => void;
   onRun: () => void;
   onImport: () => void;
-  environment: string;
-  onEnvironment: (value: string) => void;
+  environments: Environment[];
+  activeEnvironmentId: string;
+  onEnvironment: (envId: string) => void;
 }) {
   return (
     <header className="topbar">
@@ -261,10 +273,15 @@ function Topbar({
         </button>
         <label className="select-wrap hide-small">
           <span className="sr-only">测试环境</span>
-          <select value={environment} onChange={(event) => onEnvironment(event.target.value)}>
-            <option value="测试环境">环境：测试环境</option>
-            <option value="预发布环境">环境：预发布环境</option>
-            <option value="生产只读">环境：生产只读</option>
+          <select
+            value={activeEnvironmentId}
+            onChange={(event) => onEnvironment(event.target.value)}
+          >
+            {environments.map((env) => (
+              <option key={env.id} value={env.id}>
+                环境：{env.name}
+              </option>
+            ))}
           </select>
           <CaretDown size={15} aria-hidden />
         </label>
@@ -1307,25 +1324,319 @@ function CasesView({ cases, onGenerate }: { cases: TestCase[]; onGenerate: () =>
   );
 }
 
-function ReportsView({ onRerun }: { onRerun: () => void }) {
+// ─── Report Center Constants ──────────────────────────────────
+
+const RUN_STATUS_LABEL: Record<RunStatus | 'all', string> = {
+  all: '全部',
+  passed: '通过',
+  failed: '失败',
+  inconclusive: '未决',
+  'infra-error': '基础设施错误',
+};
+
+const WORKFLOW_STATUS_LABEL: Record<string, string> = {
+  passed: '通过',
+  failed: '失败',
+  skipped: '跳过',
+  error: '错误',
+};
+
+const TRIGGER_ICON: Record<TriggerType, ElementType> = {
+  manual: User,
+  scheduled: CalendarCheck,
+  ci: GitBranch,
+  webhook: LinkSimple,
+};
+
+const TRIGGER_LABEL: Record<TriggerType, string> = {
+  manual: '手动',
+  scheduled: '定时',
+  ci: 'CI',
+  webhook: 'Webhook',
+};
+
+function formatDuration(ms: number): string {
+  if (ms >= 1000) return `${(ms / 1000).toFixed(1)}s`;
+  return `${ms}ms`;
+}
+
+// ─── Report List View ──────────────────────────────────────────
+
+function ReportListView({
+  runs,
+  plans,
+  onSelect,
+}: {
+  runs: RunMeta[];
+  plans: TestPlan[];
+  onSelect: (runId: string) => void;
+}) {
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | RunStatus>('all');
+  const [planFilter, setPlanFilter] = useState('all');
+  const [envFilter, setEnvFilter] = useState('all');
+
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: runs.length };
+    for (const s of ['passed', 'failed', 'inconclusive', 'infra-error'] as RunStatus[]) {
+      counts[s] = runs.filter((r) => r.status === s).length;
+    }
+    return counts;
+  }, [runs]);
+
+  const envNames = useMemo(() => [...new Set(runs.map((r) => r.environment))].sort(), [runs]);
+
+  const filtered = useMemo(
+    () =>
+      runs.filter((r) => {
+        const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
+        const matchesPlan = planFilter === 'all' || r.planId === planFilter;
+        const matchesEnv = envFilter === 'all' || r.environment === envFilter;
+        const q = query.toLowerCase();
+        const matchesQuery =
+          !q ||
+          r.runId.toLowerCase().includes(q) ||
+          r.name.toLowerCase().includes(q) ||
+          (r.gitCommit ?? '').toLowerCase().includes(q) ||
+          r.selectedTags.some((t) => t.toLowerCase().includes(q));
+        return matchesStatus && matchesPlan && matchesEnv && matchesQuery;
+      }),
+    [runs, statusFilter, planFilter, envFilter, query],
+  );
+
+  return (
+    <main className="page-view">
+      <div className="page-intro">
+        <div>
+          <span className="eyebrow">REPORTS</span>
+          <h2>报告中心</h2>
+          <p>
+            每次测试运行聚合多个业务流程的执行结果，支持按计划选择子集。 共 {runs.length}{' '}
+            个运行报告。
+          </p>
+        </div>
+      </div>
+
+      {/* Filter bar */}
+      <div className="report-filter-bar variable-filter-bar">
+        <div className="filter-tabs">
+          {(Object.entries(RUN_STATUS_LABEL) as [RunStatus | 'all', string][]).map(
+            ([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                className={`filter-tab ${statusFilter === key ? 'filter-tab--active' : ''}`}
+                onClick={() => setStatusFilter(key)}
+              >
+                {label}
+                <span className="filter-count">({statusCounts[key] ?? 0})</span>
+              </button>
+            ),
+          )}
+        </div>
+        <span className="toolbar-spacer" />
+        <label className="search-field" style={{ minWidth: 200 }}>
+          <MagnifyingGlass size={16} />
+          <span className="sr-only">搜索报告</span>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="搜索运行ID、名称、标签或提交"
+          />
+        </label>
+        <label className="select-wrap">
+          <span className="sr-only">计划筛选</span>
+          <select value={planFilter} onChange={(e) => setPlanFilter(e.target.value)}>
+            <option value="all">全部计划</option>
+            {plans.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+          <CaretDown size={15} aria-hidden />
+        </label>
+        <label className="select-wrap">
+          <span className="sr-only">环境筛选</span>
+          <select value={envFilter} onChange={(e) => setEnvFilter(e.target.value)}>
+            <option value="all">全部环境</option>
+            {envNames.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+          <CaretDown size={15} aria-hidden />
+        </label>
+      </div>
+
+      {/* Run table */}
+      <section className="table-panel">
+        <div className="data-table reports-table">
+          <div className="data-row data-row--head">
+            <span>运行 ID</span>
+            <span>执行批次</span>
+            <span>流程结果</span>
+            <span>持续时间</span>
+            <span>触发方式</span>
+            <span>时间</span>
+          </div>
+          {filtered.length === 0 ? (
+            <div className="empty-module" style={{ border: 'none', minHeight: 240 }}>
+              <ChartBar size={42} weight="duotone" />
+              <h3>
+                {query || statusFilter !== 'all' || planFilter !== 'all' || envFilter !== 'all'
+                  ? '没有匹配的报告'
+                  : '暂无运行报告'}
+              </h3>
+              <p>
+                {query || statusFilter !== 'all' || planFilter !== 'all' || envFilter !== 'all'
+                  ? '试试调整搜索条件或筛选器。'
+                  : '触发一次测试运行后，聚合报告将出现在这里。'}
+              </p>
+            </div>
+          ) : (
+            filtered.map((r) => {
+              const total = r.totalWorkflows;
+              const planName = plans.find((p) => p.id === r.planId)?.name;
+              const TrieIcon = TRIGGER_ICON[r.trigger];
+              return (
+                <div
+                  className="data-row"
+                  key={r.id}
+                  role="link"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') onSelect(r.id);
+                  }}
+                  onClick={() => onSelect(r.id)}
+                >
+                  <span>
+                    <code className="variable-name-code">{r.runId}</code>
+                    <span className={`report-status-dot report-status-dot--${r.status}`}>
+                      {r.status === 'passed' ? (
+                        <CheckCircle size={14} weight="fill" />
+                      ) : r.status === 'failed' ? (
+                        <XCircle size={14} weight="fill" />
+                      ) : r.status === 'inconclusive' ? (
+                        <Clock size={14} weight="fill" />
+                      ) : (
+                        <Warning size={14} weight="fill" />
+                      )}
+                      {RUN_STATUS_LABEL[r.status]}
+                    </span>
+                  </span>
+                  <span>
+                    <strong>{r.name}</strong>
+                    {planName ? (
+                      <code>
+                        {planName} · {total} 流程
+                      </code>
+                    ) : (
+                      <code>
+                        {r.selectedTags.join(' · ')} · {total} 流程
+                      </code>
+                    )}
+                  </span>
+                  <span>
+                    <span className="report-stats-mini">
+                      <span className="pass-count">{r.workflowsPassed}</span>/
+                      <span className="fail-count">{r.workflowsFailed}</span>/
+                      <span className="skip-count">{r.workflowsSkipped}</span>
+                      <span className="report-stats-bar">
+                        <span
+                          className="bar-pass"
+                          style={{ width: `${total > 0 ? (r.workflowsPassed / total) * 100 : 0}%` }}
+                        />
+                        <span
+                          className="bar-fail"
+                          style={{ width: `${total > 0 ? (r.workflowsFailed / total) * 100 : 0}%` }}
+                        />
+                        <span
+                          className="bar-skip"
+                          style={{
+                            width: `${total > 0 ? (r.workflowsSkipped / total) * 100 : 0}%`,
+                          }}
+                        />
+                      </span>
+                    </span>
+                  </span>
+                  <span className="report-duration">{formatDuration(r.totalDurationMs)}</span>
+                  <span>
+                    <span className="report-trigger-tag">
+                      <TrieIcon size={13} /> {TRIGGER_LABEL[r.trigger]}
+                    </span>
+                  </span>
+                  <span className="variable-time-cell">{r.startedAt}</span>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </section>
+    </main>
+  );
+}
+
+// ─── Report Detail View ────────────────────────────────────────
+
+function ReportsView({
+  run,
+  plans,
+  onBack,
+  onRerun,
+}: {
+  run: RunMeta;
+  plans: TestPlan[];
+  onBack: () => void;
+  onRerun: () => void;
+}) {
+  const planName = plans.find((p) => p.id === run.planId)?.name;
+  const [expandedWf, setExpandedWf] = useState<string | null>(null);
+
+  const toggleWf = (wfId: string) => {
+    setExpandedWf((prev) => (prev === wfId ? null : wfId));
+  };
+
   return (
     <main className="page-view report-view">
+      <button className="report-detail-back" type="button" onClick={onBack}>
+        <CaretLeft size={16} /> 返回报告列表
+      </button>
+
+      {/* Run header */}
       <div className="page-intro report-intro">
         <div>
-          <span className="eyebrow">RUN #ST-20260621-042</span>
-          <h2>执行详情</h2>
-          <p>创建订单业务流程 · 测试环境 · 手动触发</p>
+          <span className="eyebrow">RUN {run.runId}</span>
+          <h2>{run.name}</h2>
+          <p>
+            {planName ? `${planName} · ` : ''}
+            {run.environment} · {TRIGGER_LABEL[run.trigger]}触发
+            {run.selectedTags.length > 0 ? ` · 标签: ${run.selectedTags.join(', ')}` : ''}
+          </p>
         </div>
         <div className="report-stats">
           <span>
-            <CheckCircle size={22} weight="fill" />4<small>通过</small>
+            <CheckCircle size={22} weight="fill" />
+            {run.workflowsPassed}
+            <small>流程通过</small>
           </span>
           <span>
-            <XCircle size={22} weight="fill" />1<small>失败</small>
+            <XCircle size={22} weight="fill" />
+            {run.workflowsFailed}
+            <small>流程失败</small>
           </span>
+          {run.workflowsSkipped > 0 ? (
+            <span>
+              <Warning size={22} weight="fill" />
+              {run.workflowsSkipped}
+              <small>跳过</small>
+            </span>
+          ) : null}
           <span>
             <Clock size={22} />
-            18.4s<small>持续时间</small>
+            {formatDuration(run.totalDurationMs)}
+            <small>总耗时</small>
           </span>
           <button className="button button--danger" type="button" onClick={onRerun}>
             <ArrowsClockwise size={18} />
@@ -1333,66 +1644,211 @@ function ReportsView({ onRerun }: { onRerun: () => void }) {
           </button>
         </div>
       </div>
+
       <div className="report-grid">
+        {/* Workflow results table */}
         <section className="paper-panel report-timeline">
-          <h3>步骤 · 请求 / 响应 / 断言</h3>
-          {initialSteps.map((step, index) => (
-            <div
-              className={`timeline-step ${index === 3 ? 'timeline-step--failed' : ''}`}
-              key={step.id}
-            >
-              <span className="timeline-index">{index + 1}</span>
-              <span className="timeline-status">
-                {index === 3 ? (
-                  <XCircle size={20} weight="fill" />
-                ) : (
-                  <CheckCircle size={20} weight="fill" />
-                )}
-              </span>
-              <div>
-                <strong>{step.name}</strong>
-                <code>
-                  {step.method} {step.path}
-                </code>
-                {index === 3 ? (
-                  <div className="evidence-grid">
+          <h3>执行批次 · {run.totalWorkflows} 个业务流程</h3>
+
+          <div className="data-table" style={{ marginTop: 12 }}>
+            <div className="data-row data-row--head workflow-result-head">
+              <span>BP ID</span>
+              <span>业务流程</span>
+              <span>通过/失败</span>
+              <span>耗时</span>
+              <span>状态</span>
+              <span />
+            </div>
+            {run.workflows.map((wf) => {
+              const isExpanded = expandedWf === wf.workflowId;
+              const wfTotal = wf.stepsPassed + wf.stepsFailed + wf.stepsSkipped;
+              return (
+                <div key={wf.workflowId}>
+                  <div
+                    className={`data-row workflow-result-row workflow-result-row--${wf.status}`}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') toggleWf(wf.workflowId);
+                    }}
+                    onClick={() => toggleWf(wf.workflowId)}
+                  >
                     <span>
-                      <small>请求证据</small>
-                      <pre>{`POST /api/payments\nAuthorization: Bearer ******\n{ "amount": 199.00 }`}</pre>
+                      <code className="variable-name-code">{wf.bpId}</code>
                     </span>
                     <span>
-                      <small>响应</small>
-                      <pre>{`HTTP/1.1 400\n{ "code": "PAYMENT_FAILED" }`}</pre>
+                      <strong>{wf.workflowName}</strong>
                     </span>
                     <span>
-                      <small>断言失败</small>
-                      <p>期望状态码 200，实际 400</p>
+                      <span className="report-stats-mini">
+                        <span className="pass-count">{wf.stepsPassed}</span>
+                        {wf.stepsFailed > 0 ? (
+                          <>
+                            /<span className="fail-count">{wf.stepsFailed}</span>
+                          </>
+                        ) : null}
+                        {wf.stepsSkipped > 0 ? (
+                          <>
+                            /<span className="skip-count">{wf.stepsSkipped}</span>
+                          </>
+                        ) : null}
+                        <span className="report-stats-bar">
+                          <span
+                            className="bar-pass"
+                            style={{
+                              width: `${wfTotal > 0 ? (wf.stepsPassed / wfTotal) * 100 : 0}%`,
+                            }}
+                          />
+                          <span
+                            className="bar-fail"
+                            style={{
+                              width: `${wfTotal > 0 ? (wf.stepsFailed / wfTotal) * 100 : 0}%`,
+                            }}
+                          />
+                          <span
+                            className="bar-skip"
+                            style={{
+                              width: `${wfTotal > 0 ? (wf.stepsSkipped / wfTotal) * 100 : 0}%`,
+                            }}
+                          />
+                        </span>
+                      </span>
+                    </span>
+                    <span className="report-duration">
+                      {wf.totalDurationMs > 0 ? formatDuration(wf.totalDurationMs) : '—'}
+                    </span>
+                    <span>
+                      <span
+                        className={`status-badge status-badge--${
+                          wf.status === 'passed'
+                            ? 'passed'
+                            : wf.status === 'failed'
+                              ? 'failed'
+                              : 'warning'
+                        }`}
+                      >
+                        {WORKFLOW_STATUS_LABEL[wf.status]}
+                      </span>
+                    </span>
+                    <span className="variable-time-cell">
+                      <CaretDown
+                        size={16}
+                        style={{
+                          transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                          transition: 'transform 160ms ease',
+                        }}
+                      />
                     </span>
                   </div>
-                ) : null}
-              </div>
-              <time>{[512, 320, 842, 1210, 560][index]}ms</time>
-            </div>
-          ))}
+
+                  {/* Expanded step timeline */}
+                  {isExpanded ? (
+                    <div className="workflow-expand-panel">
+                      {wf.steps.length === 0 ? (
+                        <div className="empty-module" style={{ border: 'none', minHeight: 100 }}>
+                          <Info size={20} weight="duotone" />
+                          <p>该流程没有步骤数据。</p>
+                        </div>
+                      ) : (
+                        wf.steps.map((step, stepIdx) => {
+                          const isLast = stepIdx === wf.steps.length - 1;
+                          return (
+                            <div
+                              className={`timeline-step ${step.status === 'failed' ? 'timeline-step--failed' : ''} ${step.status === 'skipped' ? 'timeline-step--failed' : ''} ${isLast ? 'timeline-step--last' : ''}`}
+                              key={step.id}
+                            >
+                              <span className="timeline-index">{stepIdx + 1}</span>
+                              <span className="timeline-status">
+                                {step.status === 'passed' ? (
+                                  <CheckCircle size={20} weight="fill" />
+                                ) : step.status === 'failed' ? (
+                                  <XCircle size={20} weight="fill" />
+                                ) : (
+                                  <Warning size={20} weight="fill" />
+                                )}
+                              </span>
+                              <div>
+                                <strong>{step.name}</strong>
+                                <code>
+                                  {step.method} {step.path}
+                                </code>
+                                {step.status === 'failed' ? (
+                                  <div className="evidence-grid">
+                                    {step.requestEvidence ? (
+                                      <span>
+                                        <small>请求证据</small>
+                                        <pre>{step.requestEvidence}</pre>
+                                      </span>
+                                    ) : null}
+                                    {step.responseEvidence ? (
+                                      <span>
+                                        <small>响应</small>
+                                        <pre>{step.responseEvidence}</pre>
+                                      </span>
+                                    ) : null}
+                                    {step.assertionFailure ? (
+                                      <span>
+                                        <small>断言失败</small>
+                                        <p>{step.assertionFailure}</p>
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                ) : null}
+                                {step.status === 'skipped' && step.assertionFailure ? (
+                                  <div className="evidence-grid">
+                                    <span>
+                                      <small>跳过原因</small>
+                                      <p>{step.assertionFailure}</p>
+                                    </span>
+                                  </div>
+                                ) : null}
+                              </div>
+                              <time>{step.durationMs > 0 ? `${step.durationMs}ms` : '—'}</time>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
         </section>
+
+        {/* Traceability sidebar */}
         <aside className="trace-card">
           <span className="eyebrow">TRACEABILITY</span>
           <h3>可追溯信息</h3>
-          {[
-            [GitCommit, 'Git 提交', 'a7b3c9d · feat: 优化支付校验逻辑'],
-            [FileCode, 'OpenAPI 版本', 'openapi.yaml · v2.3.1'],
-            [Stack, '环境', 'staging · 华东-上海'],
-            [Database, '执行机', 'runner-02 · v1.8.3'],
-            [GitBranch, 'Trace ID', '4f2c1e8b9d7e4a17'],
-          ].map(([Icon, label, value]) => (
-            <div className="trace-row" key={String(label)}>
-              <Icon size={19} />
-              <span>
-                <small>{String(label)}</small>
-                <strong>{String(value)}</strong>
-              </span>
-            </div>
-          ))}
+          {(
+            [
+              [
+                GitCommit as ElementType,
+                'Git 提交',
+                run.gitCommit ? `${run.gitSha} · ${run.gitCommit}` : null,
+              ],
+              [FileCode as ElementType, 'OpenAPI 版本', run.openapiVersion ?? null],
+              [Stack as ElementType, '环境', `${run.environment}`],
+              [Database as ElementType, '执行机', `runner-02 · ${run.runnerVersion ?? '未知'}`],
+              [GitBranch as ElementType, 'Trace ID', run.traceId ?? null],
+              [Folders as ElementType, '计划', planName ?? '标签筛选'],
+              [
+                MagnifyingGlass as ElementType,
+                '筛选标签',
+                run.selectedTags.length > 0 ? run.selectedTags.join(', ') : '无',
+              ],
+            ] as Array<[ElementType, string, string | null]>
+          )
+            .filter(([, , value]) => value != null)
+            .map(([Icon, label, value]) => (
+              <div className="trace-row" key={label}>
+                <Icon size={19} />
+                <span>
+                  <small>{label}</small>
+                  <strong>{value as string}</strong>
+                </span>
+              </div>
+            ))}
         </aside>
       </div>
     </main>
@@ -1488,70 +1944,422 @@ function AgentView() {
   );
 }
 
-function EnvironmentView() {
-  const [showSecret, setShowSecret] = useState(false);
+// ─── Environment View (CRUD) ─────────────────────────────────────
+
+function EnvironmentView({
+  environments,
+  variables,
+  activeEnvironmentId,
+  onSetActive,
+  onCreate,
+  onUpdate,
+  onDelete,
+}: {
+  environments: Environment[];
+  variables: Variable[];
+  activeEnvironmentId: string;
+  onSetActive: (envId: string) => void;
+  onCreate: (env: Environment) => void;
+  onUpdate: (env: Environment) => void;
+  onDelete: (envId: string) => void;
+}) {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
+  const [editingEnv, setEditingEnv] = useState<Environment | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Environment | null>(null);
+
+  const envVarCount = (envId: string) =>
+    variables.filter((v) => v.scope === 'environment' && v.overrides[envId]).length;
+
+  const toneForEnv = (env: Environment): 'brown' | 'amber' | 'green' => {
+    if (env.isProduction) return 'brown';
+    if (env.tags.includes('staging') || env.tags.includes('pre-release')) return 'amber';
+    return 'green';
+  };
+
   return (
     <main className="page-view">
+      <EnvironmentDialog
+        open={dialogOpen}
+        mode={dialogMode}
+        environment={editingEnv}
+        onSave={(env) => {
+          if (dialogMode === 'create') onCreate(env);
+          else onUpdate(env);
+          setDialogOpen(false);
+        }}
+        onClose={() => setDialogOpen(false)}
+      />
+      <DeleteEnvironmentDialog
+        open={deleteTarget !== null}
+        environment={deleteTarget}
+        onConfirm={() => {
+          if (deleteTarget) onDelete(deleteTarget.id);
+          setDeleteTarget(null);
+        }}
+        onClose={() => setDeleteTarget(null)}
+      />
+
       <div className="page-intro">
         <div>
           <span className="eyebrow">ENVIRONMENTS</span>
           <h2>环境管理</h2>
-          <p>运行配置按版本冻结，Secret 只在 Runner 内解析。</p>
+          <p>
+            每个环境拥有独立的服务地址和密文引用。切换环境时所有环境级变量自动切换。
+            共 {environments.length} 个环境。
+          </p>
         </div>
-        <button className="button button--primary" type="button">
+        <button
+          className="button button--primary"
+          type="button"
+          onClick={() => {
+            setDialogMode('create');
+            setEditingEnv(null);
+            setDialogOpen(true);
+          }}
+        >
           <Plus size={18} />
           新建环境
         </button>
       </div>
+
       <div className="environment-grid">
-        {['测试环境', '预发布环境', '生产只读'].map((name, index) => (
-          <section
-            className={`paper-panel env-card tone-${['brown', 'amber', 'green'][index]}`}
-            key={name}
-          >
-            <div className="section-heading">
-              <h3>{name}</h3>
-              <span
-                className={
-                  index < 2
-                    ? 'status-badge status-badge--passed'
-                    : 'status-badge status-badge--warning'
-                }
-              >
-                {index < 2 ? '可用' : '受保护'}
-              </span>
-            </div>
-            <label>
-              Base URL
-              <input
-                value={
-                  [
-                    'https://test.api.sketch.dev',
-                    'https://staging.api.sketch.dev',
-                    'https://api.sketch.dev',
-                  ][index]
-                }
-                readOnly
-              />
-            </label>
-            <label>
-              API Token
-              <div className="secret-field">
-                <input type={showSecret ? 'text' : 'password'} value="sk_test_A7s9Kx21" readOnly />
-                <button
-                  type="button"
-                  aria-label="显示或隐藏 Secret"
-                  onClick={() => setShowSecret((value) => !value)}
-                >
-                  <Eye size={18} />
-                </button>
+        {environments.map((env) => {
+          const tone = toneForEnv(env);
+          const vCount = envVarCount(env.id);
+          const isActive = env.id === activeEnvironmentId;
+          return (
+            <section className={`paper-panel env-card tone-${tone}`} key={env.id}>
+              <div className="section-heading">
+                <h3>
+                  {env.name}
+                  {isActive ? (
+                    <span className="env-active-badge" title="当前活跃环境">
+                      <Check size={11} /> 活跃
+                    </span>
+                  ) : null}
+                </h3>
+                <div className="env-card-actions">
+                  {!isActive ? (
+                    <button
+                      className="button button--outline button--sm"
+                      type="button"
+                      onClick={() => onSetActive(env.id)}
+                    >
+                      激活
+                    </button>
+                  ) : null}
+                  <button
+                    className="icon-button"
+                    type="button"
+                    onClick={() => {
+                      setDialogMode('edit');
+                      setEditingEnv(env);
+                      setDialogOpen(true);
+                    }}
+                    aria-label={`编辑 ${env.name}`}
+                    title="编辑"
+                  >
+                    <PencilSimple size={15} />
+                  </button>
+                  <button
+                    className="icon-button icon-button--danger"
+                    type="button"
+                    onClick={() => setDeleteTarget(env)}
+                    aria-label={`删除 ${env.name}`}
+                    title="删除"
+                  >
+                    <TrashSimple size={15} />
+                  </button>
+                </div>
               </div>
-            </label>
-            <small>版本 v{index + 3}.2 · 2 天前更新</small>
-          </section>
-        ))}
+
+              <div className="env-card-meta">
+                <div className="env-meta-row">
+                  <span className="env-meta-label">状态</span>
+                  <span
+                    className={`status-badge ${
+                      env.isProduction ? 'status-badge--warning' : 'status-badge--passed'
+                    }`}
+                  >
+                    {env.isProduction ? '受保护' : '可用'}
+                  </span>
+                </div>
+                <div className="env-meta-row">
+                  <span className="env-meta-label">环境变量覆盖</span>
+                  <span className="env-meta-value">
+                    {vCount > 0 ? (
+                      <span className="usage-count">
+                        <LinkSimple size={11} /> {vCount} 个
+                      </span>
+                    ) : (
+                      <span className="usage-count usage-count--none">—</span>
+                    )}
+                  </span>
+                </div>
+                <div className="env-meta-row">
+                  <span className="env-meta-label">标签</span>
+                  <span className="env-meta-value">
+                    {env.tags.length > 0
+                      ? env.tags.map((t) => (
+                          <span key={t} className="env-tag">
+                            {t}
+                          </span>
+                        ))
+                      : '—'}
+                  </span>
+                </div>
+              </div>
+
+              <p className="env-card-desc">{env.description}</p>
+              <small>
+                更新于 {env.updatedAt} · {env.updatedBy}
+              </small>
+            </section>
+          );
+        })}
       </div>
     </main>
+  );
+}
+
+// ─── Environment Dialog (Create / Edit) ──────────────────────────
+
+function EnvironmentDialog({
+  open,
+  mode,
+  environment,
+  onSave,
+  onClose,
+}: {
+  open: boolean;
+  mode: 'create' | 'edit';
+  environment: Environment | null;
+  onSave: (env: Environment) => void;
+  onClose: () => void;
+}) {
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [tags, setTags] = useState('');
+  const [isProduction, setIsProduction] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const nameRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open && mode === 'edit' && environment) {
+      setName(environment.name);
+      setDescription(environment.description);
+      setTags(environment.tags.join(', '));
+      setIsProduction(environment.isProduction);
+      setErrors({});
+    } else if (open && mode === 'create') {
+      setName('');
+      setDescription('');
+      setTags('');
+      setIsProduction(false);
+      setErrors({});
+    }
+  }, [open, mode, environment]);
+
+  useEffect(() => {
+    if (open) {
+      const timer = window.setTimeout(() => nameRef.current?.focus(), 80);
+      return () => window.clearTimeout(timer);
+    }
+  }, [open]);
+
+  if (!open) return null;
+
+  const validate = (): boolean => {
+    const next: Record<string, string> = {};
+    if (!name.trim()) next['name'] = '环境名称不能为空';
+    if (isProduction && !tags.includes('production'))
+      setIsProduction(false); // production env must include 'production' tag
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const handleSave = () => {
+    if (!validate()) return;
+    const now = new Date().toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    const parsedTags = tags
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+    const saved: Environment = {
+      id: environment?.id ?? `env-${Date.now()}`,
+      name: name.trim(),
+      description: description.trim(),
+      tags: parsedTags,
+      isProduction,
+      updatedAt: now,
+      updatedBy: 'QA_team',
+    };
+    onSave(saved);
+  };
+
+  return (
+    <div
+      className="modal-backdrop"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <section className="modal" role="dialog" aria-modal="true" aria-labelledby="env-dialog-title">
+        <div className="modal-heading">
+          <div>
+            <span className="eyebrow">
+              {mode === 'create' ? 'NEW ENVIRONMENT' : 'EDIT ENVIRONMENT'}
+            </span>
+            <h2 id="env-dialog-title">
+              {mode === 'create' ? '新建环境' : `编辑 ${environment?.name ?? ''}`}
+            </h2>
+          </div>
+          <button className="icon-button" type="button" onClick={onClose} aria-label="关闭">
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="variable-dialog-body">
+          <label className="variable-field">
+            <span className="field-label">
+              环境名称 <span className="required">*</span>
+            </span>
+            <input
+              ref={nameRef}
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (errors['name']) setErrors((prev) => ({ ...prev, name: '' }));
+              }}
+              placeholder="例如：测试环境、预发布环境、生产只读"
+              className={errors['name'] ? 'input--error' : ''}
+            />
+            {errors['name'] ? <span className="field-error">{errors['name']}</span> : null}
+          </label>
+
+          <label className="variable-field">
+            <span className="field-label">描述</span>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="环境的用途、访问限制和注意事项..."
+              rows={3}
+            />
+          </label>
+
+          <label className="variable-field">
+            <span className="field-label">标签（逗号分隔）</span>
+            <input
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              placeholder="例如：production, read-only, integration"
+            />
+          </label>
+
+          <label className="checkbox-field">
+            <input
+              type="checkbox"
+              checked={isProduction}
+              onChange={(e) => setIsProduction(e.target.checked)}
+            />
+            <span>
+              <strong>生产环境</strong>
+              <small>标记为生产环境后，将自动启用安全策略：禁止破坏性测试、要求审批等。</small>
+            </span>
+          </label>
+        </div>
+
+        <div className="modal-actions">
+          <button className="button button--ghost" type="button" onClick={onClose}>
+            取消
+          </button>
+          <button className="button button--primary" type="button" onClick={handleSave}>
+            <Check size={17} />
+            {mode === 'create' ? '创建环境' : '保存修改'}
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// ─── Delete Environment Dialog ───────────────────────────────────
+
+function DeleteEnvironmentDialog({
+  open,
+  environment,
+  onConfirm,
+  onClose,
+}: {
+  open: boolean;
+  environment: Environment | null;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (open) cancelRef.current?.focus();
+  }, [open]);
+  if (!open || !environment) return null;
+
+  return (
+    <div
+      className="modal-backdrop"
+      role="presentation"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <section
+        className="modal"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="delete-env-title"
+      >
+        <div className="modal-heading">
+          <div>
+            <span className="eyebrow">CONFIRM DELETION</span>
+            <h2 id="delete-env-title">删除环境</h2>
+          </div>
+          <button className="icon-button" ref={cancelRef} type="button" onClick={onClose} aria-label="关闭">
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="delete-confirm-body">
+          <Warning size={36} weight="duotone" className="delete-warn-icon" />
+          <p>
+            确定要删除环境 <code>{environment.name}</code> 吗？此操作不可撤销。
+          </p>
+          <div className="notice notice--warning">
+            <Info size={18} />
+            <span>
+              <strong>删除环境后</strong>
+              <small>所有变量中针对该环境的覆盖值将失效，依赖该环境的运行记录将保留但不活跃。</small>
+            </span>
+          </div>
+        </div>
+
+        <div className="modal-actions">
+          <button className="button button--ghost" type="button" onClick={onClose}>
+            取消
+          </button>
+          <button className="button button--danger" type="button" onClick={onConfirm}>
+            <TrashSimple size={17} />
+            确认删除
+          </button>
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -1582,42 +2390,50 @@ function VariableDialog({
   open,
   mode,
   variable,
+  environments,
   onSave,
   onClose,
 }: {
   open: boolean;
   mode: 'create' | 'edit';
   variable: Variable | null;
+  environments: Environment[];
   onSave: (v: Variable) => void;
   onClose: () => void;
 }) {
   const [name, setName] = useState('');
-  const [value, setValue] = useState('');
+  const [defaultValue, setDefaultValue] = useState('');
   const [type, setType] = useState<VariableType>('plain');
   const [scope, setScope] = useState<VariableScope>('environment');
   const [sensitive, setSensitive] = useState(false);
   const [description, setDescription] = useState('');
   const [showValue, setShowValue] = useState(false);
+  const [overrides, setOverrides] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const nameRef = useRef<HTMLInputElement>(null);
+
+  // Only show per-environment overrides when scope is 'environment'
+  const showEnvOverrides = scope === 'environment' && environments.length > 0;
 
   useEffect(() => {
     if (open && mode === 'edit' && variable) {
       setName(variable.name);
-      setValue(variable.value);
+      setDefaultValue(variable.defaultValue);
       setType(variable.type);
       setScope(variable.scope);
       setSensitive(variable.sensitive);
       setDescription(variable.description);
+      setOverrides({ ...variable.overrides });
       setShowValue(false);
       setErrors({});
     } else if (open && mode === 'create') {
       setName('');
-      setValue('');
+      setDefaultValue('');
       setType('plain');
       setScope('environment');
       setSensitive(false);
       setDescription('');
+      setOverrides({});
       setShowValue(false);
       setErrors({});
     }
@@ -1637,10 +2453,8 @@ function VariableDialog({
     if (!name.trim()) next['name'] = '变量名不能为空';
     else if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name.trim()))
       next['name'] = '变量名只能包含字母、数字和下划线，且必须以字母或下划线开头';
-    if (!value && type !== 'dataset') next['value'] = '变量值不能为空';
-    if (type === 'secret') {
-      setSensitive(true);
-    }
+    if (!defaultValue && type !== 'dataset') next['defaultValue'] = '默认值不能为空';
+    if (type === 'secret') setSensitive(true);
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -1658,7 +2472,8 @@ function VariableDialog({
     const saved: Variable = {
       id: variable?.id ?? `var-${Date.now()}`,
       name: name.trim(),
-      value,
+      defaultValue,
+      overrides: showEnvOverrides ? overrides : {},
       type,
       scope,
       sensitive,
@@ -1710,26 +2525,30 @@ function VariableDialog({
                 setName(e.target.value);
                 if (errors['name']) setErrors((prev) => ({ ...prev, name: '' }));
               }}
-              placeholder="例如：baseUrl, accessToken"
+              placeholder="例如：userService, paymentService, apiToken"
               className={errors['name'] ? 'input--error' : ''}
               spellCheck={false}
             />
             {errors['name'] ? <span className="field-error">{errors['name']}</span> : null}
           </label>
 
-          {/* Variable value */}
+          {/* Default value */}
           <label className="variable-field">
-            <span className="field-label">变量值</span>
+            <span className="field-label">
+              默认值 <span className="required">*</span>
+              <small className="field-hint">（无环境匹配或本地开发时使用）</small>
+            </span>
             <div className="value-input-group">
               <input
                 type={sensitive && !showValue ? 'password' : 'text'}
-                value={value}
+                value={defaultValue}
                 onChange={(e) => {
-                  setValue(e.target.value);
-                  if (errors['value']) setErrors((prev) => ({ ...prev, value: '' }));
+                  setDefaultValue(e.target.value);
+                  if (errors['defaultValue'])
+                    setErrors((prev) => ({ ...prev, defaultValue: '' }));
                 }}
-                placeholder={type === 'dataset' ? 'JSON 格式数据...' : '输入变量值...'}
-                className={errors['value'] ? 'input--error' : ''}
+                placeholder={type === 'dataset' ? 'JSON 格式数据...' : '输入默认值...'}
+                className={errors['defaultValue'] ? 'input--error' : ''}
                 spellCheck={false}
               />
               {sensitive ? (
@@ -1744,8 +2563,48 @@ function VariableDialog({
                 </button>
               ) : null}
             </div>
-            {errors['value'] ? <span className="field-error">{errors['value']}</span> : null}
+            {errors['defaultValue'] ? (
+              <span className="field-error">{errors['defaultValue']}</span>
+            ) : null}
           </label>
+
+          {/* Per-environment overrides */}
+          {showEnvOverrides ? (
+            <div className="env-overrides-section">
+              <span className="field-label">
+                环境覆盖值
+                <small className="field-hint">（每个环境的覆盖值优先于默认值）</small>
+              </span>
+              <div className="env-overrides-grid">
+                {environments.map((env) => (
+                  <label className="variable-field env-override-field" key={env.id}>
+                    <span className="env-override-label">
+                      <span
+                        className={`scope-badge scope-badge--environment`}
+                        style={{ fontSize: '0.5rem' }}
+                      >
+                        {env.name}
+                      </span>
+                    </span>
+                    <div className="value-input-group">
+                      <input
+                        type={sensitive && !showValue ? 'password' : 'text'}
+                        value={overrides[env.id] ?? ''}
+                        onChange={(e) =>
+                          setOverrides((prev) => ({
+                            ...prev,
+                            [env.id]: e.target.value,
+                          }))
+                        }
+                        placeholder={`${env.name} 的覆盖值（留空使用默认值）`}
+                        spellCheck={false}
+                      />
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ) : null}
 
           {/* Type & Scope row */}
           <div className="variable-field-row">
@@ -1909,11 +2768,15 @@ function DeleteVariableDialog({
 
 function VariablesView({
   variables,
+  environments,
+  activeEnvironmentId,
   onCreate,
   onUpdate,
   onDelete,
 }: {
   variables: Variable[];
+  environments: Environment[];
+  activeEnvironmentId: string;
   onCreate: (v: Variable) => void;
   onUpdate: (v: Variable) => void;
   onDelete: (id: string) => void;
@@ -1927,6 +2790,8 @@ function VariablesView({
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
   const [editingVariable, setEditingVariable] = useState<Variable | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Variable | null>(null);
+
+  const activeEnv = environments.find((e) => e.id === activeEnvironmentId);
 
   const openCreate = () => {
     setDialogMode('create');
@@ -1952,10 +2817,11 @@ function VariablesView({
   };
 
   const filtered = variables.filter((v) => {
+    const resolvedValue = resolveVariableValue(v, activeEnvironmentId);
     const matchesQuery =
       v.name.toLowerCase().includes(query.toLowerCase()) ||
       v.description.toLowerCase().includes(query.toLowerCase()) ||
-      v.value.toLowerCase().includes(query.toLowerCase());
+      resolvedValue.toLowerCase().includes(query.toLowerCase());
     const matchesType = typeFilter === 'all' || v.type === typeFilter;
     const matchesScope = scopeFilter === 'all' || v.scope === scopeFilter;
     return matchesQuery && matchesType && matchesScope;
@@ -1974,6 +2840,7 @@ function VariablesView({
         open={dialogOpen}
         mode={dialogMode}
         variable={editingVariable}
+        environments={environments}
         onSave={handleSave}
         onClose={() => setDialogOpen(false)}
       />
@@ -1989,8 +2856,15 @@ function VariablesView({
           <span className="eyebrow">VARIABLES</span>
           <h2>变量管理</h2>
           <p>
-            管理普通变量、数据集与 Secret 引用，支持按环境和流程作用域隔离。 共 {variables.length}{' '}
-            个变量。
+            管理普通变量、数据集与 Secret 引用，支持按环境和流程作用域隔离。
+            {activeEnv ? (
+              <span>
+                {' '}
+                当前活跃环境：
+                <strong>{activeEnv.name}</strong>
+              </span>
+            ) : null}
+            。共 {variables.length} 个变量。
           </p>
         </div>
         <button className="button button--primary" type="button" onClick={openCreate}>
@@ -2054,7 +2928,7 @@ function VariablesView({
             <span>变量名</span>
             <span>类型</span>
             <span>作用域</span>
-            <span>值</span>
+            <span>解析值{activeEnv ? `（${activeEnv.name}）` : '（默认）'}</span>
             <span>描述</span>
             <span>引用</span>
             <span>最近更新</span>
@@ -2077,6 +2951,11 @@ function VariablesView({
           ) : (
             filtered.map((v) => {
               const TypeIcon = VARIABLE_TYPE_ICON[v.type];
+              const resolvedValue = resolveVariableValue(v, activeEnvironmentId);
+              const isOverridden =
+                v.scope === 'environment' &&
+                activeEnvironmentId &&
+                !!v.overrides[activeEnvironmentId];
               return (
                 <div className="data-row" key={v.id}>
                   <span>
@@ -2097,8 +2976,13 @@ function VariablesView({
                   </span>
                   <span className="variable-value-cell">
                     <code className={v.sensitive ? 'value-masked' : ''}>
-                      {v.sensitive ? '••••••••••••' : v.value}
+                      {v.sensitive ? '••••••••••••' : resolvedValue}
                     </code>
+                    {isOverridden ? (
+                      <span className="value-override-badge" title="已由当前环境覆盖">
+                        <ArrowsClockwise size={10} />
+                      </span>
+                    ) : null}
                   </span>
                   <span className="variable-desc-cell" title={v.description}>
                     {v.description}
@@ -2439,16 +3323,61 @@ export function App() {
   const [selectedId, setSelectedId] = useState(initialSteps[2].id);
   const [logs, setLogs] = useState<ExecutionLog[]>(initialLogs);
   const [runState, setRunState] = useState<RunState>('idle');
-  const [environment, setEnvironment] = useState('测试环境');
+  const [environments, setEnvironments] = useState<Environment[]>(() => {
+    try {
+      const stored = localStorage.getItem('sketchtest.environments');
+      if (stored) return JSON.parse(stored) as Environment[];
+    } catch {
+      // ignore parse errors
+    }
+    return initialEnvironments;
+  });
+  const [activeEnvironmentId, setActiveEnvironmentId] = useState<string>(() => {
+    try {
+      const stored = localStorage.getItem('sketchtest.activeEnvironmentId');
+      if (stored) return stored;
+    } catch {
+      // ignore
+    }
+    return initialEnvironments[0].id;
+  });
   const [importOpen, setImportOpen] = useState(false);
   const [imported, setImported] = useState(false);
   const [cases, setCases] = useState(initialCases);
-  const [variables, setVariables] = useState<Variable[]>(initialVariables);
+  const [variables, setVariables] = useState<Variable[]>(() => {
+    try {
+      const stored = localStorage.getItem('sketchtest.variables');
+      if (stored) {
+        const parsed: unknown = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const first = parsed[0] as Record<string, unknown>;
+          // Migrate old format (value field) to new format (defaultValue + overrides)
+          if ('value' in first && !('defaultValue' in first)) {
+            return (parsed as Array<Record<string, unknown>>).map((v) => ({
+              ...v,
+              defaultValue: typeof v['value'] === 'string' ? (v['value'] as string) : '',
+              overrides:
+                v['overrides'] && typeof v['overrides'] === 'object'
+                  ? (v['overrides'] as Record<string, string>)
+                  : {},
+            })) as Variable[];
+          }
+        }
+        return parsed as Variable[];
+      }
+    } catch {
+      // ignore parse errors
+    }
+    return initialVariables;
+  });
+  const [runs] = useState<RunMeta[]>(initialRuns);
+  const [activeRunId, setActiveRunId] = useState<string | null>(null);
   const [toast, setToast] = useState('');
   const runningRef = useRef(false);
 
   const activeWorkflow = workflows.find((wf) => wf.id === activeWorkflowId) ?? null;
   const isCanvas = view === 'workflows' && activeWorkflowId !== null;
+  const isReportDetail = view === 'reports' && activeRunId !== null;
 
   const notify = useCallback((message: string) => {
     setToast(message);
@@ -2534,6 +3463,8 @@ export function App() {
       if (event.key === 'Escape') {
         if (isCanvas) {
           backToList();
+        } else if (isReportDetail) {
+          setActiveRunId(null);
         } else {
           setImportOpen(false);
           setSidebarOpen(false);
@@ -2542,7 +3473,7 @@ export function App() {
     };
     window.addEventListener('keydown', listener);
     return () => window.removeEventListener('keydown', listener);
-  }, [saveDraft, runWorkflow, isCanvas, backToList]);
+  }, [saveDraft, runWorkflow, isCanvas, isReportDetail, backToList]);
 
   const navigate = (next: ViewId) => {
     startTransition(() => {
@@ -2550,8 +3481,13 @@ export function App() {
         // Clicking the "业务流程" nav while on canvas → go back to list
         backToList();
       }
+      if (next === 'reports' && view === 'reports' && activeRunId) {
+        // Clicking the "报告中心" nav while on detail → go back to list
+        setActiveRunId(null);
+      }
       setView(next);
       if (next !== 'workflows') setActiveWorkflowId(null);
+      if (next !== 'reports') setActiveRunId(null);
     });
     setSidebarOpen(false);
   };
@@ -2584,7 +3520,11 @@ export function App() {
     notify('已生成 2 条测试草稿 · 等待审核');
   };
 
-  const topbarTitle = isCanvas ? `业务流程 · ${activeWorkflow?.name ?? '编排'}` : viewLabels[view];
+  const topbarTitle = isCanvas
+    ? `业务流程 · ${activeWorkflow?.name ?? '编排'}`
+    : isReportDetail
+      ? `报告详情 · ${runs.find((r) => r.id === activeRunId)?.runId ?? '报告'}`
+      : viewLabels[view];
 
   let content: React.ReactNode;
   if (view === 'workflows' && isCanvas) {
@@ -2612,13 +3552,86 @@ export function App() {
   else if (view === 'apis')
     content = <ApiView onImport={() => setImportOpen(true)} imported={imported} />;
   else if (view === 'cases') content = <CasesView cases={cases} onGenerate={generateCases} />;
-  else if (view === 'reports') content = <ReportsView onRerun={() => void runWorkflow()} />;
+  else if (view === 'reports')
+    content = isReportDetail ? (
+      (() => {
+        const activeRun = runs.find((r) => r.id === activeRunId);
+        return activeRun ? (
+          <ReportsView
+            run={activeRun}
+            plans={testPlans}
+            onBack={() => {
+              setActiveRunId(null);
+            }}
+            onRerun={() => void runWorkflow()}
+          />
+        ) : (
+          <ReportListView runs={runs} plans={testPlans} onSelect={(id) => setActiveRunId(id)} />
+        );
+      })()
+    ) : (
+      <ReportListView runs={runs} plans={testPlans} onSelect={(id) => setActiveRunId(id)} />
+    );
   else if (view === 'agent') content = <AgentView />;
-  else if (view === 'environments') content = <EnvironmentView />;
+  else if (view === 'environments')
+    content = (
+      <EnvironmentView
+        environments={environments}
+        variables={variables}
+        activeEnvironmentId={activeEnvironmentId}
+        onSetActive={(envId) => {
+          setActiveEnvironmentId(envId);
+          localStorage.setItem('sketchtest.activeEnvironmentId', envId);
+          notify(`已切换到 ${environments.find((e) => e.id === envId)?.name ?? envId}`);
+        }}
+        onCreate={(env) =>
+          setEnvironments((prev) => {
+            const next = [env, ...prev];
+            localStorage.setItem('sketchtest.environments', JSON.stringify(next));
+            notify(`环境 "${env.name}" 已创建`);
+            return next;
+          })
+        }
+        onUpdate={(env) =>
+          setEnvironments((prev) => {
+            const next = prev.map((x) => (x.id === env.id ? env : x));
+            localStorage.setItem('sketchtest.environments', JSON.stringify(next));
+            notify(`环境 "${env.name}" 已更新`);
+            return next;
+          })
+        }
+        onDelete={(envId) =>
+          setEnvironments((prev) => {
+            const target = prev.find((x) => x.id === envId);
+            const next = prev.filter((x) => x.id !== envId);
+            localStorage.setItem('sketchtest.environments', JSON.stringify(next));
+            // If the deleted env was active, switch to the first remaining one
+            if (activeEnvironmentId === envId && next.length > 0) {
+              setActiveEnvironmentId(next[0].id);
+              localStorage.setItem('sketchtest.activeEnvironmentId', next[0].id);
+            }
+            // Also clean up overrides pointing to this environment
+            setVariables((vars) => {
+              const cleaned = vars.map((v) => {
+                const newOverrides = { ...v.overrides };
+                delete newOverrides[envId];
+                return { ...v, overrides: newOverrides };
+              });
+              localStorage.setItem('sketchtest.variables', JSON.stringify(cleaned));
+              return cleaned;
+            });
+            if (target) notify(`环境 "${target.name}" 已删除`);
+            return next;
+          })
+        }
+      />
+    );
   else if (view === 'variables')
     content = (
       <VariablesView
         variables={variables}
+        environments={environments}
+        activeEnvironmentId={activeEnvironmentId}
         onCreate={(v) =>
           setVariables((prev) => {
             const next = [v, ...prev];
@@ -2664,8 +3677,12 @@ export function App() {
           onSave={saveDraft}
           onRun={() => void runWorkflow()}
           onImport={() => setImportOpen(true)}
-          environment={environment}
-          onEnvironment={setEnvironment}
+          environments={environments}
+          activeEnvironmentId={activeEnvironmentId}
+          onEnvironment={(envId) => {
+            setActiveEnvironmentId(envId);
+            localStorage.setItem('sketchtest.activeEnvironmentId', envId);
+          }}
         />
         {content}
       </div>

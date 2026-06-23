@@ -112,6 +112,90 @@ export interface TestCase {
   lastRun: string;
 }
 
+// ─── Report Center: Run → Workflow Result → Step ─────────────
+
+/** Aggregated status of an execution run. */
+export type RunStatus = 'passed' | 'failed' | 'inconclusive' | 'infra-error';
+
+/** What triggered the run. */
+export type TriggerType = 'manual' | 'scheduled' | 'ci' | 'webhook';
+
+/** Per-workflow outcome inside a run. */
+export type WorkflowResultStatus = 'passed' | 'failed' | 'skipped' | 'error';
+
+/** Step-level execution detail (same shape for both list-preview and full detail). */
+export interface ReportStep {
+  id: string;
+  name: string;
+  method: string;
+  path: string;
+  status: 'passed' | 'failed' | 'skipped';
+  durationMs: number;
+  requestEvidence?: string;
+  responseEvidence?: string;
+  assertionFailure?: string;
+  responseStatus?: number;
+}
+
+/** Outcome of a single workflow within an execution run. */
+export interface WorkflowResult {
+  workflowId: string;
+  workflowName: string;
+  bpId: string;
+  status: WorkflowResultStatus;
+  stepsPassed: number;
+  stepsFailed: number;
+  stepsSkipped: number;
+  totalDurationMs: number;
+  steps: ReportStep[];
+}
+
+/**
+ * An execution run — the unit shown in the report list.
+ * A run groups the results of multiple workflows executed together
+ * according to a plan or tag selection.
+ */
+export interface RunMeta {
+  id: string;
+  runId: string;
+  /** Human-readable label, e.g. "全量回归 · staging". */
+  name: string;
+  /** Which plan drove the selection (null for ad-hoc tag selections). */
+  planId?: string;
+  environment: string;
+  trigger: TriggerType;
+  status: RunStatus;
+  totalWorkflows: number;
+  workflowsPassed: number;
+  workflowsFailed: number;
+  workflowsSkipped: number;
+  totalDurationMs: number;
+  startedAt: string;
+  finishedAt: string;
+  /** Tags used for workflow selection. */
+  selectedTags: string[];
+  /** Workflow-level results. */
+  workflows: WorkflowResult[];
+  /* Traceability */
+  gitCommit?: string;
+  gitSha?: string;
+  runnerVersion?: string;
+  traceId?: string;
+  openapiVersion?: string;
+}
+
+/** Predefined test plan for workflow subset selection. */
+export interface TestPlan {
+  id: string;
+  name: string;
+  description: string;
+  /** 'all' = workflow must have ALL listed tags; 'any' = at least one. */
+  tagFilter: 'all' | 'any';
+  tags: string[];
+  /** How many workflows this plan would select. */
+  workflowCount: number;
+}
+
 // ─── Variable (UI model — aligns with VariableRef / contracts-common) ─
 
 /** Supported variable types for the UI. */
@@ -120,10 +204,12 @@ export type VariableType = 'plain' | 'secret' | 'dataset';
 /** A managed variable in the platform. */
 export interface Variable {
   id: EntityId;
-  /** Variable name (e.g. "baseUrl", "accessToken"). */
+  /** Variable name (e.g. "userService", "accessToken"). */
   name: string;
-  /** Current value. Masked in UI for secret-typed variables. */
-  value: string;
+  /** Default value — used when no environment is active, or as fallback. */
+  defaultValue: string;
+  /** Per-environment value overrides keyed by environment id. */
+  overrides: Record<string, string>;
   /** Classification: plain variable, secret reference, or dataset. */
   type: VariableType;
   /** Scope: environment-global, workflow-scoped, or step-local. */
@@ -138,4 +224,32 @@ export interface Variable {
   updatedBy: string;
   /** Which workflows reference this variable. */
   usedIn: string[];
+}
+
+// ─── Environment (UI model — aligns with EnvironmentSchema) ──────
+
+/** A deployment target with its own variable values. */
+export interface Environment {
+  id: EntityId;
+  name: string;
+  description: string;
+  /** Human-readable tags, e.g. ["production", "read-only"]. */
+  tags: string[];
+  /** Whether this is a production environment (triggers safety policies). */
+  isProduction: boolean;
+  /** ISO-8601 timestamp of last modification. */
+  updatedAt: string;
+  /** Who last modified this environment. */
+  updatedBy: string;
+}
+
+/**
+ * Resolve the effective value of a variable given the active environment.
+ * Checks per-environment override first, then falls back to defaultValue.
+ */
+export function resolveVariableValue(variable: Variable, activeEnvironmentId: string | null): string {
+  if (activeEnvironmentId && variable.overrides[activeEnvironmentId]) {
+    return variable.overrides[activeEnvironmentId];
+  }
+  return variable.defaultValue;
 }

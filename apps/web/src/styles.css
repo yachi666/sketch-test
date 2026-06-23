@@ -2328,7 +2328,226 @@ textarea:focus-visible {
 }
 
 /* ============================================
-   REPORT VIEW
+   REPORT LIST
+   ============================================ */
+
+.report-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+.reports-table .data-row {
+  grid-template-columns: 128px minmax(140px, 1fr) 130px 96px 80px 76px;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    box-shadow 140ms ease;
+  text-decoration: none;
+}
+
+.reports-table .data-row:hover {
+  background: var(--brown-soft);
+  box-shadow: var(--shadow-xs);
+}
+
+.reports-table .data-row:active {
+  transform: scale(0.997);
+}
+
+.reports-table .data-row--head {
+  cursor: default;
+}
+
+.reports-table .data-row--head:hover {
+  background: transparent;
+  box-shadow: none;
+}
+
+.reports-table .data-row--head:active {
+  transform: none;
+}
+
+.report-status-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-heading);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.report-status-dot--passed {
+  color: var(--green);
+}
+.report-status-dot--failed {
+  color: var(--brick);
+}
+.report-status-dot--inconclusive {
+  color: var(--amber);
+}
+.report-status-dot--infra-error {
+  color: var(--violet);
+}
+
+.report-stats-mini {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+}
+
+.report-stats-mini .pass-count {
+  color: var(--green);
+  font-weight: 600;
+}
+.report-stats-mini .fail-count {
+  color: var(--brick);
+  font-weight: 600;
+}
+.report-stats-mini .skip-count {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.report-stats-bar {
+  display: flex;
+  height: 4px;
+  min-width: 64px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--border-soft);
+}
+
+.report-stats-bar .bar-pass {
+  background: var(--green);
+}
+.report-stats-bar .bar-fail {
+  background: var(--brick);
+}
+.report-stats-bar .bar-skip {
+  background: var(--muted);
+}
+
+.report-duration {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.report-trigger-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 7px;
+  border-radius: 4px 7px;
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: var(--brown);
+  background: var(--brown-soft);
+  border: 1px solid #e8e0d5;
+}
+
+.report-detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--brown);
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 5px 2px;
+  margin-bottom: 10px;
+  transition: color 140ms ease;
+}
+
+.report-detail-back:hover {
+  color: var(--ink);
+}
+
+/* ── Workflow result rows (inside run detail) ───── */
+
+.workflow-result-row {
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.workflow-result-row:hover {
+  background: var(--brown-soft);
+}
+
+.workflow-result-row--passed {
+  border-left: 3px solid var(--green);
+}
+
+.workflow-result-row--failed {
+  border-left: 3px solid var(--brick);
+  background: var(--brick-soft);
+}
+
+.workflow-result-row--skipped {
+  border-left: 3px solid var(--amber);
+}
+
+.workflow-result-row--error {
+  border-left: 3px solid var(--violet);
+  background: var(--violet-soft);
+}
+
+.workflow-result-head {
+  cursor: default;
+  font-weight: 600;
+  font-size: 0.6rem;
+  color: var(--muted);
+}
+
+.workflow-result-head:hover {
+  background: transparent;
+}
+
+.workflow-expand-panel {
+  padding: 6px 14px 14px 28px;
+  border-bottom: 1px solid var(--border-soft);
+  background: var(--white-soft);
+  animation: expandIn 180ms ease;
+}
+
+@keyframes expandIn {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 800px;
+  }
+}
+
+.timeline-step--last::before {
+  display: none;
+}
+
+/* ── Responsive: workflow result rows ────────────── */
+
+@media (max-width: 680px) {
+  .workflow-result-head > :nth-child(3),
+  .workflow-result-row > :nth-child(3),
+  .workflow-result-head > :nth-child(4),
+  .workflow-result-row > :nth-child(4) {
+    display: none;
+  }
+}
+
+/* ============================================
+   REPORT VIEW (detail)
    ============================================ */
 
 .report-intro {
@@ -2703,16 +2922,101 @@ textarea:focus-visible {
   padding: 16px;
 }
 
-.env-card > label {
-  margin-top: 14px;
+.env-card .section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.env-card .section-heading h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.env-active-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  color: var(--green);
+  background: var(--green-soft);
+  border: 1px solid #a7f3d0;
+  border-radius: 4px 7px;
+  font-family: var(--font-body);
+  font-size: 0.55rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.env-card-actions {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.env-card-actions .button--sm {
+  padding: 4px 10px;
+  font-size: 0.6rem;
+  min-height: auto;
+}
+
+.env-card-meta {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.env-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.env-meta-label {
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  font-weight: 500;
+}
+
+.env-meta-value {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  font-size: 0.6rem;
+}
+
+.env-tag {
+  display: inline-block;
+  padding: 1px 6px;
+  color: var(--brown);
+  background: var(--brown-soft);
+  border: 1px solid #fcd34d;
+  border-radius: 3px 5px;
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  font-weight: 500;
+}
+
+.env-card-desc {
+  margin: 10px 0 8px;
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  line-height: 1.5;
 }
 
 .env-card > small {
   display: block;
-  margin-top: 14px;
+  margin-top: 10px;
   color: var(--muted);
   font-family: var(--font-body);
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 400;
 }
 
@@ -3173,6 +3477,63 @@ textarea:focus-visible {
   font-weight: 500;
 }
 
+.field-hint {
+  display: inline;
+  margin-left: 6px;
+  color: var(--muted);
+  font-size: 0.55rem;
+  font-weight: 400;
+}
+
+/* Environment override editor inside variable dialog */
+.env-overrides-section {
+  padding: 12px;
+  background: var(--paper-warm);
+  border: 1px solid var(--border);
+  border-radius: 7px 11px 8px 10px;
+}
+
+.env-overrides-section > .field-label {
+  margin-bottom: 10px;
+  display: block;
+}
+
+.env-overrides-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.env-override-field {
+  gap: 3px;
+}
+
+.env-override-label {
+  display: flex;
+  align-items: center;
+}
+
+.env-override-field input {
+  min-height: 32px;
+  font-size: 0.64rem;
+}
+
+/* Override indicator in variable table */
+.value-override-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 5px;
+  color: var(--amber);
+  vertical-align: middle;
+}
+
+/* Small button variant */
+.button--sm {
+  padding: 4px 10px;
+  font-size: 0.6rem;
+  min-height: auto;
+  border-radius: 4px 7px;
+}
+
 .variable-field-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -3352,6 +3713,13 @@ textarea:focus-visible {
   }
   .variables-table .data-row > :nth-child(4),
   .variables-table .data-row > :nth-child(7) {
+    display: none;
+  }
+
+  .reports-table .data-row {
+    grid-template-columns: 110px minmax(120px, 1fr) 110px 76px 60px;
+  }
+  .reports-table .data-row > :nth-child(6) {
     display: none;
   }
 }
@@ -3593,6 +3961,16 @@ textarea:focus-visible {
   }
   .cases-table .data-row > :nth-child(2),
   .cases-table .data-row > :nth-child(4) {
+    display: none;
+  }
+
+  .reports-table .data-row {
+    grid-template-columns: minmax(200px, 1fr) 56px 40px;
+  }
+  .reports-table .data-row > :nth-child(1),
+  .reports-table .data-row > :nth-child(4),
+  .reports-table .data-row > :nth-child(5),
+  .reports-table .data-row > :nth-child(6) {
     display: none;
   }
 

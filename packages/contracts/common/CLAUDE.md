@@ -18,8 +18,12 @@ Shared Zod schema primitives used by every other sketch-test contract package. T
 | `HttpStatusCodeSchema` | Known status codes (200-503) + catch-all |
 | `MediaTypeSchema` | MIME type string |
 | `ImmutableVersionMetaSchema` | Base fields for all published versions (id, version number, publishedAt, contentHash) |
-| `VariableRefSchema` | Variable reference (name, scope, extractFrom) |
+| `VariableRefSchema` | Variable reference (name, scope, extractFrom, sensitive) |
 | `VariableScopeSchema` | step / workflow / environment / secret |
+| `VariableTypeSchema` | plain / secret / dataset |
+| `VariableDefinitionSchema` | Full variable definition (id, name, type, scope, defaultValue, overrides, sensitive, description) |
+| `EnvironmentSchema` | Deployment target (id, name, tags, variables, secretRefs, executorTags, isProduction, updatedAt, updatedBy) |
+| `EnvironmentVersionSchema` | Immutable environment snapshot (Environment + ImmutableVersionMeta) |
 | `CursorPaginationSchema` | Cursor + limit pagination |
 | `PaginatedResultSchema` | Generic paginated response factory |
 | `ApiErrorResponseSchema` | Standard error envelope (code, message, fieldProblems, correlationId) |
