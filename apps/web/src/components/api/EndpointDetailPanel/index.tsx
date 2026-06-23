@@ -29,6 +29,8 @@ interface EndpointDetailPanelProps {
   onDelete?: (endpointId: string) => void;
   /** Called when user wants to add this endpoint to a workflow. */
   onAddToWorkflow?: (endpointId: string) => void;
+  /** Called when user creates a new schema (e.g., from JSON body paste). */
+  onCreateSchema?: (schema: SchemaDisplayNode) => void;
   onClose: () => void;
 }
 
@@ -54,6 +56,7 @@ export function EndpointDetailPanel({
   onSave,
   onDelete,
   onAddToWorkflow,
+  onCreateSchema,
   onClose,
 }: EndpointDetailPanelProps) {
   const [tab, setTab] = useState<'params' | 'request' | 'responses' | 'schema'>('params');
@@ -347,7 +350,9 @@ export function EndpointDetailPanel({
               isEditing ? (
                 <RequestBodyEditor
                   body={requestBody}
+                  schemas={schemas}
                   onChange={(bodies) => updateDraft({ requestBodies: bodies })}
+                  onCreateSchema={onCreateSchema}
                 />
               ) : (
                 <RequestBodyView body={requestBody} schemas={schemas} />
@@ -356,7 +361,9 @@ export function EndpointDetailPanel({
               isEditing ? (
                 <ResponseEditor
                   responses={draft.responses}
+                  schemas={schemas}
                   onChange={(responses) => updateDraft({ responses })}
+                  onCreateSchema={onCreateSchema}
                 />
               ) : (
                 <ResponseList responses={draft.responses} schemas={schemas} />

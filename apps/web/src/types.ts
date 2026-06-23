@@ -151,6 +151,8 @@ export interface ApiRequestBody {
   contentTypes: string[];
   /** Schema reference path, e.g. "/schemas/CreateUserRequest". */
   schemaRef?: string;
+  /** Example body content — used for pasting sample request bodies. */
+  exampleBody?: string;
 }
 
 export interface ApiResponseDef {

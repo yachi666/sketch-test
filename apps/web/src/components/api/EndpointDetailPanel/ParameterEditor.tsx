@@ -1,5 +1,7 @@
-import { Plus, Trash } from '@phosphor-icons/react';
+import { Lightning, Plus, Trash } from '@phosphor-icons/react';
+import { useState } from 'react';
 import type { ApiParameter } from '../../../types';
+import { ClipboardImportDialog } from './ClipboardImportDialog';
 
 interface ParameterEditorProps {
   parameters: ApiParameter[];
@@ -10,8 +12,15 @@ interface ParameterEditorProps {
  * Inline parameter editor used in edit/create mode.
  * Supports add, update, and remove of parameters with name, location, type,
  * required status, and description fields.
+ *
+ * Also supports bulk import from clipboard via the "批量导入" button,
+ * which opens a dialog where users can paste Key:Value pairs, cURL -H flags,
+ * or JSON objects.
  */
 export function ParameterEditor({ parameters, onChange }: ParameterEditorProps) {
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkTarget, setBulkTarget] = useState<ApiParameter['in']>('header');
+
   const addParam = () => {
     const newParam: ApiParameter = {
       id: `param-${Date.now()}`,
@@ -35,8 +44,63 @@ export function ParameterEditor({ parameters, onChange }: ParameterEditorProps) 
     onChange(parameters.filter((_, i) => i !== idx));
   };
 
+  const handleBulkImport = (imported: Omit<ApiParameter, 'id' | 'deprecated'>[]) => {
+    const newParams = imported.map((p) => ({
+      ...p,
+      id: `param-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      deprecated: false as const,
+    }));
+
+    // Merge: update existing params with same (name + location), append new ones
+    const existing = [...parameters];
+    for (const np of newParams) {
+      const existingIdx = existing.findIndex((ep) => ep.name === np.name && ep.in === np.in);
+      if (existingIdx >= 0) {
+        // Update existing: preserve id but update type, example, description
+        existing[existingIdx] = {
+          ...existing[existingIdx],
+          type: np.type || existing[existingIdx].type,
+          example: np.example || existing[existingIdx].example,
+          description: np.description || existing[existingIdx].description,
+        };
+      } else {
+        existing.push(np);
+      }
+    }
+    onChange(existing);
+  };
+
+  const openBulkFor = (location: ApiParameter['in']) => {
+    setBulkTarget(location);
+    setBulkOpen(true);
+  };
+
   return (
     <div className="editor-section">
+      {/* Bulk import toolbar */}
+      <div className="editor-toolbar">
+        <div className="editor-toolbar-actions">
+          <button
+            className="button button--ghost button--sm"
+            type="button"
+            onClick={() => openBulkFor('header')}
+            title="从剪贴板批量导入 Header 参数"
+          >
+            <Lightning size={14} />
+            批量导入 Header
+          </button>
+          <button
+            className="button button--ghost button--sm"
+            type="button"
+            onClick={() => openBulkFor('query')}
+            title="从剪贴板批量导入 Query 参数"
+          >
+            <Lightning size={14} />
+            批量导入 Query
+          </button>
+        </div>
+      </div>
+
       {parameters.length === 0 ? (
         <div className="empty-state">此接口无参数。</div>
       ) : (
@@ -103,6 +167,14 @@ export function ParameterEditor({ parameters, onChange }: ParameterEditorProps) 
         <Plus size={14} />
         添加参数
       </button>
+
+      {/* Bulk import dialog */}
+      <ClipboardImportDialog
+        open={bulkOpen}
+        targetLocation={bulkTarget}
+        onImport={handleBulkImport}
+        onClose={() => setBulkOpen(false)}
+      />
     </div>
   );
 }

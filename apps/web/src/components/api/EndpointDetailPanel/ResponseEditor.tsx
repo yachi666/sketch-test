@@ -1,9 +1,14 @@
 import { Plus, Trash } from '@phosphor-icons/react';
-import type { ApiResponseDef } from '../../../types';
+import type { ApiResponseDef, SchemaDisplayNode } from '../../../types';
+import { SchemaRefInput } from './SchemaRefInput';
 
 interface ResponseEditorProps {
   responses: ApiResponseDef[];
+  /** Available schemas for the SchemaRefInput combobox. */
+  schemas: Record<string, SchemaDisplayNode>;
   onChange: (responses: ApiResponseDef[]) => void;
+  /** Called when user creates a new schema. */
+  onCreateSchema?: (schema: SchemaDisplayNode) => void;
 }
 
 /**
@@ -11,7 +16,12 @@ interface ResponseEditorProps {
  * Supports add, update, and remove of response definitions with status code,
  * description, content types, and schema ref fields.
  */
-export function ResponseEditor({ responses, onChange }: ResponseEditorProps) {
+export function ResponseEditor({
+  responses,
+  schemas,
+  onChange,
+  onCreateSchema,
+}: ResponseEditorProps) {
   const addResponse = () => {
     const newResp: ApiResponseDef = {
       id: `resp-${Date.now()}`,
@@ -81,12 +91,13 @@ export function ResponseEditor({ responses, onChange }: ResponseEditorProps) {
                   placeholder="Content-Type"
                   aria-label="响应 Content-Type"
                 />
-                <input
-                  className="input input--cell"
-                  value={resp.schemaRef ?? ''}
-                  onChange={(e) => updateResponse(idx, { schemaRef: e.target.value || undefined })}
-                  placeholder="Schema 引用（可选）"
-                  aria-label="响应 Schema 引用"
+                <SchemaRefInput
+                  value={resp.schemaRef}
+                  schemas={schemas}
+                  onChange={(ref) => updateResponse(idx, { schemaRef: ref })}
+                  onCreateSchema={onCreateSchema}
+                  placeholder="选择或搜索 Schema…"
+                  ariaLabel="响应 Schema 引用"
                 />
               </div>
             </div>

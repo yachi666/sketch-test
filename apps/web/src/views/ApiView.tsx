@@ -65,6 +65,7 @@ interface ApiViewProps {
   onUpdate: (endpoint: ApiEndpoint, detail: EndpointDetail) => void;
   onDelete: (endpointId: string) => void;
   onAddToWorkflow?: (endpointId: string) => void;
+  onCreateSchema?: (schema: SchemaDisplayNode) => void;
 }
 
 /**
@@ -89,6 +90,7 @@ export function ApiView({
   onUpdate,
   onDelete,
   onAddToWorkflow,
+  onCreateSchema,
 }: ApiViewProps) {
   const [importOpen, setImportOpen] = useState(false);
   const [diffOpen, setDiffOpen] = useState(false);
@@ -139,6 +141,7 @@ export function ApiView({
 
   const handleClose = useCallback(() => {
     setSelectedEndpointId(null);
+    setPanelMode('view');
   }, []);
 
   const handleSave = useCallback(
@@ -263,6 +266,7 @@ export function ApiView({
           onDelete={panelMode === 'edit' ? handleDelete : undefined}
           onAddToWorkflow={panelMode === 'view' ? handleAddToWorkflow : undefined}
           onClose={handleClose}
+          onCreateSchema={onCreateSchema}
         />
       ) : null}
 

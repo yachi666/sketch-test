@@ -8,13 +8,15 @@ interface RequestBodyViewProps {
     required: boolean;
     contentTypes: string[];
     schemaRef?: string;
+    exampleBody?: string;
   };
   schemas: Record<string, SchemaDisplayNode>;
 }
 
 /**
  * Read-only view of the request body definition.
- * Shows required/optional badge, content types, description, and resolved schema.
+ * Shows required/optional badge, content types, description, resolved schema,
+ * and example body content if present.
  */
 export function RequestBodyView({ body, schemas }: RequestBodyViewProps) {
   if (!body) {
@@ -44,6 +46,17 @@ export function RequestBodyView({ body, schemas }: RequestBodyViewProps) {
         <div className="notice notice--warning">
           Schema <code>{body.schemaRef}</code> 未找到。
         </div>
+      ) : null}
+      {body.exampleBody ? (
+        <details className="schema-details" open>
+          <summary>
+            <BracketsCurly size={16} />
+            请求体示例
+          </summary>
+          <pre className="request-body-example">
+            <code>{body.exampleBody}</code>
+          </pre>
+        </details>
       ) : null}
     </div>
   );

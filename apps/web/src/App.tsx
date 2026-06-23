@@ -70,7 +70,6 @@ import {
   useState,
 } from 'react';
 import {
-  apiSchemas,
   apiVersions,
   endpointDetails,
   endpoints,
@@ -78,6 +77,7 @@ import {
   initialEnvironments,
   initialLogs,
   initialRuns,
+  apiSchemas as initialSchemas,
   initialSteps,
   initialVariables,
   makeLogs,
@@ -106,6 +106,7 @@ import type {
   RunMeta,
   RunState,
   RunStatus,
+  SchemaDisplayNode,
   StepTone,
   TestCase,
   TestPlan,
@@ -3230,6 +3231,7 @@ export function App() {
     return initialEnvironments[0].id;
   });
   const [imported, setImported] = useState(false);
+  const [apiSchemas, setApiSchemas] = useState<Record<string, SchemaDisplayNode>>(initialSchemas);
   const [apiEndpoints, setApiEndpoints] = useState<ApiEndpoint[]>(endpoints);
   const [apiDetails, setApiDetails] = useState<Record<string, EndpointDetail>>(endpointDetails);
   const [cases, setCases] = useState(initialCases);
@@ -3407,6 +3409,14 @@ export function App() {
     [notify],
   );
 
+  const handleCreateSchema = useCallback(
+    (schema: SchemaDisplayNode) => {
+      setApiSchemas((prev) => ({ ...prev, [schema.id]: schema }));
+      notify(`Schema ${schema.displayName} 已创建`);
+    },
+    [notify],
+  );
+
   const handleDeleteEndpoint = useCallback(
     (endpointId: string) => {
       const ep = apiEndpoints.find((e) => e.id === endpointId);
@@ -3487,6 +3497,7 @@ export function App() {
         onCreate={handleCreateEndpoint}
         onUpdate={handleUpdateEndpoint}
         onDelete={handleDeleteEndpoint}
+        onCreateSchema={handleCreateSchema}
       />
     );
   else if (view === 'cases') content = <CasesView cases={cases} onGenerate={generateCases} />;
