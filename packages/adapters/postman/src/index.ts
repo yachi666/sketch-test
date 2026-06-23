@@ -21,16 +21,3 @@
 export { parseCollection } from './parser/collection.js';
 export { parseEnvironment } from './parser/environment.js';
 
-export type {
-  PostmanAuth,
-  PostmanBody,
-  PostmanCollection,
-  PostmanEnvironment,
-  PostmanEvent,
-  PostmanHeader,
-  PostmanItem,
-  PostmanRequest,
-  PostmanResponse,
-  PostmanUrl,
-  PostmanVariable,
-} from './types.js';

@@ -1,4 +1,5 @@
 import type { Diagnostic } from '@sketch-test/contracts-common';
+import { parse as parseJson } from 'jsonc-parser';
 import type { PostmanEnvironment } from '../types.js';
 
 /**
@@ -18,7 +19,19 @@ export function parseEnvironment(raw: unknown): {
 
   if (typeof raw === 'string') {
     try {
-      const parsed = JSON.parse(raw);
+      const parsed = parseJson(raw);
+      if (parsed === undefined) {
+        return {
+          env: null,
+          diagnostics: [
+            {
+              severity: 'error',
+              code: 'PARSE_ERROR',
+              message: 'Failed to parse input as JSON',
+            },
+          ],
+        };
+      }
       return parseEnvironment(parsed);
     } catch {
       return {
