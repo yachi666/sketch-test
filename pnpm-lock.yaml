@@ -128,6 +128,19 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
+  packages/adapters/format-detector:
+    dependencies:
+      '@sketch-test/contracts-common':
+        specifier: workspace:*
+        version: link:../../contracts/common
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.6(@types/node@22.19.21)(jiti@2.6.1)(tsx@4.22.4)
+
   packages/adapters/openapi:
     dependencies:
       '@sketch-test/canonical-api-model':

@@ -53,6 +53,18 @@ describe('detectFormat — Postman Collection', () => {
     expect(results[0]!.version).toBe('1');
   });
 
+  it('detects Postman Environment', () => {
+    const result = detectFormat({
+      id: 'env-id',
+      name: 'Production',
+      values: [{ key: 'baseUrl', value: 'https://api.example.com', enabled: true }],
+      _postman_variable_scope: 'environment',
+    });
+    const match = result.find((r) => r.format === 'postman-environment');
+    expect(match).toBeDefined();
+    expect(match!.confidence).toBe(0.85);
+  });
+
   it('returns multiple candidates for ambiguous Postman v1 input', () => {
     // A Postman v1 doc looks like a generic object — may overlap with OpenAPI
     const input = {
