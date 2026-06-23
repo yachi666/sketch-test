@@ -80,6 +80,7 @@ interface ApiViewProps {
   onAddToWorkflow?: (endpointId: string) => void;
   onCreateSchema?: (schema: SchemaDisplayNode) => void;
   onManageSources?: () => void;
+  onSourceCreated?: (source: ApiSource) => void;
 }
 
 /**
@@ -107,6 +108,7 @@ export function ApiView({
   onAddToWorkflow,
   onCreateSchema,
   onManageSources,
+  onSourceCreated,
 }: ApiViewProps) {
   const [importOpen, setImportOpen] = useState(false);
   const [diffOpen, setDiffOpen] = useState(false);
@@ -261,9 +263,28 @@ export function ApiView({
       setImportErrorMessage(null);
       setImportedEndpoints([]);
       setImportedVersions([]);
-      startImport(config);
+
+      // Create new source if needed
+      if (!config.sourceId && config.newSourceName) {
+        const sourceId = `src-${Date.now()}`;
+        const newSource: ApiSource = {
+          id: sourceId,
+          name: config.newSourceName,
+          sourceLabel: config.fileName,
+          sourceType: 'openapi' as const,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        // Store sourceId in config for downstream use
+        importConfigRef.current = { ...config, sourceId };
+        // Add to local sources state via callback
+        onSourceCreated?.(newSource);
+        startImport({ ...config, sourceId });
+      } else {
+        startImport(config);
+      }
     },
-    [startImport],
+    [startImport, onSourceCreated],
   );
 
   /** Apply the imported data to local state and signal the parent. */
@@ -334,7 +355,8 @@ export function ApiView({
     }
 
     const model = importResult.model as unknown as CanonicalApiModel;
-    const { versionId, endpointCount } = saveApiImport(model);
+    const config = importConfigRef.current;
+    const { versionId, endpointCount } = saveApiImport(model, config?.sourceId);
 
     const newEndpoints: ApiEndpoint[] = model.endpoints.map((ep) => ({
       id: ep.id as ApiEndpoint['id'],
@@ -351,6 +373,7 @@ export function ApiView({
 
     const newVersion: ApiVersionInfo = {
       id: versionId,
+      sourceId: config?.sourceId,
       label: `${model.metadata.sourceLabel} · v${model.metadata.sourceVersion}`,
       sourceType: model.metadata.sourceType as ApiVersionInfo['sourceType'],
       fileName: model.metadata.sourceLabel,
@@ -364,7 +387,6 @@ export function ApiView({
     // Detect conflicts with existing endpoints
     const existingIds = new Set(allEndpoints.map((e) => e.id));
     const conflictingEps = newEndpoints.filter((ep) => existingIds.has(ep.id));
-    const config = importConfigRef.current;
 
     // Show conflict resolution dialog when strategy is 'decide-per-item'
     if (conflictingEps.length > 0 && config?.conflictStrategy === 'decide-per-item') {
@@ -530,6 +552,7 @@ export function ApiView({
       {/* Import dialog */}
       <ImportDialog
         open={importOpen}
+        sources={sources}
         onClose={() => setImportOpen(false)}
         onImport={handleImport}
       />

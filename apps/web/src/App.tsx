@@ -3540,6 +3540,7 @@ export function App() {
         onDelete={handleDeleteEndpoint}
         onCreateSchema={handleCreateSchema}
         onManageSources={handleManageSources}
+        onSourceCreated={handleSourceSaved}
       />
     );
   else if (view === 'cases') content = <CasesView cases={cases} onGenerate={generateCases} />;

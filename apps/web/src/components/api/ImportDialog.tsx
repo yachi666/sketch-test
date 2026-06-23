@@ -8,12 +8,14 @@ import {
 } from '@phosphor-icons/react';
 import { type DetectionResult, detectFormat } from '@sketch-test/format-detector';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ApiSource } from '../../types';
 import type { ImportConfig } from '../../types/import';
 
 interface ImportDialogProps {
   open: boolean;
   onClose: () => void;
   onImport: (config: ImportConfig) => void;
+  sources: ApiSource[];
 }
 
 /**
@@ -21,7 +23,7 @@ interface ImportDialogProps {
  * Supports file upload (JSON, YAML, HAR, TXT/cURL) and remote URL sources.
  * Performs automatic format detection and shows import options.
  */
-export function ImportDialog({ open, onClose, onImport }: ImportDialogProps) {
+export function ImportDialog({ open, onClose, onImport, sources }: ImportDialogProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [source, setSource] = useState<'file' | 'url'>('file');
   const [url, setUrl] = useState('');
@@ -48,6 +50,10 @@ export function ImportDialog({ open, onClose, onImport }: ImportDialogProps) {
     'skip' | 'overwrite' | 'keep-both' | 'decide-per-item'
   >('skip');
 
+  // Source selection
+  const [selectedSourceId, setSelectedSourceId] = useState<string>('');
+  const [newSourceName, setNewSourceName] = useState('');
+
   useEffect(() => {
     if (open) {
       closeButtonRef.current?.focus();
@@ -63,6 +69,8 @@ export function ImportDialog({ open, onClose, onImport }: ImportDialogProps) {
       setConvertAssertions(false);
       setFoldersToTags(true);
       setConflictStrategy('skip');
+      setSelectedSourceId('');
+      setNewSourceName('');
       setDetecting(false);
     }
   }, [open]);
@@ -122,6 +130,8 @@ export function ImportDialog({ open, onClose, onImport }: ImportDialogProps) {
         foldersToTags,
       },
       conflictStrategy,
+      sourceId: selectedSourceId || undefined,
+      newSourceName: selectedSourceId === '' ? newSourceName : undefined,
     };
     if (envFileContent) {
       config.envFileContent = envFileContent;
@@ -298,6 +308,34 @@ export function ImportDialog({ open, onClose, onImport }: ImportDialogProps) {
                       <small>将集合文件夹层级转换为接口标签</small>
                     </div>
                   </label>
+                </div>
+
+                {/* Source selection */}
+                <div className="import-strategy-section">
+                  <h3 className="import-section-title">所属系统</h3>
+                  <div className="modal-field">
+                    <select
+                      value={selectedSourceId}
+                      onChange={(e) => setSelectedSourceId(e.target.value)}
+                      className="input"
+                    >
+                      <option value="">新建系统...</option>
+                      {sources.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name} ({s.sourceLabel})
+                        </option>
+                      ))}
+                    </select>
+                    {selectedSourceId === '' && (
+                      <input
+                        className="input"
+                        value={newSourceName}
+                        onChange={(e) => setNewSourceName(e.target.value)}
+                        placeholder="新系统名称，例如：支付服务"
+                        style={{ marginTop: 8 }}
+                      />
+                    )}
+                  </div>
                 </div>
 
                 {/* Conflict strategy */}

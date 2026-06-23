@@ -26,4 +26,8 @@ export interface ImportConfig {
   };
   /** Strategy for handling duplicate endpoint conflicts. */
   conflictStrategy: 'skip' | 'overwrite' | 'keep-both' | 'decide-per-item';
+  /** Which ApiSource this import belongs to. If empty, creates a new source. */
+  sourceId?: string;
+  /** Name for a new ApiSource when sourceId is not provided. */
+  newSourceName?: string;
 }
