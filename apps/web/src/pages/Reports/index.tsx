@@ -23,6 +23,7 @@ import {
 import { initialRuns, testPlans } from '../../data';
 import type { RunStatus, RunMeta, TriggerType, TestPlan } from '../../types';
 import { useWorkflowStore } from '../../stores/workflowStore';
+import { LiveRunPanel } from '../../components/reports/LiveRunPanel';
 
 // ─── Report constants ──────────────────────────────────────────
 
@@ -264,6 +265,7 @@ function ReportListView() {
           )}
         </div>
       </section>
+      <LiveRunPanel />
     </main>
   );
 }
