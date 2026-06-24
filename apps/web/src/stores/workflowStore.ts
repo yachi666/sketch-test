@@ -1,3 +1,4 @@
+import type { ExecutionLog, RunState, WorkflowStep } from '../types';
 import { create } from 'zustand';
 import { initialLogs, initialSteps, makeLogs, workflowStepsMap, workflows } from '../data';
 import {
@@ -8,8 +9,7 @@ import {
   lsSet,
   lsSetJSON,
 } from '../lib/storage';
-import { cpClient } from '../lib/cp-client';
-import type { ExecutionLog, RunState, WorkflowStep } from '../types';
+import { cpClient, type Workflow } from '../lib/cp-client';
 
 const FIXTURE_BASE = 'http://localhost:3800';
 
@@ -21,6 +21,10 @@ interface WorkflowState {
   runState: RunState;
   runningRef: { current: boolean };
   currentRunId: string | null;
+  /** Workflows fetched from CP. */
+  cpWorkflows: Workflow[];
+  loading: boolean;
+  error: string | null;
 
   setActiveWorkflowId: (id: string | null) => void;
   setSteps: (stepsOrUpdater: WorkflowStep[] | ((prev: WorkflowStep[]) => WorkflowStep[])) => void;
@@ -31,6 +35,8 @@ interface WorkflowState {
   backToList: () => void;
   saveDraft: () => void;
   runWorkflow: () => Promise<void>;
+  /** Fetch workflows from CP. Falls back to local data. */
+  fetchWorkflowsFromServer: (workspaceId?: string) => Promise<void>;
 }
 
 const sleep = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -78,6 +84,10 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     }
     return null;
   })(),
+
+  cpWorkflows: [],
+  loading: false,
+  error: null,
 
   steps: lsGetJSON<WorkflowStep[]>(LS_WORKFLOW_KEY, initialSteps, (parsed) =>
     Array.isArray(parsed) &&
@@ -212,5 +222,15 @@ export const useWorkflowStore = create<WorkflowState>((set, get) => ({
     }
 
     runningRef.current = false;
+  },
+
+  fetchWorkflowsFromServer: async (workspaceId?: string) => {
+    set({ loading: true, error: null });
+    try {
+      const { workflows: cpWfs } = await cpClient.listWorkflows(workspaceId);
+      set({ cpWorkflows: cpWfs, loading: false });
+    } catch (err) {
+      set({ error: String(err), loading: false });
+    }
   },
 }));

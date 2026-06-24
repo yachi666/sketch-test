@@ -2,13 +2,22 @@ import { create } from 'zustand';
 import { lsGetJSON, lsSetJSON, LS_VARIABLES_KEY } from '../lib/storage';
 import { initialVariables } from '../data';
 import type { Variable } from '../types';
+import { cpClient, type Secret } from '../lib/cp-client';
 
 interface VariableState {
   variables: Variable[];
+  /** Secrets fetched from CP (with encrypted_value hidden). */
+  secrets: Secret[];
+  loading: boolean;
+  error: string | null;
+
   setVariables: (variables: Variable[]) => void;
   createVariable: (v: Variable) => void;
   updateVariable: (v: Variable) => void;
   deleteVariable: (id: string) => void;
+
+  /** Fetch secrets from CP. Falls back silently on error. */
+  fetchSecretsFromServer: (workspaceId?: string) => Promise<void>;
 }
 
 export const useVariableStore = create<VariableState>((set) => ({
@@ -36,6 +45,10 @@ export const useVariableStore = create<VariableState>((set) => ({
     return parsed as Variable[];
   }),
 
+  secrets: [],
+  loading: false,
+  error: null,
+
   setVariables: (variables) => set({ variables }),
 
   createVariable: (v) =>
@@ -58,4 +71,14 @@ export const useVariableStore = create<VariableState>((set) => ({
       lsSetJSON(LS_VARIABLES_KEY, next);
       return { variables: next };
     }),
+
+  fetchSecretsFromServer: async (workspaceId?: string) => {
+    set({ loading: true, error: null });
+    try {
+      const { secrets } = await cpClient.listSecrets(workspaceId);
+      set({ secrets, loading: false });
+    } catch (err) {
+      set({ error: String(err), loading: false });
+    }
+  },
 }));
