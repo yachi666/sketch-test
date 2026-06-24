@@ -19,8 +19,6 @@ pnpm format                # Format all files (biome)
 pnpm clean                 # Remove all dist/ directories
 ```
 
-**Node** >= 22.13.0 · **pnpm** >= 11.8.0 · **Package manager** pnpm@11.8.0
-
 ## Monorepo map
 
 ```
@@ -54,7 +52,7 @@ sketch-test/
 - **Control Plane**: Fastify API server — workspace/project management, API import, test authoring, workflow compilation, run orchestration, scheduling, reporting, IAM with JWT auth.
 - **Runner**: Independent Node.js/TypeScript process. Deployed near the system under test. Pulls tasks via lease, executes HTTP requests, redacts secrets, uploads events.
 - **AI Worker**: Planned for M3 — spec parsing, Git analysis, and draft generation.
-- **PostgreSQL**: Transactional metadata and run indexes. 22 tables covering M0–M2 schema.
+- **PostgreSQL**: Transactional metadata and run indexes.
 - **S3-compatible object storage**: Raw specs, request/response artifacts, generated outputs (not yet integrated).
 - **No Kafka in V1** — task scheduling uses PostgreSQL persistent tasks and leases.
 
@@ -64,14 +62,14 @@ sketch-test/
 
 ### Language & tooling
 - **TypeScript strict** across all packages and apps.
-- **Biome** for formatting and linting (space indent 2, single quotes, semicolons, trailing commas, 100 char line width).
-- **Vitest** for testing (workspace config in `vitest.workspace.ts`).
+- **Biome** for formatting and linting (see `biome.json` for rules).
+- **Vitest** for testing (search the repo root for the vitest workspace config file).
 - **Turbo** for task orchestration.
 - **pnpm catalog** for shared dependency versions (`pnpm-workspace.yaml`).
 - **Changesets** for versioning (`pnpm changeset`).
 
 ### Code style
-- All contracts use **Zod schemas** for runtime validation — types are derived with `z.infer<typeof Schema>`.
+- All contracts use **Zod schemas** for runtime validation; types are inferred from schemas.
 - Exported schemas use the `Schema` suffix (e.g., `EndpointSchema`). Inferred types use the plain name (`Endpoint`).
 - Every contract file starts with a JSDoc block stating the schema version, purpose, and invariants.
 - Packages import from `@sketch-test/contracts-common` for shared primitives (EntityId, ContentHash, Instant, etc.).
@@ -95,27 +93,9 @@ Use the canonical terms and product principles from [CONTEXT.md](CONTEXT.md). Ke
 - **Unit tests**: `vitest run` per package — fast, no external dependencies.
 - **Golden tests**: all 5 contract packages have golden tests that serialize Zod output to JSON and compare against checked-in snapshots.
 - **Adapter tests**: each adapter (OpenAPI, Postman, HAR, RAML, format-detector) has fixture-based tests.
-- **Integration tests**: use the Hermetic Fixture Server (`packages/test-fixtures/hermetic-fixture-server`). It provides a deterministic REST API (users, auth, orders, payments) with fixed clock, fixed random seed, and fault injection. Start with `pnpm dev:fixture`.
+- **Integration tests**: use the Hermetic Fixture Server (look under `packages/test-fixtures/`). It provides a deterministic REST API (users, auth, orders, payments) with fixed clock, fixed random seed, and fault injection. Start with `pnpm dev:fixture`.
 - **Fault injection**: Set `FAULT_MODE=timeout|500|slow` and `FAULT_TARGET=/api/payments` to inject faults into specific endpoints.
 - **Control Plane and Web app** do not yet have automated tests — this is a known gap.
-
-## Current status
-
-M0 (feasibility) is complete. M1 and M2 features are in active development. Key modules built:
-
-- ✅ Monorepo setup with pnpm workspace, TypeScript strict, Biome, Vitest, Turbo
-- ✅ 5 contract packages with Zod schemas and golden tests
-- ✅ 5 adapters: OpenAPI, Postman, HAR, RAML, format-detector
-- ✅ Runner with HTTP execution, assertion evaluation, variable extraction, redaction
-- ✅ Hermetic Fixture Server with 8 business process scenarios (BP-01 through BP-08)
-- ✅ CI pipeline (`.github/workflows/ci.yml`)
-- ✅ Control Plane: 14 modules, ~80 API endpoints, 22 database tables (M0–M2 schema)
-- ✅ Workflow Compiler (677 lines) — compiles WorkflowDefinitions into ExecutionPlans
-- ✅ Web app: 10 pages, 7 Zustand stores, connected to Control Plane
-- ✅ CLI tool with GitHub Actions and GitLab CI examples
-- 🔲 Control Plane and Web automated tests
-- 🔲 AI Worker
-- 🔲 S3 object storage integration
 
 ## Docs index
 
@@ -130,4 +110,5 @@ M0 (feasibility) is complete. M1 and M2 features are in active development. Key 
 | [docs/agents/domain.md](docs/agents/domain.md) | Agent instructions for domain docs |
 | [docs/agents/issue-tracker.md](docs/agents/issue-tracker.md) | GitHub issue conventions |
 | [docs/agents/triage-labels.md](docs/agents/triage-labels.md) | Triage label vocabulary |
+| [docs/STATUS.md](docs/STATUS.md) | Current project status and milestone progress (snapshot) |
 | [AGENTS.md](AGENTS.md) | Agent skill routing |
