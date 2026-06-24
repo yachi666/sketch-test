@@ -5,6 +5,7 @@ import { sendError } from '../../shared/errors.js';
 import {
   createFixtureRun,
   createRunFromSteps,
+  createRunFromWorkflow,
   getApiVersion,
   getRun,
   listRuns,
@@ -114,6 +115,38 @@ export async function runRoutes(app: FastifyInstance): Promise<void> {
 
     const { runId, plan } = createRunFromSteps(parsed.data.steps);
     reply.status(201).send({ runId, plan });
+  });
+
+  /** Create a Run from a published workflow version. */
+  app.post('/api/runs/from-workflow', async (request, reply) => {
+    const parsed = z
+      .object({
+        workflowVersionId: z.string().min(1).max(256),
+      })
+      .safeParse(request.body);
+
+    if (!parsed.success) {
+      return sendError(reply, 400, 'INVALID_INPUT', 'Invalid request', [
+        { field: 'body', message: parsed.error.message },
+      ]);
+    }
+
+    try {
+      const result = await createRunFromWorkflow(parsed.data.workflowVersionId);
+      reply.status(201).send({
+        runId: result.runId,
+        workflowVersionId: result.workflowVersionId,
+        plan: result.plan,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      console.error('[run] createRunFromWorkflow error:', message);
+
+      if (message.includes('not found')) {
+        return sendError(reply, 404, 'NOT_FOUND', message);
+      }
+      return sendError(reply, 500, 'INTERNAL_ERROR', 'Failed to create run from workflow');
+    }
   });
 
   /** List all runs. */
