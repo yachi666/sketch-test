@@ -2,11 +2,16 @@
  * Runner Registry Service
  *
  * Manages runner lifecycle: registration, heartbeat, status, and deregistration.
- * Runner tokens are stored in-memory (Map) — this is a dev-mode limitation.
- * In production, tokens should be hashed and stored in the database.
+ * Runner tokens are SHA-256 hashed and stored in the `runner_tokens` table —
+ * raw tokens are never persisted. Token verification hashes the incoming token
+ * and looks up the hash.
+ *
+ * A legacy in-memory fallback (runnerTokens Map) is retained for dev convenience
+ * but new registrations use the database.
  *
  * Invariants:
  * - Tokens are generated with crypto.randomBytes for unpredictability.
+ * - Only SHA-256(token) is stored — raw tokens are not recoverable from DB.
  * - A runner can only belong to one workspace.
  * - Heartbeat updates last_heartbeat and sets status to 'online'.
  */
@@ -15,10 +20,14 @@ import crypto from 'node:crypto';
 import { pool } from '../../db/db.js';
 import { runnerId } from '../../shared/id.js';
 
-// ── In-memory token store (dev mode) ──
-// Map<token, { runnerId: string; workspaceId: string }>
-// NOTE: In production, tokens should be hashed (e.g. SHA-256) and stored
-// in a database table with expiration, scopes, and revocation support.
+// ── Token hashing ───────────────────────────────────────────────────
+
+function hashToken(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+// ── Legacy in-memory token store (for backward compat) ──────────────
+
 export const runnerTokens = new Map<string, { runnerId: string; workspaceId: string }>();
 
 export interface RunnerRecord {
@@ -86,6 +95,15 @@ export async function registerRunner(
     [id, workspaceId, name, version, JSON.stringify(labels)],
   );
 
+  // Store token hash in DB
+  const tokenHash = hashToken(token);
+  await pool.query(
+    `INSERT INTO runner_tokens (token_hash, runner_id, workspace_id)
+     VALUES ($1, $2, $3)
+     ON CONFLICT (token_hash) DO NOTHING`,
+    [tokenHash, id, workspaceId],
+  );
+  // Also keep in legacy map for transition
   runnerTokens.set(token, { runnerId: id, workspaceId });
   return { id, token };
 }
@@ -136,19 +154,36 @@ export async function updateRunnerStatus(
 
 /** Delete a runner and its tokens. */
 export async function deleteRunner(id: string): Promise<void> {
-  // Remove all tokens associated with this runner
+  // DB cascade handles runner_tokens, but clean up explicitly for safety
+  await pool.query(`DELETE FROM runner_tokens WHERE runner_id = $1`, [id]);
+  await pool.query(`DELETE FROM runner_heartbeats WHERE runner_id = $1`, [id]);
+  await pool.query(`DELETE FROM runners WHERE id = $1`, [id]);
+  // Legacy in-memory cleanup
   for (const [token, data] of runnerTokens) {
     if (data.runnerId === id) {
       runnerTokens.delete(token);
     }
   }
-
-  await pool.query(`DELETE FROM runner_heartbeats WHERE runner_id = $1`, [id]);
-  await pool.query(`DELETE FROM runners WHERE id = $1`, [id]);
 }
 
-/** Verify a runner token and return the associated runner info. */
-export function verifyRunnerToken(token: string): { runnerId: string; workspaceId: string } | null {
+/** Verify a runner token and return the associated runner info.
+ *  Checks the `runner_tokens` DB table first, then falls back to in-memory legacy store. */
+export async function verifyRunnerToken(
+  token: string,
+): Promise<{ runnerId: string; workspaceId: string } | null> {
+  // Check DB first (hashing the token)
+  const tokenHash = hashToken(token);
+  const result = await pool.query(
+    `SELECT runner_id, workspace_id FROM runner_tokens WHERE token_hash = $1`,
+    [tokenHash],
+  );
+  if (result.rows.length > 0) {
+    return {
+      runnerId: result.rows[0].runner_id,
+      workspaceId: result.rows[0].workspace_id,
+    };
+  }
+  // Fall back to legacy in-memory store
   return runnerTokens.get(token) ?? null;
 }
 

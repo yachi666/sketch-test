@@ -84,7 +84,7 @@ export async function diffApiVersions(
 /**
  * Core diff logic comparing two CanonicalApiModel instances.
  */
-function computeDiff(base: CanonicalApiModel, target: CanonicalApiModel): DiffEntry[] {
+export function computeDiff(base: CanonicalApiModel, target: CanonicalApiModel): DiffEntry[] {
   const changes: DiffEntry[] = [];
 
   // ── Endpoints ──
@@ -261,7 +261,7 @@ function computeDiff(base: CanonicalApiModel, target: CanonicalApiModel): DiffEn
  * - Narrowing enum values
  * - Removing properties
  */
-function isSchemaBreakingChange(before: unknown, after: unknown): boolean {
+export function isSchemaBreakingChange(before: unknown, after: unknown): boolean {
   if (typeof before !== 'object' || typeof after !== 'object' || !before || !after) {
     return true; // Structural change — assume breaking
   }

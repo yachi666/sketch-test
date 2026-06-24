@@ -105,7 +105,7 @@ export async function runnerRegistryRoutes(app: FastifyInstance): Promise<void> 
     const token = (request.headers['x-runner-token'] as string) ?? '';
 
     // Verify the token belongs to this runner
-    const tokenInfo = verifyRunnerToken(token);
+    const tokenInfo = await verifyRunnerToken(token);
     if (!tokenInfo || tokenInfo.runnerId !== id) {
       return sendError(reply, 401, 'UNAUTHORIZED', 'Invalid or missing runner token');
     }

@@ -26,11 +26,13 @@ import type {
   AssertionEvaluatedEvent,
   ExecutionPlan,
   FrozenStep,
+  FrozenTeardownStep,
   ResponseReceivedEvent,
   RunEvent,
   RunFinishedEvent,
   RunStartedEvent,
   StepFinishedEvent,
+  StepRetriedEvent,
   StepStartedEvent,
   VariableExtractedEvent,
 } from '@sketch-test/runner-protocol';
@@ -486,77 +488,135 @@ async function executeStep(
   const timeout = setTimeout(() => controller.abort(), step.timeoutMs);
 
   try {
-    const fetchStart = Date.now();
+    // ── Polling loop ─────────────────────────────────────────────
+    const pollIntervalMs = step.pollIntervalMs ?? 1000;
+    const pollMaxDurationMs = step.pollMaxDurationMs ?? 0;
+    const pollMaxAttempts = step.pollMaxAttempts ?? 1;
+    const pollStart = Date.now();
+    let response: Response | null = null;
+    let responseBody: unknown;
+    let responseHeaders: Record<string, string> = {};
+    let durationMs = 0;
+    let bodySizeBytes = 0;
+    let resolvedUrlWithParams = resolvedUrl;
 
-    // Prepare body
-    let body: string | undefined;
-    if (step.body !== undefined && step.body !== null) {
-      body = typeof step.body === 'string' ? step.body : JSON.stringify(step.body);
-      body = variables.resolve(body);
-    }
+    for (let pollAttempt = 1; pollAttempt <= pollMaxAttempts; pollAttempt++) {
+      const fetchStart = Date.now();
 
-    // Resolve query parameters
-    const url = new URL(resolvedUrl);
-    if (step.query) {
-      for (const [key, value] of Object.entries(step.query)) {
-        url.searchParams.set(key, variables.resolve(value));
+      // Prepare body
+      let body: string | undefined;
+      if (step.body !== undefined && step.body !== null) {
+        body = typeof step.body === 'string' ? step.body : JSON.stringify(step.body);
+        body = variables.resolve(body);
       }
+
+      // Resolve query parameters
+      const url = new URL(resolvedUrl);
+      if (step.query) {
+        for (const [key, value] of Object.entries(step.query)) {
+          url.searchParams.set(key, variables.resolve(value));
+        }
+      }
+      resolvedUrlWithParams = url.toString();
+
+      // Request prepared event (only on first attempt)
+      if (pollAttempt === 1) {
+        events.push({
+          ...makeMeta(),
+          eventType: 'request.prepared',
+          headers: redactHeaders(resolvedHeaders),
+          method: step.method,
+          url: resolvedUrlWithParams,
+          bodySizeBytes: body ? new TextEncoder().encode(body).length : undefined,
+        });
+      }
+
+      // Send request
+      events.push({
+        ...makeMeta(),
+        eventType: 'request.sent',
+        sentAt: new Date().toISOString() as Instant,
+      });
+
+      response = await fetch(resolvedUrlWithParams, {
+        method: step.method,
+        headers: resolvedHeaders,
+        body,
+        signal: controller.signal,
+        redirect: 'manual',
+      });
+
+      durationMs = Date.now() - fetchStart;
+      responseHeaders = {};
+      response.headers.forEach((value, key) => {
+        responseHeaders[key] = value;
+      });
+
+      const responseText = await response.text();
+      try {
+        responseBody = JSON.parse(responseText);
+      } catch {
+        responseBody = responseText;
+      }
+
+      bodySizeBytes = new TextEncoder().encode(responseText).length;
+
+      // Response received event
+      const responseEvent: ResponseReceivedEvent = {
+        ...makeMeta(),
+        eventType: 'response.received',
+        statusCode: response.status as ResponseReceivedEvent['statusCode'],
+        headers: redactHeaders(responseHeaders),
+        bodySizeBytes,
+        durationMs,
+        bodyPreview: redactBody(responseBody),
+      };
+      events.push(responseEvent);
+
+      // Check polling condition
+      if (step.pollUntilExpression && pollMaxAttempts > 1) {
+        // Resolve the polling expression against the response
+        let conditionMet = false;
+        try {
+          const pollValue = jsonPathGet(responseBody, step.pollUntilExpression);
+          if (pollValue !== undefined && pollValue !== null) {
+            const strValue = String(pollValue);
+            conditionMet = strValue === 'true' || strValue === '1';
+            // Also check if the expression itself is satisfied
+            if (!conditionMet) {
+              // For expressions like "${status}", resolve via variables
+              const resolved = variables.resolve(step.pollUntilExpression);
+              conditionMet = resolved === 'true' || resolved === '1' || resolved.includes('true');
+            }
+          }
+        } catch {
+          // If expression evaluation fails, stop polling
+          conditionMet = true;
+        }
+
+        if (conditionMet) break;
+
+        // Check duration limit
+        if (pollMaxDurationMs > 0 && Date.now() - pollStart >= pollMaxDurationMs) {
+          // Exceeded max duration; continue with last response
+          break;
+        }
+
+        // Wait before next poll
+        await new Promise((r) => setTimeout(r, pollIntervalMs));
+        continue;
+      }
+
+      // No polling configured, or only one attempt — exit after first request
+      break;
     }
-
-    // Request prepared event
-    events.push({
-      ...makeMeta(),
-      eventType: 'request.prepared',
-      headers: redactHeaders(resolvedHeaders),
-      method: step.method,
-      url: url.toString(),
-      bodySizeBytes: body ? new TextEncoder().encode(body).length : undefined,
-    });
-
-    // Send request
-    events.push({
-      ...makeMeta(),
-      eventType: 'request.sent',
-      sentAt: new Date().toISOString() as Instant,
-    });
-
-    const response = await fetch(url.toString(), {
-      method: step.method,
-      headers: resolvedHeaders,
-      body,
-      signal: controller.signal,
-      redirect: 'manual',
-    });
 
     clearTimeout(timeout);
 
-    const durationMs = Date.now() - fetchStart;
-    const responseHeaders: Record<string, string> = {};
-    response.headers.forEach((value, key) => {
-      responseHeaders[key] = value;
-    });
-
-    let responseBody: unknown;
-    const responseText = await response.text();
-    try {
-      responseBody = JSON.parse(responseText);
-    } catch {
-      responseBody = responseText;
+    // Ensure response is available (always set after at least one poll attempt)
+    if (!response) {
+      throw new Error('No response received — polling loop produced no result');
     }
-
-    const bodySizeBytes = new TextEncoder().encode(responseText).length;
-
-    // Response received event
-    const responseEvent: ResponseReceivedEvent = {
-      ...makeMeta(),
-      eventType: 'response.received',
-      statusCode: response.status as ResponseReceivedEvent['statusCode'],
-      headers: redactHeaders(responseHeaders),
-      bodySizeBytes,
-      durationMs,
-      bodyPreview: redactBody(responseBody),
-    };
-    events.push(responseEvent);
 
     // Variable extraction
     const extractedVariables: StepExecutionResult['extractedVariables'] = [];
@@ -779,7 +839,18 @@ export async function executePlan(
       if (stepResult.status === 'passed') break;
 
       if (attempt <= maxRetries && stepResult.status === 'error') {
-        // Will retry
+        // Emit retry event before retrying
+        const retryEvent: StepRetriedEvent = {
+          runId,
+          sequence: nextSeq(),
+          timestamp: new Date().toISOString() as Instant,
+          attempt,
+          stepId: step.stepId,
+          eventType: 'step.retried',
+          reason: stepResult.error?.message ?? 'unknown error',
+          retryNumber: attempt,
+        };
+        allEvents.push(retryEvent);
         continue;
       }
       break;
@@ -800,6 +871,59 @@ export async function executePlan(
     } else {
       stepsFailed++;
       if (step.onFailure === 'stop' || step.onFailure === 'teardown-and-stop') break;
+    }
+  }
+
+  // ── Execute Teardown Phase ──────────────────────────────────────
+  if (plan.teardown && plan.teardown.steps.length > 0) {
+    // Emit teardown.started event
+    const tdStartedEvent: StepStartedEvent = {
+      runId,
+      sequence: nextSeq(),
+      timestamp: new Date().toISOString() as Instant,
+      attempt: 1,
+      stepId: 'teardown' as EntityId,
+      eventType: 'step.started',
+      resolvedUrl: '(teardown phase)',
+    };
+    allEvents.push(tdStartedEvent);
+
+    for (let ti = 0; ti < plan.teardown.steps.length; ti++) {
+      // biome-ignore lint/style/noNonNullAssertion: loop index check
+      const tdStep = plan.teardown.steps[ti]!;
+
+      if (!tdStep.enabled) continue;
+
+      let tdResult: StepExecutionResult | null = null;
+      const tdMaxRetries = tdStep.maxRetries ?? 1;
+
+      // Convert FrozenTeardownStep to FrozenStep for executeStep compatibility
+      const tdFrozenStep: FrozenStep = {
+        stepId: tdStep.stepId,
+        sequence: ti,
+        method: tdStep.method,
+        urlTemplate: tdStep.urlTemplate,
+        headers: tdStep.headers ?? {},
+        body: tdStep.body,
+        maxRetries: tdMaxRetries,
+        retryBaseDelayMs: 1000,
+        retryBackoffMultiplier: 2,
+        retryOnNetworkError: true,
+        onFailure: 'stop',
+        assertions: [],
+        extractions: [],
+        sideEffect: 'cleanup-required',
+        enabled: true,
+        timeoutMs: tdStep.timeoutMs,
+      };
+
+      for (let attempt = 1; attempt <= tdMaxRetries + 1; attempt++) {
+        tdResult = await executeStep(tdFrozenStep, variables, ti, runId, attempt);
+        for (const event of tdResult.events) {
+          allEvents.push({ ...event, sequence: nextSeq() });
+        }
+        if (tdResult.status === 'passed') break;
+      }
     }
   }
 

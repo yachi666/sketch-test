@@ -7,14 +7,17 @@ import { claimNextRun, updateRunStatus } from './lease.service.js';
  * Extract and verify the X-Runner-Token header.
  * Returns the verified runnerId, or sends a 401 and returns null.
  */
-function authenticateRunner(request: FastifyRequest, reply: FastifyReply): string | null {
+async function authenticateRunner(
+  request: FastifyRequest,
+  reply: FastifyReply,
+): Promise<string | null> {
   const token = (request.headers['x-runner-token'] as string | undefined) ?? '';
   if (!token) {
     sendError(reply, 401, 'UNAUTHORIZED', 'Missing X-Runner-Token header');
     return null;
   }
 
-  const tokenInfo = verifyRunnerToken(token);
+  const tokenInfo = await verifyRunnerToken(token);
   if (!tokenInfo) {
     sendError(reply, 401, 'UNAUTHORIZED', 'Invalid or unknown runner token');
     return null;
@@ -26,7 +29,7 @@ function authenticateRunner(request: FastifyRequest, reply: FastifyReply): strin
 export async function leaseRoutes(app: FastifyInstance): Promise<void> {
   /** Runner polls for the next pending run. Long-poll: waits up to 30s. */
   app.get('/api/runs/next', async (request, reply) => {
-    const runnerId = authenticateRunner(request, reply);
+    const runnerId = await authenticateRunner(request, reply);
     if (!runnerId) return;
 
     // Simple polling with timeout (30s loop with 1s interval)
@@ -45,7 +48,7 @@ export async function leaseRoutes(app: FastifyInstance): Promise<void> {
 
   /** Runner explicitly claims a specific run. */
   app.put('/api/runs/:id/claim', async (request, reply) => {
-    const runnerId = authenticateRunner(request, reply);
+    const runnerId = await authenticateRunner(request, reply);
     if (!runnerId) return;
 
     const { id } = request.params as { id: string };
@@ -60,7 +63,7 @@ export async function leaseRoutes(app: FastifyInstance): Promise<void> {
 
   /** Runner updates run status. */
   app.patch('/api/runs/:id', async (request, reply) => {
-    const runnerId = authenticateRunner(request, reply);
+    const runnerId = await authenticateRunner(request, reply);
     if (!runnerId) return;
 
     const { id } = request.params as { id: string };

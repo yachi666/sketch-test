@@ -78,7 +78,7 @@ interface ResponseDef {
   >;
 }
 
-interface SchemaNode {
+export interface SchemaNode {
   id?: string;
   type?: string;
   enum?: unknown[];
@@ -112,7 +112,7 @@ interface SchemaNode {
  * Resolve a schema ref into a full SchemaNode by walking the canonical schema map.
  * Returns the resolved node with inline properties (resolved recursively).
  */
-function resolveSchema(
+export function resolveSchema(
   ref: string,
   schemas: Record<string, SchemaNode>,
   visited: Set<string> = new Set(),
@@ -171,7 +171,10 @@ function getPropertySchema(
 // ─── Value Generation ──────────────────────────────────────────────
 
 /** Generate a valid value for a given schema node. */
-function generateValidValue(schema: SchemaNode, schemas: Record<string, SchemaNode>): unknown {
+export function generateValidValue(
+  schema: SchemaNode,
+  schemas: Record<string, SchemaNode>,
+): unknown {
   if (schema.example !== undefined) return schema.example;
   if (schema.default !== undefined) return schema.default;
   if (schema.enum && schema.enum.length > 0) return schema.enum[0];
@@ -188,8 +191,8 @@ function generateValidValue(schema: SchemaNode, schemas: Record<string, SchemaNo
     }
     case 'number':
     case 'integer': {
-      if (schema.minimum !== undefined) return schema.minimum;
       if (schema.exclusiveMinimum && schema.minimum !== undefined) return schema.minimum + 1;
+      if (schema.minimum !== undefined) return schema.minimum;
       return schema.type === 'integer' ? 1 : 1.0;
     }
     case 'boolean':
@@ -225,7 +228,10 @@ function generateValidValue(schema: SchemaNode, schemas: Record<string, SchemaNo
 }
 
 /** Generate an invalid (wrong-type) value for a given schema node. */
-function generateInvalidValue(schema: SchemaNode, _schemas: Record<string, SchemaNode>): unknown {
+export function generateInvalidValue(
+  schema: SchemaNode,
+  _schemas: Record<string, SchemaNode>,
+): unknown {
   switch (schema.type) {
     case 'string':
       return 12345;
@@ -244,7 +250,7 @@ function generateInvalidValue(schema: SchemaNode, _schemas: Record<string, Schem
 }
 
 /** Generate a boundary-violating value for a given schema node. */
-function generateBoundaryValue(
+export function generateBoundaryValue(
   schema: SchemaNode,
   schemas: Record<string, SchemaNode>,
 ): { value: unknown; rule: string; expectedStatus: number } | null {
@@ -400,7 +406,7 @@ function buildRequestBody(
 }
 
 /** Build a full request for an endpoint using its first request body. */
-function buildHappyPathRequest(
+export function buildHappyPathRequest(
   endpoint: EndpointDef,
   schemas: Record<string, SchemaNode>,
 ): BuiltRequest {

@@ -202,6 +202,13 @@ export async function runMigrations(): Promise<void> {
         capacity        JSONB DEFAULT '{}',
         recorded_at     TIMESTAMPTZ NOT NULL DEFAULT now()
       );
+
+      CREATE TABLE IF NOT EXISTS runner_tokens (
+        token_hash      TEXT PRIMARY KEY,
+        runner_id       TEXT NOT NULL REFERENCES runners(id) ON DELETE CASCADE,
+        workspace_id    TEXT NOT NULL,
+        created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
     `);
 
     // ── M2: Workflows ──

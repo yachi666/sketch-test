@@ -1,20 +1,23 @@
 /**
- * Auth Middleware — simplified dev authentication for M1.
+ * Auth Middleware — JWT-based authentication.
  *
- * Uses an in-memory session store (Map) with random bearer tokens.
- * This is NOT production auth — it is designed for local development and
- * integration testing. In production, replace with a proper JWT/OIDC flow.
+ * Uses HMAC-SHA256 signed JWTs from ../shared/jwt.ts.
+ * Tokens are stateless (no server-side session storage), enabling:
+ * - Server restart without logging out users
+ * - Multiple CP instances sharing the same JWT_SECRET
  *
- * Session tokens are generated via crypto.randomBytes and stored in memory.
- * They expire after 24 hours of inactivity.
+ * The legacy in-memory session store is preserved as a fallback channel
+ * (e.g., for service accounts issued via the old path), but new user
+ * sessions use JWTs exclusively.
  */
 
 import crypto from 'node:crypto';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { sendError } from '../../shared/errors.js';
+import { verifyJwt, type JwtPayload } from '../../shared/jwt.js';
 import type { User } from './iam.service.js';
 
-// ── Session types ──────────────────────────────────────────────────────────────
+// ── Session types ──────────────────────────────────────────────────
 
 export interface AuthUser {
   id: string;
@@ -24,64 +27,79 @@ export interface AuthUser {
   workspaceId: string;
 }
 
+// ── Legacy session store (kept for transition) ─────────────────────
+
 interface SessionEntry {
   userId: string;
   user: AuthUser;
   createdAt: number;
 }
 
-// ── Session store ──────────────────────────────────────────────────────────────
+const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 
-const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-
-/**
- * In-memory session store: token → session entry.
- * Other modules can import this to inspect or clear sessions.
- */
 export const authSessions = new Map<string, SessionEntry>();
 
-/** Create a session for a user. Returns the bearer token. */
 export function createSession(user: AuthUser): string {
-  // Evict expired sessions before creating a new one
   const now = Date.now();
   for (const [tok, entry] of authSessions) {
     if (now - entry.createdAt > SESSION_TTL_MS) {
       authSessions.delete(tok);
     }
   }
-
   const token = crypto.randomBytes(32).toString('base64url');
   authSessions.set(token, { userId: user.id, user, createdAt: now });
   return token;
 }
 
-/** Destroy a session by token. */
 export function destroySession(token: string): void {
   authSessions.delete(token);
 }
 
-/** Look up a session by token. Returns the user if valid, null otherwise. */
+/** Look up a session by legacy token. */
 function lookupSession(token: string): AuthUser | null {
   const entry = authSessions.get(token);
   if (!entry) return null;
-
   if (Date.now() - entry.createdAt > SESSION_TTL_MS) {
     authSessions.delete(token);
     return null;
   }
-
   return entry.user;
 }
 
-// ── Fastify preHandler hook ────────────────────────────────────────────────────
+// ── Token lookup ───────────────────────────────────────────────────
 
 /**
- * Fastify preHandler hook factory. Validates the bearer token from the
- * Authorization header, attaches `request.user`, and optionally checks roles.
- *
- * Usage:
- *   app.get('/api/auth/me', { preHandler: requireAuth() }, handler);
- *   app.delete('/admin', { preHandler: requireAuth({ roles: ['owner'] }) }, handler);
+ * Try to authenticate using JWT first, then fall back to legacy sessions.
+ */
+function authenticate(header: string): AuthUser | null {
+  const parts = header.split(' ');
+  if (parts.length !== 2 || parts[0]?.toLowerCase() !== 'bearer') return null;
+
+  const token = parts[1]!;
+
+  // Try JWT first (stateless, preferred)
+  if (token.split('.').length === 3) {
+    const payload: JwtPayload | null = verifyJwt(token);
+    if (payload) {
+      return {
+        id: payload.sub,
+        email: payload.email,
+        displayName: payload.displayName,
+        role: payload.role as User['role'],
+        workspaceId: payload.workspaceId,
+      };
+    }
+  }
+
+  // Fall back to legacy session token
+  return lookupSession(token);
+}
+
+// ── Fastify preHandler hook ────────────────────────────────────────
+
+/**
+ * Fastify preHandler hook factory. Validates bearer token (JWT or legacy
+ * session), attaches `request.user`, and optionally checks roles.
  */
 export function requireAuth(options?: { roles?: User['role'][] }) {
   return async function preHandler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -91,14 +109,7 @@ export function requireAuth(options?: { roles?: User['role'][] }) {
       return;
     }
 
-    const parts = header.split(' ');
-    if (parts.length !== 2 || parts[0]?.toLowerCase() !== 'bearer') {
-      sendError(reply, 401, 'UNAUTHORIZED', 'Authorization header must be "Bearer <token>"');
-      return;
-    }
-
-    const token = parts[1]!;
-    const user = lookupSession(token);
+    const user = authenticate(header);
     if (!user) {
       sendError(reply, 401, 'UNAUTHORIZED', 'Invalid or expired token');
       return;
@@ -109,12 +120,11 @@ export function requireAuth(options?: { roles?: User['role'][] }) {
       return;
     }
 
-    // Attach user to request for downstream handlers
     (request as unknown as Record<string, unknown>)['user'] = user;
   };
 }
 
-// ── Fastify type augmentation ──────────────────────────────────────────────────
+// ── Fastify type augmentation ──────────────────────────────────────
 
 declare module 'fastify' {
   interface FastifyRequest {

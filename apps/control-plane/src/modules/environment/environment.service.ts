@@ -25,9 +25,31 @@ import { environmentId, environmentVersionId, secretId } from '../../shared/id.j
 
 // ── Encryption utilities ──
 
+const DEV_KEY = 'sketch-test-dev-key-32chr!!';
+let _encryptionKeyChecked = false;
+
 function getEncryptionKey(): Buffer {
-  const raw = process.env['SECRET_KEY'] ?? 'sketch-test-dev-key-32chr!!';
-  let key = raw;
+  const raw = process.env['SECRET_KEY'];
+  if (!raw) {
+    if (!_encryptionKeyChecked) {
+      console.warn(
+        '[security] SECRET_KEY env var not set — using default dev key. ' +
+          'Set SECRET_KEY to a strong random value before deploying to production.',
+      );
+      _encryptionKeyChecked = true;
+    }
+  }
+  if (raw && raw === DEV_KEY) {
+    if (!_encryptionKeyChecked) {
+      console.warn(
+        '[security] SECRET_KEY is set to the default dev value — ' +
+          'this is not safe for production. Generate a unique key.',
+      );
+      _encryptionKeyChecked = true;
+    }
+  }
+  const keySource = raw ?? DEV_KEY;
+  let key = keySource;
   if (key.length < 32) key = key.padEnd(32, '0');
   if (key.length > 32) key = key.slice(0, 32);
   return Buffer.from(key, 'utf8');

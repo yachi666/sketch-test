@@ -25,7 +25,7 @@ export async function eventRoutes(app: FastifyInstance): Promise<void> {
     if (!token) {
       return sendError(reply, 401, 'UNAUTHORIZED', 'Missing X-Runner-Token header');
     }
-    const tokenInfo = verifyRunnerToken(token);
+    const tokenInfo = await verifyRunnerToken(token);
     if (!tokenInfo) {
       return sendError(reply, 401, 'UNAUTHORIZED', 'Invalid or unknown runner token');
     }

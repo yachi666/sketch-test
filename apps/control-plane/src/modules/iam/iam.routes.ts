@@ -23,6 +23,7 @@ import {
   revokeServiceAccount,
 } from './iam.service.js';
 import { requireAuth, createSession } from './auth.middleware.js';
+import { signJwt } from '../../shared/jwt.js';
 
 // ── Zod schemas ────────────────────────────────────────────────────────────────
 
@@ -228,7 +229,13 @@ export async function iamRoutes(app: FastifyInstance): Promise<void> {
         workspaceId: userWithHash.workspaceId,
       };
 
-      const token = createSession(authUser);
+      const token = signJwt({
+        sub: authUser.id,
+        email: authUser.email,
+        displayName: authUser.displayName,
+        role: authUser.role,
+        workspaceId: authUser.workspaceId,
+      });
 
       reply.send({
         user: {
