@@ -101,6 +101,8 @@ export interface ApiEndpoint {
   deprecated: boolean;
   /** Which API version this endpoint belongs to. */
   versionId?: EntityId;
+  /** ISO-8601 timestamp of the last modification to this endpoint. */
+  updatedAt?: string;
 }
 
 // ─── API Version ────────────────────────────────────────────────

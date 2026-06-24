@@ -169,20 +169,6 @@ export function ApiView({
     [variables],
   );
 
-  // Compute workflow usage per endpoint
-  const usedInWorkflows = useMemo(() => {
-    const map: Record<string, string[]> = {};
-    for (const ep of allEndpoints) {
-      const epDetail = details[ep.id];
-      if (epDetail) {
-        map[ep.id] = epDetail.tags.filter((t) =>
-          ['核心流程', '认证', '支付', '订单', '生命周期'].includes(t),
-        );
-      }
-    }
-    return map;
-  }, [allEndpoints, details]);
-
   // Resolve the current detail based on mode
   const currentDetail = useMemo(() => {
     if (panelMode === 'create') return emptyEndpointDetail();
@@ -595,7 +581,6 @@ export function ApiView({
       <ApiTable
         endpoints={allEndpoints}
         activeVersion={activeVersion}
-        usedInWorkflows={usedInWorkflows}
         onViewDetail={handleViewDetail}
         onEdit={handleEdit}
         onDelete={handleDelete}

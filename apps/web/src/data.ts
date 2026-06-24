@@ -94,6 +94,7 @@ export const endpoints: ApiEndpoint[] = [
     tags: ['用户', '注册'],
     deprecated: false,
     versionId: 'v2',
+    updatedAt: '2026-06-24T10:30:00Z',
   },
   {
     id: 'e2',
@@ -106,6 +107,7 @@ export const endpoints: ApiEndpoint[] = [
     tags: ['认证', '用户'],
     deprecated: false,
     versionId: 'v2',
+    updatedAt: '2026-06-23T14:20:00Z',
   },
   {
     id: 'e3',
@@ -118,6 +120,7 @@ export const endpoints: ApiEndpoint[] = [
     tags: ['订单', '核心流程'],
     deprecated: false,
     versionId: 'v2',
+    updatedAt: '2026-06-22T09:15:00Z',
   },
   {
     id: 'e4',
@@ -130,6 +133,7 @@ export const endpoints: ApiEndpoint[] = [
     tags: ['支付', '核心流程'],
     deprecated: false,
     versionId: 'v2',
+    updatedAt: '2026-06-20T16:45:00Z',
   },
   {
     id: 'e5',
@@ -142,6 +146,7 @@ export const endpoints: ApiEndpoint[] = [
     tags: ['订单', '查询'],
     deprecated: false,
     versionId: 'v2',
+    updatedAt: '2026-06-18T11:00:00Z',
   },
   {
     id: 'e6',
@@ -154,6 +159,7 @@ export const endpoints: ApiEndpoint[] = [
     tags: ['订单', '生命周期'],
     deprecated: false,
     versionId: 'v2',
+    updatedAt: '2026-06-15T08:30:00Z',
   },
 ];
 
