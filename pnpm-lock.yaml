@@ -25,8 +25,8 @@ catalogs:
       specifier: 19.2.0
       version: 19.2.0
     react-dom:
-      specifier: 19.2.0
-      version: 19.2.0
+      specifier: 19.2.7
+      version: 19.2.7
     tsx:
       specifier: ^4.19.0
       version: 4.22.4
@@ -160,7 +160,7 @@ importers:
     dependencies:
       '@phosphor-icons/react':
         specifier: 'catalog:'
-        version: 2.1.10(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 2.1.10(react-dom@19.2.7(react@19.2.0))(react@19.2.0)
       '@sketch-test/adapter-har':
         specifier: workspace:*
         version: link:../../packages/adapters/har
@@ -184,10 +184,10 @@ importers:
         version: 19.2.0
       react-dom:
         specifier: 'catalog:'
-        version: 19.2.0(react@19.2.0)
+        version: 19.2.7(react@19.2.0)
       react-router-dom:
         specifier: ^7.18.0
-        version: 7.18.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 7.18.0(react-dom@19.2.7(react@19.2.0))(react@19.2.0)
       vite:
         specifier: 'catalog:'
         version: 6.4.2(@types/node@22.19.21)(jiti@2.6.1)(tsx@4.22.4)(yaml@2.9.0)
@@ -200,7 +200,7 @@ importers:
         version: 6.9.1
       '@testing-library/react':
         specifier: ^16.3.0
-        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.0))(react@19.2.0)
       '@types/react':
         specifier: 'catalog:'
         version: 19.2.17
@@ -1721,7 +1721,7 @@ packages:
   git-raw-commits@4.0.0:
     resolution: {integrity: sha512-ICsMM1Wk8xSGMowkOmPrzo2Fgmfo4bMHLNX6ytHjajRJUqvHOw/TFapQ+QG75c3X/tTDDhOSRPGC52dDbNM8FQ==}
     engines: {node: '>=16'}
-    deprecated: This package is no longer maintained. For the JavaScript API, please use @conventional-changelog/git-client instead.
+    deprecated: Deprecated and no longer maintained. Use @conventional-changelog/git-client instead.
     hasBin: true
 
   glob-parent@5.1.2:
@@ -2211,10 +2211,10 @@ packages:
   quick-format-unescaped@4.0.4:
     resolution: {integrity: sha512-tYC1Q1hgyRuHgloV/YXs2w15unPVh8qfu/qCTfhTYamaw7fyhumKa2yGpdSo87vY32rIclj+4fWYQXUMs9EHvg==}
 
-  react-dom@19.2.0:
-    resolution: {integrity: sha512-UlbRu4cAiGaIewkPyiRGJk0imDN2T3JjieT6spoL2UeSf5od4n5LB/mQ4ejmxhCFT1tYe8IvaFulzynWovsEFQ==}
+  react-dom@19.2.7:
+    resolution: {integrity: sha512-t0BRVXvbiE/o20Hfw669rLbMCDWtYZLvmJigy2f0MxsXF+71pxhR3xOkspmsO8h3ZlNzyibAmtCa3l4lYKk6gQ==}
     peerDependencies:
-      react: ^19.2.0
+      react: ^19.2.7
 
   react-is@17.0.2:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
@@ -3332,10 +3332,10 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.20.1
 
-  '@phosphor-icons/react@2.1.10(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
+  '@phosphor-icons/react@2.1.10(react-dom@19.2.7(react@19.2.0))(react@19.2.0)':
     dependencies:
       react: 19.2.0
-      react-dom: 19.2.0(react@19.2.0)
+      react-dom: 19.2.7(react@19.2.0)
 
   '@pinojs/redact@0.4.0': {}
 
@@ -3436,12 +3436,12 @@ snapshots:
       picocolors: 1.1.1
       redent: 3.0.0
 
-  '@testing-library/react@16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
+  '@testing-library/react@16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.0))(react@19.2.0)':
     dependencies:
       '@babel/runtime': 7.29.7
       '@testing-library/dom': 10.4.1
       react: 19.2.0
-      react-dom: 19.2.0(react@19.2.0)
+      react-dom: 19.2.7(react@19.2.0)
     optionalDependencies:
       '@types/react': 19.2.17
       '@types/react-dom': 19.2.3(@types/react@19.2.17)
@@ -4377,7 +4377,7 @@ snapshots:
 
   quick-format-unescaped@4.0.4: {}
 
-  react-dom@19.2.0(react@19.2.0):
+  react-dom@19.2.7(react@19.2.0):
     dependencies:
       react: 19.2.0
       scheduler: 0.27.0
@@ -4386,19 +4386,19 @@ snapshots:
 
   react-refresh@0.17.0: {}
 
-  react-router-dom@7.18.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+  react-router-dom@7.18.0(react-dom@19.2.7(react@19.2.0))(react@19.2.0):
     dependencies:
       react: 19.2.0
-      react-dom: 19.2.0(react@19.2.0)
-      react-router: 7.18.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      react-dom: 19.2.7(react@19.2.0)
+      react-router: 7.18.0(react-dom@19.2.7(react@19.2.0))(react@19.2.0)
 
-  react-router@7.18.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+  react-router@7.18.0(react-dom@19.2.7(react@19.2.0))(react@19.2.0):
     dependencies:
       cookie: 1.1.1
       react: 19.2.0
       set-cookie-parser: 2.7.2
     optionalDependencies:
-      react-dom: 19.2.0(react@19.2.0)
+      react-dom: 19.2.7(react@19.2.0)
 
   react@19.2.0: {}
 
