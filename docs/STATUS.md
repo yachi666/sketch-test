@@ -30,7 +30,7 @@ still incomplete.
 | Product E2E | `E2E_MANAGED_POSTGRES=1 pnpm e2e:product`: production CP/Runner/Web, managed disposable PostgreSQL 18, pinned MinIO, fixture, CLI and Chromium | Pass: 8 imported endpoints, 6 externalized events, report/trace/audit evidence |
 | Recovery E2E | Same product run: `pg_dump` → empty restore DB plus complete S3 recovery-bucket mirror and per-object SHA-256 comparison | Pass: restored Run `passed`, migration count 1, 8/8 objects |
 | Compose clean install | Isolated project name and new volumes; built production CP/Web/Runner; `/ready`, Web health, bootstrap/login and one Runner registration | Pass; temporary containers, images and volumes removed |
-| Release CI | Forced lint/check/build/test plus product/recovery E2E and isolated Compose smoke are required before release | Workflow configured locally; GitHub-hosted execution still requires an authorized push |
+| Release CI | Forced lint/check/build/test plus product/recovery E2E and isolated Compose smoke are required before release | Pass on [PR #24](https://github.com/yachi666/sketch-test/pull/24): all six required GitHub-hosted jobs passed; release correctly skipped for the PR |
 | Configuration | Missing/insecure database, JWT, encryption, Runner and S3 settings fail production startup; `.env.example` passes `docker compose config -q` | Pass for supported single-node target |
 | Observability | Readiness checks PostgreSQL/S3; normalized metrics; W3C trace and request ID correlated with events/audit | Pass at local runtime level |
 
