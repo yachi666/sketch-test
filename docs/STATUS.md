@@ -48,15 +48,29 @@ still incomplete.
 
 ## Remaining production work
 
-1. Validate TLS ingress, external secret management, off-host encrypted backup,
-   managed PostgreSQL/S3 failover, and restore drills in the target environment.
-2. Add load/soak testing, multi-instance lease contention tests, dashboards,
-   alert delivery, and SLO evidence.
-3. Add accessibility and cross-browser coverage, plus broader UI negative paths.
-4. Add login abuse controls and an enterprise identity/revocation strategy if
-   exposed beyond a trusted deployment boundary.
-5. Reintroduce wider product surfaces only after they use real Control Plane
-   data and receive equivalent route/browser evidence.
+The following work is explicitly outside the current single-node RC and is
+tracked as independently verifiable backlog:
+
+1. [#14 — Prove TLS ingress and external secret
+   delivery](https://github.com/yachi666/sketch-test/issues/14)
+2. [#15 — Run an encrypted off-host PostgreSQL and S3 recovery
+   drill](https://github.com/yachi666/sketch-test/issues/15)
+3. [#16 — Prove managed PostgreSQL failover
+   behavior](https://github.com/yachi666/sketch-test/issues/16)
+4. [#17 — Prove managed S3 failover
+   behavior](https://github.com/yachi666/sketch-test/issues/17)
+5. [#18 — Prove lease safety under multi-instance load and
+   soak](https://github.com/yachi666/sketch-test/issues/18)
+6. [#19 — Ship evidence-backed SLO dashboards and alert
+   delivery](https://github.com/yachi666/sketch-test/issues/19)
+7. [#20 — Cover the critical Web flow across browsers and
+   accessibility](https://github.com/yachi666/sketch-test/issues/20)
+8. [#21 — Protect workspace login from
+   abuse](https://github.com/yachi666/sketch-test/issues/21)
+9. [#22 — Choose and implement enterprise identity with session
+   revocation](https://github.com/yachi666/sketch-test/issues/22)
+10. [#23 — Restore one deferred product surface with live Control Plane
+    data](https://github.com/yachi666/sketch-test/issues/23)
 
 ## Next verification sequence
 
