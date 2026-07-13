@@ -139,7 +139,8 @@ export function computeDiff(base: CanonicalApiModel, target: CanonicalApiModel):
           breaking: tp.required === true,
         });
       } else {
-        const bp = baseParamMap.get(name)!;
+        const bp = baseParamMap.get(name);
+        if (!bp) continue;
         if (bp.required !== tp.required) {
           changes.push({
             type: 'modified',

@@ -119,11 +119,12 @@ export async function createSchedule(input: ScheduleCreateInput): Promise<Schedu
     ],
   );
 
-  if (result.rows.length === 0) {
+  const [createdSchedule] = result.rows;
+  if (!createdSchedule) {
     throw new ScheduleTriggerError('Test suite or environment not found in workspace');
   }
 
-  return toSchedule(result.rows[0]!);
+  return toSchedule(createdSchedule);
 }
 
 /** List schedules in one workspace. */
@@ -168,8 +169,8 @@ export async function updateSchedule(
   const query = `UPDATE schedule_configs SET ${sets.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
 
   const result = await pool.query<ScheduleRow>(query, params);
-  if (result.rows.length === 0) return null;
-  return toSchedule(result.rows[0]!);
+  const [updatedSchedule] = result.rows;
+  return updatedSchedule ? toSchedule(updatedSchedule) : null;
 }
 
 /** Delete a schedule. Returns true if deleted, false if not found. */
@@ -183,8 +184,8 @@ export async function getSchedule(id: string): Promise<Schedule | null> {
   const result = await pool.query<ScheduleRow>('SELECT * FROM schedule_configs WHERE id = $1', [
     id,
   ]);
-  if (result.rows.length === 0) return null;
-  return toSchedule(result.rows[0]!);
+  const [schedule] = result.rows;
+  return schedule ? toSchedule(schedule) : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -209,7 +210,7 @@ function cronFieldMatches(field: string, value: number): boolean {
     // */N format: every N steps
     if (trimmed.startsWith('*/')) {
       const interval = parseInt(trimmed.slice(2), 10);
-      if (!isNaN(interval) && interval > 0 && value % interval === 0) {
+      if (!Number.isNaN(interval) && interval > 0 && value % interval === 0) {
         return true;
       }
       continue;
@@ -222,7 +223,7 @@ function cronFieldMatches(field: string, value: number): boolean {
       const endStr = trimmed.slice(dashIdx + 1);
       const start = parseInt(startStr, 10);
       const end = parseInt(endStr, 10);
-      if (!isNaN(start) && !isNaN(end) && value >= start && value <= end) {
+      if (!Number.isNaN(start) && !Number.isNaN(end) && value >= start && value <= end) {
         return true;
       }
       continue;
@@ -233,7 +234,7 @@ function cronFieldMatches(field: string, value: number): boolean {
 
     // Exact number
     const num = parseInt(trimmed, 10);
-    if (!isNaN(num) && num === value) return true;
+    if (!Number.isNaN(num) && num === value) return true;
   }
 
   return false;
@@ -282,9 +283,9 @@ export function isValidCronExpression(expression: string): boolean {
     { min: 0, max: 6 }, // day of week
   ];
 
-  for (let i = 0; i < 5; i++) {
-    const field = fields[i]!;
-    const range = validators[i]!;
+  for (const [index, field] of fields.entries()) {
+    const range = validators[index];
+    if (!range) return false;
 
     const parts = field.split(',');
     for (const part of parts) {
@@ -294,7 +295,7 @@ export function isValidCronExpression(expression: string): boolean {
 
       if (trimmed.startsWith('*/')) {
         const interval = parseInt(trimmed.slice(2), 10);
-        if (isNaN(interval) || interval <= 0) return false;
+        if (Number.isNaN(interval) || interval <= 0) return false;
         continue;
       }
 
@@ -302,14 +303,20 @@ export function isValidCronExpression(expression: string): boolean {
         const dashIdx = trimmed.indexOf('-');
         const start = parseInt(trimmed.slice(0, dashIdx), 10);
         const end = parseInt(trimmed.slice(dashIdx + 1), 10);
-        if (isNaN(start) || isNaN(end) || start < range.min || end > range.max || start > end) {
+        if (
+          Number.isNaN(start) ||
+          Number.isNaN(end) ||
+          start < range.min ||
+          end > range.max ||
+          start > end
+        ) {
           return false;
         }
         continue;
       }
 
       const num = parseInt(trimmed, 10);
-      if (isNaN(num) || num < range.min || num > range.max) return false;
+      if (Number.isNaN(num) || num < range.min || num > range.max) return false;
     }
   }
 

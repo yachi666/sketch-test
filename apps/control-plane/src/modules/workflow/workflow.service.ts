@@ -92,9 +92,10 @@ export async function getWorkflow(
   id: string,
 ): Promise<(Workflow & { latestVersion: WorkflowVersion | null }) | null> {
   const result = await pool.query(`SELECT * FROM workflows WHERE id = $1`, [id]);
-  if (result.rows.length === 0) return null;
+  const [workflowRow] = result.rows;
+  if (!workflowRow) return null;
 
-  const workflow = rowToWorkflow(result.rows[0]!);
+  const workflow = rowToWorkflow(workflowRow);
 
   // Fetch latest version
   const versionResult = await pool.query(
@@ -105,7 +106,8 @@ export async function getWorkflow(
     [id],
   );
 
-  const latestVersion = versionResult.rows.length > 0 ? rowToVersion(versionResult.rows[0]!) : null;
+  const [latestVersionRow] = versionResult.rows;
+  const latestVersion = latestVersionRow ? rowToVersion(latestVersionRow) : null;
 
   return { ...workflow, latestVersion };
 }
@@ -151,8 +153,8 @@ export async function updateWorkflow(
     values,
   );
 
-  if (result.rows.length === 0) return null;
-  return rowToWorkflow(result.rows[0]!);
+  const [updatedWorkflow] = result.rows;
+  return updatedWorkflow ? rowToWorkflow(updatedWorkflow) : null;
 }
 
 /** Delete a workflow and all its versions. */
@@ -177,7 +179,8 @@ export async function saveDraft(
      WHERE workflow_id = $1`,
     [workflowId],
   );
-  const nextVersion = (maxResult.rows[0]! as { max_version: number }).max_version + 1;
+  const maxVersionRow = maxResult.rows[0] as { max_version: number } | undefined;
+  const nextVersion = (maxVersionRow?.max_version ?? 0) + 1;
 
   const id = workflowVersionId();
   const now = new Date().toISOString();
@@ -212,11 +215,11 @@ export async function publishVersion(
      WHERE v.id = $1`,
     [versionId],
   );
-  if (result.rows.length === 0) {
+  const [row] = result.rows;
+  if (!row) {
     throw new Error(`Workflow version ${versionId} not found`);
   }
 
-  const row = result.rows[0]!;
   const definition = row.definition as WorkflowDefInput;
   const workspaceId = row.workspace_id as string;
 
@@ -261,8 +264,8 @@ export async function publishVersion(
 /** Get a workflow version by ID. */
 export async function getWorkflowVersion(versionId: string): Promise<WorkflowVersion | null> {
   const result = await pool.query(`SELECT * FROM workflow_versions WHERE id = $1`, [versionId]);
-  if (result.rows.length === 0) return null;
-  return rowToVersion(result.rows[0]!);
+  const [version] = result.rows;
+  return version ? rowToVersion(version) : null;
 }
 
 /** List all versions for a workflow, newest first. */
@@ -288,8 +291,8 @@ export async function getLatestPublishedVersion(
      LIMIT 1`,
     [workflowId],
   );
-  if (result.rows.length === 0) return null;
-  return rowToVersion(result.rows[0]!);
+  const [version] = result.rows;
+  return version ? rowToVersion(version) : null;
 }
 
 /** Compile a workflow definition and return diagnostics (preview, no persistence). */
@@ -310,8 +313,9 @@ async function resolveTestVersion(testVersionId: string, workspaceId: string) {
      WHERE v.id = $1 AND t.workspace_id = $2`,
     [testVersionId, workspaceId],
   );
-  if (testResult.rows.length === 0) return null;
-  const testDef = testResult.rows[0]!['definition'] as Record<string, unknown>;
+  const [testVersion] = testResult.rows;
+  if (!testVersion) return null;
+  const testDef = testVersion['definition'] as Record<string, unknown>;
   const request = testDef['request'] as Record<string, unknown> | undefined;
   return {
     method: (request?.['method'] as string) ?? 'GET',
@@ -320,6 +324,7 @@ async function resolveTestVersion(testVersionId: string, workspaceId: string) {
     body: request?.['body'] as unknown,
     assertions: ((testDef['assertions'] as Array<Record<string, unknown>>) ?? []).map((a) => ({
       target: (a['target'] as string) ?? 'status',
+      path: a['path'] as string | undefined,
       operator: (a['operator'] as string) ?? 'equals',
       expected: a['expected'],
       description: a['description'] as string | undefined,

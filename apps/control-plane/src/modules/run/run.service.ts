@@ -150,11 +150,11 @@ export async function createRunFromWorkflow(workflowVersionId: string, workspace
     [workflowVersionId, workspaceId],
   );
 
-  if (versionResult.rows.length === 0) {
+  const [row] = versionResult.rows;
+  if (!row) {
     throw new Error(`Workflow version ${workflowVersionId} not found or has no compiled plan`);
   }
 
-  const row = versionResult.rows[0]!;
   const plan = row.compiled_plan as ExecutionPlan;
 
   // Ensure the plan has the correct workflow version ID

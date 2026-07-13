@@ -172,7 +172,7 @@ describe('E2E: Generation → Compilation → ExecutionPlan', () => {
       body: happyPathReq!.body,
       assertions: [
         { target: 'status', operator: 'equals', expected: 201, description: 'User created' },
-        { target: 'jsonPath', path: '$.data.userId', operator: 'exists' } as any,
+        { target: 'jsonPath', path: '$.data.userId', operator: 'exists' },
       ],
       extract: [{ name: 'userId', source: 'body', expression: '$.data.userId', scope: 'workflow' }],
     };
@@ -192,8 +192,7 @@ describe('E2E: Generation → Compilation → ExecutionPlan', () => {
       name: 'User CRUD Flow',
       steps: [loginStep, createUserStep, getUsersStep],
       teardown: [],
-      description: 'E2E test workflow',
-    } as any;
+    };
 
     // Step 3: Compile the workflow (async!)
     const result = await compileWorkflow(workflowInput);

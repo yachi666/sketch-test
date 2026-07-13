@@ -363,8 +363,9 @@ function buildUrl(
 /** Build headers from the endpoint definition. */
 function buildHeaders(requestBody: RequestBodyDef | undefined): Record<string, string> {
   const headers: Record<string, string> = {};
-  if (requestBody && Object.keys(requestBody.content).length > 0) {
-    const mediaType = Object.keys(requestBody.content)[0]!;
+  if (requestBody) {
+    const mediaType = Object.keys(requestBody.content).at(0);
+    if (!mediaType) return headers;
     headers['Content-Type'] = mediaType;
   }
   return headers;
@@ -510,11 +511,11 @@ function generateMissingRequiredTests(
   }
 
   // Required request body fields
-  if (endpoint.requestBodies.length > 0) {
-    const requestBody = endpoint.requestBodies[0]!;
-    const mediaTypes = Object.keys(requestBody.content);
-    if (mediaTypes.length > 0) {
-      const content = requestBody.content[mediaTypes[0]!];
+  const requestBody = endpoint.requestBodies.at(0);
+  if (requestBody) {
+    const mediaType = Object.keys(requestBody.content).at(0);
+    if (mediaType) {
+      const content = requestBody.content[mediaType];
       if (content) {
         const schema = getPropertySchema(content.schema.ref, schemas);
         const required = schema?.required ?? [];
@@ -569,13 +570,13 @@ function generateInvalidTypeTests(
   schemas: Record<string, SchemaNode>,
 ): DraftInput[] {
   const drafts: DraftInput[] = [];
-  if (endpoint.requestBodies.length === 0) return drafts;
+  const requestBody = endpoint.requestBodies.at(0);
+  if (!requestBody) return drafts;
 
-  const requestBody = endpoint.requestBodies[0]!;
-  const mediaTypes = Object.keys(requestBody.content);
-  if (mediaTypes.length === 0) return drafts;
+  const mediaType = Object.keys(requestBody.content).at(0);
+  if (!mediaType) return drafts;
 
-  const content = requestBody.content[mediaTypes[0]!];
+  const content = requestBody.content[mediaType];
   if (!content) return drafts;
 
   const schema = getPropertySchema(content.schema.ref, schemas);
@@ -636,13 +637,13 @@ function generateBoundaryTests(
   schemas: Record<string, SchemaNode>,
 ): DraftInput[] {
   const drafts: DraftInput[] = [];
-  if (endpoint.requestBodies.length === 0) return drafts;
+  const requestBody = endpoint.requestBodies.at(0);
+  if (!requestBody) return drafts;
 
-  const requestBody = endpoint.requestBodies[0]!;
-  const mediaTypes = Object.keys(requestBody.content);
-  if (mediaTypes.length === 0) return drafts;
+  const mediaType = Object.keys(requestBody.content).at(0);
+  if (!mediaType) return drafts;
 
-  const content = requestBody.content[mediaTypes[0]!];
+  const content = requestBody.content[mediaType];
   if (!content) return drafts;
 
   const schema = getPropertySchema(content.schema.ref, schemas);
@@ -1099,9 +1100,12 @@ export async function acceptDraft(
   if (!refreshedDraft) {
     throw new GenerationError('Draft disappeared after acceptance', 500);
   }
+  if (!tcId) {
+    throw new GenerationError('Accepted draft has no TestCase identifier', 500);
+  }
 
   return {
-    testCaseId: tcId!,
+    testCaseId: tcId,
     versionId,
     version: nextVersion,
     draft: refreshedDraft,

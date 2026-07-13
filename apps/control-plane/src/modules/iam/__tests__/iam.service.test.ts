@@ -60,7 +60,7 @@ function makeUserWithHash(
     createdAt: '2026-01-01T00:00:00Z',
     passwordHash:
       overrides.passwordHash ??
-      crypto.scryptSync(password + ':sketch-test-salt', 'sketch-test-salt', 64).toString('hex'),
+      crypto.scryptSync(`${password}:sketch-test-salt`, 'sketch-test-salt', 64).toString('hex'),
   };
 }
 

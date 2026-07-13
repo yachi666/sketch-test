@@ -37,6 +37,7 @@ export interface WorkflowStepDef {
   /** Assertions. */
   assertions?: Array<{
     target: string;
+    path?: string;
     operator: string;
     expected?: unknown;
     description?: string;
@@ -80,6 +81,7 @@ interface ResolvedTestDef {
   body?: unknown;
   assertions: Array<{
     target: string;
+    path?: string;
     operator: string;
     expected?: unknown;
     description?: string;
@@ -285,9 +287,9 @@ function checkStepDependencies(steps: WorkflowStepDef[], diagnostics: CompileDia
 function detectCycles(steps: WorkflowStepDef[], diagnostics: CompileDiagnostic[]): void {
   const varInfo = analyzeStepVariables(steps);
   const stepIndex: Map<string, number> = new Map();
-  for (let i = 0; i < steps.length; i++) {
-    stepIndex.set(steps[i]!.id, i);
-  }
+  steps.forEach((step, index) => {
+    stepIndex.set(step.id, index);
+  });
 
   // Build adjacency: step A → step B if A references a variable produced by B
   const adj: Map<number, number[]> = new Map();
@@ -382,6 +384,7 @@ async function resolveStepDefinition(
           body: step.body,
           assertions: (step.assertions ?? []).map((a) => ({
             target: a.target,
+            path: a.path,
             operator: a.operator,
             expected: a.expected,
             description: a.description,
@@ -411,6 +414,7 @@ async function resolveStepDefinition(
       body: step.body !== undefined ? step.body : testDef.body,
       assertions: (step.assertions ?? testDef.assertions).map((a) => ({
         target: a.target,
+        path: a.path,
         operator: a.operator,
         expected: a.expected,
         description: a.description,
@@ -437,6 +441,7 @@ async function resolveStepDefinition(
     body: step.body,
     assertions: (step.assertions ?? []).map((a) => ({
       target: a.target,
+      path: a.path,
       operator: a.operator,
       expected: a.expected,
       description: a.description,
@@ -597,6 +602,7 @@ export async function compileWorkflow(
         id: `${planId}-assert-${i}-${ai}`,
         description: a.description,
         target: (a.target as FrozenStep['assertions'][0]['target']) || 'status',
+        path: a.path,
         operator: (a.operator as FrozenStep['assertions'][0]['operator']) || 'equals',
         expected: a.expected,
         severity: 'block' as const,

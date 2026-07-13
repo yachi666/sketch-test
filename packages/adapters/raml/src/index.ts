@@ -363,7 +363,7 @@ function processType(typeObj: unknown, id: string, ctx: SourceContext): string |
     minItems: typeof t.minItems === 'number' ? t.minItems : undefined,
     maxItems: typeof t.maxItems === 'number' ? t.maxItems : undefined,
     uniqueItems: t.uniqueItems === true ? true : undefined,
-    nullable: t.required === false ? true : false,
+    nullable: t.required === false,
     description: typeof t.description === 'string' ? t.description : undefined,
     example: t.example,
     default: t.default,
