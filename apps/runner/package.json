@@ -16,6 +16,8 @@
     "clean": "rm -rf dist/ tsconfig.tsbuildinfo"
   },
   "dependencies": {
+    "ajv": "catalog:",
+    "ajv-formats": "catalog:",
     "@sketch-test/contracts-common": "workspace:*",
     "@sketch-test/canonical-api-model": "workspace:*",
     "@sketch-test/test-dsl": "workspace:*",

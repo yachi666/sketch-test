@@ -348,6 +348,38 @@ describe('executePlan: assertions', () => {
 
     expect(result.status).toBe('passed');
   });
+
+  test('schema assertion failure blocks the step and emits diagnostics', async () => {
+    const step = makeStep({
+      urlTemplate: `${serverUrl}/api/hello`,
+      assertions: [
+        {
+          id: 'schema-a-1',
+          target: 'schema',
+          operator: 'schema',
+          expected: {
+            type: 'object',
+            required: ['message'],
+            properties: { message: { type: 'integer' } },
+          },
+          severity: 'block',
+        },
+      ],
+    });
+    const plan = makePlan([step]);
+    const result = await executePlan(plan, { runId: 'run-schema-failure' });
+
+    expect(result.status).toBe('failed');
+    expect(result.stepsFailed).toBe(1);
+
+    const assertionEvent = result.events.find((event) => event.eventType === 'assertion.evaluated');
+    expect(assertionEvent?.eventType).toBe('assertion.evaluated');
+    if (assertionEvent?.eventType !== 'assertion.evaluated') {
+      throw new Error('Expected assertion.evaluated event');
+    }
+    expect(assertionEvent.passed).toBe(false);
+    expect(assertionEvent.schemaDiff).toContain('must be integer');
+  });
 });
 
 // ─── Variable Extraction ─────────────────────────────────────────────

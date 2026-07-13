@@ -70,7 +70,7 @@ The `VariableStore` supports dot-notation templates (`${env.baseUrl}`, `${steps.
 | `jsonPath` | exists, notExists, equals, contains, greaterThan, lessThan, matches, type, hasItems, isEmpty |
 | `body` | contains, equals, notContains |
 | `responseTime` | lessThan (max ms) |
-| `schema` | deferred (validator integration pending) |
+| `schema` | JSON Schema draft-07, 2019-09, and 2020-12 via Ajv; invalid or unsupported schemas fail explicitly |
 
 ## JSONPath
 

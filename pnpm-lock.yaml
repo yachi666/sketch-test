@@ -21,6 +21,12 @@ catalogs:
     '@vitejs/plugin-react':
       specifier: 5.0.4
       version: 5.0.4
+    ajv:
+      specifier: ^8.20.0
+      version: 8.20.0
+    ajv-formats:
+      specifier: ^3.0.1
+      version: 3.0.1
     react:
       specifier: 19.2.0
       version: 19.2.0
@@ -151,6 +157,12 @@ importers:
       '@sketch-test/test-dsl':
         specifier: workspace:*
         version: link:../../packages/contracts/test-dsl
+      ajv:
+        specifier: 'catalog:'
+        version: 8.20.0
+      ajv-formats:
+        specifier: 'catalog:'
+        version: 3.0.1(ajv@8.20.0)
       zod:
         specifier: 'catalog:'
         version: 3.25.76
