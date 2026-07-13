@@ -1,253 +1,144 @@
-# SketchTest — 测试自动化平台
+# SketchTest
 
-<div align="center">
+SketchTest 是一个基于 TypeScript monorepo 的 REST API 自动化测试平台。
+它将 API 描述导入为 `CanonicalApiModel`，创建不可变的测试与流程版本，
+编译成 `ExecutionPlan`，交给独立 Runner 执行，并保存有序、脱敏的
+`RunEvent` 证据。
 
-**REST API 自动化测试平台 · 从规范导入到证据驱动的报告，一站式 API 测试解决方案**
+[English](./README.md)
 
-[![CI](https://github.com/yachi666/sketch-test/actions/workflows/ci.yml/badge.svg)](https://github.com/yachi666/sketch-test/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Node](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg)](https://nodejs.org)
-[![pnpm](https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg)](https://pnpm.io)
-[![在线演示](https://img.shields.io/badge/demo-live-brightgreen.svg)](https://yachi666.github.io/sketch-test/)
+## 当前已实现能力
 
-[English](README.md) | [中文](README.zh-CN.md)
+- OpenAPI、Postman、HAR、RAML Adapter 和格式检测。
+- Canonical API、测试 DSL、流程 DSL、Runner Protocol 与公共类型的
+  版本化 Zod 契约。
+- Fastify Control Plane：身份、导入、环境和 Secret、测试编写、流程、
+  生成草稿、套件、策略、调度、Runner 租约、事件和报告。
+- 独立 Node.js Runner：重试、轮询、变量提取、断言、脱敏和有序事件。
+- React Web 提供经过认证、由 Control Plane 驱动的 API 导入、流程发布执行和
+  运行报告主路径。
+- CLI：触发已发布流程版本、等待运行、读取报告、输出 CI 格式并返回状态退出码。
+- 用于集成测试及故障注入的确定性测试基础设施。
 
-</div>
+以上只表示仓库中存在相应代码，不代表已经达到生产发布标准。实际验证状态和
+缺口见 [`docs/STATUS.md`](docs/STATUS.md)。
 
-<p align="center">
-  <em>导入 OpenAPI 规范 → 定义 HTTP 测试及断言 → 通过独立 Runner 执行 → 获得脱敏的、有证据支持的报告。多步骤流程编排和 AI 辅助生成为 M1 规划功能。</em>
-</p>
+## 架构
 
----
-
-## 为什么选择 SketchTest？
-
-现有的 API 测试工具总让人左右为难：简单的工具缺乏流程测试和可重现性；重型平台把你锁在私有格式和不透明的执行里。SketchTest 走的是第三条路：
-
-| | SketchTest | Postman / Bruno | Karate / REST Assured | 商业 SaaS |
-|---|---|---|---|---|
-| **API 规范即事实来源** | ✅ CanonicalApiModel | ⚠️ 导入后断联 | ❌ 纯代码 | ⚠️ 供应商锁定 |
-| **多步骤业务流程** | 🔲 规划中 M1 | ⚠️ Collection runner | ✅ | ✅ |
-| **不可变版本化** | ✅ 已发布产物不可变 | ❌ | ❌ | ⚠️ |
-| **证据与可重现性** | ✅ 事件流中捕获脱敏的请求/响应；持久化哈希存储为 M1 规划 | ⚠️ | ❌ | ⚠️ |
-| **私有化部署** | ✅ 完整私有部署 | ✅ | ✅ | ❌ |
-| **AI 辅助生成** | 🔲 规划中 M1 | ❌ | ❌ | ⚠️ |
-| **控制面与执行分离** | ✅ Runner 部署在你的网络内 | ❌ | ⚠️ 进程内执行 | ⚠️ |
-
-**SketchTest 是为像对待生产代码一样对待 API 测试的团队打造的** — 版本化、可审查、可重现、可观测。
-
----
-
-## 架构概览
-
-SketchTest 由三个独立进程组成，仅通过版本化契约通信：
-
-```mermaid
-flowchart LR
-    User[开发者 / 测试人员] --> Web[React Web 控制台]
-    CI[CI / CLI] --> CP[控制面<br/>NestJS + Fastify]
-    Web --> CP
-    AI[AI Worker] --> CP
-    AI --> LLM[大模型 Provider]
-    Runner[Runner<br/>独立进程] --> CP
-    Runner --> SUT[被测系统]
-    CP --> PG[(PostgreSQL)]
-    CP --> S3[(对象存储)]
-    Runner --> S3
+```text
+Web / CLI
+    │ 版本化 HTTP API
+    ▼
+Control Plane ─── PostgreSQL
+    │ Runner Protocol
+    ▼
+独立 Runner ─── 被测系统
 ```
 
-| 组件 | 状态 | 职责 | 技术栈 |
-|---|---|---|---|
-| **Runner** | ✅ M0 | 通过租约拉取任务，执行 HTTP 请求，脱敏 Secret，上传事件 | Node.js / TypeScript |
-| **Web 控制台** | ✅ M0 | 流程编辑器、运行时间线 | React 19 + Vite 6 |
-| **控制面 (Control Plane)** | 🔲 M1 | 项目管理、API 资产管理、测试编排、流程编译、调度、报告、权限 | NestJS + Fastify |
-| **AI Worker** | 🔲 M1 | 规范解析、Git 仓库分析、测试草稿生成 | Node.js / TypeScript |
+`packages/contracts` 下的五个契约包是唯一稳定边界。Control Plane、Runner
+以及未来 Worker 必须保持独立进程。已经发布的 `ApiVersion`、
+`TestCaseVersion`、`WorkflowVersion`、`EnvironmentVersion` 和
+`DatasetVersion` 不可修改。
 
-**核心原则：** 控制面、Runner 和 AI Worker 是独立进程。共享的是版本化契约，不是进程生命周期。未来某个热点需要 Go/Rust/Python？在已有 seam 后替换即可，契约不变。
+每个 `ExecutionPlan` 只能记录一种来源：
 
----
+- 已发布的 `WorkflowVersion`；
+- 已发布的 `TestCaseVersion`；
+- 或拥有不可变临时计划的 Run。
 
-## 在线体验
+计划对实际执行步骤和 Teardown 计算确定性的 SHA-256。Secret 在 Runner
+执行时解析，并在上传事件前脱敏。
 
-**[🔗 打开在线演示 →](https://yachi666.github.io/sketch-test/)**
+## 环境要求
 
-我们提供了 SketchTest Web 控制台的在线预览。无需配置本地环境，即可浏览界面、查看 API 资产并体验流程编辑器。
+- Node.js 22 或 24
+- pnpm 11.8+
+- Control Plane 运行和集成测试所需的 PostgreSQL
 
-> **注意：** 在线演示仅展示 Web 控制台界面。如需执行测试，请按下方快速开始搭建本地开发环境。
-
----
-
-## 快速开始
-
-### 环境要求
-
-- **Node.js** ≥ 20.0.0
-- **pnpm** ≥ 9.0.0（执行 `corepack enable` 即可自动安装 `package.json` 中指定的版本）
-
-### 1. 安装依赖并构建
+## 安装与验证
 
 ```bash
-corepack enable        # 确保使用 pnpm@11.8.0（来自 package.json）
-pnpm install
+pnpm install --frozen-lockfile
+pnpm check
+pnpm test
+pnpm lint
 pnpm build
 ```
 
-### 2. 启动开发环境
+四个根级质量命令当前均已通过。Control Plane 和 Runner 构建会在 `dist/`
+生成生产 JavaScript，其 `start` 命令执行构建产物，而不是 TypeScript 源码。
+
+本机具备 Docker 和 PostgreSQL 时，可以运行 production-mode 跨进程验收：
 
 ```bash
-pnpm dev
+pnpm e2e:product
 ```
 
-一键启动所有应用（热更新）。也可以按需启动：
+该命令创建隔离的 PostgreSQL 与 MinIO，启动构建后的 Control Plane、Runner、
+Web 和仅用于测试的服务器，验证登录、导入、发布、租约、执行、CLI、报告和
+浏览器全链路；随后把数据库和全部对象证据恢复到一次性目标，并在 `finally`
+中删除临时资源。
+
+## 本地开发
 
 ```bash
-pnpm dev:web        # React Web 控制台 (Vite 开发服务器)
-pnpm dev:fixture    # Hermetic Fixture Server — 确定性的 REST API 测试服务器 (端口 3800)
+pnpm dev:web       # React，127.0.0.1:5173
+pnpm dev:cp        # Control Plane，0.0.0.0:3802，需要 PostgreSQL
+pnpm dev:runner    # Runner 开发进程
+pnpm dev:fixture   # 测试服务器，127.0.0.1:3800
 ```
 
-### 3. 运行测试
+开发环境配置示例：
 
 ```bash
-pnpm test           # 所有单元测试、Golden 测试和集成测试
+export DATABASE_URL='postgresql://localhost:5432/sketchtest'
+export JWT_SECRET='replace-with-a-long-random-development-secret'
+export SECRET_KEY='replace-with-a-32-byte-secret'
 ```
 
-> ✅ 你现在拥有了一个可工作的 SketchTest 开发环境。运行 `pnpm check && pnpm test` 验证——所有检查应该通过。
->
-> **注意：** Control Plane 在 M0 阶段仅有骨架——Fixture Server（端口 3800）和 Runner 功能完整。多步骤流程编排和 AI 生成功能为 M1 规划。
+Fixture Server 只能作为测试基础设施，生产路由和 Web 操作不得依赖它。
 
----
+## 仓库结构
 
-## 功能特性
-
-> ✅ = M0 已交付 · 🔲 = M1 规划中
-
-| 特性 | 状态 | 说明 |
-|---|---|---|
-| 🔌 **适配器架构** | ✅ | 导入 OpenAPI 规范，统一转换为 CanonicalApiModel（RAML、Git 发现规划中） |
-| 🧪 **版本化测试 DSL** | ✅ | 定义 HTTP 测试，支持断言、变量提取和副作用分类 |
-| 🔒 **Secret 脱敏** | ✅ | Secret 永不进入数据库或日志，由 Runner 在执行时解析 |
-| 🏠 **私有化优先** | ✅ | 完整私有部署，Runner 部署在被测系统的同一网络内 |
-| 🔗 **多步骤流程编排** | 🔲 | 组合顺序 API 流程，支持控制逻辑、轮询和清理阶段 |
-| 📸 **运行快照** | 🔲 | 每次运行冻结所有输入版本——100% 可重现 |
-| 📋 **证据账本** | 🔲 | 请求/响应正文带内容哈希、大小和保留策略保存 |
-| 🚦 **质量门禁** | 🔲 | 执行后按可配置标准评估运行结果 |
-| 🤖 **AI 辅助生成** | 🔲 | Git 感知的代码分析生成带来源证据的测试草稿（从不自动发布） |
-
----
-
-## 仓库地图
-
-```
-sketch-test/
-├── apps/
-│   ├── web/                          # React 19 + Vite 6 — 流程编辑器、运行时间线
-│   ├── control-plane/                # NestJS + Fastify (开发中)
-│   └── runner/                       # 独立进程 — 执行 HTTP 测试
-├── packages/
-│   ├── contracts/                    # 5 个版本化 Zod 契约包 (最关键的稳定接缝)
-│   │   ├── common/                   #   EntityId、诊断、HTTP 类型
-│   │   ├── canonical-api-model/      #   统一 API 模型
-│   │   ├── runner-protocol/          #   ExecutionPlan、RunEvents、生命周期
-│   │   ├── test-dsl/                 #   TestDefinition、断言、变量提取
-│   │   └── workflow-dsl/             #   WorkflowDefinition、步骤、清理
-│   ├── adapters/
-│   │   └── openapi/                  # OpenAPI → CanonicalApiModel 适配器
-│   └── test-fixtures/
-│       └── hermetic-fixture-server/  # 确定性的集成测试 REST API
-└── tooling/
-    └── tsconfig/                     # 共享 TypeScript 基础配置
+```text
+apps/
+  web/              React 产品界面
+  control-plane/    Fastify API 与 PostgreSQL 持久化
+  runner/           独立 HTTP 执行进程
+  cli/              CI 与命令行客户端
+packages/
+  contracts/        版本化稳定契约
+  adapters/         导入格式 → CanonicalApiModel
+  test-fixtures/     仅用于测试的确定性基础设施
+docs/                领域、架构、状态与执行目标
 ```
 
----
+仓库硬约束见 [`CLAUDE.md`](CLAUDE.md)，统一领域语言见
+[`CONTEXT.md`](CONTEXT.md)，持续产品化目标和证据矩阵见
+[`docs/CODEX_PRODUCT_GOAL.md`](docs/CODEX_PRODUCT_GOAL.md)。
 
-## 开发指南
+部署、验证、备份、恢复、升级和回滚命令见
+[`docs/OPERATIONS.md`](docs/OPERATIONS.md)。
 
-| 命令 | 用途 |
-|---|---|
-| `pnpm install` | 安装所有依赖 |
-| `pnpm dev` | 启动所有应用（turbo 编排） |
-| `pnpm build` | 构建所有包和应用 |
-| `pnpm check` | 类型检查 (`tsc --noEmit`) |
-| `pnpm test` | 运行所有测试（vitest，turbo 编排） |
-| `pnpm lint` | 代码检查（biome） |
-| `pnpm format` | 格式化代码（biome） |
-| `pnpm clean` | 清理所有 `dist/` 目录 |
+## 当前生产缺口
 
-### 测试体系
+- 当前验证目标是单机本地发布候选；多节点高可用、托管服务故障切换、TLS
+  入口和负载测试仍需由部署方完成。
+- 浏览器测试已覆盖产品主路径，但可访问性、兼容性和更广的异常路径仍不完整。
+- 恢复测试在本地镜像数据库与对象证据；部署方仍需使用选定供应商验证加密的
+  异地备份。
 
-- **单元测试：** `vitest run` 按包执行——快速，无外部依赖。
-- **Golden 测试：** 契约包将 Zod 输出序列化为 JSON，与检入的 Snapshots 对比。
-- **集成测试：** Hermetic Fixture Server 提供用户、认证、订单、支付等确定性的业务场景。
-- **故障注入：** 设置 `FAULT_MODE=timeout|500|slow` 和 `FAULT_TARGET=/api/payments` 注入故障。
+证据矩阵没有全部标记为已证明之前，不应部署到生产环境。
 
-### 业务流程场景
+## 安全
 
-Fixture Server 内置 8 个业务流程场景，用于流程测试：
+禁止提交凭据或 `.env` 文件。漏洞报告流程见 [`SECURITY.md`](SECURITY.md)。
 
-| 编号 | 场景 | 类型 |
-|---|---|---|
-| BP-01 | 用户注册与认证 | 可清理写入 |
-| BP-02 | 创建订单并支付 | 不可逆 |
-| BP-03 | 订单生命周期管理 | 可清理写入 |
-| BP-04 | 用户信息查询与更新 | 只读 |
-| BP-05 | 支付状态轮询 | 不可逆 |
-| BP-06 | 重复支付保护（异常路径） | 不可逆 |
-| BP-07 | 认证失败处理（异常路径） | 只读 |
-| BP-08 | 参数校验失败（异常路径） | 只读 |
+## 贡献
 
----
-
-## 当前阶段：M0（可行性验证）
-
-依据我们的[实施计划](docs/IMPLEMENTATION_PLAN.md)：
-
-- ✅ Monorepo 搭建：pnpm workspace、TypeScript strict、Biome、Vitest、Turbo
-- ✅ 5 个契约包，含 Zod Schema（canonical-api-model 有 Golden 测试；其余包进行中）
-- ✅ OpenAPI → CanonicalApiModel 适配器
-- ✅ Runner：HTTP 执行、断言求值、变量提取、脱敏
-- ✅ Hermetic Fixture Server，含 8 个业务流程场景
-- ✅ CI 流水线
-- 🔲 Control Plane (NestJS/Fastify) — 仅有骨架
-- 🔲 AI Worker
-- 🔲 Workflow Compiler
-
----
-
-## 文档索引
-
-| 文档 | 内容 |
-|---|---|
-| [CONTEXT.md](CONTEXT.md) | 领域词汇表和业务流程 |
-| [docs/PRD.md](docs/PRD.md) | 产品需求文档 |
-| [docs/TECHNICAL_ARCHITECTURE.md](docs/TECHNICAL_ARCHITECTURE.md) | 系统架构和模块地图 |
-| [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | 基于里程碑的任务拆分 |
-| [docs/TECH_STACK_RESEARCH.md](docs/TECH_STACK_RESEARCH.md) | 技术选型研究笔记 |
-| [CLAUDE.md](CLAUDE.md) | AI 助手指令 |
-| [docs/ARCHITECTURE_REVIEW.md](docs/ARCHITECTURE_REVIEW.md) | 架构评审：前后端分离与 2025–2026 行业最佳实践 |
-
----
-
-## 参与贡献
-
-我们欢迎贡献！SketchTest 处于早期开发阶段（M0 可行性验证），有大量机会参与平台建设。
-
-1. **Fork** 本仓库
-2. **创建分支** (`git checkout -b feat/your-feature`)
-3. **提交修改** — 请包含测试和文档
-4. **运行完整检查：** `pnpm check && pnpm test && pnpm lint`
-5. **使用 conventional commits** 提交
-6. **发起 Pull Request** 到 `master` 分支
-
-详见 [AGENTS.md](AGENTS.md)（AI Agent 规范）和 [docs/agents/issue-tracker.md](docs/agents/issue-tracker.md)（Issue 规范）。
-
----
+参阅 [`CONTRIBUTING.md`](CONTRIBUTING.md)。契约 Schema 发生变化时，必须在
+同一个变更中更新所有消费者和契约测试。
 
 ## 许可证
 
-MIT — 详见 [LICENSE](LICENSE)。
-
----
-
-<p align="center">
-  <sub>基于 TypeScript strict 模式 · Biome · Vitest · Turbo · pnpm 构建</sub>
-</p>
+[Apache-2.0](LICENSE)

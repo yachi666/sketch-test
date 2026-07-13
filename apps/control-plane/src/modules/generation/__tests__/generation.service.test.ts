@@ -6,13 +6,13 @@
  */
 import { describe, expect, test } from 'vitest';
 import {
-  type EndpointDef,
-  type SchemaNode,
   buildHappyPathRequest,
+  type EndpointDef,
   generateBoundaryValue,
   generateInvalidValue,
   generateValidValue,
   resolveSchema,
+  type SchemaNode,
 } from '../generation.service';
 
 // ─── Helpers ────────────────────────────────────────────────────────
@@ -30,22 +30,6 @@ function makeEndpoint(overrides: Partial<EndpointDef> = {}): EndpointDef {
     responses: [{ id: 'resp-200', statusCode: 200, description: 'OK' }],
     ...overrides,
   };
-}
-
-function makeStringSchema(overrides: Partial<SchemaNode> = {}): SchemaNode {
-  return { type: 'string', ...overrides };
-}
-
-function makeNumberSchema(overrides: Partial<SchemaNode> = {}): SchemaNode {
-  return { type: 'number', ...overrides };
-}
-
-function makeIntSchema(overrides: Partial<SchemaNode> = {}): SchemaNode {
-  return { type: 'integer', ...overrides };
-}
-
-function makeObjectSchema(overrides: Partial<SchemaNode> = {}): SchemaNode {
-  return { type: 'object', properties: {}, required: [], ...overrides };
 }
 
 // ─── Schema Resolution ───────────────────────────────────────────────

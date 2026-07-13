@@ -74,7 +74,7 @@ The `VariableStore` supports dot-notation templates (`${env.baseUrl}`, `${steps.
 
 ## JSONPath
 
-Minimal M0 implementation. Supports: `$.field.subfield`, `$[0].field`, `$.data.items[*].name` (wildcard array access).
+Built-in subset supports: `$.field.subfield`, `$[0].field`, and `$.data.items[*].name` (wildcard array access). Unsupported expressions must fail explicitly rather than being interpreted approximately.
 
 ## Dependencies
 

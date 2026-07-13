@@ -1,8 +1,9 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { sendError } from '../../shared/errors.js';
+import { authenticatedUser } from '../iam/auth.middleware.js';
+import { DiffError, diffApiVersions } from './diff.service.js';
 import { ImportError, importApiSpec } from './import.service.js';
-import { diffApiVersions, DiffError } from './diff.service.js';
 
 const ImportBodySchema = z.object({
   sourceType: z.enum(['file', 'url']),
@@ -20,7 +21,10 @@ export async function importRoutes(app: FastifyInstance): Promise<void> {
     }
 
     try {
-      const result = await importApiSpec(parsed.data);
+      const result = await importApiSpec({
+        ...parsed.data,
+        workspaceId: authenticatedUser(request).workspaceId,
+      });
       reply.status(201).send(result);
     } catch (err) {
       if (err instanceof ImportError) {
@@ -41,7 +45,11 @@ export async function importRoutes(app: FastifyInstance): Promise<void> {
     }
 
     try {
-      const result = await diffApiVersions(baseId, targetId);
+      const result = await diffApiVersions(
+        baseId,
+        targetId,
+        authenticatedUser(request).workspaceId,
+      );
       reply.send(result);
     } catch (err) {
       if (err instanceof DiffError) {

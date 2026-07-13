@@ -11,6 +11,8 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { sendError } from '../../shared/errors.js';
+import { recordAuditEvent } from '../audit/audit.service.js';
+import { verifyRunnerToken } from '../runner-registry/runner-registry.service.js';
 import {
   createEnvironment,
   createEnvironmentVersion,
@@ -27,15 +29,6 @@ import {
   updateEnvironment,
   updateSecret,
 } from './environment.service.js';
-
-// ── Runner auth for decrypt endpoint ──
-
-const RUNNER_SECRET_TOKEN = process.env['RUNNER_SECRET_TOKEN'] ?? 'sketch-test-runner-dev-token';
-
-function checkRunnerAuth(headers: Record<string, string | undefined>): boolean {
-  const token = headers['x-runner-token'];
-  return token === RUNNER_SECRET_TOKEN;
-}
 
 // ── Strip encrypted_value from secret responses ──
 
@@ -344,14 +337,18 @@ export async function environmentRoutes(app: FastifyInstance): Promise<void> {
   app.post('/api/secrets/:id/decrypt', async (request, reply) => {
     const { id } = request.params as { id: string };
 
-    // Auth check
-    if (!checkRunnerAuth(request.headers as Record<string, string | undefined>)) {
+    const token = (request.headers['x-runner-token'] as string | undefined) ?? '';
+    const runner = token ? await verifyRunnerToken(token) : null;
+    if (!runner) {
       return sendError(reply, 401, 'UNAUTHORIZED', 'Invalid or missing runner token');
     }
 
     try {
       const secret = await getSecret(id);
       if (!secret) {
+        return sendError(reply, 404, 'NOT_FOUND', `Secret ${id} not found`);
+      }
+      if (secret.workspaceId !== runner.workspaceId) {
         return sendError(reply, 404, 'NOT_FOUND', `Secret ${id} not found`);
       }
 
@@ -361,11 +358,17 @@ export async function environmentRoutes(app: FastifyInstance): Promise<void> {
 
       const plaintext = decryptSecret(secret.encryptedValue);
 
-      // Audit log
-      console.log(
-        `[audit] Secret decrypted: id=${secret.id} name=${secret.name} ` +
-          `timestamp=${new Date().toISOString()}`,
-      );
+      await recordAuditEvent({
+        workspaceId: secret.workspaceId,
+        actorType: 'runner',
+        actorId: 'runner-secret-channel',
+        action: 'secret.decrypt',
+        resourceType: 'secret',
+        resourceId: secret.id,
+        outcome: 'success',
+        requestId: request.id,
+        metadata: { secretName: secret.name },
+      });
 
       reply.send({ value: plaintext });
     } catch (err) {

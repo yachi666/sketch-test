@@ -7,28 +7,25 @@
  * No database — tests pure contract compatibility across modules.
  * This is the "闭环" test: it proves the chain works end to end.
  */
-import { describe, expect, test } from 'vitest';
+
 import type { ExecutionPlan } from '@sketch-test/runner-protocol';
+import { describe, expect, test } from 'vitest';
 
 // ─── Generation imports ────────────────────────────────────────
 
 import {
+  buildHappyPathRequest,
   type EndpointDef,
   type SchemaNode,
-  buildHappyPathRequest,
 } from '../generation/generation.service';
 
 // ─── Workflow Compiler imports ──────────────────────────────────
 
 import {
+  compileWorkflow,
   type WorkflowDefInput,
   type WorkflowStepDef,
-  compileWorkflow,
 } from '../workflow/workflow-compiler';
-
-// ─── Run service imports ────────────────────────────────────────
-
-import { buildFixturePlan } from '../run/run.service';
 
 // ─── Helpers ────────────────────────────────────────────────────
 
@@ -442,24 +439,5 @@ describe('E2E: Generation → Compilation → ExecutionPlan', () => {
 
     // Should be JSON-serializable
     expect(() => JSON.stringify(body)).not.toThrow();
-  });
-
-  test('chain: fixture plan is compatible with runner protocol', () => {
-    const plan = buildFixturePlan('api-v1');
-
-    const issues = validateExecutionPlan(plan);
-    expect(issues).toHaveLength(0);
-
-    expect(plan.steps).toHaveLength(5);
-
-    // Step dependencies should be correct
-    const step0Extractions = plan.steps[0]!.extractions?.map((e) => e.name) ?? [];
-    expect(step0Extractions).toContain('accessToken');
-
-    const step1Extractions = plan.steps[1]!.extractions?.map((e) => e.name) ?? [];
-    expect(step1Extractions).toContain('userId');
-
-    const step3Extractions = plan.steps[3]!.extractions?.map((e) => e.name) ?? [];
-    expect(step3Extractions).toContain('orderId');
   });
 });

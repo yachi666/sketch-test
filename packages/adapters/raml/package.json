@@ -4,11 +4,20 @@
   "private": true,
   "description": "RAML 1.0 adapter — produces CanonicalApiModel",
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
+    "build": "tsc --noEmit false --allowImportingTsExtensions false --incremental false",
     "check": "tsc --noEmit",
+    "lint": "biome check",
     "test": "vitest run",
-    "clean": "rm -rf dist/"
+    "clean": "rm -rf dist/ tsconfig.tsbuildinfo"
   },
   "dependencies": {
     "@sketch-test/canonical-api-model": "workspace:*",

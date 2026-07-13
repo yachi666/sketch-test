@@ -5,7 +5,7 @@
  * CanonicalApiModel. This is an adapter seam: the output is always the
  * canonical model, regardless of input format version.
  *
- * M0 scope:
+ * Supported scope:
  * - OpenAPI 3.0/3.1 JSON specs
  * - Paths, methods, parameters, request bodies, responses
  * - Schema extraction with stable JSON Pointer paths
@@ -678,7 +678,7 @@ export function importOpenApi(doc: OpenApiDocument, options: OpenApiAdapterOptio
         {
           severity: 'error',
           code: 'UNSUPPORTED_OPENAPI_VERSION',
-          message: `OpenAPI version ${oaVersion} is not supported. M0 supports 3.0 and 3.1.`,
+          message: `OpenAPI version ${oaVersion} is not supported. Supported versions are 3.0 and 3.1.`,
         },
       ],
     };

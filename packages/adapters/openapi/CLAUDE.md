@@ -13,7 +13,7 @@ pnpm test        # Run vitest unit tests
 pnpm check       # TypeScript type-check
 ```
 
-## M0 scope
+## Supported scope
 
 - OpenAPI 3.0 / 3.1 JSON documents
 - Paths → Endpoints (with stable identifiers)

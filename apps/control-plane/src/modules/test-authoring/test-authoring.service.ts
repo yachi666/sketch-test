@@ -106,12 +106,24 @@ export async function createTestCase(
   description?: string,
 ): Promise<TestCaseRow> {
   const id = testCaseId();
-  const result = await pool.query(
-    `INSERT INTO test_cases (id, workspace_id, api_version_id, name, description)
-     VALUES ($1, $2, $3, $4, $5)
-     RETURNING *`,
-    [id, workspaceId, apiVersionId ?? null, name, description ?? ''],
-  );
+  const result = apiVersionId
+    ? await pool.query(
+        `INSERT INTO test_cases (id, workspace_id, api_version_id, name, description)
+         SELECT $1, $2, av.id, $4, $5
+         FROM api_versions av
+         WHERE av.id = $3 AND av.workspace_id = $2
+         RETURNING *`,
+        [id, workspaceId, apiVersionId, name, description ?? ''],
+      )
+    : await pool.query(
+        `INSERT INTO test_cases (id, workspace_id, api_version_id, name, description)
+         VALUES ($1, $2, NULL, $3, $4)
+         RETURNING *`,
+        [id, workspaceId, name, description ?? ''],
+      );
+  if (result.rows.length === 0) {
+    throw new TestAuthoringError(`API version ${apiVersionId} not found`, 404);
+  }
   return result.rows[0] as TestCaseRow;
 }
 
@@ -325,13 +337,27 @@ export async function getLatestPublishedVersion(
 export async function compareVersions(
   versionIdA: string,
   versionIdB: string,
+  workspaceId: string,
 ): Promise<CompareResult | null> {
   const [a, b] = await Promise.all([
-    getTestCaseVersion(versionIdA),
-    getTestCaseVersion(versionIdB),
+    getTestCaseVersionInWorkspace(versionIdA, workspaceId),
+    getTestCaseVersionInWorkspace(versionIdB, workspaceId),
   ]);
   if (!a || !b) return null;
   return diffDefinitions(a.definition, b.definition);
+}
+
+async function getTestCaseVersionInWorkspace(
+  versionId: string,
+  workspaceId: string,
+): Promise<TestCaseVersionRow | null> {
+  const result = await pool.query(
+    `SELECT v.* FROM test_case_versions v
+     JOIN test_cases t ON t.id = v.test_case_id
+     WHERE v.id = $1 AND t.workspace_id = $2`,
+    [versionId, workspaceId],
+  );
+  return result.rows.length > 0 ? (result.rows[0] as TestCaseVersionRow) : null;
 }
 
 // ─── Custom Error ──────────────────────────────────────────────────

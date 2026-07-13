@@ -18,6 +18,7 @@ import {
   listTestSuites,
   listTestSuiteVersions,
   RunNotFoundError,
+  TestSuiteMemberNotFoundError,
   TestSuiteNotFoundError,
   TestSuiteVersionNotFoundError,
 } from './test-suite.service.js';
@@ -158,6 +159,9 @@ export async function testSuiteRoutes(app: FastifyInstance): Promise<void> {
       reply.status(201).send({ version });
     } catch (err) {
       if (err instanceof TestSuiteNotFoundError) {
+        return sendError(reply, 404, 'NOT_FOUND', err.message);
+      }
+      if (err instanceof TestSuiteMemberNotFoundError) {
         return sendError(reply, 404, 'NOT_FOUND', err.message);
       }
       const message = err instanceof Error ? err.message : 'Unknown error';

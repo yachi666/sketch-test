@@ -85,6 +85,28 @@ describe('ExecutionPlanSchema', () => {
     expect(ExecutionPlanSchema.safeParse(validPlan).success).toBe(true);
   });
 
+  test('accepts a plan compiled directly from a TestCaseVersion', () => {
+    const { workflowVersionId: _, ...withoutWorkflow } = validPlan;
+    expect(
+      ExecutionPlanSchema.safeParse({ ...withoutWorkflow, testCaseVersionId: 'tcv-1' }).success,
+    ).toBe(true);
+  });
+
+  test('accepts an immutable ad-hoc plan owned by its Run', () => {
+    const { workflowVersionId: _, ...withoutWorkflow } = validPlan;
+    expect(ExecutionPlanSchema.safeParse({ ...withoutWorkflow, adHocRunId: 'run-1' }).success).toBe(
+      true,
+    );
+  });
+
+  test('requires exactly one immutable source version', () => {
+    const { workflowVersionId: _, ...withoutSource } = validPlan;
+    expect(ExecutionPlanSchema.safeParse(withoutSource).success).toBe(false);
+    expect(
+      ExecutionPlanSchema.safeParse({ ...validPlan, testCaseVersionId: 'tcv-1' }).success,
+    ).toBe(false);
+  });
+
   test('rejects empty steps', () => {
     expect(ExecutionPlanSchema.safeParse({ ...validPlan, steps: [] }).success).toBe(false);
   });

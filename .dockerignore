@@ -1,0 +1,11 @@
+.git
+.turbo
+**/.turbo
+**/dist
+**/node_modules
+.env
+.env.*
+!.env.example
+.sketchtest
+coverage
+docs/archive

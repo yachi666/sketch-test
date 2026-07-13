@@ -103,6 +103,13 @@ export class TestSuiteVersionNotFoundError extends Error {
   }
 }
 
+export class TestSuiteMemberNotFoundError extends Error {
+  constructor() {
+    super('One or more suite members were not found in the test suite workspace');
+    this.name = 'TestSuiteMemberNotFoundError';
+  }
+}
+
 export class RunNotFoundError extends Error {
   constructor(id: string) {
     super(`Run ${id} not found`);
@@ -196,6 +203,30 @@ export async function createTestSuiteVersion(
     throw new TestSuiteNotFoundError(testSuiteId);
   }
 
+  const testIds = [...new Set(members.filter((member) => member.type === 'test').map((m) => m.id))];
+  const workflowIds = [
+    ...new Set([
+      ...members.filter((member) => member.type === 'workflow').map((member) => member.id),
+      ...(qualityGate.requiredWorkflows ?? []),
+    ]),
+  ];
+  if (testIds.length > 0 || workflowIds.length > 0) {
+    const ownership = await pool.query(
+      `SELECT
+         (SELECT COUNT(*)::int FROM test_cases
+          WHERE workspace_id = $1 AND id = ANY($2::text[])) AS test_count,
+         (SELECT COUNT(*)::int FROM workflows
+          WHERE workspace_id = $1 AND id = ANY($3::text[])) AS workflow_count`,
+      [suite.workspaceId, testIds, workflowIds],
+    );
+    const counts = ownership.rows[0] as
+      | { test_count?: number; workflow_count?: number }
+      | undefined;
+    if (counts?.test_count !== testIds.length || counts.workflow_count !== workflowIds.length) {
+      throw new TestSuiteMemberNotFoundError();
+    }
+  }
+
   // Get the latest version number, or 0 if none exist
   const latestResult = await pool.query(
     `SELECT version FROM test_suite_versions
@@ -275,14 +306,25 @@ export async function evaluateQualityGate(
   testSuiteVersionId: string,
 ): Promise<QualityGateResult> {
   // Get the test suite version with its quality gate config
-  const version = await getTestSuiteVersion(testSuiteVersionId);
-  if (!version) {
+  const versionResult = await pool.query(
+    `SELECT v.*, s.workspace_id
+     FROM test_suite_versions v
+     JOIN test_suites s ON s.id = v.test_suite_id
+     WHERE v.id = $1`,
+    [testSuiteVersionId],
+  );
+  if (versionResult.rows.length === 0) {
     throw new TestSuiteVersionNotFoundError(testSuiteVersionId);
   }
+  const version = rowToTestSuiteVersion(versionResult.rows[0]);
+  const workspaceId = versionResult.rows[0].workspace_id as string;
   const gateConfig = version.qualityGate;
 
   // Get the run
-  const runResult = await pool.query('SELECT * FROM runs WHERE id = $1', [runId]);
+  const runResult = await pool.query('SELECT * FROM runs WHERE id = $1 AND workspace_id = $2', [
+    runId,
+    workspaceId,
+  ]);
   if (runResult.rows.length === 0) {
     throw new RunNotFoundError(runId);
   }

@@ -5,7 +5,7 @@
  * fault injection, and an OpenAPI endpoint. Used by Runner integration tests
  * and local development.
  *
- * sketch-test-004: M0 feasibility verification.
+ * This server is test infrastructure only and must not be used by production routes.
  *
  * Usage:
  *   npx tsx src/index.ts            # default port 3800
@@ -13,7 +13,8 @@
  *   FAULT_MODE=timeout npx tsx ...  # inject faults
  */
 
-import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
+import { pathToFileURL } from 'node:url';
 
 // ─── Configuration ──────────────────────────────────────────────
 
@@ -604,14 +605,35 @@ function generateOpenApiSpec(): unknown {
 
 // ─── Start Server ────────────────────────────────────────────────
 
-const server = createServer(handleRequest);
-server.listen(PORT, () => {
-  console.log(`\n🔬 Hermetic Fixture Server ready at http://127.0.0.1:${PORT}`);
-  console.log(`   OpenAPI spec:    http://127.0.0.1:${PORT}/openapi.json`);
-  console.log(`   Health check:    http://127.0.0.1:${PORT}/health`);
-  console.log(`   Admin reset:     POST http://127.0.0.1:${PORT}/__admin/reset`);
-  if (FAULT_MODE) {
-    console.log(`   ⚠️  Fault injection: ${FAULT_MODE} on "${FAULT_TARGET || '*'}"`);
-  }
-  console.log('');
-});
+export function createFixtureServer(): Server {
+  seed();
+  return createServer(handleRequest);
+}
+
+export function startFixtureServer(port = PORT, log = true): Promise<Server> {
+  const server = createFixtureServer();
+  return new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(port, '127.0.0.1', () => {
+      server.off('error', reject);
+      if (log) {
+        const address = server.address();
+        const actualPort = typeof address === 'object' && address ? address.port : port;
+        console.log(`\n🔬 Hermetic Fixture Server ready at http://127.0.0.1:${actualPort}`);
+        console.log(`   OpenAPI spec:    http://127.0.0.1:${actualPort}/openapi.json`);
+        console.log(`   Health check:    http://127.0.0.1:${actualPort}/health`);
+        console.log(`   Admin reset:     POST http://127.0.0.1:${actualPort}/__admin/reset`);
+        if (FAULT_MODE) {
+          console.log(`   ⚠️  Fault injection: ${FAULT_MODE} on "${FAULT_TARGET || '*'}"`);
+        }
+        console.log('');
+      }
+      resolve(server);
+    });
+  });
+}
+
+const entrypoint = process.argv[1];
+if (entrypoint && import.meta.url === pathToFileURL(entrypoint).href) {
+  await startFixtureServer();
+}

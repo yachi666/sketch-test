@@ -30,23 +30,20 @@ vi.mock('../../../shared/id', () => {
 });
 
 import {
-  generateServiceToken,
-  verifyPassword,
-  createWorkspace,
   createUser,
+  findUserByEmail,
+  generateServiceToken,
   getUser,
   getUserByEmail,
-  findUserByEmail,
-  listUsers,
-  updateUserRole,
-  createServiceAccount,
-  verifyServiceAccountToken,
-  revokeServiceAccount,
-  listServiceAccounts,
   getWorkspace,
+  listServiceAccounts,
+  listUsers,
   listWorkspaces,
+  revokeServiceAccount,
+  updateUserRole,
+  verifyPassword,
+  verifyServiceAccountToken,
 } from '../iam.service';
-import type { User } from '../iam.service';
 
 // ─── Helpers ────────────────────────────────────────────────────────
 
@@ -70,36 +67,32 @@ function makeUserWithHash(
 // ─── verifyPassword ───────────────────────────────────────────────
 
 describe('verifyPassword', () => {
-  test('returns true for correct password', () => {
+  test('returns true for a correct legacy password', async () => {
     const user = makeUserWithHash({ password: 'secret123' });
-    expect(verifyPassword(user, 'secret123')).toBe(true);
+    await expect(verifyPassword(user, 'secret123')).resolves.toBe(true);
   });
 
-  test('returns false for wrong password', () => {
+  test('returns false for wrong password', async () => {
     const user = makeUserWithHash({ password: 'secret123' });
-    expect(verifyPassword(user, 'wrong-password')).toBe(false);
+    await expect(verifyPassword(user, 'wrong-password')).resolves.toBe(false);
   });
 
-  test('returns false for empty password', () => {
+  test('returns false for empty password', async () => {
     const user = makeUserWithHash({ password: 'secret123' });
-    expect(verifyPassword(user, '')).toBe(false);
+    await expect(verifyPassword(user, '')).resolves.toBe(false);
   });
 
-  test('returns false when hash length differs', () => {
+  test('returns false when hash length differs', async () => {
     const user = makeUserWithHash({ passwordHash: 'abc' });
-    expect(verifyPassword(user, 'anything')).toBe(false);
+    await expect(verifyPassword(user, 'anything')).resolves.toBe(false);
   });
 
-  test('same password produces consistent hash', () => {
+  test('continues to verify pre-release fixed-salt hashes', async () => {
     const user1 = makeUserWithHash({ password: 'mypassword' });
     const user2 = makeUserWithHash({ password: 'mypassword' });
 
-    // Both should verify with the same password
-    expect(verifyPassword(user1, 'mypassword')).toBe(true);
-    expect(verifyPassword(user2, 'mypassword')).toBe(true);
-
-    // Hashes should be identical (deterministic scrypt with fixed salt)
-    expect(user1.passwordHash).toBe(user2.passwordHash);
+    await expect(verifyPassword(user1, 'mypassword')).resolves.toBe(true);
+    await expect(verifyPassword(user2, 'mypassword')).resolves.toBe(true);
   });
 });
 
@@ -462,9 +455,20 @@ describe('createUser', () => {
     const callArgs = mockQuery.mock.calls[0] as [string, unknown[]];
     const storedPassword = callArgs[1][3] as string;
 
-    // The stored value should be a hex hash, not the plaintext password
+    // The stored value includes an algorithm version and a per-password salt.
     expect(storedPassword).not.toBe('my-secret-pw');
-    expect(/^[0-9a-f]{128}$/.test(storedPassword)).toBe(true);
+    expect(storedPassword).toMatch(/^scrypt-v1\$[A-Za-z0-9_-]+\$[0-9a-f]{128}$/);
+  });
+
+  test('uses a unique salt for users with the same password', async () => {
+    mockQuery.mockResolvedValue({ rowCount: 1 });
+
+    await createUser('ws-1', 'first@test.com', 'shared-password');
+    await createUser('ws-1', 'second@test.com', 'shared-password');
+
+    const firstHash = mockQuery.mock.calls[0]?.[1]?.[3];
+    const secondHash = mockQuery.mock.calls[1]?.[1]?.[3];
+    expect(firstHash).not.toBe(secondHash);
   });
 
   test('each user gets a unique ID', async () => {

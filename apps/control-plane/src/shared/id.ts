@@ -86,6 +86,9 @@ export function runId(): string {
 export function eventId(): string {
   return generateId('evt');
 }
+export function auditLogId(): string {
+  return generateId('audit');
+}
 
 // ── Runner ──
 export function runnerId(): string {

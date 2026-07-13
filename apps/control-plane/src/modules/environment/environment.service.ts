@@ -31,6 +31,9 @@ let _encryptionKeyChecked = false;
 function getEncryptionKey(): Buffer {
   const raw = process.env['SECRET_KEY'];
   if (!raw) {
+    if (process.env['NODE_ENV'] === 'production') {
+      throw new Error('SECRET_KEY must be set in production');
+    }
     if (!_encryptionKeyChecked) {
       console.warn(
         '[security] SECRET_KEY env var not set — using default dev key. ' +
@@ -40,6 +43,9 @@ function getEncryptionKey(): Buffer {
     }
   }
   if (raw && raw === DEV_KEY) {
+    if (process.env['NODE_ENV'] === 'production') {
+      throw new Error('SECRET_KEY must not use the development value in production');
+    }
     if (!_encryptionKeyChecked) {
       console.warn(
         '[security] SECRET_KEY is set to the default dev value — ' +

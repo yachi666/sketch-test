@@ -13,6 +13,7 @@
 
 import crypto from 'node:crypto';
 import type { ExecutionPlan, FrozenStep, FrozenTeardownStep } from '@sketch-test/runner-protocol';
+import { executionPlanContentHash } from '../../shared/execution-plan-hash.js';
 
 // ─── Editor DSL Types (what the web editor sends) ────────────────
 
@@ -451,12 +452,6 @@ const VALID_ON_FAILURE = ['stop', 'skip', 'teardown-and-stop'] as const;
 const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_MAX_RETRIES = 0;
 
-function makePlanHash(steps: FrozenStep[], teardown?: FrozenTeardownStep[]): string {
-  const hash = crypto.createHash('sha256');
-  hash.update(JSON.stringify({ steps, teardown }));
-  return hash.digest('hex');
-}
-
 /**
  * Compile a WorkflowDefinition (editor DSL) into an ExecutionPlan.
  *
@@ -642,14 +637,14 @@ export async function compileWorkflow(
   }
 
   // ── Build ExecutionPlan ───────────────────────────────────────
-  const planHash = makePlanHash(frozenSteps, frozenTeardown);
+  const planHash = executionPlanContentHash(frozenSteps, frozenTeardown);
   const now = new Date().toISOString();
 
   const plan: ExecutionPlan = {
     schemaVersion: 'sketch-test.runner-protocol/v1',
     planId,
     planHash,
-    workflowVersionId: '', // Will be set by the service when publishing
+    adHocRunId: planId, // Replaced with WorkflowVersion provenance when published.
     compiledAt: now,
     steps: frozenSteps,
     teardown: frozenTeardown

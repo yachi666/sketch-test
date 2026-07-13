@@ -2,7 +2,7 @@
  * API Version Diff Service — compares two CanonicalApiModel versions
  * and produces a structured change set.
  *
- * M1: Detects added, removed, and modified endpoints, parameters,
+ * Detects added, removed, and modified endpoints, parameters,
  * request bodies, and responses. Marks potentially breaking changes.
  */
 
@@ -48,13 +48,16 @@ export interface ApiDiffResult {
 export async function diffApiVersions(
   baseVersionId: string,
   targetVersionId: string,
+  workspaceId: string,
 ): Promise<ApiDiffResult> {
-  const baseResult = await pool.query(`SELECT spec_json FROM api_versions WHERE id = $1`, [
-    baseVersionId,
-  ]);
-  const targetResult = await pool.query(`SELECT spec_json FROM api_versions WHERE id = $1`, [
-    targetVersionId,
-  ]);
+  const baseResult = await pool.query(
+    `SELECT spec_json FROM api_versions WHERE id = $1 AND workspace_id = $2`,
+    [baseVersionId, workspaceId],
+  );
+  const targetResult = await pool.query(
+    `SELECT spec_json FROM api_versions WHERE id = $1 AND workspace_id = $2`,
+    [targetVersionId, workspaceId],
+  );
 
   if (baseResult.rows.length === 0) {
     throw new DiffError(`Base version ${baseVersionId} not found`);

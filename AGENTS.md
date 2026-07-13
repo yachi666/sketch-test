@@ -6,7 +6,13 @@
 
 ### Project overview
 
-Read `CLAUDE.md` at the repo root for monorepo structure, conventions, and current status. Each package and app has its own `CLAUDE.md` with API docs, invariants, and modification guides.
+Read `CLAUDE.md` at the repo root for monorepo structure, conventions, and current status. Pay special attention to:
+
+- **Hard constraints** — non-negotiable rules (immutable versions, independent processes, contract-only seams). Violating these breaks the platform.
+- **Gotchas** — common pitfalls (contract change cascades, PostgreSQL requirement, Biome vs ESLint, golden test snapshots).
+- **Domain language** — 7 product principles and canonical terms table.
+
+Each package and app has its own `CLAUDE.md` with API docs, invariants, and modification guides. See the index below.
 
 ### Issue tracker
 
@@ -18,13 +24,14 @@ Label vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-hu
 
 ### Domain docs
 
-Read `CONTEXT.md` at the repo root for the domain glossary. See `docs/agents/domain.md` for agent-specific domain conventions.
+`CLAUDE.md` includes the 7 product principles and canonical terms table. For the full domain glossary, business processes, and platform flows, read `CONTEXT.md` at the repo root. See `docs/agents/domain.md` for agent-specific domain conventions.
 
 ### Per-package CLAUDE.md index
 
 | Package | CLAUDE.md |
 |---------|-----------|
 | Root (monorepo) | [`CLAUDE.md`](CLAUDE.md) |
+| Web | [`apps/web/CLAUDE.md`](apps/web/CLAUDE.md) |
 | Control Plane | [`apps/control-plane/CLAUDE.md`](apps/control-plane/CLAUDE.md) |
 | Runner | [`apps/runner/CLAUDE.md`](apps/runner/CLAUDE.md) |
 | CLI | [`apps/cli/CLAUDE.md`](apps/cli/CLAUDE.md) |

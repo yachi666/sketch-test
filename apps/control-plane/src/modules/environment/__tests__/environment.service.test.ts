@@ -29,19 +29,19 @@ vi.mock('../../../shared/id.js', () => ({
 
 import {
   createEnvironment,
-  getEnvironment,
-  listEnvironments,
-  updateEnvironment,
-  deleteEnvironment,
   createEnvironmentVersion,
-  getEnvironmentVersion,
-  listEnvironmentVersions,
   createSecret,
-  getSecret,
-  listSecrets,
-  updateSecret,
-  deleteSecret,
   decryptSecret,
+  deleteEnvironment,
+  deleteSecret,
+  getEnvironment,
+  getEnvironmentVersion,
+  getSecret,
+  listEnvironments,
+  listEnvironmentVersions,
+  listSecrets,
+  updateEnvironment,
+  updateSecret,
 } from '../environment.service';
 
 // ─── Helpers ───────────────────────────────────────────────────────

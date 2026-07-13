@@ -2,9 +2,9 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { pool } from '../../db/db.js';
 import { sendError } from '../../shared/errors.js';
+import { authenticatedUser } from '../iam/auth.middleware.js';
 import {
-  createFixtureRun,
-  createRunFromSteps,
+  createPersistedRunFromSteps,
   createRunFromWorkflow,
   getApiVersion,
   getRun,
@@ -59,15 +59,29 @@ const CustomRunBodySchema = z.object({
 
 export async function runRoutes(app: FastifyInstance): Promise<void> {
   /** List all imported API versions. */
-  app.get('/api/api-versions', async (_request, reply) => {
+  app.get('/api/api-versions', async (request, reply) => {
     const result = await pool.query(
       `SELECT id, source_type, source_location, content_hash, created_at,
               spec_json->'metadata'->>'sourceLabel' as label,
               jsonb_array_length(spec_json->'endpoints') as endpoint_count,
               jsonb_array_length(spec_json->'diagnostics') as diagnostic_count
-       FROM api_versions ORDER BY created_at DESC LIMIT 50`,
+       FROM api_versions
+       WHERE workspace_id = $1
+       ORDER BY created_at DESC LIMIT 50`,
+      [authenticatedUser(request).workspaceId],
     );
-    reply.send({ apiVersions: result.rows });
+    reply.send({
+      apiVersions: result.rows.map((row) => ({
+        id: row.id,
+        sourceType: row.source_type,
+        sourceLocation: row.source_location,
+        contentHash: row.content_hash,
+        createdAt: row.created_at,
+        label: row.label,
+        endpointCount: row.endpoint_count,
+        diagnosticCount: row.diagnostic_count,
+      })),
+    });
   });
 
   /** Get a single API version with its endpoints. */
@@ -92,18 +106,6 @@ export async function runRoutes(app: FastifyInstance): Promise<void> {
     });
   });
 
-  /** Generate ExecutionPlan from an API version and create a Run. */
-  app.get('/api/api-versions/:id/execution-plan', async (request, reply) => {
-    const { id } = request.params as { id: string };
-    const apiVersion = await getApiVersion(id);
-    if (!apiVersion) {
-      return sendError(reply, 404, 'NOT_FOUND', `API version ${id} not found`);
-    }
-
-    const { runId, plan } = await createFixtureRun(id);
-    reply.send({ runId, plan });
-  });
-
   /** Create a Run from custom steps. */
   app.post('/api/runs', async (request, reply) => {
     const parsed = CustomRunBodySchema.safeParse(request.body);
@@ -113,7 +115,10 @@ export async function runRoutes(app: FastifyInstance): Promise<void> {
       ]);
     }
 
-    const { runId, plan } = createRunFromSteps(parsed.data.steps);
+    const { runId, plan } = await createPersistedRunFromSteps(
+      authenticatedUser(request).workspaceId,
+      parsed.data.steps,
+    );
     reply.status(201).send({ runId, plan });
   });
 
@@ -132,7 +137,10 @@ export async function runRoutes(app: FastifyInstance): Promise<void> {
     }
 
     try {
-      const result = await createRunFromWorkflow(parsed.data.workflowVersionId);
+      const result = await createRunFromWorkflow(
+        parsed.data.workflowVersionId,
+        authenticatedUser(request).workspaceId,
+      );
       reply.status(201).send({
         runId: result.runId,
         workflowVersionId: result.workflowVersionId,
@@ -150,8 +158,8 @@ export async function runRoutes(app: FastifyInstance): Promise<void> {
   });
 
   /** List all runs. */
-  app.get('/api/runs', async (_request, reply) => {
-    const runs = await listRuns();
+  app.get('/api/runs', async (request, reply) => {
+    const runs = await listRuns(authenticatedUser(request).workspaceId);
     reply.send({ runs });
   });
 

@@ -1,0 +1,30 @@
+groups:
+  - name: sketchtest
+    rules:
+      - alert: SketchTestControlPlaneDown
+        expr: up{job="sketchtest-control-plane"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: SketchTest Control Plane is unreachable
+
+      - alert: SketchTestHighServerErrorRate
+        expr: >-
+          sum(rate(sketchtest_http_requests_total{status=~"5.."}[5m]))
+          /
+          clamp_min(sum(rate(sketchtest_http_requests_total[5m])), 0.001)
+          > 0.05
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: More than 5% of Control Plane requests are failing
+
+      - alert: SketchTestNoTraffic
+        expr: sum(increase(sketchtest_http_requests_total[15m])) == 0
+        for: 15m
+        labels:
+          severity: info
+        annotations:
+          summary: Control Plane has received no traffic

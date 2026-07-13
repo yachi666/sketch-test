@@ -9,9 +9,11 @@
  * values, and ranges (N-M).
  */
 
+import { type ExecutionPlan, ExecutionPlanSchema } from '@sketch-test/runner-protocol';
 import { pool } from '../../db/db.js';
-import { generateId } from '../../shared/id.js';
-import { runId } from '../../shared/id.js';
+import { executionPlanContentHash } from '../../shared/execution-plan-hash.js';
+import { generateId, runId } from '../../shared/id.js';
+import { compileTestCaseVersionPlan, TestPlanCompileError } from './test-plan-compiler.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -51,6 +53,18 @@ export interface ScheduleUpdateInput {
   enabled?: boolean;
 }
 
+export interface ScheduleTriggerResult {
+  testSuiteVersionId: string;
+  runIds: string[];
+}
+
+export class ScheduleTriggerError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ScheduleTriggerError';
+  }
+}
+
 // ---------------------------------------------------------------------------
 // ID generation
 // ---------------------------------------------------------------------------
@@ -85,7 +99,15 @@ export async function createSchedule(input: ScheduleCreateInput): Promise<Schedu
 
   const result = await pool.query<ScheduleRow>(
     `INSERT INTO schedule_configs (id, workspace_id, test_suite_id, cron_expression, environment_id, enabled)
-     VALUES ($1, $2, $3, $4, $5, $6)
+     SELECT $1, $2, suite.id, $4, $5, $6
+     FROM test_suites suite
+     WHERE suite.id = $3 AND suite.workspace_id = $2
+       AND (
+         $5::text IS NULL OR EXISTS (
+           SELECT 1 FROM environments environment
+           WHERE environment.id = $5 AND environment.workspace_id = $2
+         )
+       )
      RETURNING *`,
     [
       id,
@@ -97,22 +119,21 @@ export async function createSchedule(input: ScheduleCreateInput): Promise<Schedu
     ],
   );
 
+  if (result.rows.length === 0) {
+    throw new ScheduleTriggerError('Test suite or environment not found in workspace');
+  }
+
   return toSchedule(result.rows[0]!);
 }
 
-/** List schedules, optionally filtered by workspace. */
-export async function listSchedules(workspaceId?: string): Promise<Schedule[]> {
-  let query = 'SELECT * FROM schedule_configs';
-  const params: string[] = [];
-
-  if (workspaceId) {
-    query += ' WHERE workspace_id = $1';
-    params.push(workspaceId);
-  }
-
-  query += ' ORDER BY created_at DESC LIMIT 100';
-
-  const result = await pool.query<ScheduleRow>(query, params);
+/** List schedules in one workspace. */
+export async function listSchedules(workspaceId: string): Promise<Schedule[]> {
+  const result = await pool.query<ScheduleRow>(
+    `SELECT * FROM schedule_configs
+     WHERE workspace_id = $1
+     ORDER BY created_at DESC LIMIT 100`,
+    [workspaceId],
+  );
   return result.rows.map(toSchedule);
 }
 
@@ -301,32 +322,123 @@ export function isValidCronExpression(expression: string): boolean {
 
 /**
  * Manually trigger a scheduled run immediately.
- * Creates a new run from the schedule's test suite and returns the run ID.
+ * Creates one immutable Run for every member in the latest TestSuiteVersion.
  */
-export async function triggerSchedule(id: string): Promise<string | null> {
+export async function triggerSchedule(id: string): Promise<ScheduleTriggerResult | null> {
   const schedule = await getSchedule(id);
   if (!schedule) return null;
 
-  const newRunId = runId();
-  const now = new Date().toISOString();
-
-  // Build a minimal plan referencing the test suite
-  const plan = {
-    schemaVersion: 'sketch-test.runner-protocol/v1',
-    planId: newRunId,
-    planHash: '0'.repeat(64),
-    workflowVersionId: schedule.testSuiteId,
-    compiledAt: now,
-    steps: [] as Array<Record<string, unknown>>,
-  };
-
-  await pool.query(
-    `INSERT INTO runs (id, api_version_id, status, plan_json, created_at)
-     VALUES ($1, NULL, 'pending', $2, $3)`,
-    [newRunId, JSON.stringify(plan), now],
+  const versionResult = await pool.query<{
+    id: string;
+    members_json: Array<{ type: 'test' | 'workflow'; id: string }>;
+  }>(
+    `SELECT id, members_json
+     FROM test_suite_versions
+     WHERE test_suite_id = $1
+     ORDER BY version DESC
+     LIMIT 1`,
+    [schedule.testSuiteId],
   );
 
-  return newRunId;
+  const suiteVersion = versionResult.rows[0];
+  if (!suiteVersion) {
+    throw new ScheduleTriggerError(
+      `Test suite ${schedule.testSuiteId} has no version and cannot be scheduled`,
+    );
+  }
+
+  const members = suiteVersion.members_json ?? [];
+  if (members.length === 0) {
+    throw new ScheduleTriggerError(`Test suite version ${suiteVersion.id} has no members`);
+  }
+
+  const plans: ExecutionPlan[] = [];
+  for (const member of members) {
+    if (member.type === 'test') {
+      const testResult = await pool.query<{ id: string; definition: unknown }>(
+        `SELECT id, definition
+         FROM test_case_versions
+         WHERE test_case_id = $1 AND published_by IS NOT NULL
+         ORDER BY version DESC
+         LIMIT 1`,
+        [member.id],
+      );
+      const testVersion = testResult.rows[0];
+      if (!testVersion) {
+        throw new ScheduleTriggerError(`TestCase ${member.id} has no published TestCaseVersion`);
+      }
+      try {
+        plans.push(compileTestCaseVersionPlan(testVersion.id, testVersion.definition));
+      } catch (error) {
+        if (error instanceof TestPlanCompileError) {
+          throw new ScheduleTriggerError(error.message);
+        }
+        throw error;
+      }
+      continue;
+    }
+
+    const planResult = await pool.query<{ compiled_plan: unknown }>(
+      `SELECT compiled_plan
+       FROM workflow_versions
+       WHERE workflow_id = $1 AND compiled_plan IS NOT NULL
+       ORDER BY version DESC
+       LIMIT 1`,
+      [member.id],
+    );
+    const storedPlan = planResult.rows[0]?.compiled_plan;
+    const parsed = ExecutionPlanSchema.safeParse(storedPlan);
+    if (!parsed.success) {
+      throw new ScheduleTriggerError(`Workflow ${member.id} has no valid published ExecutionPlan`);
+    }
+
+    // Verify the exact stored representation. Zod applies protocol defaults
+    // while parsing; hashing the parsed value would incorrectly reject older
+    // valid plans that omit optional fields with defaults.
+    const storedContent = storedPlan as ExecutionPlan;
+    const expectedHash = executionPlanContentHash(
+      storedContent.steps,
+      storedContent.teardown?.steps,
+    );
+    if (parsed.data.planHash !== expectedHash) {
+      throw new ScheduleTriggerError(
+        `Workflow ${member.id} has an ExecutionPlan with an invalid content hash`,
+      );
+    }
+    // Preserve the immutable published representation. Normalizing defaults
+    // here would change executable content without updating its content hash.
+    plans.push(storedContent);
+  }
+
+  const client = await pool.connect();
+  const runIds: string[] = [];
+  try {
+    await client.query('BEGIN');
+    for (const plan of plans) {
+      const newRunId = runId();
+      runIds.push(newRunId);
+      await client.query(
+        `INSERT INTO runs
+          (id, workspace_id, workflow_version_id, test_case_version_id, status, plan_json)
+         VALUES ($1, $2, $3, $4, 'pending', $5)`,
+        [
+          newRunId,
+          schedule.workspaceId,
+          plan.workflowVersionId ?? null,
+          plan.testCaseVersionId ?? null,
+          JSON.stringify(plan),
+        ],
+      );
+    }
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+
+  return { testSuiteVersionId: suiteVersion.id, runIds };
 }
 
 /**
@@ -336,8 +448,6 @@ export async function triggerSchedule(id: string): Promise<string | null> {
 export async function getDueSchedules(): Promise<Schedule[]> {
   const now = new Date();
   const oneMinuteAgo = new Date(now.getTime() - 60_000);
-  const oneMinuteAhead = new Date(now.getTime() + 60_000);
-
   const result = await pool.query<ScheduleRow>(
     `SELECT * FROM schedule_configs WHERE enabled = true ORDER BY created_at`,
   );

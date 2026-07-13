@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
+    "e2e:live": "node e2e/live-product.mjs",
     "build": "vite build",
+    "clean": "rm -rf dist/ tsconfig.tsbuildinfo",
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
     "check": "tsc --noEmit",
@@ -13,11 +15,6 @@
   },
   "dependencies": {
     "@phosphor-icons/react": "catalog:",
-    "@sketch-test/adapter-har": "workspace:*",
-    "@sketch-test/adapter-postman": "workspace:*",
-    "@sketch-test/canonical-api-model": "workspace:*",
-    "@sketch-test/contracts-common": "workspace:*",
-    "@sketch-test/format-detector": "workspace:*",
     "@vitejs/plugin-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
@@ -26,6 +23,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@playwright/test": "1.61.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@types/react": "catalog:",

@@ -22,16 +22,16 @@ vi.mock('../../../shared/id.js', () => ({
 
 import {
   createTestSuite,
-  getTestSuite,
-  listTestSuites,
-  deleteTestSuite,
   createTestSuiteVersion,
-  getTestSuiteVersion,
-  listTestSuiteVersions,
+  deleteTestSuite,
   evaluateQualityGate,
+  getTestSuite,
+  getTestSuiteVersion,
+  listTestSuites,
+  listTestSuiteVersions,
+  RunNotFoundError,
   TestSuiteNotFoundError,
   TestSuiteVersionNotFoundError,
-  RunNotFoundError,
 } from '../test-suite.service';
 
 // ─── Helpers ───────────────────────────────────────────────────────
@@ -156,6 +156,7 @@ describe('createTestSuiteVersion', () => {
 
   test('creates a version with auto-increment', async () => {
     mockQuery.mockResolvedValueOnce({ rows: [makeSuiteRow()] }); // suite exists
+    mockQuery.mockResolvedValueOnce({ rows: [{ test_count: 1, workflow_count: 1 }] });
     mockQuery.mockResolvedValueOnce({ rows: [{ version: 1 }] }); // latest version
     mockQuery.mockResolvedValueOnce({ rows: [] }); // INSERT version
     mockQuery.mockResolvedValueOnce({ rows: [] }); // UPDATE updated_at

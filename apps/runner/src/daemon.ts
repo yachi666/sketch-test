@@ -28,19 +28,18 @@
  *   [runner] Polling for work at http://localhost:3802
  */
 
-import { executePlan } from './index.js';
 import type { ExecutionPlan } from '@sketch-test/runner-protocol';
+import { loadRunnerConfig } from './config.js';
+import { executePlan } from './index.js';
 
 // ── Configuration ──
 
-const CP_URL = process.env['CP_URL'] ?? 'http://localhost:3802';
-const WORKSPACE_ID = process.env['WORKSPACE_ID'] ?? 'ws_default';
-const RUNNER_NAME = process.env['RUNNER_NAME'] ?? `runner-${process.pid}`;
-const RUNNER_VERSION = process.env['RUNNER_VERSION'] ?? '0.1.0';
-const RUNNER_LABELS = (process.env['RUNNER_LABELS'] ?? '')
-  .split(',')
-  .map((s) => s.trim())
-  .filter(Boolean);
+const config = loadRunnerConfig();
+const CP_URL = config.controlPlaneUrl;
+const WORKSPACE_ID = config.workspaceId;
+const RUNNER_NAME = config.name;
+const RUNNER_VERSION = config.version;
+const RUNNER_LABELS = config.labels;
 const HEARTBEAT_INTERVAL_MS = 15_000;
 const POLL_INTERVAL_MS = 2000;
 
@@ -61,7 +60,7 @@ async function cpRequest(path: string, options: RequestInit = {}): Promise<Respo
   const url = `${CP_URL}${path}`;
   const headers = new Headers(options.headers as Record<string, string> | undefined);
   headers.set('X-Runner-Token', runnerToken);
-  if (!headers.has('Content-Type') && options.method !== 'GET') {
+  if (!headers.has('Content-Type') && options.body !== undefined) {
     headers.set('Content-Type', 'application/json');
   }
 
@@ -75,7 +74,12 @@ async function cpRequest(path: string, options: RequestInit = {}): Promise<Respo
 async function registerWithCP(): Promise<{ id: string; token: string }> {
   const response = await fetch(`${CP_URL}/api/runners/register`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(config.registrationToken
+        ? { 'X-Runner-Registration-Token': config.registrationToken }
+        : {}),
+    },
     body: JSON.stringify({
       workspaceId: WORKSPACE_ID,
       name: RUNNER_NAME,
@@ -121,28 +125,32 @@ async function uploadEvents(
     payload: unknown;
   }>,
 ): Promise<void> {
-  try {
-    const response = await cpRequest(`/api/runs/${runId}/events`, {
-      method: 'POST',
-      body: JSON.stringify({ events }),
-    });
-    if (!response.ok) {
-      console.error(`[runner] Failed to upload events: HTTP ${response.status}`);
-    }
-  } catch (err) {
-    console.error(`[runner] Failed to upload events: ${err instanceof Error ? err.message : err}`);
+  const response = await cpRequest(`/api/runs/${runId}/events`, {
+    method: 'POST',
+    body: JSON.stringify({ events }),
+  });
+  if (!response.ok) {
+    throw new Error(`Event upload failed (HTTP ${response.status}): ${await response.text()}`);
   }
 }
 
 /** Report run status to the Control Plane. */
 async function reportStatus(runId: string, status: string): Promise<void> {
   try {
-    await cpRequest(`/api/runs/${runId}`, {
+    const response = await cpRequest(`/api/runs/${runId}`, {
       method: 'PATCH',
       body: JSON.stringify({ status }),
     });
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${await response.text()}`);
   } catch (err) {
     console.error(`[runner] Failed to report status: ${err instanceof Error ? err.message : err}`);
+  }
+}
+
+async function persistEvidenceManifest(runId: string): Promise<void> {
+  const response = await cpRequest(`/api/runs/${runId}/evidence-manifest`, { method: 'POST' });
+  if (!response.ok) {
+    throw new Error(`Evidence manifest persistence failed (HTTP ${response.status})`);
   }
 }
 
@@ -213,7 +221,8 @@ async function executeRun(run: CpRun): Promise<void> {
   // Build stepId → stepIndex map from the plan
   const stepIndexMap = new Map<string, number>();
   for (let i = 0; i < run.plan.steps.length; i++) {
-    stepIndexMap.set(run.plan.steps[i]!.stepId, i);
+    const step = run.plan.steps[i];
+    if (step) stepIndexMap.set(step.stepId, i);
   }
   stepIndexMap.set('run', -1); // run-level events (run.started, run.finished)
 
@@ -232,6 +241,8 @@ async function executeRun(run: CpRun): Promise<void> {
     await uploadEvents(run.id, uploadBatch);
   }
 
+  await persistEvidenceManifest(run.id);
+
   // Report final status
   const status = result.status === 'passed' ? 'passed' : 'failed';
   await reportStatus(run.id, status);
@@ -247,18 +258,9 @@ async function main(): Promise<void> {
   console.log(`[runner] Starting daemon...`);
 
   // ── Authentication: register or use existing token ──
-  if (process.env['RUNNER_TOKEN']) {
-    runnerToken = process.env['RUNNER_TOKEN'];
-    runnerId = process.env['RUNNER_ID'] ?? '';
-
-    if (!runnerId) {
-      console.error(
-        '[runner] ERROR: RUNNER_TOKEN is set but RUNNER_ID is not. ' +
-          'When using a pre-existing token, you must also set RUNNER_ID.',
-      );
-      process.exit(1);
-    }
-
+  if (config.token && config.id) {
+    runnerToken = config.token;
+    runnerId = config.id;
     console.log(`[runner] Using existing runner ID: ${runnerId}`);
   } else {
     try {
@@ -267,7 +269,6 @@ async function main(): Promise<void> {
       runnerToken = registration.token;
 
       console.log(`[runner] Registered as ${runnerId}`);
-      console.log(`[runner] Token: ${runnerToken} (save this!)`);
     } catch (err) {
       console.error(`[runner] Failed to register: ${err instanceof Error ? err.message : err}`);
       process.exit(1);

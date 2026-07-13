@@ -853,7 +853,7 @@ interface GenerationConfig {
  */
 async function runGeneration(
   jobId: string,
-  _workspaceId: string,
+  workspaceId: string,
   apiVersionId: string,
   strategy: GenerationStrategy,
   config: GenerationConfig,
@@ -863,7 +863,10 @@ async function runGeneration(
     await pool.query(`UPDATE generation_jobs SET status = 'running' WHERE id = $1`, [jobId]);
 
     // Fetch API version
-    const avResult = await pool.query(`SELECT * FROM api_versions WHERE id = $1`, [apiVersionId]);
+    const avResult = await pool.query(
+      `SELECT * FROM api_versions WHERE id = $1 AND workspace_id = $2`,
+      [apiVersionId, workspaceId],
+    );
     if (avResult.rows.length === 0) {
       await pool.query(`UPDATE generation_jobs SET status = 'failed' WHERE id = $1`, [jobId]);
       return;
@@ -955,10 +958,15 @@ export async function generateTests(
 
   const result = await pool.query(
     `INSERT INTO generation_jobs (id, workspace_id, api_version_id, strategy, status, config)
-     VALUES ($1, $2, $3, $4, 'pending', $5)
+     SELECT $1, $2, av.id, $4, 'pending', $5
+     FROM api_versions av
+     WHERE av.id = $3 AND av.workspace_id = $2
      RETURNING *`,
     [id, workspaceId, apiVersionId, strategy, JSON.stringify({ endpointIds: endpointIds ?? [] })],
   );
+  if (result.rows.length === 0) {
+    throw new GenerationError(`API version ${apiVersionId} not found`, 404);
+  }
   const job = result.rows[0] as GenerationJobRow;
 
   // Run generation asynchronously (fire and forget)

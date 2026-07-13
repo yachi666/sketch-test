@@ -6,8 +6,8 @@
  * retries, conditions, and redaction.
  */
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
-import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import type { ExecutionPlan, FrozenStep } from '@sketch-test/runner-protocol';
+import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import { executePlan } from '../index';
 
 // ─── Test HTTP Server ────────────────────────────────────────────────
@@ -37,6 +37,10 @@ beforeAll(async () => {
       return json(res, 200, { message: 'Hello, world!', status: 'ok' });
     }
 
+    if (method === 'GET' && url.pathname === '/api/trace') {
+      return json(res, 200, { traceparent: req.headers['traceparent'] });
+    }
+
     if (method === 'POST' && url.pathname === '/api/echo') {
       const body = await readBody(req);
       const parsed = body ? JSON.parse(body) : {};
@@ -45,7 +49,7 @@ beforeAll(async () => {
 
     if (method === 'GET' && url.pathname === '/api/users/me') {
       const auth = req.headers['authorization'];
-      if (!auth || !auth.startsWith('Bearer ')) {
+      if (!auth?.startsWith('Bearer ')) {
         return json(res, 401, { error: 'Unauthorized' });
       }
       return json(res, 200, { id: 'usr-1', name: 'Test User', token: auth.slice(7) });
@@ -227,6 +231,22 @@ describe('executePlan: basic HTTP', () => {
 
     expect(result.status).toBe('passed');
     expect(result.stepsPassed).toBe(1);
+  });
+});
+
+describe('executePlan: trace correlation', () => {
+  test('injects W3C traceparent and carries the trace ID through every event', async () => {
+    const traceId = '0123456789abcdef0123456789abcdef';
+    const plan = makePlan([makeStep({ urlTemplate: `${serverUrl}/api/trace` })]);
+    const result = await executePlan(plan, { runId: 'run-trace', traceId });
+
+    expect(result.events.every((event) => event.traceId === traceId)).toBe(true);
+    const prepared = result.events.find((event) => event.eventType === 'request.prepared');
+    expect(prepared && 'headers' in prepared ? prepared.headers['traceparent'] : undefined).toMatch(
+      /^00-0123456789abcdef0123456789abcdef-[a-f0-9]{16}-01$/,
+    );
+    const received = result.events.find((event) => event.eventType === 'response.received');
+    expect(received && 'bodyPreview' in received ? received.bodyPreview : '').toContain(traceId);
   });
 });
 

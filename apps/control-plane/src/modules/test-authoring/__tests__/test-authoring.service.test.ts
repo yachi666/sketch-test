@@ -20,19 +20,20 @@ vi.mock('../../../shared/id.js', () => ({
   testCaseVersionId: () => `tcv-${Math.random().toString(36).slice(2, 10)}`,
 }));
 
-import { diffDefinitions, TestAuthoringError } from '../test-authoring.service';
 import {
-  createTestCase,
-  getTestCase,
-  listTestCases,
-  updateTestCase,
-  deleteTestCase,
-  saveDraft,
-  publishVersion,
-  getTestCaseVersion,
-  listTestCaseVersions,
-  getLatestPublishedVersion,
   compareVersions,
+  createTestCase,
+  deleteTestCase,
+  diffDefinitions,
+  getLatestPublishedVersion,
+  getTestCase,
+  getTestCaseVersion,
+  listTestCases,
+  listTestCaseVersions,
+  publishVersion,
+  saveDraft,
+  TestAuthoringError,
+  updateTestCase,
 } from '../test-authoring.service';
 
 // ─── Helpers ───────────────────────────────────────────────────────
@@ -213,6 +214,14 @@ describe('createTestCase', () => {
 
     const tc = await createTestCase('ws-001', 'Standalone');
     expect(tc.api_version_id).toBeNull();
+  });
+
+  test('rejects an API version outside the workspace', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    await expect(createTestCase('ws-001', 'Cross tenant', 'av-other')).rejects.toThrow(
+      TestAuthoringError,
+    );
   });
 });
 
@@ -505,7 +514,7 @@ describe('compareVersions', () => {
       rows: [makeVersionRow({ id: 'tcv-2', definition: { method: 'POST' } })],
     });
 
-    const diff = await compareVersions('tcv-1', 'tcv-2');
+    const diff = await compareVersions('tcv-1', 'tcv-2', 'ws-001');
     expect(diff).not.toBeNull();
     expect(diff!.modified).toContain('method');
   });
@@ -516,7 +525,7 @@ describe('compareVersions', () => {
     });
     mockQuery.mockResolvedValueOnce({ rows: [] });
 
-    const diff = await compareVersions('tcv-1', 'non-existent');
+    const diff = await compareVersions('tcv-1', 'non-existent', 'ws-001');
     expect(diff).toBeNull();
   });
 
@@ -524,7 +533,7 @@ describe('compareVersions', () => {
     mockQuery.mockResolvedValueOnce({ rows: [] });
     mockQuery.mockResolvedValueOnce({ rows: [] });
 
-    const diff = await compareVersions('bad-1', 'bad-2');
+    const diff = await compareVersions('bad-1', 'bad-2', 'ws-001');
     expect(diff).toBeNull();
   });
 });

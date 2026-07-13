@@ -59,6 +59,9 @@ export async function generationRoutes(app: FastifyInstance): Promise<void> {
         createdAt: job.created_at,
       });
     } catch (err) {
+      if (err instanceof GenerationError) {
+        return sendError(reply, err.statusCode, 'NOT_FOUND', err.message);
+      }
       console.error('[generation] generateTests error:', err);
       return sendError(reply, 500, 'INTERNAL_ERROR', 'Failed to start generation job');
     }

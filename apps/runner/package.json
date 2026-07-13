@@ -4,14 +4,16 @@
   "private": true,
   "description": "SketchTest Runner — executes HTTP tests in isolated process",
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
   "scripts": {
+    "build": "tsc --noEmit false --allowImportingTsExtensions false --incremental false",
     "dev": "tsx --watch src/index.ts",
     "dev:daemon": "tsx --watch src/daemon.ts",
+    "start": "node dist/daemon.js",
     "check": "tsc --noEmit",
     "lint": "biome check",
     "test": "vitest run",
-    "clean": "rm -rf dist/"
+    "clean": "rm -rf dist/ tsconfig.tsbuildinfo"
   },
   "dependencies": {
     "@sketch-test/contracts-common": "workspace:*",

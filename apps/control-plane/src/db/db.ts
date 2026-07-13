@@ -14,24 +14,18 @@ export const pool = new Pool({
  * Run all database migrations. Uses CREATE TABLE IF NOT EXISTS
  * so it's safe to run repeatedly — only new tables are created.
  *
- * Covers M0 through M2 schemas:
- * - M0: api_versions, runs, step_events
- * - M1: workspaces, users, memberships, service_accounts, environments,
- *        environment_versions, secrets, test_cases, test_case_versions,
- *        generation_jobs, generated_drafts, runners, runner_heartbeats
- * - M2: workflows, workflow_versions, datasets, dataset_versions,
- *        test_suites, test_suite_versions, test_suite_members,
- *        quality_gates, policies, schedule_configs
+ * Covers the complete product schema. Tables are grouped by domain below so
+ * migration history does not leak obsolete delivery milestones into runtime.
  */
-export async function runMigrations(): Promise<void> {
-  const client = await pool.connect();
-  try {
-    // ── M0: Core execution ──
-    await client.query(`
+async function applyInitialPlatformSchema(client: pg.PoolClient): Promise<void> {
+  // ── Core execution ──
+  await client.query(`
       CREATE TABLE IF NOT EXISTS api_versions (
         id              TEXT PRIMARY KEY,
+        workspace_id    TEXT NOT NULL,
         source_type     TEXT NOT NULL,
         source_location TEXT NOT NULL,
+        source_object_key TEXT,
         content_hash    TEXT NOT NULL,
         spec_json       JSONB NOT NULL,
         diagnostics     JSONB NOT NULL DEFAULT '[]',
@@ -40,8 +34,10 @@ export async function runMigrations(): Promise<void> {
 
       CREATE TABLE IF NOT EXISTS runs (
         id              TEXT PRIMARY KEY,
+        workspace_id    TEXT NOT NULL,
         api_version_id  TEXT REFERENCES api_versions(id),
         workflow_version_id TEXT,
+        test_case_version_id TEXT,
         status          TEXT NOT NULL DEFAULT 'pending',
         plan_json       JSONB NOT NULL,
         runner_id       TEXT,
@@ -56,12 +52,37 @@ export async function runMigrations(): Promise<void> {
         step_index      INTEGER NOT NULL,
         event_type      TEXT NOT NULL,
         payload_json    JSONB NOT NULL,
+        content_hash    TEXT,
+        payload_size_bytes BIGINT,
+        payload_object_key TEXT,
         created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
       );
+
+      CREATE TABLE IF NOT EXISTS evidence_manifests (
+        run_id          TEXT PRIMARY KEY REFERENCES runs(id),
+        manifest_hash   TEXT NOT NULL,
+        object_key      TEXT NOT NULL,
+        event_count     INTEGER NOT NULL,
+        total_size_bytes BIGINT NOT NULL,
+        created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+
     `);
 
-    // ── M1: IAM ──
-    await client.query(`
+  // Add provenance columns to databases created by earlier schema revisions.
+  await client.query(`
+      ALTER TABLE api_versions ADD COLUMN IF NOT EXISTS source_object_key TEXT;
+      ALTER TABLE api_versions ADD COLUMN IF NOT EXISTS workspace_id TEXT;
+      ALTER TABLE runs ADD COLUMN IF NOT EXISTS workflow_version_id TEXT;
+      ALTER TABLE runs ADD COLUMN IF NOT EXISTS test_case_version_id TEXT;
+      ALTER TABLE runs ADD COLUMN IF NOT EXISTS workspace_id TEXT;
+      ALTER TABLE step_events ADD COLUMN IF NOT EXISTS content_hash TEXT;
+      ALTER TABLE step_events ADD COLUMN IF NOT EXISTS payload_size_bytes BIGINT;
+      ALTER TABLE step_events ADD COLUMN IF NOT EXISTS payload_object_key TEXT;
+    `);
+
+  // ── IAM ──
+  await client.query(`
       CREATE TABLE IF NOT EXISTS workspaces (
         id              TEXT PRIMARY KEY,
         name            TEXT NOT NULL UNIQUE,
@@ -92,10 +113,82 @@ export async function runMigrations(): Promise<void> {
         created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
         revoked_at      TIMESTAMPTZ
       );
+
+      DO $$
+      DECLARE
+        workspace_count INTEGER;
+        only_workspace_id TEXT;
+      BEGIN
+        SELECT COUNT(*), MIN(id) INTO workspace_count, only_workspace_id FROM workspaces;
+
+        IF EXISTS (SELECT 1 FROM api_versions WHERE workspace_id IS NULL) THEN
+          IF workspace_count = 1 THEN
+            UPDATE api_versions SET workspace_id = only_workspace_id WHERE workspace_id IS NULL;
+          ELSE
+            RAISE EXCEPTION
+              'Cannot migrate api_versions without workspace ownership: expected one workspace, found %',
+              workspace_count;
+          END IF;
+        END IF;
+
+        IF EXISTS (SELECT 1 FROM runs WHERE workspace_id IS NULL) THEN
+          IF workspace_count = 1 THEN
+            UPDATE runs SET workspace_id = only_workspace_id WHERE workspace_id IS NULL;
+          ELSE
+            RAISE EXCEPTION
+              'Cannot migrate runs without workspace ownership: expected one workspace, found %',
+              workspace_count;
+          END IF;
+        END IF;
+      END $$;
+
+      ALTER TABLE api_versions ALTER COLUMN workspace_id SET NOT NULL;
+      ALTER TABLE runs ALTER COLUMN workspace_id SET NOT NULL;
+
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'api_versions_workspace_id_fkey'
+        ) THEN
+          ALTER TABLE api_versions
+            ADD CONSTRAINT api_versions_workspace_id_fkey
+            FOREIGN KEY (workspace_id) REFERENCES workspaces(id);
+        END IF;
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'runs_workspace_id_fkey'
+        ) THEN
+          ALTER TABLE runs
+            ADD CONSTRAINT runs_workspace_id_fkey
+            FOREIGN KEY (workspace_id) REFERENCES workspaces(id);
+        END IF;
+      END $$;
+
+      CREATE INDEX IF NOT EXISTS idx_api_versions_workspace_created
+        ON api_versions(workspace_id, created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_runs_workspace_created
+        ON runs(workspace_id, created_at DESC);
     `);
 
-    // ── M1: Environment & Secret ──
-    await client.query(`
+  await client.query(`
+      CREATE TABLE IF NOT EXISTS audit_logs (
+        id              TEXT PRIMARY KEY,
+        workspace_id    TEXT REFERENCES workspaces(id),
+        actor_type      TEXT NOT NULL,
+        actor_id        TEXT NOT NULL,
+        action          TEXT NOT NULL,
+        resource_type   TEXT NOT NULL,
+        resource_id     TEXT NOT NULL,
+        outcome         TEXT NOT NULL,
+        request_id      TEXT,
+        metadata        JSONB NOT NULL DEFAULT '{}',
+        created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+      CREATE INDEX IF NOT EXISTS idx_audit_logs_workspace_created
+        ON audit_logs(workspace_id, created_at DESC);
+    `);
+
+  // ── Environment & Secret ──
+  await client.query(`
       CREATE TABLE IF NOT EXISTS environments (
         id              TEXT PRIMARY KEY,
         workspace_id    TEXT NOT NULL REFERENCES workspaces(id),
@@ -128,8 +221,8 @@ export async function runMigrations(): Promise<void> {
       );
     `);
 
-    // ── M1: Test Cases ──
-    await client.query(`
+  // ── Test Cases ──
+  await client.query(`
       CREATE TABLE IF NOT EXISTS test_cases (
         id              TEXT PRIMARY KEY,
         workspace_id    TEXT NOT NULL REFERENCES workspaces(id),
@@ -153,8 +246,8 @@ export async function runMigrations(): Promise<void> {
       );
     `);
 
-    // ── M1: Generation ──
-    await client.query(`
+  // ── Generation ──
+  await client.query(`
       CREATE TABLE IF NOT EXISTS generation_jobs (
         id              TEXT PRIMARY KEY,
         workspace_id    TEXT NOT NULL REFERENCES workspaces(id),
@@ -182,8 +275,8 @@ export async function runMigrations(): Promise<void> {
       );
     `);
 
-    // ── M1: Runner Registry ──
-    await client.query(`
+  // ── Runner Registry ──
+  await client.query(`
       CREATE TABLE IF NOT EXISTS runners (
         id              TEXT PRIMARY KEY,
         workspace_id    TEXT NOT NULL REFERENCES workspaces(id),
@@ -211,8 +304,8 @@ export async function runMigrations(): Promise<void> {
       );
     `);
 
-    // ── M2: Workflows ──
-    await client.query(`
+  // ── Workflows ──
+  await client.query(`
       CREATE TABLE IF NOT EXISTS workflows (
         id              TEXT PRIMARY KEY,
         workspace_id    TEXT NOT NULL REFERENCES workspaces(id),
@@ -234,8 +327,8 @@ export async function runMigrations(): Promise<void> {
       );
     `);
 
-    // ── M2: Datasets ──
-    await client.query(`
+  // ── Datasets ──
+  await client.query(`
       CREATE TABLE IF NOT EXISTS datasets (
         id              TEXT PRIMARY KEY,
         workspace_id    TEXT NOT NULL REFERENCES workspaces(id),
@@ -255,8 +348,8 @@ export async function runMigrations(): Promise<void> {
       );
     `);
 
-    // ── M2: Test Suites & Quality Gates ──
-    await client.query(`
+  // ── Test Suites & Quality Gates ──
+  await client.query(`
       CREATE TABLE IF NOT EXISTS test_suites (
         id              TEXT PRIMARY KEY,
         workspace_id    TEXT NOT NULL REFERENCES workspaces(id),
@@ -287,8 +380,8 @@ export async function runMigrations(): Promise<void> {
       );
     `);
 
-    // ── M2: Policies ──
-    await client.query(`
+  // ── Policies ──
+  await client.query(`
       CREATE TABLE IF NOT EXISTS policies (
         id              TEXT PRIMARY KEY,
         workspace_id    TEXT NOT NULL REFERENCES workspaces(id),
@@ -302,8 +395,8 @@ export async function runMigrations(): Promise<void> {
       );
     `);
 
-    // ── Indexes ──
-    await client.query(`
+  // ── Indexes ──
+  await client.query(`
       CREATE INDEX IF NOT EXISTS idx_step_events_run ON step_events(run_id, step_index);
       CREATE INDEX IF NOT EXISTS idx_runs_status ON runs(status);
       CREATE INDEX IF NOT EXISTS idx_runs_created ON runs(created_at DESC);
@@ -321,9 +414,80 @@ export async function runMigrations(): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_policies_workspace ON policies(workspace_id);
       CREATE INDEX IF NOT EXISTS idx_schedule_configs_ws ON schedule_configs(workspace_id);
     `);
+}
 
-    console.log('[db] All migrations applied successfully (M0–M2 schema)');
+interface Migration {
+  version: number;
+  name: string;
+  checksum: string;
+  up: (client: pg.PoolClient) => Promise<void>;
+}
+
+const MIGRATIONS: Migration[] = [
+  {
+    version: 1,
+    name: 'initial-platform-schema',
+    checksum: 'initial-platform-schema-v1',
+    up: applyInitialPlatformSchema,
+  },
+];
+
+/** Apply each immutable schema migration once, under a PostgreSQL advisory lock. */
+export async function runMigrations(): Promise<void> {
+  const client = await pool.connect();
+  let locked = false;
+  try {
+    await client.query(`SELECT pg_advisory_lock(hashtext('sketchtest-schema-migrations'))`);
+    locked = true;
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS schema_migrations (
+        version       INTEGER PRIMARY KEY,
+        name          TEXT NOT NULL UNIQUE,
+        checksum      TEXT NOT NULL,
+        applied_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+      )
+    `);
+
+    const appliedResult = await client.query(
+      `SELECT version, name, checksum FROM schema_migrations ORDER BY version`,
+    );
+    const applied = new Map<number, { name: string; checksum: string }>(
+      appliedResult.rows.map((row) => [
+        row.version as number,
+        { name: row.name as string, checksum: row.checksum as string },
+      ]),
+    );
+
+    for (const migration of MIGRATIONS) {
+      const recorded = applied.get(migration.version);
+      if (recorded) {
+        if (recorded.name !== migration.name || recorded.checksum !== migration.checksum) {
+          throw new Error(
+            `Migration ${migration.version} does not match the immutable applied record`,
+          );
+        }
+        continue;
+      }
+
+      await client.query('BEGIN');
+      try {
+        await migration.up(client);
+        await client.query(
+          `INSERT INTO schema_migrations (version, name, checksum) VALUES ($1, $2, $3)`,
+          [migration.version, migration.name, migration.checksum],
+        );
+        await client.query('COMMIT');
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      }
+    }
+
+    console.log(`[db] Database schema is current at version ${MIGRATIONS.at(-1)?.version ?? 0}`);
   } finally {
+    if (locked) {
+      await client.query(`SELECT pg_advisory_unlock(hashtext('sketchtest-schema-migrations'))`);
+    }
     client.release();
   }
 }

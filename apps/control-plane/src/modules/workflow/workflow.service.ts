@@ -205,44 +205,24 @@ export async function publishVersion(
   publishedBy?: string,
 ): Promise<{ version: WorkflowVersion; compileResult: CompileResult }> {
   // Fetch the version
-  const result = await pool.query(`SELECT * FROM workflow_versions WHERE id = $1`, [versionId]);
+  const result = await pool.query(
+    `SELECT v.*, w.workspace_id
+     FROM workflow_versions v
+     JOIN workflows w ON w.id = v.workflow_id
+     WHERE v.id = $1`,
+    [versionId],
+  );
   if (result.rows.length === 0) {
     throw new Error(`Workflow version ${versionId} not found`);
   }
 
   const row = result.rows[0]!;
   const definition = row.definition as WorkflowDefInput;
+  const workspaceId = row.workspace_id as string;
 
   // Compile the definition
   const compileResult = await compileWorkflow(definition, {
-    resolveTest: async (testVersionId: string) => {
-      const testResult = await pool.query(
-        `SELECT definition FROM test_case_versions WHERE id = $1`,
-        [testVersionId],
-      );
-      if (testResult.rows.length === 0) return null;
-      const testDef = testResult.rows[0]!['definition'] as Record<string, unknown>;
-      const request = testDef['request'] as Record<string, unknown> | undefined;
-      return {
-        method: (request?.['method'] as string) ?? 'GET',
-        url: (request?.['url'] as string) ?? '',
-        headers: request?.['headers'] as Record<string, string> | undefined,
-        body: request?.['body'] as unknown,
-        assertions: ((testDef['assertions'] as Array<Record<string, unknown>>) ?? []).map((a) => ({
-          target: (a['target'] as string) ?? 'status',
-          operator: (a['operator'] as string) ?? 'equals',
-          expected: a['expected'],
-          description: a['description'] as string | undefined,
-        })),
-        extract: ((testDef['extract'] as Array<Record<string, unknown>>) ?? []).map((e) => ({
-          name: e['name'] as string,
-          source: (e['source'] as string) ?? 'body',
-          expression: e['expression'] as string,
-          scope: e['scope'] as string | undefined,
-        })),
-        sideEffect: (testDef['sideEffect'] as string) ?? 'read-only',
-      };
-    },
+    resolveTest: (testVersionId: string) => resolveTestVersion(testVersionId, workspaceId),
   });
 
   if (!compileResult.success || !compileResult.plan) {
@@ -250,6 +230,7 @@ export async function publishVersion(
   }
 
   // Set the workflow version ID on the plan
+  delete compileResult.plan.adHocRunId;
   compileResult.plan.workflowVersionId = versionId;
 
   const now = new Date().toISOString();
@@ -312,35 +293,43 @@ export async function getLatestPublishedVersion(
 }
 
 /** Compile a workflow definition and return diagnostics (preview, no persistence). */
-export async function compileWorkflowPreview(definition: WorkflowDefInput): Promise<CompileResult> {
+export async function compileWorkflowPreview(
+  definition: WorkflowDefInput,
+  workspaceId: string,
+): Promise<CompileResult> {
   return compileWorkflow(definition, {
-    resolveTest: async (testVersionId: string) => {
-      const testResult = await pool.query(
-        `SELECT definition FROM test_case_versions WHERE id = $1`,
-        [testVersionId],
-      );
-      if (testResult.rows.length === 0) return null;
-      const testDef = testResult.rows[0]!['definition'] as Record<string, unknown>;
-      const request = testDef['request'] as Record<string, unknown> | undefined;
-      return {
-        method: (request?.['method'] as string) ?? 'GET',
-        url: (request?.['url'] as string) ?? '',
-        headers: request?.['headers'] as Record<string, string> | undefined,
-        body: request?.['body'] as unknown,
-        assertions: ((testDef['assertions'] as Array<Record<string, unknown>>) ?? []).map((a) => ({
-          target: (a['target'] as string) ?? 'status',
-          operator: (a['operator'] as string) ?? 'equals',
-          expected: a['expected'],
-          description: a['description'] as string | undefined,
-        })),
-        extract: ((testDef['extract'] as Array<Record<string, unknown>>) ?? []).map((e) => ({
-          name: e['name'] as string,
-          source: (e['source'] as string) ?? 'body',
-          expression: e['expression'] as string,
-          scope: e['scope'] as string | undefined,
-        })),
-        sideEffect: (testDef['sideEffect'] as string) ?? 'read-only',
-      };
-    },
+    resolveTest: (testVersionId: string) => resolveTestVersion(testVersionId, workspaceId),
   });
+}
+
+async function resolveTestVersion(testVersionId: string, workspaceId: string) {
+  const testResult = await pool.query(
+    `SELECT v.definition
+     FROM test_case_versions v
+     JOIN test_cases t ON t.id = v.test_case_id
+     WHERE v.id = $1 AND t.workspace_id = $2`,
+    [testVersionId, workspaceId],
+  );
+  if (testResult.rows.length === 0) return null;
+  const testDef = testResult.rows[0]!['definition'] as Record<string, unknown>;
+  const request = testDef['request'] as Record<string, unknown> | undefined;
+  return {
+    method: (request?.['method'] as string) ?? 'GET',
+    url: (request?.['url'] as string) ?? '',
+    headers: request?.['headers'] as Record<string, string> | undefined,
+    body: request?.['body'] as unknown,
+    assertions: ((testDef['assertions'] as Array<Record<string, unknown>>) ?? []).map((a) => ({
+      target: (a['target'] as string) ?? 'status',
+      operator: (a['operator'] as string) ?? 'equals',
+      expected: a['expected'],
+      description: a['description'] as string | undefined,
+    })),
+    extract: ((testDef['extract'] as Array<Record<string, unknown>>) ?? []).map((e) => ({
+      name: e['name'] as string,
+      source: (e['source'] as string) ?? 'body',
+      expression: e['expression'] as string,
+      scope: e['scope'] as string | undefined,
+    })),
+    sideEffect: (testDef['sideEffect'] as string) ?? 'read-only',
+  };
 }

@@ -5,7 +5,7 @@
  * independent process deployed near the system under test. It communicates
  * with the Control Plane via the Runner Protocol.
  *
- * M0 scope:
+ * Supported execution scope:
  * - HTTP request execution (GET, POST, PUT, PATCH, DELETE)
  * - Variable resolution (environment, workflow, step scopes)
  * - Assertion evaluation (status, header, jsonPath, body, responseTime)
@@ -21,12 +21,12 @@
  * - Retries record each attempt independently.
  */
 
+import { createHash } from 'node:crypto';
 import type { EntityId, Instant } from '@sketch-test/contracts-common';
 import type {
   AssertionEvaluatedEvent,
   ExecutionPlan,
   FrozenStep,
-  FrozenTeardownStep,
   ResponseReceivedEvent,
   RunEvent,
   RunFinishedEvent,
@@ -206,7 +206,7 @@ function redactObject(obj: unknown): unknown {
 // ─── JSONPath (Simplified) ────────────────────────────────────────
 
 /**
- * Minimal JSONPath implementation for M0. Supports:
+ * Built-in JSONPath subset. Supports:
  * - $.field.subfield
  * - $[0].field
  * - $.data.items[*].name (wildcard in arrays)
@@ -473,6 +473,13 @@ async function executeStep(
     for (const [key, value] of Object.entries(step.headers)) {
       resolvedHeaders[key] = variables.resolve(value);
     }
+  }
+  if (traceId && !Object.keys(resolvedHeaders).some((key) => key.toLowerCase() === 'traceparent')) {
+    const spanId = createHash('sha256')
+      .update(`${traceId}:${stepId}:${attempt}`)
+      .digest('hex')
+      .slice(0, 16);
+    resolvedHeaders['traceparent'] = `00-${traceId}-${spanId}-01`;
   }
 
   // Step started event
@@ -765,9 +772,12 @@ export async function executePlan(
     runnerId?: string;
     runnerVersion?: string;
     environment?: Record<string, string>;
+    traceId?: string;
   },
 ): Promise<RunResult> {
   const runId = options.runId;
+  const traceId =
+    options.traceId ?? createHash('sha256').update(String(runId)).digest('hex').slice(0, 32);
   const runnerId = options.runnerId ?? 'runner-local';
   const runnerVersion = options.runnerVersion ?? '0.1.0';
   const variables = createVariableStore(options.environment);
@@ -786,6 +796,7 @@ export async function executePlan(
     attempt: 1,
     stepId: 'run' as EntityId,
     eventType: 'run.started',
+    traceId,
     runnerId,
     runnerVersion,
   };
@@ -829,7 +840,7 @@ export async function executePlan(
     const maxRetries = step.maxRetries ?? 0;
 
     for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
-      stepResult = await executeStep(step, variables, i, runId, attempt);
+      stepResult = await executeStep(step, variables, i, runId, attempt, traceId);
 
       // Re-sequence events into global ordering
       for (const event of stepResult.events) {
@@ -847,6 +858,7 @@ export async function executePlan(
           attempt,
           stepId: step.stepId,
           eventType: 'step.retried',
+          traceId,
           reason: stepResult.error?.message ?? 'unknown error',
           retryNumber: attempt,
         };
@@ -884,6 +896,7 @@ export async function executePlan(
       attempt: 1,
       stepId: 'teardown' as EntityId,
       eventType: 'step.started',
+      traceId,
       resolvedUrl: '(teardown phase)',
     };
     allEvents.push(tdStartedEvent);
@@ -918,7 +931,7 @@ export async function executePlan(
       };
 
       for (let attempt = 1; attempt <= tdMaxRetries + 1; attempt++) {
-        tdResult = await executeStep(tdFrozenStep, variables, ti, runId, attempt);
+        tdResult = await executeStep(tdFrozenStep, variables, ti, runId, attempt, traceId);
         for (const event of tdResult.events) {
           allEvents.push({ ...event, sequence: nextSeq() });
         }
@@ -938,6 +951,7 @@ export async function executePlan(
     attempt: 1,
     stepId: 'run' as EntityId,
     eventType: 'run.finished',
+    traceId,
     terminalState,
     totalSteps: plan.steps.length,
     stepsPassed,

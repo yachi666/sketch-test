@@ -2,7 +2,13 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { sendError } from '../../shared/errors.js';
 import { verifyRunnerToken } from '../runner-registry/runner-registry.service.js';
-import { insertEvents, buildEvidenceManifest, verifyEvidenceIntegrity } from './event.service.js';
+import {
+  getPersistedEvidenceManifest,
+  insertEvents,
+  persistEvidenceManifest,
+  verifyEvidenceIntegrity,
+} from './event.service.js';
+import { runnerOwnsRun } from './lease.service.js';
 
 const EventsBodySchema = z.object({
   events: z.array(
@@ -29,12 +35,23 @@ export async function eventRoutes(app: FastifyInstance): Promise<void> {
     if (!tokenInfo) {
       return sendError(reply, 401, 'UNAUTHORIZED', 'Invalid or unknown runner token');
     }
+    if (!(await runnerOwnsRun(id, tokenInfo.runnerId, tokenInfo.workspaceId))) {
+      return sendError(reply, 404, 'NOT_FOUND', `Run ${id} not found`);
+    }
 
     const parsed = EventsBodySchema.safeParse(request.body);
     if (!parsed.success) {
       return sendError(reply, 400, 'INVALID_INPUT', 'Invalid events payload', [
         { field: 'body', message: parsed.error.message },
       ]);
+    }
+    if (parsed.data.events.some((event) => event.runId !== id)) {
+      return sendError(
+        reply,
+        400,
+        'INVALID_INPUT',
+        'Every event runId must match the route run ID',
+      );
     }
 
     const { accepted, duplicates, contentHashes } = await insertEvents(
@@ -53,8 +70,24 @@ export async function eventRoutes(app: FastifyInstance): Promise<void> {
   /** Get evidence manifest for a run (content hashes, sizes, integrity chain). */
   app.get('/api/runs/:id/evidence-manifest', async (request, reply) => {
     const { id } = request.params as { id: string };
-    const manifest = await buildEvidenceManifest(id);
+    const manifest = await getPersistedEvidenceManifest(id);
+    if (!manifest) return sendError(reply, 404, 'NOT_FOUND', `No evidence manifest for run ${id}`);
     reply.send(manifest);
+  });
+
+  /** Materialize an immutable manifest in object storage. Runner-authenticated. */
+  app.post('/api/runs/:id/evidence-manifest', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const token = (request.headers['x-runner-token'] as string) ?? '';
+    const tokenInfo = token ? await verifyRunnerToken(token) : null;
+    if (!tokenInfo) {
+      return sendError(reply, 401, 'UNAUTHORIZED', 'Invalid or missing runner token');
+    }
+    if (!(await runnerOwnsRun(id, tokenInfo.runnerId, tokenInfo.workspaceId))) {
+      return sendError(reply, 404, 'NOT_FOUND', `Run ${id} not found`);
+    }
+    const manifest = await persistEvidenceManifest(id);
+    reply.status(201).send(manifest);
   });
 
   /** Verify evidence integrity for a run. */

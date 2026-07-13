@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { sendError } from '../../shared/errors.js';
+import { authenticatedUser } from '../iam/auth.middleware.js';
 import {
   compareVersions,
   createTestCase,
@@ -67,6 +68,9 @@ export async function testAuthoringRoutes(app: FastifyInstance): Promise<void> {
         updatedAt: tc.updated_at,
       });
     } catch (err) {
+      if (err instanceof TestAuthoringError) {
+        return sendError(reply, err.statusCode, 'NOT_FOUND', err.message);
+      }
       console.error('[test-authoring] createTestCase error:', err);
       return sendError(reply, 500, 'INTERNAL_ERROR', 'Failed to create test case');
     }
@@ -245,7 +249,7 @@ export async function testAuthoringRoutes(app: FastifyInstance): Promise<void> {
     }
 
     try {
-      const diff = await compareVersions(query.a, query.b);
+      const diff = await compareVersions(query.a, query.b, authenticatedUser(request).workspaceId);
       if (!diff) {
         return sendError(reply, 404, 'NOT_FOUND', 'One or both versions not found');
       }

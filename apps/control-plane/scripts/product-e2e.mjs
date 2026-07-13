@@ -1,0 +1,510 @@
+import { spawn, spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { existsSync, unlinkSync } from 'node:fs';
+import { createServer } from 'node:net';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import process from 'node:process';
+import { fileURLToPath } from 'node:url';
+import {
+  CreateBucketCommand,
+  GetObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+const suffix = `${process.pid}-${Date.now()}`;
+const database = `sketchtest_e2e_${process.pid}`;
+const restoredDatabase = `${database}_restored`;
+const container = `sketchtest-e2e-minio-${suffix}`;
+const bucket = `sketchtest-e2e-${process.pid}`;
+const restoredBucket = `${bucket}-restored`;
+const databaseBackup = path.join(tmpdir(), `${database}.dump`);
+const accessKey = 'e2e-access';
+const secretKey = 'e2e-secret-password';
+const secret32 = '0123456789abcdef0123456789abcdef';
+const children = [];
+let containerStarted = false;
+let databaseCreated = false;
+let restoredDatabaseCreated = false;
+
+function command(program, args, options = {}) {
+  const result = spawnSync(program, args, {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    stdio: options.capture ? 'pipe' : 'inherit',
+    ...options,
+  });
+  if (result.status !== 0) {
+    throw new Error(
+      `${program} ${args.join(' ')} failed (${result.status})\n${result.stdout ?? ''}${result.stderr ?? ''}`,
+    );
+  }
+  return result.stdout?.trim() ?? '';
+}
+
+async function freePort() {
+  return new Promise((resolve, reject) => {
+    const server = createServer();
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', () => {
+      const address = server.address();
+      if (!address || typeof address === 'string') return reject(new Error('Cannot allocate port'));
+      server.close(() => resolve(address.port));
+    });
+  });
+}
+
+function start(name, program, args, options) {
+  const child = spawn(program, args, {
+    cwd: options.cwd,
+    env: { ...process.env, ...options.env },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  const logs = [];
+  for (const stream of [child.stdout, child.stderr]) {
+    stream.on('data', (chunk) => {
+      const text = chunk.toString();
+      logs.push(text);
+      if (process.env['E2E_VERBOSE'] === '1') process.stderr.write(`[${name}] ${text}`);
+    });
+  }
+  child.e2eName = name;
+  child.e2eLogs = logs;
+  children.push(child);
+  return child;
+}
+
+async function waitFor(url, timeoutMs = 30_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      const response = await fetch(url);
+      if (response.ok) return;
+    } catch {}
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  throw new Error(`Timed out waiting for ${url}`);
+}
+
+async function json(url, options = {}) {
+  const response = await fetch(url, {
+    ...options,
+    headers: options.body
+      ? { 'Content-Type': 'application/json', ...options.headers }
+      : options.headers,
+    body: options.body ? JSON.stringify(options.body) : undefined,
+  });
+  const text = await response.text();
+  if (!response.ok)
+    throw new Error(`${options.method ?? 'GET'} ${url}: HTTP ${response.status} ${text}`);
+  return text ? JSON.parse(text) : null;
+}
+
+function assert(condition, message) {
+  if (!condition) throw new Error(`E2E assertion failed: ${message}`);
+}
+
+async function stopChild(child) {
+  if (child.exitCode !== null || child.signalCode !== null) return;
+  child.kill('SIGINT');
+  await Promise.race([
+    new Promise((resolve) => child.once('exit', resolve)),
+    new Promise((resolve) => setTimeout(resolve, 2_000)),
+  ]);
+  if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
+}
+
+async function cleanup() {
+  for (const child of [...children].reverse()) await stopChild(child);
+  if (containerStarted) {
+    spawnSync('docker', ['rm', '-f', container], { cwd: repoRoot, stdio: 'ignore' });
+  }
+  if (databaseCreated) {
+    spawnSync('dropdb', ['--if-exists', database], { cwd: repoRoot, stdio: 'ignore' });
+  }
+  if (restoredDatabaseCreated) {
+    spawnSync('dropdb', ['--if-exists', restoredDatabase], { cwd: repoRoot, stdio: 'ignore' });
+  }
+  if (existsSync(databaseBackup)) unlinkSync(databaseBackup);
+}
+
+async function main() {
+  command('docker', ['version'], { capture: true });
+  command('pg_isready', [], { capture: true });
+  command('pnpm', ['build']);
+
+  command('dropdb', ['--if-exists', database], { capture: true });
+  command('createdb', [database]);
+  databaseCreated = true;
+
+  const [fixturePort, controlPlanePort, minioPort, consolePort, webPort] = await Promise.all([
+    freePort(),
+    freePort(),
+    freePort(),
+    freePort(),
+    freePort(),
+  ]);
+  const fixtureUrl = `http://127.0.0.1:${fixturePort}`;
+  const controlPlaneUrl = `http://127.0.0.1:${controlPlanePort}`;
+  const minioUrl = `http://127.0.0.1:${minioPort}`;
+  const webUrl = `http://127.0.0.1:${webPort}`;
+
+  command('docker', [
+    'run',
+    '-d',
+    '--rm',
+    '--name',
+    container,
+    '-p',
+    `127.0.0.1:${minioPort}:9000`,
+    '-p',
+    `127.0.0.1:${consolePort}:9001`,
+    '-e',
+    `MINIO_ROOT_USER=${accessKey}`,
+    '-e',
+    `MINIO_ROOT_PASSWORD=${secretKey}`,
+    'minio/minio:RELEASE.2025-09-07T16-13-09Z',
+    'server',
+    '/data',
+    '--console-address',
+    ':9001',
+  ]);
+  containerStarted = true;
+  await waitFor(`${minioUrl}/minio/health/live`, 60_000);
+
+  const s3 = new S3Client({
+    endpoint: minioUrl,
+    region: 'us-east-1',
+    forcePathStyle: true,
+    credentials: { accessKeyId: accessKey, secretAccessKey: secretKey },
+  });
+  await s3.send(new CreateBucketCommand({ Bucket: bucket }));
+
+  start('fixture', 'pnpm', ['exec', 'tsx', 'src/index.ts'], {
+    cwd: path.join(repoRoot, 'packages/test-fixtures/hermetic-fixture-server'),
+    env: { FIXTURE_PORT: String(fixturePort) },
+  });
+  await waitFor(`${fixtureUrl}/health`);
+
+  start('control-plane', 'node', ['--no-strip-types', 'dist/main.js'], {
+    cwd: path.join(repoRoot, 'apps/control-plane'),
+    env: {
+      NODE_ENV: 'production',
+      DATABASE_URL: `postgresql:///${database}`,
+      CP_HOST: '127.0.0.1',
+      CP_PORT: String(controlPlanePort),
+      LOG_LEVEL: 'warn',
+      JWT_SECRET: secret32,
+      SECRET_KEY: secret32,
+      RUNNER_REGISTRATION_TOKEN: secret32,
+      S3_ENDPOINT: minioUrl,
+      S3_REGION: 'us-east-1',
+      S3_ACCESS_KEY: accessKey,
+      S3_SECRET_KEY: secretKey,
+      S3_BUCKET: bucket,
+      EVIDENCE_INLINE_MAX_BYTES: '200',
+      WEB_ORIGINS: webUrl,
+    },
+  });
+  await waitFor(`${controlPlaneUrl}/health`);
+  start('web', 'pnpm', ['exec', 'vite', '--host', '127.0.0.1', '--port', String(webPort)], {
+    cwd: path.join(repoRoot, 'apps/web'),
+    env: { VITE_CP_BASE: controlPlaneUrl },
+  });
+  await waitFor(webUrl);
+  const ready = await json(`${controlPlaneUrl}/ready`);
+  assert(ready.status === 'ready', 'readiness must include PostgreSQL and S3');
+  const correlatedHealth = await fetch(`${controlPlaneUrl}/health/live`, {
+    headers: { 'x-request-id': 'product-e2e-health' },
+  });
+  assert(
+    correlatedHealth.headers.get('x-request-id') === 'product-e2e-health',
+    'Control Plane must propagate request IDs',
+  );
+
+  const workspaceResult = await json(`${controlPlaneUrl}/api/workspaces`, {
+    method: 'POST',
+    body: {
+      name: `Product E2E ${suffix}`,
+      ownerEmail: 'owner@product-e2e.test',
+      ownerPassword: 'product-e2e-owner-password',
+    },
+  });
+  const workspaceId = workspaceResult.workspace.id;
+  const login = await json(`${controlPlaneUrl}/api/auth/login`, {
+    method: 'POST',
+    body: {
+      workspaceId,
+      email: 'owner@product-e2e.test',
+      password: 'product-e2e-owner-password',
+    },
+  });
+  const userHeaders = { authorization: `Bearer ${login.token}` };
+  const secret = await json(`${controlPlaneUrl}/api/secrets`, {
+    method: 'POST',
+    headers: userHeaders,
+    body: { workspaceId, name: 'e2e-api-key', value: 'never-log-this-value' },
+  });
+  const registration = await json(`${controlPlaneUrl}/api/runners/register`, {
+    method: 'POST',
+    headers: { 'x-runner-registration-token': secret32 },
+    body: { workspaceId, name: 'product-e2e-runner', version: 'e2e' },
+  });
+  const decrypted = await json(`${controlPlaneUrl}/api/secrets/${secret.id}/decrypt`, {
+    method: 'POST',
+    headers: {
+      'x-runner-token': registration.token,
+      'x-request-id': 'product-e2e-secret-decrypt',
+    },
+  });
+  assert(decrypted.value === 'never-log-this-value', 'runner secret channel must decrypt');
+  const audit = await json(
+    `${controlPlaneUrl}/api/audit-logs?workspaceId=${encodeURIComponent(workspaceId)}&action=secret.decrypt`,
+    { headers: userHeaders },
+  );
+  assert(audit.events.length === 1, 'secret decryption must create one audit event');
+  assert(
+    audit.events[0].requestId === 'product-e2e-secret-decrypt',
+    'audit evidence must retain request correlation',
+  );
+  start('runner', 'node', ['--no-strip-types', 'dist/daemon.js'], {
+    cwd: path.join(repoRoot, 'apps/runner'),
+    env: {
+      NODE_ENV: 'production',
+      CP_URL: controlPlaneUrl,
+      WORKSPACE_ID: workspaceId,
+      RUNNER_ID: registration.id,
+      RUNNER_TOKEN: registration.token,
+    },
+  });
+
+  const imported = await json(`${controlPlaneUrl}/api/import`, {
+    method: 'POST',
+    headers: userHeaders,
+    body: { sourceType: 'url', sourceLocation: `${fixtureUrl}/openapi.json` },
+  });
+  assert(imported.endpointCount > 0, 'import must produce endpoints');
+  assert(imported.sourceObjectKey.startsWith('api-sources/sha256/'), 'raw source must be durable');
+
+  const createdWorkflow = await json(`${controlPlaneUrl}/api/workflows`, {
+    method: 'POST',
+    headers: userHeaders,
+    body: { workspaceId, name: 'Cross-process health' },
+  });
+  const workflowId = createdWorkflow.workflow.id;
+  const draft = await json(`${controlPlaneUrl}/api/workflows/${workflowId}/versions`, {
+    method: 'POST',
+    headers: userHeaders,
+    body: {
+      definition: {
+        schemaVersion: '1.0.0',
+        name: 'Cross-process health',
+        steps: [
+          {
+            id: 'health',
+            name: 'Test-server health',
+            method: 'GET',
+            url: `${fixtureUrl}/health`,
+            assertions: [{ target: 'status', operator: 'equals', expected: 200 }],
+          },
+        ],
+        teardown: [],
+      },
+    },
+  });
+  const workflowVersionId = draft.version.id;
+  const published = await json(
+    `${controlPlaneUrl}/api/workflow-versions/${workflowVersionId}/publish`,
+    { method: 'POST', headers: userHeaders, body: { publishedBy: 'product-e2e' } },
+  );
+  assert(published.published === true, 'workflow must publish');
+  assert(/^[a-f0-9]{64}$/.test(published.plan.planHash), 'plan hash must be SHA-256');
+
+  const createdRun = await json(`${controlPlaneUrl}/api/runs/from-workflow`, {
+    method: 'POST',
+    headers: userHeaders,
+    body: { workflowVersionId },
+  });
+  const runId = createdRun.runId;
+  const deadline = Date.now() + 60_000;
+  let run;
+  while (Date.now() < deadline) {
+    run = await json(`${controlPlaneUrl}/api/runs/${runId}`, { headers: userHeaders });
+    if (['passed', 'failed', 'cancelled', 'lost'].includes(run.run.status)) break;
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  assert(run?.run.status === 'passed', `run must pass, received ${run?.run.status ?? 'timeout'}`);
+  assert(run.steps.length >= 6, 'runner must upload ordered execution evidence');
+
+  const report = await json(`${controlPlaneUrl}/api/runs/${runId}/report`, {
+    headers: userHeaders,
+  });
+  assert(report.run.workflowVersionId === workflowVersionId, 'report must retain provenance');
+  assert(report.steps[0]?.status === 'passed', 'report step must pass');
+  const traceIds = new Set(
+    report.steps.flatMap((step) => step.events.map((event) => event.payload.traceId)),
+  );
+  assert(traceIds.size === 1, 'all execution evidence must share one trace ID');
+  const traceId = [...traceIds][0];
+  assert(/^[a-f0-9]{32}$/.test(traceId), 'trace ID must be W3C-compatible');
+  const preparedEvent = report.steps[0].events.find(
+    (event) => event.eventType === 'request.prepared',
+  );
+  assert(
+    preparedEvent.payload.headers.traceparent.startsWith(`00-${traceId}-`),
+    'HTTP request traceparent must correlate with evidence',
+  );
+  const cliStatus = JSON.parse(
+    command(
+      'node',
+      [
+        'apps/cli/dist/index.js',
+        'status',
+        runId,
+        '--cp-url',
+        controlPlaneUrl,
+        '--token',
+        login.token,
+        '--output',
+        'json',
+      ],
+      { capture: true },
+    ),
+  );
+  assert(cliStatus.id === runId && cliStatus.status === 'passed', 'CLI must read real run status');
+  const manifest = await json(`${controlPlaneUrl}/api/runs/${runId}/evidence-manifest`, {
+    headers: userHeaders,
+  });
+  assert(manifest.eventCount === run.steps.length, 'manifest must cover every stored event');
+  assert(/^[a-f0-9]{64}$/.test(manifest.manifestHash), 'manifest hash must be SHA-256');
+  const externalEvents = manifest.events.filter((event) => event.objectKey);
+  assert(externalEvents.length > 0, 'large event payloads must be externalized');
+
+  const objects = await s3.send(new ListObjectsV2Command({ Bucket: bucket }));
+  const keys = new Set((objects.Contents ?? []).map((object) => object.Key));
+  assert(keys.has(imported.sourceObjectKey), 'S3 must contain imported raw source');
+  assert(keys.has(manifest.objectKey), 'S3 must contain immutable evidence manifest');
+  for (const event of externalEvents) {
+    assert(keys.has(event.objectKey), `S3 must contain external event ${event.id}`);
+  }
+
+  await s3.send(new CreateBucketCommand({ Bucket: restoredBucket }));
+  for (const key of keys) {
+    const sourceObject = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+    const sourceBody = await sourceObject.Body.transformToByteArray();
+    await s3.send(new PutObjectCommand({ Bucket: restoredBucket, Key: key, Body: sourceBody }));
+    const restoredObject = await s3.send(
+      new GetObjectCommand({ Bucket: restoredBucket, Key: key }),
+    );
+    const restoredBody = await restoredObject.Body.transformToByteArray();
+    assert(
+      createHash('sha256').update(sourceBody).digest('hex') ===
+        createHash('sha256').update(restoredBody).digest('hex'),
+      `restored S3 object must match ${key}`,
+    );
+  }
+  const restoredObjects = await s3.send(new ListObjectsV2Command({ Bucket: restoredBucket }));
+  const restoredKeys = new Set((restoredObjects.Contents ?? []).map((object) => object.Key));
+  assert(restoredKeys.size === keys.size, 'restored S3 bucket must contain every evidence object');
+
+  command('pg_dump', ['--format=custom', '--file', databaseBackup, database]);
+  command('dropdb', ['--if-exists', restoredDatabase], { capture: true });
+  command('createdb', [restoredDatabase]);
+  restoredDatabaseCreated = true;
+  command('pg_restore', [
+    '--exit-on-error',
+    '--no-owner',
+    '--no-privileges',
+    '--dbname',
+    restoredDatabase,
+    databaseBackup,
+  ]);
+  const restoredRunStatus = command(
+    'psql',
+    [
+      '--tuples-only',
+      '--no-align',
+      '--dbname',
+      restoredDatabase,
+      '--command',
+      `SELECT status FROM runs WHERE id = '${runId}'`,
+    ],
+    { capture: true },
+  );
+  const restoredMigrationCount = Number(
+    command(
+      'psql',
+      [
+        '--tuples-only',
+        '--no-align',
+        '--dbname',
+        restoredDatabase,
+        '--command',
+        'SELECT COUNT(*) FROM schema_migrations',
+      ],
+      { capture: true },
+    ),
+  );
+  assert(restoredRunStatus === 'passed', 'restored PostgreSQL must retain the completed run');
+  assert(restoredMigrationCount > 0, 'restored PostgreSQL must retain migration history');
+
+  const metricsResponse = await fetch(`${controlPlaneUrl}/metrics`);
+  const metrics = await metricsResponse.text();
+  assert(
+    metrics.includes('sketchtest_http_requests_total') && metrics.includes('route="/api/runs/:id"'),
+    'Prometheus metrics must contain normalized route counters',
+  );
+  command('pnpm', ['--filter', 'web', 'e2e:live'], {
+    env: {
+      ...process.env,
+      E2E_WEB_URL: webUrl,
+      E2E_RUN_ID: runId,
+      E2E_WORKSPACE_ID: workspaceId,
+      E2E_OWNER_EMAIL: 'owner@product-e2e.test',
+      E2E_OWNER_PASSWORD: 'product-e2e-owner-password',
+      E2E_FIXTURE_URL: fixtureUrl,
+    },
+  });
+
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        apiVersionId: imported.apiVersionId,
+        endpointCount: imported.endpointCount,
+        workflowVersionId,
+        planHash: published.plan.planHash,
+        runId,
+        eventCount: manifest.eventCount,
+        externalizedEventCount: externalEvents.length,
+        manifestHash: manifest.manifestHash,
+        traceId,
+        auditEventId: audit.events[0].id,
+        recovery: {
+          databaseRunStatus: restoredRunStatus,
+          migrationCount: restoredMigrationCount,
+          objectCount: restoredKeys.size,
+        },
+        objectKeys: [...keys].sort(),
+      },
+      null,
+      2,
+    ),
+  );
+}
+
+try {
+  await main();
+} catch (error) {
+  console.error(error instanceof Error ? error.stack : error);
+  for (const child of children) {
+    const logs = child.e2eLogs?.join('').trim();
+    if (logs) console.error(`\n--- ${child.e2eName} ---\n${logs}`);
+  }
+  process.exitCode = 1;
+} finally {
+  await cleanup();
+}

@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { sendError } from '../../shared/errors.js';
+import { authenticatedUser } from '../iam/auth.middleware.js';
 import {
   compileWorkflowPreview,
   createWorkflow,
@@ -348,7 +349,10 @@ export async function workflowRoutes(app: FastifyInstance): Promise<void> {
         return sendError(reply, 404, 'NOT_FOUND', `Workflow version ${id} not found`);
       }
 
-      const result = await compileWorkflowPreview(version.definition);
+      const result = await compileWorkflowPreview(
+        version.definition,
+        authenticatedUser(request).workspaceId,
+      );
       reply.send({
         success: result.success,
         plan: result.plan ?? null,
@@ -370,7 +374,10 @@ export async function workflowRoutes(app: FastifyInstance): Promise<void> {
     }
 
     try {
-      const result = await compileWorkflowPreview(parsed.data.definition);
+      const result = await compileWorkflowPreview(
+        parsed.data.definition,
+        authenticatedUser(request).workspaceId,
+      );
       reply.send({
         success: result.success,
         plan: result.plan ?? null,

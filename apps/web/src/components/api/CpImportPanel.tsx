@@ -1,16 +1,15 @@
+import { CheckCircle, CloudArrowDown, Database, Warning, X } from '@phosphor-icons/react';
 import { useState } from 'react';
-import { CloudArrowDown, CheckCircle, Warning, X, Database } from '@phosphor-icons/react';
-import { cpClient } from '../../lib/cp-client';
-import type { ApiEndpoint } from '../../types';
+import { cpClient, getControlPlaneBaseUrl } from '../../lib/cp-client';
 
 interface Props {
-  onImport: (endpoints: ApiEndpoint[]) => void;
+  onImport: () => void;
 }
 
-const CP_URL = 'http://localhost:3802';
+const CP_URL = getControlPlaneBaseUrl();
 
 export function CpImportPanel({ onImport }: Props) {
-  const [url, setUrl] = useState('http://localhost:3800/openapi.json');
+  const [url, setUrl] = useState('');
   const [importing, setImporting] = useState(false);
   const [result, setResult] = useState<{
     apiVersionId: string;
@@ -27,35 +26,7 @@ export function CpImportPanel({ onImport }: Props) {
     try {
       const imported = await cpClient.importSpec('url', url);
       setResult(imported);
-
-      // Fetch the API version to get endpoints
-      const response = await fetch(`${CP_URL}/api/api-versions/${imported.apiVersionId}`);
-      const data = (await response.json()) as {
-        endpoints: Array<{
-          id: string;
-          method: string;
-          path: string;
-          summary?: string;
-          description?: string;
-          tags?: string[];
-          deprecated?: boolean;
-        }>;
-      };
-
-      const mapped: ApiEndpoint[] = data.endpoints.map((ep) => ({
-        id: ep.id,
-        method: ep.method as ApiEndpoint['method'],
-        path: ep.path,
-        summary: ep.summary ?? ep.path,
-        description: ep.description,
-        tags: ep.tags ?? [],
-        coverage: 0,
-        cases: 0,
-        deprecated: ep.deprecated ?? false,
-        versionId: imported.apiVersionId,
-      }));
-
-      onImport(mapped);
+      onImport();
     } catch (err) {
       setError(err instanceof Error ? err.message : '导入失败');
     }
@@ -107,7 +78,7 @@ export function CpImportPanel({ onImport }: Props) {
           type="button"
           className="button button--primary"
           onClick={handleImport}
-          disabled={importing}
+          disabled={importing || url.trim().length === 0}
           style={{ whiteSpace: 'nowrap' }}
         >
           <CloudArrowDown size={18} />

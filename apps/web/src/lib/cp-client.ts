@@ -1,24 +1,42 @@
 /**
  * Control Plane API client — connects Web UI to the Control Plane REST API.
  *
- * Covers M0–M2 endpoints: import, runs, IAM, environments, secrets,
+ * Covers product endpoints: import, runs, IAM, environments, secrets,
  * test cases, generation, workflows, datasets, test suites, policies.
  *
- * Uses localStorage as fallback when CP is unreachable (offline dev mode).
+ * Network and server failures are surfaced to callers. Production views must
+ * never replace Control Plane data with browser-local sample records.
  */
+
+import { clearAuthSession, notifyUnauthorized, storedAccessToken } from './auth-session';
 
 const CP_BASE = import.meta.env['VITE_CP_BASE'] ?? 'http://localhost:3802';
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+export function getControlPlaneBaseUrl(): string {
+  return CP_BASE;
+}
+
+interface RequestOptions extends RequestInit {
+  auth?: boolean;
+}
+
+async function request<T>(path: string, options?: RequestOptions): Promise<T> {
+  const token = options?.auth === false ? null : storedAccessToken();
+  const { auth: _auth, ...fetchOptions } = options ?? {};
   const response = await fetch(`${CP_BASE}${path}`, {
-    ...options,
+    ...fetchOptions,
     headers: {
       'Content-Type': 'application/json',
-      ...options?.headers,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...fetchOptions.headers,
     },
   });
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: response.statusText }));
+    if (response.status === 401 && options?.auth !== false) {
+      clearAuthSession();
+      notifyUnauthorized();
+    }
     throw new Error(error.message ?? `HTTP ${response.status}`);
   }
   return response.json() as Promise<T>;
@@ -32,9 +50,22 @@ export interface ImportResult {
   diagnostics: Array<{ level: string; message: string }>;
 }
 
+export interface ApiVersionSummary {
+  id: string;
+  sourceType: string;
+  sourceLocation: string;
+  contentHash: string;
+  createdAt: string;
+  label?: string;
+  endpointCount: number;
+  diagnosticCount: number;
+}
+
 export interface RunSummary {
   id: string;
-  apiVersionId: string;
+  apiVersionId: string | null;
+  workflowVersionId: string | null;
+  testCaseVersionId: string | null;
   status: string;
   runnerId: string | null;
   claimedAt: string | null;
@@ -171,6 +202,13 @@ export interface WorkflowVersion {
   publishedAt: string;
 }
 
+export interface PublishedWorkflow {
+  published: boolean;
+  version: { id: string; workflowId: string; version: number; publishedAt: string };
+  plan: { planHash: string; steps: unknown[] };
+  diagnostics: Array<{ severity: string; message: string }>;
+}
+
 export interface TestSuite {
   id: string;
   name: string;
@@ -193,26 +231,31 @@ export const cpClient = {
   login(
     email: string,
     password: string,
-    workspaceId?: string,
+    workspaceId: string,
   ): Promise<{ user: User; token: string }> {
     return request('/api/auth/login', {
       method: 'POST',
+      auth: false,
       body: JSON.stringify({ email, password, workspaceId }),
     });
   },
 
-  getMe(token: string): Promise<User> {
-    return request('/api/auth/me', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  getMe(): Promise<{ user: User }> {
+    return request('/api/auth/me');
   },
 
   // ── Workspaces ──
 
-  createWorkspace(name: string, description?: string) {
-    return request<{ workspace: Workspace; admin: User }>('/api/workspaces', {
+  createWorkspace(
+    name: string,
+    ownerEmail: string,
+    ownerPassword: string,
+    description?: string,
+    ownerDisplayName?: string,
+  ) {
+    return request<{ workspace: Workspace; adminUser: User }>('/api/workspaces', {
       method: 'POST',
-      body: JSON.stringify({ name, description }),
+      body: JSON.stringify({ name, description, ownerEmail, ownerPassword, ownerDisplayName }),
     });
   },
 
@@ -253,7 +296,7 @@ export const cpClient = {
   },
 
   listApiVersions() {
-    return request<{ apiVersions: unknown[] }>('/api/api-versions');
+    return request<{ apiVersions: ApiVersionSummary[] }>('/api/api-versions');
   },
 
   getApiVersion(id: string) {
@@ -275,12 +318,6 @@ export const cpClient = {
   },
 
   // ── Runs ──
-
-  createRun(apiVersionId: string) {
-    return request<{ runId: string; plan: unknown }>(
-      `/api/api-versions/${apiVersionId}/execution-plan`,
-    );
-  },
 
   createCustomRun(
     steps: Array<{
@@ -536,7 +573,7 @@ export const cpClient = {
   // ── Workflows ──
 
   createWorkflow(workspaceId: string, name: string, description?: string) {
-    return request<Workflow>('/api/workflows', {
+    return request<{ workflow: Workflow }>('/api/workflows', {
       method: 'POST',
       body: JSON.stringify({ workspaceId, name, description }),
     });
@@ -548,7 +585,7 @@ export const cpClient = {
   },
 
   getWorkflow(id: string) {
-    return request<Workflow>(`/api/workflows/${id}`);
+    return request<{ workflow: Workflow }>(`/api/workflows/${id}`);
   },
 
   deleteWorkflow(id: string) {
@@ -556,7 +593,7 @@ export const cpClient = {
   },
 
   saveWorkflowDraft(workflowId: string, definition: Record<string, unknown>) {
-    return request<WorkflowVersion>(`/api/workflows/${workflowId}/versions`, {
+    return request<{ version: WorkflowVersion }>(`/api/workflows/${workflowId}/versions`, {
       method: 'POST',
       body: JSON.stringify({ definition }),
     });
@@ -567,9 +604,17 @@ export const cpClient = {
   },
 
   publishWorkflowVersion(versionId: string) {
-    return request<WorkflowVersion>(`/api/workflow-versions/${versionId}/publish`, {
+    return request<PublishedWorkflow>(`/api/workflow-versions/${versionId}/publish`, {
       method: 'POST',
+      body: JSON.stringify({ publishedBy: 'web' }),
     });
+  },
+
+  createRunFromWorkflow(workflowVersionId: string) {
+    return request<{ runId: string; workflowVersionId: string; plan: unknown }>(
+      '/api/runs/from-workflow',
+      { method: 'POST', body: JSON.stringify({ workflowVersionId }) },
+    );
   },
 
   // ── Test Suites ──

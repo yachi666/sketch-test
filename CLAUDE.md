@@ -1,6 +1,7 @@
 # SketchTest
 
 > REST API 自动化测试平台 · pnpm monorepo · TypeScript strict
+> Last reviewed: 2026-06-24
 
 ## Quick start
 
@@ -40,7 +41,7 @@ sketch-test/
 │   │   ├── openapi/            # OpenAPI 3.x → CanonicalApiModel adapter
 │   │   ├── postman/            # Postman Collection v2.1 → CanonicalApiModel adapter
 │   │   ├── har/                # HAR 1.2 → CanonicalApiModel adapter
-│   │   └── raml/               # RAML 1.0 → CanonicalApiModel adapter (in progress)
+│   │   └── raml/               # RAML 1.0 → CanonicalApiModel adapter
 │   └── test-fixtures/
 │       └── hermetic-fixture-server/  # Deterministic REST API for integration testing
 └── tooling/
@@ -56,14 +57,22 @@ sketch-test/
 - **S3-compatible object storage**: Raw specs, request/response artifacts, generated outputs (not yet integrated).
 - **No Kafka in V1** — task scheduling uses PostgreSQL persistent tasks and leases.
 
-**Critical rule**: Control Plane, Runner, and AI Worker must be independent processes. They share versioned contracts, not process lifecycles. If a hotspot needs Go/Rust/Python later, replace behind the existing seam — never change the contract.
+## Hard constraints
+
+These are non-negotiable. Violating any of them breaks the platform's design.
+
+- **NEVER commit secrets, .env files, or credentials** — secrets are resolved by the Runner at execution time.
+- **Published versions are IMMUTABLE** — ApiVersion, TestCaseVersion, WorkflowVersion, EnvironmentVersion, DatasetVersion. Once published, never modify.
+- **Control Plane, Runner, and AI Worker MUST be independent processes** — they share only versioned contracts, not process lifecycles.
+- **Contract packages are the ONLY stable seams** — never bypass them with direct cross-package imports or shared mutable state.
+- **If a hotspot needs Go/Rust/Python later** — replace behind the existing contract seam; never change the contract.
 
 ## Key conventions
 
 ### Language & tooling
 - **TypeScript strict** across all packages and apps.
-- **Biome** for formatting and linting (see `biome.json` for rules).
-- **Vitest** for testing (search the repo root for the vitest workspace config file).
+- **Biome** for formatting and linting (see `biome.json` for rules). This replaces ESLint + Prettier.
+- **Vitest** for testing (`vitest.workspace.ts` at repo root).
 - **Turbo** for task orchestration.
 - **pnpm catalog** for shared dependency versions (`pnpm-workspace.yaml`).
 - **Changesets** for versioning (`pnpm changeset`).
@@ -78,15 +87,32 @@ sketch-test/
 - The five `packages/contracts/*` packages are the **most important stable seams** in the platform.
 - Consumer code (test generation, workflow compiler, API browser) depends **only** on these contracts.
 - Adapter code (OpenAPI, RAML, code discovery) **produces** these contracts.
-- Published versions of ApiVersion, TestCaseVersion, WorkflowVersion, EnvironmentVersion, DatasetVersion are **immutable**.
 - Before modifying any contract schema, check all downstream consumers and update golden tests.
 
 ## Domain language
 
-Use the canonical terms and product principles from [CONTEXT.md](CONTEXT.md). Key reminders:
+Use the canonical terms from [CONTEXT.md](CONTEXT.md) for the full glossary. Key principles and terms:
 
-- Published versions (ApiVersion, TestCaseVersion, WorkflowVersion, EnvironmentVersion, DatasetVersion) are **immutable**.
-- The seven product principles are non-negotiable — evidence-first, draft-first, flow over count, reproducibility-first, secure by default, adapter architecture, control/execution separation.
+### Seven product principles (non-negotiable)
+1. **Evidence-first** — all conclusions and results must trace back to sources.
+2. **Draft-first** — AI and rule-generated content enters as drafts, never directly as published tests.
+3. **Flow over count** — critical business flow coverage matters more than total test case count.
+4. **Reproducibility-first** — failures must retain enough input and version info to replay.
+5. **Secure by default** — secrets are never shown in plain text; request/response is redacted by default.
+6. **Adapter architecture** — OpenAPI, RAML, and code analysis all output the same CanonicalApiModel.
+7. **Control/execution separation** — Runners can be deployed in the same network as the system under test.
+
+### Canonical terms (always use these)
+| Say | Don't Say |
+|-----|-----------|
+| TestCaseVersion | test case (ambiguous: draft or published?) |
+| WorkflowVersion | workflow (ambiguous: editor doc or published?) |
+| CanonicalApiModel | API spec, API document, parsed API |
+| ExecutionPlan | compiled workflow, frozen workflow |
+| RunSnapshot | run config, run params |
+| RunEvent | execution log, run log |
+| StepRun | step execution, run step |
+| GeneratedDraft | AI test, generated test |
 
 ## Testing
 
@@ -95,7 +121,18 @@ Use the canonical terms and product principles from [CONTEXT.md](CONTEXT.md). Ke
 - **Adapter tests**: each adapter (OpenAPI, Postman, HAR, RAML, format-detector) has fixture-based tests.
 - **Integration tests**: use the Hermetic Fixture Server (look under `packages/test-fixtures/`). It provides a deterministic REST API (users, auth, orders, payments) with fixed clock, fixed random seed, and fault injection. Start with `pnpm dev:fixture`.
 - **Fault injection**: Set `FAULT_MODE=timeout|500|slow` and `FAULT_TARGET=/api/payments` to inject faults into specific endpoints.
-- **Control Plane and Web app** do not yet have automated tests — this is a known gap.
+- **Control Plane and Web app** have basic automated tests (module-level tests for CP, store tests for Web) — coverage is still growing.
+
+## Gotchas
+
+Common pitfalls that trip up new contributors:
+
+- **Contract changes cascade** — changing a contract schema requires updating all downstream consumers AND golden test snapshots. Run `pnpm test` from root to catch breaks.
+- **PostgreSQL is required for CP dev** — `pnpm dev:cp` fails without a running PostgreSQL instance. Set `DATABASE_URL` if not using the default.
+- **Biome replaces ESLint + Prettier** — don't install or configure them. Run `pnpm lint` and `pnpm format`.
+- **pnpm catalog controls shared versions** — React, Vite, TypeScript, etc. are pinned in `pnpm-workspace.yaml`. Don't bump them in individual `package.json` files.
+- **Published versions are one-way** — once a version is published, it cannot be changed. Get it right before publishing.
+- **Golden test snapshots are checked in** — if you intentionally change contract output, update the snapshots with `vitest run --update`.
 
 ## Docs index
 

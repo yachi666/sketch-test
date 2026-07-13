@@ -4,8 +4,7 @@
  * Tests content hashing, evidence manifest building, and integrity verification.
  * Uses a mocked pg pool to simulate database interactions.
  */
-import { createHash } from 'node:crypto';
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // ─── Mock the database pool ────────────────────────────────────────
 
@@ -27,8 +26,15 @@ vi.mock('../../../shared/id', () => {
   };
 });
 
-import { insertEvents, buildEvidenceManifest, verifyEvidenceIntegrity } from '../event.service';
+import type { ObjectStore } from '../../../shared/object-storage.js';
 import type { IncomingEvent } from '../event.service';
+import {
+  buildEvidenceManifest,
+  getPersistedEvidenceManifest,
+  insertEvents,
+  persistEvidenceManifest,
+  verifyEvidenceIntegrity,
+} from '../event.service';
 
 // ─── Helpers ────────────────────────────────────────────────────────
 
@@ -127,14 +133,10 @@ describe('insertEvents', () => {
     expect(/^[0-9a-f]{64}$/.test(result.contentHashes[0]!)).toBe(true);
   });
 
-  test('treats query errors as duplicates (graceful degradation)', async () => {
+  test('surfaces database errors instead of reporting false duplicate success', async () => {
     mockQuery.mockRejectedValue(new Error('Connection lost'));
 
-    const result = await insertEvents('run-1', [makeEvent()]);
-
-    expect(result.accepted).toBe(0);
-    expect(result.duplicates).toBe(1);
-    expect(result.contentHashes).toHaveLength(0);
+    await expect(insertEvents('run-1', [makeEvent()])).rejects.toThrow(/Connection lost/);
   });
 
   test('handles multiple events in one call', async () => {
@@ -157,6 +159,30 @@ describe('insertEvents', () => {
     const callArgs = mockQuery.mock.calls[0] as [string, unknown[]];
     expect(callArgs[1]).toContain('run-1');
     expect(callArgs[1][2]).toBe(3);
+  });
+
+  test('externalizes payloads above the inline limit before inserting their reference', async () => {
+    mockQuery.mockResolvedValue({ rowCount: 1 });
+    const store: ObjectStore = {
+      put: vi.fn().mockResolvedValue(undefined),
+      get: vi.fn(),
+      exists: vi.fn(),
+    };
+    await insertEvents(
+      'run-large',
+      [makeEvent({ id: 'evt-large', payload: { body: 'x'.repeat(100) } })],
+      store,
+      10,
+    );
+
+    expect(store.put).toHaveBeenCalledWith(
+      expect.stringMatching(/^runs\/run-large\/events\/evt-large\/[a-f0-9]{64}\.json$/),
+      JSON.stringify({ body: 'x'.repeat(100) }),
+      'application/json',
+    );
+    const params = mockQuery.mock.calls[0]?.[1] as unknown[];
+    expect(params[4]).toContain('"externalized":true');
+    expect(params[7]).toMatch(/^runs\/run-large\/events\//);
   });
 });
 
@@ -253,6 +279,114 @@ describe('buildEvidenceManifest', () => {
   });
 });
 
+describe('persistEvidenceManifest', () => {
+  beforeEach(() => mockQuery.mockReset());
+
+  test('stores immutable manifest before recording its lookup metadata', async () => {
+    mockQuery
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            id: 'evt-1',
+            step_index: 0,
+            event_type: 'step:end',
+            payload_json: { status: 200 },
+            created_at: '2026-01-01T00:00:00Z',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rowCount: 1 });
+    const store: ObjectStore = {
+      put: vi.fn().mockResolvedValue(undefined),
+      get: vi.fn(),
+      exists: vi.fn(),
+    };
+
+    const manifest = await persistEvidenceManifest('run-1', store);
+
+    expect(manifest.objectKey).toBe(`runs/run-1/manifests/${manifest.manifestHash}.json`);
+    expect(store.put).toHaveBeenCalledWith(
+      manifest.objectKey,
+      expect.stringContaining('"runId":"run-1"'),
+      'application/json',
+    );
+    expect(mockQuery).toHaveBeenCalledTimes(2);
+  });
+
+  test('does not record metadata if object storage fails', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+    const store: ObjectStore = {
+      put: vi.fn().mockRejectedValue(new Error('S3 unavailable')),
+      get: vi.fn(),
+      exists: vi.fn(),
+    };
+
+    await expect(persistEvidenceManifest('run-1', store)).rejects.toThrow(/S3 unavailable/);
+    expect(mockQuery).toHaveBeenCalledOnce();
+  });
+});
+
+describe('getPersistedEvidenceManifest', () => {
+  beforeEach(() => mockQuery.mockReset());
+
+  test('retrieves and verifies the immutable object against database metadata', async () => {
+    const eventHash = 'a'.repeat(64);
+    const manifestHash = await crypto.subtle
+      .digest('SHA-256', new TextEncoder().encode(eventHash))
+      .then((bytes) => Buffer.from(bytes).toString('hex'));
+    const manifest = {
+      runId: 'run-1',
+      eventCount: 1,
+      totalSizeBytes: 2,
+      manifestHash,
+      events: [
+        {
+          id: 'evt-1',
+          stepIndex: 0,
+          eventType: 'step:end',
+          contentHash: eventHash,
+          sizeBytes: 2,
+          createdAt: '2026-01-01T00:00:00Z',
+        },
+      ],
+    };
+    mockQuery.mockResolvedValue({
+      rows: [{ manifest_hash: manifestHash, object_key: 'manifest.json' }],
+    });
+    const store: ObjectStore = {
+      put: vi.fn(),
+      get: vi.fn().mockResolvedValue({
+        body: new TextEncoder().encode(JSON.stringify(manifest)),
+        contentLength: 1,
+      }),
+      exists: vi.fn(),
+    };
+
+    await expect(getPersistedEvidenceManifest('run-1', store)).resolves.toMatchObject({
+      manifestHash,
+      objectKey: 'manifest.json',
+    });
+  });
+
+  test('rejects tampered stored manifests', async () => {
+    mockQuery.mockResolvedValue({
+      rows: [{ manifest_hash: 'a'.repeat(64), object_key: 'manifest.json' }],
+    });
+    const store: ObjectStore = {
+      put: vi.fn(),
+      get: vi.fn().mockResolvedValue({
+        body: new TextEncoder().encode(
+          JSON.stringify({ runId: 'run-1', manifestHash: 'a'.repeat(64), events: [] }),
+        ),
+        contentLength: 1,
+      }),
+      exists: vi.fn(),
+    };
+
+    await expect(getPersistedEvidenceManifest('run-1', store)).rejects.toThrow(/integrity/);
+  });
+});
+
 // ─── verifyEvidenceIntegrity ───────────────────────────────────────
 
 describe('verifyEvidenceIntegrity', () => {
@@ -262,9 +396,6 @@ describe('verifyEvidenceIntegrity', () => {
 
   test('verification passes for unmodified evidence', async () => {
     const payload = JSON.stringify({ status: 200 });
-    const hash1 = createHash('sha256').update(payload).digest('hex');
-    const manifestHash = createHash('sha256').update(hash1).digest('hex');
-
     // First call: buildEvidenceManifest queries events
     mockQuery.mockResolvedValueOnce({
       rows: [
