@@ -59,25 +59,32 @@ Control Plane ─── PostgreSQL
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm check
-pnpm test
-pnpm lint
-pnpm build
+pnpm turbo run lint check test build --force
 ```
 
 四个根级质量命令当前均已通过。Control Plane 和 Runner 构建会在 `dist/`
 生成生产 JavaScript，其 `start` 命令执行构建产物，而不是 TypeScript 源码。
 
-本机具备 Docker 和 PostgreSQL 时，可以运行 production-mode 跨进程验收：
+本机具备 Docker 时，可以用一次性 PostgreSQL 18 运行 production-mode
+跨进程验收与恢复验证：
 
 ```bash
-pnpm e2e:product
+E2E_MANAGED_POSTGRES=1 pnpm e2e:product
 ```
 
 该命令创建隔离的 PostgreSQL 与 MinIO，启动构建后的 Control Plane、Runner、
 Web 和仅用于测试的服务器，验证登录、导入、发布、租约、执行、CLI、报告和
 浏览器全链路；随后把数据库和全部对象证据恢复到一次性目标，并在 `finally`
 中删除临时资源。
+
+还可以从新 Compose 数据卷构建并启动打包镜像，验证 Control Plane、Web
+健康状态以及独立 Runner 心跳：
+
+```bash
+pnpm e2e:compose
+```
+
+该烟测使用唯一的本地资源，并在 `finally` 中删除容器、镜像和数据卷。
 
 ## 本地开发
 

@@ -21,6 +21,7 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "e2e:product": "node apps/control-plane/scripts/product-e2e.mjs",
+    "e2e:compose": "node apps/control-plane/scripts/compose-smoke.mjs",
     "clean": "turbo run clean",
     "format": "biome format --write .",
     "format:check": "biome format .",

@@ -15,6 +15,24 @@ origins and URLs. Generate independent values with `openssl rand -hex 32`.
 Never reuse `JWT_SECRET`, `SECRET_KEY`, or `RUNNER_REGISTRATION_TOKEN`.
 Production CORS requires exact `WEB_ORIGINS`.
 
+## Pre-release verification
+
+Run the release gates from a clean checkout with Docker available:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm turbo run lint check test build --force
+E2E_MANAGED_POSTGRES=1 pnpm e2e:product
+pnpm e2e:compose
+```
+
+The product E2E starts a disposable PostgreSQL 18 container when
+`E2E_MANAGED_POSTGRES=1`; without it, the command expects local PostgreSQL
+client tools and a reachable local server. The Compose smoke uses a unique
+project, ports, credentials, images, and volumes; it proves Control Plane and
+Web health plus an independently authenticated Runner heartbeat, then removes
+its disposable resources even on failure.
+
 ## Deploy
 
 ```bash
@@ -112,10 +130,10 @@ docker compose exec postgres psql -U sketchtest -d sketchtest_restore -c '\dt'
 
 Restore the matching object checkpoint, point a disposable Control Plane at
 both restored services, require `/ready`, retrieve a known manifest, and run
-its integrity endpoint. `pnpm e2e:product` automates a local drill: it dumps the
-live test database into an empty database, verifies the completed Run and
-`schema_migrations`, mirrors every evidence object into a recovery bucket, and
-compares SHA-256 content.
+its integrity endpoint. `E2E_MANAGED_POSTGRES=1 pnpm e2e:product` automates a
+local drill: it dumps the live test database into an empty database, verifies
+the completed Run and `schema_migrations`, mirrors every evidence object into
+a recovery bucket, and compares SHA-256 content.
 
 ## Upgrade and rollback
 

@@ -1,7 +1,8 @@
 # Project Status
 
-> Evidence snapshot, last updated 2026-07-13. This reports the current dirty
-> worktree and does not imply internet-scale production readiness. The durable
+> Evidence snapshot, last updated 2026-07-13. This reports the current local
+> release-candidate branch and does not imply internet-scale production
+> readiness. The durable
 > acceptance contract is in [`CODEX_PRODUCT_GOAL.md`](CODEX_PRODUCT_GOAL.md).
 
 ## Current assessment
@@ -21,14 +22,15 @@ still incomplete.
 | Workspace isolation | `api_versions` and `runs` own a workspace; foreign-resource references are checked atomically; cross-tenant resources return 404 | Pass at service and middleware level |
 | Identity | Workspace-qualified login; async salted scrypt; legacy hash upgrade; hardened JWT parsing/signature/expiry; Web token persistence and 401 invalidation | Pass |
 | Control Plane | 25 test files, 401 tests | Pass |
-| Runner | 3 test files, 71 tests | Pass |
+| Runner | 3 test files, 78 tests, including draft-07/2019-09/2020-12 JSON Schema assertions | Pass |
 | Web | 3 test files, 17 tests plus mandatory live Chromium flow | Pass |
 | CLI | Independent lint/check/build and 3 HTTP-client tests; real run status read in product E2E | Pass |
 | Hermetic fixture | Independent lint/check/build and 2 determinism/server tests | Pass |
 | Versioned migrations | `schema_migrations` checksum/identity, advisory lock, transaction rollback, legacy ownership fail-closed; 4 focused tests | Pass |
-| Product E2E | `pnpm e2e:product`: production CP/Runner/Web, PostgreSQL 18, pinned MinIO, fixture, CLI and Chromium | Pass: 8 imported endpoints, 6 externalized events, report/trace/audit evidence |
+| Product E2E | `E2E_MANAGED_POSTGRES=1 pnpm e2e:product`: production CP/Runner/Web, managed disposable PostgreSQL 18, pinned MinIO, fixture, CLI and Chromium | Pass: 8 imported endpoints, 6 externalized events, report/trace/audit evidence |
 | Recovery E2E | Same product run: `pg_dump` → empty restore DB plus complete S3 recovery-bucket mirror and per-object SHA-256 comparison | Pass: restored Run `passed`, migration count 1, 8/8 objects |
 | Compose clean install | Isolated project name and new volumes; built production CP/Web/Runner; `/ready`, Web health, bootstrap/login and one Runner registration | Pass; temporary containers, images and volumes removed |
+| Release CI | Forced lint/check/build/test plus product/recovery E2E and isolated Compose smoke are required before release | Workflow configured locally; GitHub-hosted execution still requires an authorized push |
 | Configuration | Missing/insecure database, JWT, encryption, Runner and S3 settings fail production startup; `.env.example` passes `docker compose config -q` | Pass for supported single-node target |
 | Observability | Readiness checks PostgreSQL/S3; normalized metrics; W3C trace and request ID correlated with events/audit | Pass at local runtime level |
 
@@ -58,8 +60,8 @@ still incomplete.
 
 ## Next verification sequence
 
-1. Run clean-cache root lint/check/test/build after every cross-package change.
-2. Run `pnpm e2e:product` for primary-path, browser, CLI and local recovery proof.
-3. Run the isolated Compose clean-install smoke for every image/release change.
+1. Run `pnpm turbo run lint check test build --force` after every cross-package change.
+2. Run `E2E_MANAGED_POSTGRES=1 pnpm e2e:product` for primary-path, browser, CLI and local recovery proof.
+3. Run `pnpm e2e:compose` for every image/release change.
 4. Perform a target-environment off-host restore and load/soak exercise before
    declaring a production release.

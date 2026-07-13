@@ -62,21 +62,18 @@ Secrets are resolved by the Runner and redacted before event upload.
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm check
-pnpm test
-pnpm lint
-pnpm build
+pnpm turbo run lint check test build --force
 ```
 
 The four root gates currently pass. Control Plane and Runner builds emit
 production JavaScript into `dist/`; their `start` commands execute those
 artifacts rather than TypeScript source.
 
-With Docker and a local PostgreSQL server available, run the production-mode
-cross-process acceptance test:
+With Docker available, run the production-mode cross-process acceptance and
+recovery test with its own disposable PostgreSQL 18 service:
 
 ```bash
-pnpm e2e:product
+E2E_MANAGED_POSTGRES=1 pnpm e2e:product
 ```
 
 It creates isolated PostgreSQL and MinIO resources, starts the built Control
@@ -84,6 +81,16 @@ Plane, Runner, Web, and test-only server, verifies login → import → publish 
 lease → execution → CLI/report/browser evidence, restores the database and all
 object evidence into disposable recovery targets, and removes temporary
 resources in `finally`.
+
+Build and start the packaged images against new Compose volumes, then verify
+Control Plane/Web health and an independent Runner heartbeat:
+
+```bash
+pnpm e2e:compose
+```
+
+The smoke uses unique local resources and removes its containers, images, and
+volumes in `finally`.
 
 ## Local development
 

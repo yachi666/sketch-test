@@ -4,7 +4,7 @@ RUN corepack enable
 WORKDIR /workspace
 COPY . .
 RUN pnpm install --frozen-lockfile
-RUN pnpm build
+RUN pnpm --filter '@sketch-test/control-plane...' run build
 RUN pnpm --filter @sketch-test/control-plane deploy --prod --legacy /deploy
 
 FROM node:24.16.0-alpine AS runtime

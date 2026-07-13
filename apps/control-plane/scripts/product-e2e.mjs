@@ -19,14 +19,19 @@ const suffix = `${process.pid}-${Date.now()}`;
 const database = `sketchtest_e2e_${process.pid}`;
 const restoredDatabase = `${database}_restored`;
 const container = `sketchtest-e2e-minio-${suffix}`;
+const postgresContainer = `sketchtest-e2e-postgres-${suffix}`;
 const bucket = `sketchtest-e2e-${process.pid}`;
 const restoredBucket = `${bucket}-restored`;
 const databaseBackup = path.join(tmpdir(), `${database}.dump`);
 const accessKey = 'e2e-access';
 const secretKey = 'e2e-secret-password';
 const secret32 = '0123456789abcdef0123456789abcdef';
+const postgresPassword = 'product-e2e-postgres-password';
+const managedPostgres = process.env['E2E_MANAGED_POSTGRES'] === '1';
 const children = [];
 let containerStarted = false;
+let postgresContainerStarted = false;
+let postgresPort;
 let databaseCreated = false;
 let restoredDatabaseCreated = false;
 
@@ -43,6 +48,63 @@ function command(program, args, options = {}) {
     );
   }
   return result.stdout?.trim() ?? '';
+}
+
+function postgresCommand(program, args, options = {}) {
+  if (!managedPostgres) return command(program, args, options);
+  return command(
+    'docker',
+    [
+      'exec',
+      '-e',
+      `PGPASSWORD=${postgresPassword}`,
+      postgresContainer,
+      program,
+      '-U',
+      'postgres',
+      ...args,
+    ],
+    options,
+  );
+}
+
+function databaseUrl(name) {
+  if (!managedPostgres) return `postgresql:///${name}`;
+  if (!postgresPort) throw new Error('Managed PostgreSQL port is not initialized');
+  return `postgresql://postgres:${encodeURIComponent(postgresPassword)}@127.0.0.1:${postgresPort}/${name}`;
+}
+
+async function startManagedPostgres() {
+  postgresPort = await freePort();
+  command('docker', [
+    'run',
+    '-d',
+    '--rm',
+    '--name',
+    postgresContainer,
+    '-p',
+    `127.0.0.1:${postgresPort}:5432`,
+    '-e',
+    'POSTGRES_USER=postgres',
+    '-e',
+    `POSTGRES_PASSWORD=${postgresPassword}`,
+    '-e',
+    'POSTGRES_DB=postgres',
+    'postgres:18-alpine',
+  ]);
+  postgresContainerStarted = true;
+
+  const deadline = Date.now() + 60_000;
+  while (Date.now() < deadline) {
+    const result = spawnSync(
+      'docker',
+      ['exec', postgresContainer, 'pg_isready', '-U', 'postgres', '-d', 'postgres'],
+      { cwd: repoRoot, stdio: 'ignore' },
+    );
+    if (result.status === 0) return;
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  throw new Error('Timed out waiting for managed PostgreSQL 18');
 }
 
 async function freePort() {
@@ -122,22 +184,30 @@ async function cleanup() {
   if (containerStarted) {
     spawnSync('docker', ['rm', '-f', container], { cwd: repoRoot, stdio: 'ignore' });
   }
-  if (databaseCreated) {
-    spawnSync('dropdb', ['--if-exists', database], { cwd: repoRoot, stdio: 'ignore' });
-  }
-  if (restoredDatabaseCreated) {
-    spawnSync('dropdb', ['--if-exists', restoredDatabase], { cwd: repoRoot, stdio: 'ignore' });
+  if (postgresContainerStarted) {
+    spawnSync('docker', ['rm', '-f', postgresContainer], { cwd: repoRoot, stdio: 'ignore' });
+  } else {
+    if (databaseCreated) {
+      spawnSync('dropdb', ['--if-exists', database], { cwd: repoRoot, stdio: 'ignore' });
+    }
+    if (restoredDatabaseCreated) {
+      spawnSync('dropdb', ['--if-exists', restoredDatabase], { cwd: repoRoot, stdio: 'ignore' });
+    }
   }
   if (existsSync(databaseBackup)) unlinkSync(databaseBackup);
 }
 
 async function main() {
   command('docker', ['version'], { capture: true });
-  command('pg_isready', [], { capture: true });
+  if (managedPostgres) {
+    await startManagedPostgres();
+  } else {
+    command('pg_isready', [], { capture: true });
+  }
   command('pnpm', ['build']);
 
-  command('dropdb', ['--if-exists', database], { capture: true });
-  command('createdb', [database]);
+  postgresCommand('dropdb', ['--if-exists', database], { capture: true });
+  postgresCommand('createdb', [database]);
   databaseCreated = true;
 
   const [fixturePort, controlPlanePort, minioPort, consolePort, webPort] = await Promise.all([
@@ -193,7 +263,7 @@ async function main() {
     cwd: path.join(repoRoot, 'apps/control-plane'),
     env: {
       NODE_ENV: 'production',
-      DATABASE_URL: `postgresql:///${database}`,
+      DATABASE_URL: databaseUrl(database),
       CP_HOST: '127.0.0.1',
       CP_PORT: String(controlPlanePort),
       LOG_LEVEL: 'warn',
@@ -410,19 +480,20 @@ async function main() {
   const restoredKeys = new Set((restoredObjects.Contents ?? []).map((object) => object.Key));
   assert(restoredKeys.size === keys.size, 'restored S3 bucket must contain every evidence object');
 
-  command('pg_dump', ['--format=custom', '--file', databaseBackup, database]);
-  command('dropdb', ['--if-exists', restoredDatabase], { capture: true });
-  command('createdb', [restoredDatabase]);
+  const databaseBackupPath = managedPostgres ? `/tmp/${database}.dump` : databaseBackup;
+  postgresCommand('pg_dump', ['--format=custom', '--file', databaseBackupPath, database]);
+  postgresCommand('dropdb', ['--if-exists', restoredDatabase], { capture: true });
+  postgresCommand('createdb', [restoredDatabase]);
   restoredDatabaseCreated = true;
-  command('pg_restore', [
+  postgresCommand('pg_restore', [
     '--exit-on-error',
     '--no-owner',
     '--no-privileges',
     '--dbname',
     restoredDatabase,
-    databaseBackup,
+    databaseBackupPath,
   ]);
-  const restoredRunStatus = command(
+  const restoredRunStatus = postgresCommand(
     'psql',
     [
       '--tuples-only',
@@ -435,7 +506,7 @@ async function main() {
     { capture: true },
   );
   const restoredMigrationCount = Number(
-    command(
+    postgresCommand(
       'psql',
       [
         '--tuples-only',
