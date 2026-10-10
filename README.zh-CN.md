@@ -1,161 +1,153 @@
 # SketchTest
 
-SketchTest 是一个基于 TypeScript monorepo 的 REST API 自动化测试平台。
-它将 API 描述导入为 `CanonicalApiModel`，创建不可变的测试与流程版本，
-编译成 `ExecutionPlan`，交给独立 Runner 执行，并保存有序、脱敏的
-`RunEvent` 证据。
+**从 API 描述到待审测试、可复现执行与可追溯证据。**
 
-[English](./README.md)
+[![CI](https://github.com/yachi666/sketch-test/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/yachi666/sketch-test/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/yachi666/sketch-test/actions/workflows/codeql.yml/badge.svg?branch=master)](https://github.com/yachi666/sketch-test/actions/workflows/codeql.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 
-## 当前已实现能力
+[English](README.md) · 简体中文
 
-- OpenAPI 3.0.4/3.1.2/3.2.0（JSON 与 YAML 1.2）、Postman、HAR、RAML
-  Adapter 和格式检测。
-- Arazzo 1.1 顺序 HTTP 流程导入/导出；通过检索 URL 与内容哈希绑定不可变的
-  OpenAPI 导入版本。
-- Canonical API、测试 DSL、流程 DSL、Runner Protocol、Generation Protocol 与公共类型的
-  版本化 Zod 契约。
-- Fastify Control Plane：身份、导入、环境和 Secret、测试编写、流程、
-  生成草稿、套件、策略、调度、Runner 租约、事件和报告。
-- GitHub 公开仓库 URL → 固定 Commit → Spring Controller/简单 DTO 分析 → AI 待审测试草稿；保留源码行号与实际覆盖数，见 [验收及边界](docs/design/2026-09-23-github-generation.md)。
-- 独立 Pi AI Worker：有界生成、持久化租约和人工审阅草稿，见 [配置说明](apps/ai-worker/README.md)。
-- 独立 Node.js Runner：重试、轮询、变量提取、断言、脱敏和有序事件。
-- React Web 提供经过认证、由 Control Plane 驱动的 API 导入、流程发布执行和
-  运行报告主路径。
-- CLI：触发已发布流程版本、等待运行、读取报告、输出 CI 格式并返回状态退出码。
-- 用于集成测试及故障注入的确定性测试基础设施。
+SketchTest 是面向开发与测试团队的自托管 REST API 自动化测试平台。
+导入 API 描述，审阅生成的草稿，发布不可变的测试或流程版本，再由部署在目标服务附近的
+独立 Runner 执行。每次运行保留固定版本的输入，以及有序、脱敏的执行证据。
 
-以上只表示仓库中存在相应代码，不代表已经达到生产发布标准。实际验证状态和
-缺口见 [`docs/STATUS.md`](docs/STATUS.md)。
+> **当前状态：单机发布候选。** 核心产品路径已有验收记录，但不代表所有生产场景均已就绪。
+> 已验证能力与剩余工作见[项目状态](docs/STATUS.md)。
 
-## 架构
+[快速开始](#快速开始) · [本地开发](#本地开发) · [文档导航](#文档导航) · [参与贡献](CONTRIBUTING.md)
 
-```text
-Web / CLI
-    │ 版本化 HTTP API
-    ▼
-Control Plane ─── PostgreSQL
-    ├── Generation Protocol ─── 独立 Pi AI Worker
-    │ Runner Protocol
-    ▼
-独立 Runner ─── 被测系统
-```
+## 可以做什么
 
-`packages/contracts` 下的六个契约包是唯一稳定边界。Control Plane、Runner
-以及 AI Worker 必须保持独立进程。已经发布的 `ApiVersion`、
-`TestCaseVersion`、`WorkflowVersion`、`EnvironmentVersion` 和
-`DatasetVersion` 不可修改。
+| 能力 | 工作方式 |
+| --- | --- |
+| 导入 API 资产 | OpenAPI 3.0/3.1/3.2、Postman、HAR、RAML Adapter 统一输出 `CanonicalApiModel`。 |
+| 编排业务流程 | 导入、导出受支持的 Arazzo 1.1 子集，组合请求、断言、提取、轮询与清理步骤。 |
+| 生成待审草稿 | 规则生成与可选的 Pi AI Worker 产出草稿，由用户明确审阅、发布。 |
+| 从代码发现 API | 固定公开 GitHub 仓库的 Commit，分析受支持的 Spring 路由和简单 DTO，保留源码行号。 |
+| 可复现执行 | 独立 Runner 使用固定输入执行已发布版本，支持租约、重试与 Secret 脱敏。 |
+| 查看执行证据 | Web 报告与 CLI 提供运行结果、有序事件、Trace 和质量门禁结论。 |
 
-每个 `ExecutionPlan` 只能记录一种来源：
+格式支持有明确边界，参见 [OpenAPI/Arazzo 兼容性](docs/OPENAPI_COMPATIBILITY.md)
+与 [GitHub 代码发现范围](docs/design/2026-09-23-github-generation.md)。
 
-- 已发布的 `WorkflowVersion`；
-- 已发布的 `TestCaseVersion`；
-- 或拥有不可变临时计划的 Run。
+## 快速开始
 
-计划对实际执行步骤和 Teardown 计算确定性的 SHA-256。Secret 在 Runner
-执行时解析，并在上传事件前脱敏。
+### 1. 获取源码
 
-## 环境要求
-
-- Node.js 22.22.2+、24.15.0+ 或 26+（当前测试工具链要求）
-- pnpm 12.10.1
-- Control Plane 运行和集成测试所需的 PostgreSQL
-
-## 安装与验证
+建议使用 **Node.js 24.15.0 及以上的 24.x 版本**和 **pnpm 12.10.1**。
+完整 Node 支持范围见 [package.json](package.json)。容器部署与端到端验证需要
+Docker Engine 和 Compose v2。
 
 ```bash
+git clone https://github.com/yachi666/sketch-test.git
+cd sketch-test
 pnpm install --frozen-lockfile
 pnpm turbo run lint check test build --force
 ```
 
-四个根级质量命令当前均已通过。Control Plane 和 Runner 构建会在 `dist/`
-生成生产 JavaScript，其 `start` 命令执行构建产物，而不是 TypeScript 源码。
-
-本机具备 Docker 时，可以用一次性 PostgreSQL 18 运行 production-mode
-跨进程验收与恢复验证：
+### 2. 启动本地容器服务
 
 ```bash
-E2E_MANAGED_POSTGRES=1 pnpm e2e:product
+cp .env.example .env
 ```
 
-该命令创建隔离的 PostgreSQL 与 MinIO，启动构建后的 Control Plane、Runner、
-Web 和仅用于测试的服务器，验证登录、导入、发布、租约、执行、CLI、报告和
-浏览器全链路。主导入路径实际执行 OpenAPI 3.2 → Arazzo 1.1 →
-`WorkflowVersion` → `ExecutionPlan`；随后把数据库和全部对象证据恢复到一次性
-目标，并在 `finally` 中删除临时资源。
-
-还可以从新 Compose 数据卷构建并启动打包镜像，验证 Control Plane、Web
-健康状态以及独立 Runner 心跳：
+先编辑 `.env`：替换 PostgreSQL 与 S3 凭据，使用 `openssl rand -hex 32`
+为 `JWT_SECRET`、`SECRET_KEY`、`RUNNER_REGISTRATION_TOKEN` **分别生成独立值**。
+容器版 Web 使用 `WEB_ORIGINS=http://localhost:8080`，`IMPORT_ALLOWED_HOSTS`
+仅填写需要导入 API 描述的主机。完整说明见[配置与部署手册](docs/OPERATIONS.md)。
 
 ```bash
-pnpm e2e:compose
+docker compose config -q
+docker compose up -d --build postgres minio minio-init control-plane web
+curl --fail http://localhost:3802/ready
 ```
 
-该烟测使用唯一的本地资源，并在 `finally` 中删除容器、镜像和数据卷。
+首次构建会编译固定版本的 MinIO 源码，可能需要数分钟。Web 地址为 **http://localhost:8080**。
+执行测试前，按手册完成[工作区初始化与 Runner 配置](docs/OPERATIONS.md#deploy)；
+仅启动 Web 容器不会自动创建账号或 Runner。
+
+### 3. 完成第一条测试流程
+
+1. 创建首个工作区与所有者账号，然后登录。
+2. 为工作区注册并启动 Runner。
+3. 导入 API 描述，为目标服务配置运行环境。
+4. 编写或生成草稿，完成审阅，发布 `TestCaseVersion` 或 `WorkflowVersion`。
+5. 执行已发布版本，在报告中查看结果与脱敏证据。
+
+AI 生成是可选功能，需要单独配置 [AI Worker](apps/ai-worker/README.md)。
+普通编写与执行不需要模型密钥。
 
 ## 本地开发
 
+配置开发环境后，先运行 `pnpm build` 构建工作区依赖，再用独立终端启动各个进程。
+通过 Shell 或进程管理器显式传入环境变量；裸 `pnpm` 命令不会为所有服务自动读取 `.env`。
+
+| 命令 | 用途 |
+| --- | --- |
+| `pnpm dev:web` | Web 开发服务器，默认端口 5173 |
+| `pnpm dev:cp` | Control Plane，需要可访问的 PostgreSQL |
+| `pnpm --filter @sketch-test/runner dev:daemon` | Runner 守护进程，需要工作区与 Runner 配置 |
+| `pnpm dev:fixture` | 仅用于测试的确定性目标服务 |
+| `node apps/cli/dist/index.js --help` | CLI 使用说明 |
+| `pnpm lint` / `pnpm check` / `pnpm test` / `pnpm build` | 代码规范、类型检查、测试与构建 |
+
+用隔离的一次性资源验证生产模式下的完整流程：
+
 ```bash
-pnpm dev:web       # React，127.0.0.1:5173
-pnpm dev:cp        # Control Plane，0.0.0.0:3802，需要 PostgreSQL
-pnpm dev:runner    # Runner 开发进程
-pnpm dev:fixture   # 测试服务器，127.0.0.1:3800
+pnpm --filter web exec playwright install chromium
+E2E_MANAGED_POSTGRES=1 pnpm e2e:product
+pnpm e2e:compose
 ```
 
-开发环境配置示例：
+Linux 如缺少浏览器系统依赖，使用 `playwright install --with-deps chromium`。
+验证脚本创建隔离数据库、对象存储和容器，结束后清理。产品 E2E 覆盖
+导入 → 发布 → 执行 → 浏览器／CLI 报告，以及数据库和对象证据恢复。
 
-```bash
-export DATABASE_URL='postgresql://localhost:5432/sketchtest'
-export JWT_SECRET='replace-with-a-long-random-development-secret'
-export SECRET_KEY='replace-with-a-32-byte-secret'
-export IMPORT_ALLOWED_HOSTS='specs.example.test'
-```
-
-Fixture Server 只能作为测试基础设施，生产路由和 Web 操作不得依赖它。
-
-## 仓库结构
+## 架构
 
 ```text
-apps/
-  web/              React 产品界面
-  control-plane/    Fastify API 与 PostgreSQL 持久化
-  runner/           独立 HTTP 执行进程
-  cli/              CI 与命令行客户端
-packages/
-  contracts/        版本化稳定契约
-  adapters/         导入格式 → CanonicalApiModel
-  test-fixtures/     仅用于测试的确定性基础设施
-docs/                领域、架构、状态与执行目标
+Web / CLI ── HTTP ── Control Plane ── PostgreSQL + S3 兼容对象存储
+                         │
+                         ├── Generation Protocol ── 独立 AI Worker
+                         └── Runner Protocol ── 独立 Runner ── 目标 API
 ```
 
-仓库硬约束见 [`CLAUDE.md`](CLAUDE.md)，统一领域语言见
-[`CONTEXT.md`](CONTEXT.md)，持续产品化目标和证据矩阵见
-[`docs/CODEX_PRODUCT_GOAL.md`](docs/CODEX_PRODUCT_GOAL.md)。
+- **发布后不可变：** 已发布的 API、测试、流程、环境与数据集版本不再修改。
+- **契约边界：** `packages/contracts/` 下的六个版本化契约包是稳定边界。
+- **独立进程：** Control Plane、Runner 和 AI Worker 各自管理生命周期。
+- **AI 先产草稿：** 生成内容必须经过审阅与明确发布，才能执行。
 
-部署、验证、备份、恢复、升级和回滚命令见
-[`docs/OPERATIONS.md`](docs/OPERATIONS.md)。
-OpenAPI/Arazzo 的可执行兼容边界及 Overlay 决策见
-[`docs/OPENAPI_COMPATIBILITY.md`](docs/OPENAPI_COMPATIBILITY.md)。
+```text
+apps/       web · control-plane · runner · ai-worker · cli
+packages/   contracts · adapters · test-fixtures
+docs/       运维 · 兼容性 · 设计决策 · 验证记录
+ops/        对象存储 · 监控 · 告警
+.github/    CI · 安全扫描 · 依赖更新 · Pages
+```
 
-## 当前生产缺口
+## 文档导航
 
-- 当前验证目标是单机本地发布候选；多节点高可用、托管服务故障切换、TLS
-  入口和负载测试仍需由部署方完成。
-- 浏览器测试已覆盖产品主路径，但可访问性、兼容性和更广的异常路径仍不完整。
-- 恢复测试在本地镜像数据库与对象证据；部署方仍需使用选定供应商验证加密的
-  异地备份。
+| 文档 | 内容 |
+| --- | --- |
+| [运维手册](docs/OPERATIONS.md) | 配置、部署、初始化、备份、恢复与回滚 |
+| [项目状态](docs/STATUS.md) | 带日期的验证证据与生产缺口 |
+| [兼容性说明](docs/OPENAPI_COMPATIBILITY.md) | OpenAPI/Arazzo 可执行支持边界 |
+| [AI Worker](apps/ai-worker/README.md) | 模型配置、草稿审阅与 Worker 限制 |
+| [领域词汇](CONTEXT.md) | 统一实体定义与产品流程 |
+| [仓库指南](CLAUDE.md) | 包结构、硬约束、工具与测试约定 |
+| [GitHub 自动化](docs/GITHUB_AUTOMATION.md) | 检查、依赖更新、安全、版本 PR 与 Pages |
 
-证据矩阵没有全部标记为已证明之前，不应部署到生产环境。
+## 贡献与安全
 
-## 安全
+通过 [GitHub Issues](https://github.com/yachi666/sketch-test/issues/new/choose) 报告缺陷或提出建议。
+向 `master` 提交 PR 前，请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。CI 必须通过，
+契约变更必须同步更新消费者与测试。
 
-禁止提交凭据或 `.env` 文件。漏洞报告流程见 [`SECURITY.md`](SECURITY.md)。
-
-## 贡献
-
-参阅 [`CONTRIBUTING.md`](CONTRIBUTING.md)。契约 Schema 发生变化时，必须在
-同一个变更中更新所有消费者和契约测试。
+漏洞请走[私密安全报告](https://github.com/yachi666/sketch-test/security/advisories/new)，
+不要在公开 Issue 披露。详见 [SECURITY.md](SECURITY.md)。禁止提交凭据与 `.env` 文件。
 
 ## 许可证
 
-[Apache-2.0](LICENSE)
+SketchTest 源码使用 [Apache-2.0](LICENSE)。第三方组件遵循各自许可证；
+随容器构建的 MinIO 服务端与客户端采用 AGPL-3.0。

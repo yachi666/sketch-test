@@ -66,7 +66,7 @@ function AuthBootstrap({ children }: { children: React.ReactNode }) {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <AuthBootstrap>{children}</AuthBootstrap>
     </BrowserRouter>
   );

@@ -1,0 +1,17 @@
+name: Build Pages frontend
+description: Build workspace dependencies and the Web frontend for a project Pages URL
+runs:
+  using: composite
+  steps:
+    - name: Build workspace dependencies
+      shell: bash
+      run: pnpm turbo run build --filter='web^...' --force
+    - name: Build Web at its Pages base path
+      shell: bash
+      env:
+        PAGES_BASE_PATH: /${{ github.event.repository.name }}/
+        VITE_CP_BASE: ${{ vars.PUBLIC_CONTROL_PLANE_URL }}
+      run: |
+        pnpm --filter web exec vite build --base "$PAGES_BASE_PATH"
+        cp apps/web/dist/index.html apps/web/dist/404.html
+        touch apps/web/dist/.nojekyll

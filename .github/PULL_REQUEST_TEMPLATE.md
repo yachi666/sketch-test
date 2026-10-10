@@ -6,7 +6,7 @@
 
 <!-- Why is this change needed? Link related issues. -->
 
-Closes #
+<!-- Closes #123 (omit if no issue applies). -->
 
 ## Type of change
 
@@ -19,7 +19,7 @@ Closes #
 
 ## Checklist
 
-- [ ] I have read [CONTRIBUTING.md](../CONTRIBUTING.md)
+- [ ] I have read [CONTRIBUTING.md](https://github.com/yachi666/sketch-test/blob/master/CONTRIBUTING.md)
 - [ ] TypeScript compiles without errors (`pnpm check`)
 - [ ] Biome linting passes (`pnpm lint`)
 - [ ] Tests pass (`pnpm test`)

@@ -1,27 +1,43 @@
 version: 2
 updates:
-  # Root and workspace npm dependencies
-  - package-ecosystem: 'npm'
-    directory: '/'
+  - package-ecosystem: npm
+    directory: /
     schedule:
-      interval: 'weekly'
-      day: 'monday'
-    versioning-strategy: 'auto'
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: Asia/Shanghai
+    open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
+    groups:
+      react:
+        patterns: ['react', 'react-dom', '@types/react', '@types/react-dom']
+      vite:
+        patterns: ['vite', '@vitejs/plugin-react']
+      vitest:
+        patterns: ['vitest', '@vitest/*']
+      minor-and-patch:
+        patterns: ['*']
+        update-types: [minor, patch]
+      security:
+        applies-to: security-updates
+        patterns: ['*']
     commit-message:
-      prefix: 'chore'
-      prefix-development: 'chore'
-      include: 'scope'
-    labels:
-      - 'dependencies'
-    open-pull-requests-limit: 10
+      prefix: chore(deps)
+    labels: [dependencies]
 
-  # GitHub Actions
-  - package-ecosystem: 'github-actions'
-    directory: '/'
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: 'monthly'
+      interval: weekly
+      day: monday
+      time: '09:30'
+      timezone: Asia/Shanghai
+    open-pull-requests-limit: 3
+    groups:
+      actions:
+        patterns: ['*']
     commit-message:
-      prefix: 'chore(ci)'
-    labels:
-      - 'dependencies'
-      - 'ci'
+      prefix: chore(ci)
+    labels: [dependencies, ci]
