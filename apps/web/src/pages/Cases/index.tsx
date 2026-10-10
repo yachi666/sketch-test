@@ -5,6 +5,7 @@ import { ErrorCallout } from '../../components/shared/ErrorCallout';
 import { cpClient, type Draft, type TestCase } from '../../lib/cp-client';
 import { useAuthStore } from '../../stores/authStore';
 import { useUIStore } from '../../stores/uiStore';
+import { CaseProvenance } from '../AgentSettings/Execution';
 import { RunPublishedTest } from './RunPublishedTest';
 import './cases.css';
 import '../Agent/agent.css';
@@ -350,6 +351,7 @@ export function CasesPage() {
                   </pre>
                 </section>
                 <section className="case-detail__section">
+                  <CaseProvenance id={selected.id} />
                   <h3>关联操作</h3>
                   <p>可在测试计划中引用已发布用例；运行与证据请在报告中心查看。</p>
                   {selected.latestVersion && !selected.latestVersion.publishedBy ? (

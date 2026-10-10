@@ -108,6 +108,13 @@ describe('Pi draft harness', () => {
     expect(result.sourceHash).toBe(task.sourceHash);
     expect(result.inputHash).toMatch(/^[a-f0-9]{64}$/);
     expect(result.turns).toBe(2);
+    expect(result.events?.filter((e) => e.type === 'model.completed')).toHaveLength(2);
+    expect(result.events?.filter((e) => e.type === 'tool.completed').map((e) => e.tool)).toEqual([
+      'read_endpoint',
+      'propose_test',
+    ]);
+    expect(result.events?.every((e) => e.success)).toBe(true);
+    expect(result.events?.[0]?.inputTokens).toBe(1);
     expect(result.harnessVersion).toBe('1.1.0');
     const context = streamFn.mock.calls[0]?.[1];
     expect(

@@ -8,6 +8,7 @@ import { AgentPage } from './index';
 vi.mock('../../lib/cp-client', () => ({
   cpClient: {
     aiCapabilities: vi.fn(),
+    listAgents: vi.fn(),
     analyzeRepository: vi.fn(),
     listApiVersions: vi.fn(),
     getApiVersion: vi.fn(),
@@ -18,6 +19,28 @@ vi.mock('../../lib/cp-client', () => ({
 }));
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(cpClient.listAgents).mockResolvedValue({
+    agents: [
+      {
+        schemaVersion: 'sketch-test.agent/v1',
+        id: 'ag_test',
+        version: 1,
+        name: '契约 Agent',
+        avatar: 'contract',
+        capability: 'test',
+        enabled: true,
+        connectionId: 'c',
+        connectionName: 'DeepSeek',
+        connectionRef: 'default',
+        provider: 'deepseek',
+        model: 'deepseek-v4-flash',
+        instructions: 'test',
+        timeoutMs: 120000,
+        retries: 2,
+        maxOutputTokens: 4096,
+      },
+    ],
+  });
   useAuthStore.setState({
     user: {
       id: 'u',
@@ -31,7 +54,14 @@ beforeEach(() => {
     configured: true,
     available: true,
     workers: [
-      { workerId: 'w', provider: 'deepseek', model: 'deepseek-v4-flash', harnessVersion: '0.85.1' },
+      {
+        agentConfigVersion: 1,
+        connectionRef: 'default',
+        workerId: 'w',
+        provider: 'deepseek',
+        model: 'deepseek-v4-flash',
+        harnessVersion: '0.85.1',
+      },
     ],
   });
   vi.mocked(cpClient.listApiVersions).mockResolvedValue({
@@ -77,6 +107,7 @@ test('queues user intent against the selected immutable API version', async () =
       'pi',
       ['health'],
       'Verify health',
+      'ag_test',
     ),
   );
 });
@@ -167,6 +198,7 @@ test('restores GitHub input, analyzes the real backend result and invalidates se
       'pi',
       ['code_health'],
       expect.any(String),
+      'ag_test',
     ),
   );
   fireEvent.change(screen.getByLabelText('GitHub 仓库 URL'), {

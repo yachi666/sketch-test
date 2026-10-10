@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
+import type { AgentSnapshot } from '@sketch-test/generation-protocol';
 import {
   type PlanAsset,
   type PlanProposal,
@@ -11,12 +12,15 @@ import {
 import type pg from 'pg';
 import { pool } from '../../db/db.js';
 import { transaction } from '../../db/transaction.js';
+import { selectedAgent } from '../agents/agents.service.js';
 import { aiCapabilities } from '../generation/ai-generation.service.js';
 import { GenerationError } from '../generation/generation.service.js';
 
 const hash = (v: unknown) => createHash('sha256').update(JSON.stringify(v)).digest('hex');
 const id = (prefix: string) => `${prefix}_${randomUUID().replaceAll('-', '').slice(0, 16)}`;
 interface Row {
+  original_proposal?: unknown;
+  execution_events?: unknown;
   id: string;
   workspace_id: string;
   task: PlanTask;
@@ -104,17 +108,35 @@ export async function planInventory(
   return assets;
 }
 export async function planSettings(workspaceId: string) {
-  const r = await pool.query('SELECT enabled FROM ai_plan_settings WHERE workspace_id=$1', [
-    workspaceId,
-  ]);
-  return { enabled: r.rows[0]?.enabled ?? false };
-}
-export async function setPlanSettings(workspaceId: string, enabled: boolean) {
-  await pool.query(
-    `INSERT INTO ai_plan_settings(workspace_id,enabled) VALUES($1,$2) ON CONFLICT(workspace_id) DO UPDATE SET enabled=$2,last_checked=NULL`,
-    [workspaceId, enabled],
+  const r = await pool.query(
+    'SELECT enabled,agent_id FROM ai_plan_settings WHERE workspace_id=$1',
+    [workspaceId],
   );
-  return { enabled };
+  return { enabled: r.rows[0]?.enabled ?? false, agentId: r.rows[0]?.agent_id ?? null };
+}
+export async function setPlanSettings(workspaceId: string, enabled: boolean, agentId?: string) {
+  return transaction(async (client) => {
+    if (enabled && agentId)
+      await selectedAgent(
+        client,
+        workspaceId,
+        agentId,
+        'plan',
+        (await aiCapabilities(workspaceId)).workers.filter((w) => w.capabilities?.includes('plan')),
+      );
+    if (
+      enabled &&
+      !agentId &&
+      (await client.query('SELECT id FROM agents WHERE workspace_id=$1 LIMIT 1', [workspaceId]))
+        .rows.length
+    )
+      throw new GenerationError('请选择自动建议使用的 Agent', 400);
+    await client.query(
+      `INSERT INTO ai_plan_settings(workspace_id,enabled,agent_id) VALUES($1,$2,$3) ON CONFLICT(workspace_id) DO UPDATE SET enabled=$2,agent_id=$3,last_checked=NULL`,
+      [workspaceId, enabled, agentId ?? null],
+    );
+    return { enabled, agentId: agentId ?? null };
+  });
 }
 export async function listPlanJobs(workspaceId: string) {
   const r = await pool.query(
@@ -138,6 +160,12 @@ function publicJob(r: Row) {
     errorCode: r.error_code,
     createdAt: r.created_at,
     model: r.task.modelTarget,
+    agent: r.task.agent ?? null,
+    workerId: r.worker_id,
+    attempt: r.attempt,
+    inputHash: r.input_hash,
+    originalProposal: r.original_proposal ?? null,
+    events: r.execution_events ?? [],
     sourceHash: r.task.sourceHash,
   };
 }
@@ -157,6 +185,7 @@ async function insertJob(
   objective: string,
   trigger: string,
   parent?: Row,
+  agent?: AgentSnapshot,
 ) {
   if (!assets.length)
     throw new GenerationError('请先导入接口并生成用例，或发布一个用例/流程。', 400);
@@ -174,8 +203,16 @@ async function insertJob(
     objective,
     assets,
     previous: parent?.proposal ?? undefined,
-    modelTarget: { provider: worker.provider, model: worker.model },
-    limits: { timeoutMs: 120000, maxTurns: 4, maxOutputTokens: 4096 },
+    ...(agent ? { agent } : {}),
+    modelTarget: {
+      provider: agent?.provider ?? worker.provider,
+      model: agent?.model ?? worker.model,
+    },
+    limits: {
+      timeoutMs: agent?.timeoutMs ?? 120000,
+      maxTurns: 4,
+      maxOutputTokens: agent?.maxOutputTokens ?? 4096,
+    },
   });
   const r = await client.query(
     `INSERT INTO ai_plan_jobs(id,workspace_id,task,input_hash,trigger,parent_id) VALUES($1,$2,$3,$4,$5,$6) RETURNING *`,
@@ -188,6 +225,7 @@ export async function enqueuePlan(
   objective: string,
   parentId?: string,
   revision?: number,
+  agentId?: string,
 ) {
   const worker = (await aiCapabilities(workspaceId)).workers.find((w) =>
     w.capabilities?.includes('plan'),
@@ -195,6 +233,23 @@ export async function enqueuePlan(
   if (!worker) throw new GenerationError('支持计划生成的 AI Worker 尚未在线。', 503);
   return transaction(async (client) => {
     await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [`plan:${workspaceId}`]);
+    const agent = agentId
+      ? await selectedAgent(
+          client,
+          workspaceId,
+          agentId,
+          'plan',
+          (await aiCapabilities(workspaceId)).workers.filter((w) =>
+            w.capabilities?.includes('plan'),
+          ),
+        )
+      : undefined;
+    if (
+      !agent &&
+      (await client.query('SELECT id FROM agents WHERE workspace_id=$1 LIMIT 1', [workspaceId]))
+        .rows.length
+    )
+      throw new GenerationError('请选择计划 Agent', 400);
     const parent = parentId ? await locked(client, workspaceId, parentId) : undefined;
     if (parent && (parent.revision !== revision || parent.status !== 'completed'))
       throw new GenerationError('草稿已变化，请刷新后再调整。', 409);
@@ -206,6 +261,7 @@ export async function enqueuePlan(
       objective,
       parent ? '对话调整' : '手动生成',
       parent,
+      agent,
     );
   });
 }
@@ -219,6 +275,21 @@ async function autoSuggest(workspaceId: string, worker: WorkerIdentity) {
       [workspaceId],
     );
     if (!settings.rows[0]) return;
+    let agent: AgentSnapshot | undefined;
+    if (settings.rows[0].agent_id) {
+      try {
+        agent = await selectedAgent(client, workspaceId, settings.rows[0].agent_id, 'plan', [
+          worker,
+        ]);
+      } catch (e) {
+        if (e instanceof GenerationError) return;
+        throw e;
+      }
+    } else if (
+      (await client.query('SELECT id FROM agents WHERE workspace_id=$1 LIMIT 1', [workspaceId]))
+        .rows.length
+    )
+      return;
     await client.query('UPDATE ai_plan_settings SET last_checked=now() WHERE workspace_id=$1', [
       workspaceId,
     ]);
@@ -237,6 +308,8 @@ async function autoSuggest(workspaceId: string, worker: WorkerIdentity) {
       assets,
       '基于当前已发布用例、业务流程和待审草稿，主动建议一个聚焦关键业务的回归计划。明确待补齐资产和执行前提，不编造业务预期。',
       '用例资产变化后自动建议',
+      undefined,
+      agent,
     );
     await client.query('UPDATE ai_plan_settings SET last_hash=$2 WHERE workspace_id=$1', [
       workspaceId,
@@ -248,12 +321,18 @@ export async function claimPlan(workspaceId: string, worker: WorkerIdentity) {
   await autoSuggest(workspaceId, worker);
   return transaction(async (client) => {
     const r = await client.query(
-      `SELECT * FROM ai_plan_jobs WHERE workspace_id=$1 AND task->'modelTarget'->>'provider'=$2 AND task->'modelTarget'->>'model'=$3 AND (status='pending' OR (status='running' AND leased_until<now())) ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1`,
-      [workspaceId, worker.provider, worker.model],
+      `SELECT * FROM ai_plan_jobs WHERE workspace_id=$1 AND task->'modelTarget'->>'provider'=$2 AND task->'modelTarget'->>'model'=$3 AND (task->'agent' IS NULL OR ($5::boolean AND task->'agent'->>'connectionRef'=$4)) AND (status='pending' OR (status='running' AND leased_until<now())) ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1`,
+      [
+        workspaceId,
+        worker.provider,
+        worker.model,
+        worker.connectionRef ?? 'default',
+        worker.agentConfigVersion === 1,
+      ],
     );
     const row = r.rows[0] as Row | undefined;
     if (!row) return null;
-    if (row.attempt >= 3) {
+    if (row.attempt >= (row.task.agent?.retries ?? 2) + 1) {
       await client.query(
         `UPDATE ai_plan_jobs SET status='failed',error_code='LEASE_EXHAUSTED' WHERE id=$1`,
         [row.id],
@@ -308,8 +387,8 @@ export async function planLeaseAction(
       );
     else if (result)
       await client.query(
-        `UPDATE ai_plan_jobs SET status='completed',proposal=$2,result_hash=$3,revision=revision+1 WHERE id=$1`,
-        [jobId, JSON.stringify(result.proposal), hash(result)],
+        `UPDATE ai_plan_jobs SET status='completed',proposal=$2,original_proposal=$2,execution_events=$4,result_hash=$3,revision=revision+1 WHERE id=$1`,
+        [jobId, JSON.stringify(result.proposal), hash(result), JSON.stringify(result.events ?? [])],
       );
     else
       await client.query(

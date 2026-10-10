@@ -1,0 +1,293 @@
+{
+  "verifiedAt": "2026-10-10T08:25:03.464Z",
+  "jobId": "gj_d1987170",
+  "testCaseId": "tc_84623cb4",
+  "agentVersionAtExecution": 1,
+  "currentAgentVersion": 2,
+  "execution": {
+    "id": "gj_d1987170",
+    "status": "completed",
+    "config": {
+      "agent": {
+        "id": "ag_da6570f9-27d9-4676-a83a-0397f4ed893c",
+        "name": "契约用例 Agent",
+        "model": "deepseek-flash",
+        "avatar": "contract",
+        "enabled": true,
+        "retries": 2,
+        "version": 1,
+        "provider": "deepseek",
+        "timeoutMs": 120000,
+        "capability": "test",
+        "connectionId": "conn_77f58f4f-4a01-429c-803a-baf2c7ca570d",
+        "instructions": "根据接口证据生成正常、边界和异常用例。所有结果进入待审核草稿。",
+        "connectionRef": "default",
+        "schemaVersion": "sketch-test.agent/v1",
+        "connectionName": "团队 DeepSeek",
+        "maxOutputTokens": 4096
+      },
+      "model": "deepseek-flash",
+      "provider": "deepseek",
+      "objective": "Agent 后端验收：为公开 Node.js 仓库元数据生成 1 条只读用例。owner=nodejs，repo=node，严格使用 requestTemplate，断言 HTTP 200 和 full_name 等于 nodejs/node。仅生成待审草稿。",
+      "endpointIds": [
+        "GET-/repos/:owner/:repo"
+      ]
+    },
+    "createdAt": "2026-10-10T08:24:26.025Z",
+    "completedAt": "2026-10-10T08:24:33.756Z",
+    "attempt": 1,
+    "errorCode": null,
+    "workerId": "ai_2139fa8f-714a-4770-957f-bbfabbf891cf",
+    "inputHash": "7ffc2a12590fba11d1660cb3598afd10be639aff6099ec97252c280cc4877165",
+    "resultHash": "975877cdfa30883ed87b4718b6fc3b9b1b4d8b8f6b5783a54855258893fd41a5",
+    "agent": {
+      "id": "ag_da6570f9-27d9-4676-a83a-0397f4ed893c",
+      "name": "契约用例 Agent",
+      "model": "deepseek-flash",
+      "avatar": "contract",
+      "enabled": true,
+      "retries": 2,
+      "version": 1,
+      "provider": "deepseek",
+      "timeoutMs": 120000,
+      "capability": "test",
+      "connectionId": "conn_77f58f4f-4a01-429c-803a-baf2c7ca570d",
+      "instructions": "根据接口证据生成正常、边界和异常用例。所有结果进入待审核草稿。",
+      "connectionRef": "default",
+      "schemaVersion": "sketch-test.agent/v1",
+      "connectionName": "团队 DeepSeek",
+      "maxOutputTokens": 4096
+    },
+    "modelSnapshot": null,
+    "events": [
+      {
+        "id": "1",
+        "attempt": 0,
+        "type": "queued",
+        "payload": {},
+        "createdAt": "2026-10-10T08:24:26.025Z"
+      },
+      {
+        "id": "2",
+        "attempt": 1,
+        "type": "claimed",
+        "payload": {
+          "workerId": "ai_2139fa8f-714a-4770-957f-bbfabbf891cf"
+        },
+        "createdAt": "2026-10-10T08:24:26.317Z"
+      },
+      {
+        "id": "3",
+        "attempt": 1,
+        "type": "model.completed",
+        "payload": {
+          "at": "2026-10-10T08:24:27.456Z",
+          "type": "model.completed",
+          "success": true,
+          "durationMs": 974,
+          "inputTokens": 697,
+          "outputTokens": 58
+        },
+        "createdAt": "2026-10-10T08:24:33.756Z"
+      },
+      {
+        "id": "4",
+        "attempt": 1,
+        "type": "tool.completed",
+        "payload": {
+          "at": "2026-10-10T08:24:27.462Z",
+          "tool": "read_endpoint",
+          "type": "tool.completed",
+          "success": true,
+          "durationMs": 6
+        },
+        "createdAt": "2026-10-10T08:24:33.756Z"
+      },
+      {
+        "id": "5",
+        "attempt": 1,
+        "type": "model.completed",
+        "payload": {
+          "at": "2026-10-10T08:24:30.691Z",
+          "type": "model.completed",
+          "success": true,
+          "durationMs": 3229,
+          "inputTokens": 381,
+          "outputTokens": 651
+        },
+        "createdAt": "2026-10-10T08:24:33.756Z"
+      },
+      {
+        "id": "6",
+        "attempt": 1,
+        "type": "tool.completed",
+        "payload": {
+          "at": "2026-10-10T08:24:30.694Z",
+          "tool": "propose_test",
+          "type": "tool.completed",
+          "success": false,
+          "durationMs": 3
+        },
+        "createdAt": "2026-10-10T08:24:33.756Z"
+      },
+      {
+        "id": "7",
+        "attempt": 1,
+        "type": "model.completed",
+        "payload": {
+          "at": "2026-10-10T08:24:33.596Z",
+          "type": "model.completed",
+          "success": true,
+          "durationMs": 2902,
+          "inputTokens": 149,
+          "outputTokens": 649
+        },
+        "createdAt": "2026-10-10T08:24:33.756Z"
+      },
+      {
+        "id": "8",
+        "attempt": 1,
+        "type": "tool.completed",
+        "payload": {
+          "at": "2026-10-10T08:24:33.597Z",
+          "tool": "propose_test",
+          "type": "tool.completed",
+          "success": true,
+          "durationMs": 1
+        },
+        "createdAt": "2026-10-10T08:24:33.756Z"
+      },
+      {
+        "id": "9",
+        "attempt": 1,
+        "type": "completed",
+        "payload": {
+          "model": "deepseek-flash",
+          "turns": 3,
+          "provider": "deepseek",
+          "draftCount": 1
+        },
+        "createdAt": "2026-10-10T08:24:33.756Z"
+      }
+    ],
+    "outputs": [
+      {
+        "id": "draft_88738eb4",
+        "status": "modified",
+        "testCaseId": "tc_84623cb4",
+        "originalDefinition": {
+          "id": "get-repos-owner-repo-nodejs-node-200",
+          "name": "获取 nodejs/node 仓库元数据返回 200 且 full_name 正确",
+          "request": {
+            "url": "${env.baseUrl}/repos/${env.owner}/${env.repo}",
+            "method": "GET",
+            "timeoutMs": 30000,
+            "followRedirects": false
+          },
+          "assertions": [
+            {
+              "id": "status-is-200",
+              "target": "status",
+              "expected": 200,
+              "operator": "equals",
+              "severity": "block"
+            },
+            {
+              "id": "full-name-equals-nodejs-node",
+              "path": "$.full_name",
+              "target": "jsonPath",
+              "expected": "nodejs/node",
+              "operator": "equals",
+              "severity": "block"
+            }
+          ],
+          "sideEffect": "read-only",
+          "schemaVersion": "sketch-test.test/v1"
+        },
+        "sourceInfo": {
+          "path": "/repos/:owner/:repo",
+          "agent": {
+            "id": "ag_da6570f9-27d9-4676-a83a-0397f4ed893c",
+            "name": "契约用例 Agent",
+            "model": "deepseek-flash",
+            "avatar": "contract",
+            "enabled": true,
+            "retries": 2,
+            "version": 1,
+            "provider": "deepseek",
+            "timeoutMs": 120000,
+            "capability": "test",
+            "connectionId": "conn_77f58f4f-4a01-429c-803a-baf2c7ca570d",
+            "instructions": "根据接口证据生成正常、边界和异常用例。所有结果进入待审核草稿。",
+            "connectionRef": "default",
+            "schemaVersion": "sketch-test.agent/v1",
+            "connectionName": "团队 DeepSeek",
+            "maxOutputTokens": 4096
+          },
+          "model": "deepseek-flash",
+          "method": "GET",
+          "agentId": "ag_da6570f9-27d9-4676-a83a-0397f4ed893c",
+          "attempt": 1,
+          "harness": "pi-agent-core",
+          "provider": "deepseek",
+          "strategy": "pi",
+          "inputHash": "7ffc2a12590fba11d1660cb3598afd10be639aff6099ec97252c280cc4877165",
+          "rationale": "正常路径用例：GET /repos/:owner/:repo 为只读接口（sideEffect=read-only），契约声明唯一成功状态 200，响应体必需字段为 id(integer) 与 full_name(string)。本次修正了第二条断言的结构，使其匹配允许的 target 枚举（target=jsonPath，路径 $ 入独立 path 字段）。\n\n依据与取值：\n- URL 严格等于 read_endpoint 返回的 requestTemplate（${env.baseUrl}/repos/${env.owner}/${env.repo}），未新增路径参数或查询参数。\n- 断言 1：target=status，operator=equals，expected=200，来自契约记录的唯一状态码 200。\n- 断言 2：target=jsonPath，path=$.full_name，expected=\"nodejs/node\"，依据契约中 full_name 为必需 string 字段，且任务要求校验 owner=nodejs、repo=node。\n\n假设与待确认事项（需人工审核）：\n- 假设测试环境 env.owner 与 env.repo 分别配置为 nodejs 与 node；若环境变量指向其它仓库，该断言会失败，属预期差异而非用例缺陷。\n- 期望字符串 \"nodejs/node\" 来自任务输入而非接口契约；full_name 的大小写规范化方式未在契约中声明，若真实返回形式不同需人工确认。\n- 未对 id、default_branch 添加断言：契约仅声明类型，未提供具体取值证据；default_branch 也非必需字段，缺乏业务期望，故不臆造期望值。\n- 未覆盖边界与异常用例（如不存在的 owner/repo 返回 404、owner 或 repo 为空或超长），因目标限定为 1 条只读正常用例，且契约未声明错误响应结构。\n- 本结果为待审核草稿，工具调用成功不代表已验证或已发布。",
+          "endpointId": "GET-/repos/:owner/:repo",
+          "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+          "agentVersion": 1,
+          "apiVersionId": "av_fa206a0a",
+          "promptVersion": "1.1.0",
+          "harnessVersion": "1.1.0"
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "sources": [
+      {
+        "jobId": "gj_d1987170",
+        "draftId": "draft_88738eb4",
+        "sourceInfo": {
+          "path": "/repos/:owner/:repo",
+          "agent": {
+            "id": "ag_da6570f9-27d9-4676-a83a-0397f4ed893c",
+            "name": "契约用例 Agent",
+            "model": "deepseek-flash",
+            "avatar": "contract",
+            "enabled": true,
+            "retries": 2,
+            "version": 1,
+            "provider": "deepseek",
+            "timeoutMs": 120000,
+            "capability": "test",
+            "connectionId": "conn_77f58f4f-4a01-429c-803a-baf2c7ca570d",
+            "instructions": "根据接口证据生成正常、边界和异常用例。所有结果进入待审核草稿。",
+            "connectionRef": "default",
+            "schemaVersion": "sketch-test.agent/v1",
+            "connectionName": "团队 DeepSeek",
+            "maxOutputTokens": 4096
+          },
+          "model": "deepseek-flash",
+          "method": "GET",
+          "agentId": "ag_da6570f9-27d9-4676-a83a-0397f4ed893c",
+          "attempt": 1,
+          "harness": "pi-agent-core",
+          "provider": "deepseek",
+          "strategy": "pi",
+          "inputHash": "7ffc2a12590fba11d1660cb3598afd10be639aff6099ec97252c280cc4877165",
+          "rationale": "正常路径用例：GET /repos/:owner/:repo 为只读接口（sideEffect=read-only），契约声明唯一成功状态 200，响应体必需字段为 id(integer) 与 full_name(string)。本次修正了第二条断言的结构，使其匹配允许的 target 枚举（target=jsonPath，路径 $ 入独立 path 字段）。\n\n依据与取值：\n- URL 严格等于 read_endpoint 返回的 requestTemplate（${env.baseUrl}/repos/${env.owner}/${env.repo}），未新增路径参数或查询参数。\n- 断言 1：target=status，operator=equals，expected=200，来自契约记录的唯一状态码 200。\n- 断言 2：target=jsonPath，path=$.full_name，expected=\"nodejs/node\"，依据契约中 full_name 为必需 string 字段，且任务要求校验 owner=nodejs、repo=node。\n\n假设与待确认事项（需人工审核）：\n- 假设测试环境 env.owner 与 env.repo 分别配置为 nodejs 与 node；若环境变量指向其它仓库，该断言会失败，属预期差异而非用例缺陷。\n- 期望字符串 \"nodejs/node\" 来自任务输入而非接口契约；full_name 的大小写规范化方式未在契约中声明，若真实返回形式不同需人工确认。\n- 未对 id、default_branch 添加断言：契约仅声明类型，未提供具体取值证据；default_branch 也非必需字段，缺乏业务期望，故不臆造期望值。\n- 未覆盖边界与异常用例（如不存在的 owner/repo 返回 404、owner 或 repo 为空或超长），因目标限定为 1 条只读正常用例，且契约未声明错误响应结构。\n- 本结果为待审核草稿，工具调用成功不代表已验证或已发布。",
+          "endpointId": "GET-/repos/:owner/:repo",
+          "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+          "agentVersion": 1,
+          "apiVersionId": "av_fa206a0a",
+          "promptVersion": "1.1.0",
+          "harnessVersion": "1.1.0"
+        },
+        "status": "modified",
+        "reviewedAt": "2026-10-10T08:25:03.440Z"
+      }
+    ]
+  },
+  "planJobId": "ap_faa3ad23099a4086"
+}

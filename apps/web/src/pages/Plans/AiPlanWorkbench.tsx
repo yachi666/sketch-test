@@ -15,17 +15,22 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
 import {
+  type AgentSnapshot,
+  cpClient,
   type PlanAsset,
   type PlanProposal,
   type PlanSuggestion,
   planClient,
 } from '../../lib/cp-client';
 import { useAuthStore } from '../../stores/authStore';
+import { AgentAvatar } from '../AgentSettings';
 import './ai-plans.css';
 
 export function AiPlanWorkbench({ onPublished }: { onPublished: () => void }) {
   const user = useAuthStore((s) => s.user);
   const canEdit = Boolean(user) && user?.role !== 'viewer';
+  const [agents, setAgents] = useState<AgentSnapshot[]>([]);
+  const [agentId, setAgentId] = useState('');
   const [jobs, setJobs] = useState<PlanSuggestion[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [draft, setDraft] = useState<PlanProposal | null>(null);
@@ -52,7 +57,14 @@ export function AiPlanWorkbench({ onPublished }: { onPublished: () => void }) {
   const active = job?.status === 'pending' || job?.status === 'running';
   const refresh = useCallback(async () => {
     try {
-      const result = await planClient.list();
+      const [result, team] = await Promise.all([planClient.list(), cpClient.listAgents()]);
+      const eligible = team.agents.filter((a) => a.enabled && a.capability === 'plan');
+      setAgents(eligible);
+      setAgentId((current) =>
+        eligible.some((a) => a.id === current)
+          ? current
+          : (result.settings.agentId ?? eligible[0]?.id ?? ''),
+      );
       setJobs(result.jobs);
       setSelected((current) => current ?? result.jobs[0]?.id ?? null);
       setEnabled(result.settings.enabled);
@@ -79,6 +91,10 @@ export function AiPlanWorkbench({ onPublished }: { onPublished: () => void }) {
   }
   async function generate(text: string) {
     if (!text.trim() || busy) return;
+    if (!agentId) {
+      setError('请先选择测试计划 Agent');
+      return;
+    }
     setBusy(true);
     setError('');
     setNotice('');
@@ -90,6 +106,7 @@ export function AiPlanWorkbench({ onPublished }: { onPublished: () => void }) {
         text.trim(),
         parent?.status === 'completed' ? parent.id : undefined,
         parent?.status === 'completed' ? parent.revision : undefined,
+        agentId,
       );
       setJobs((current) => [result.job, ...current.filter((j) => j.id !== result.job.id)]);
       setSelected(result.job.id);
@@ -134,7 +151,7 @@ export function AiPlanWorkbench({ onPublished }: { onPublished: () => void }) {
     setBusy(true);
     setError('');
     try {
-      const r = await planClient.settings(!enabled);
+      const r = await planClient.settings(!enabled, agentId || undefined);
       setEnabled(r.enabled);
       setNotice(
         r.enabled
@@ -280,6 +297,24 @@ export function AiPlanWorkbench({ onPublished }: { onPublished: () => void }) {
             <h2>对话共创与计划预览</h2>
             <p>与 AI 一起完善测试计划，边聊边预览</p>
           </header>
+          <label style={{ padding: '12px 20px' }}>
+            执行 Agent
+            <select
+              aria-label="计划 Agent"
+              value={agentId}
+              onChange={(e) => setAgentId(e.target.value)}
+            >
+              <option value="" disabled>
+                选择测试计划 Agent
+              </option>
+              {agents.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name} · v{a.version} / {a.model}
+                </option>
+              ))}
+            </select>{' '}
+            <Link to="/settings/agents">管理 Agent</Link>
+          </label>
           <div className="ai-plan-messages" ref={messagesRef} aria-live="polite">
             {loading ? <p>正在加载工作区建议…</p> : null}
             {!loading && !job ? (
@@ -306,9 +341,13 @@ export function AiPlanWorkbench({ onPublished }: { onPublished: () => void }) {
                 ) : null}
                 {entry.proposal ? (
                   <div className="ai-message ai-message--assistant">
-                    <Robot size={24} />
+                    <AgentAvatar agent={entry.agent} size={32} />
                     <div>
-                      <strong>SketchTest AI</strong>
+                      <strong>
+                        {entry.agent
+                          ? `${entry.agent.name} · v${entry.agent.version}`
+                          : '历史 AI 记录'}
+                      </strong>
                       {entry.proposal.explanation.length > 150 ? (
                         <details className="ai-long-message">
                           <summary>
@@ -321,15 +360,40 @@ export function AiPlanWorkbench({ onPublished }: { onPublished: () => void }) {
                       )}
                       <small>
                         <GitBranch size={14} /> {entry.assets.length} 个来源资产 ·{' '}
-                        {entry.model.model}
+                        {entry.model.provider} / {entry.model.model}
                       </small>
+                      <details>
+                        <summary>执行来源与当时配置</summary>
+                        <p>
+                          {entry.id} · Worker {entry.workerId ?? '历史未记录'} · 领取{' '}
+                          {entry.attempt ?? 0} 次
+                        </p>
+                        <p>输入哈希：{entry.inputHash ?? '历史未记录'}</p>
+                        <p>来源哈希：{entry.sourceHash}</p>
+                        <p>厂商底层模型快照：未返回</p>
+                        <pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
+                          {JSON.stringify(
+                            {
+                              agent: entry.agent ?? null,
+                              events: entry.events ?? [],
+                              originalProposal: entry.originalProposal ?? null,
+                            },
+                            null,
+                            2,
+                          )}
+                        </pre>
+                      </details>
                     </div>
                   </div>
                 ) : index === conversation.length - 1 ? (
                   <div className="ai-message ai-message--assistant">
-                    <Robot size={24} />
+                    <AgentAvatar agent={entry.agent} size={32} />
                     <div>
-                      <strong>SketchTest AI</strong>
+                      <strong>
+                        {entry.agent
+                          ? `${entry.agent.name} · v${entry.agent.version}`
+                          : '历史 AI 记录'}
+                      </strong>
                       <p>
                         {entry.status === 'failed'
                           ? '本次生成未完成，上一版草稿仍保留。请重新发送目标。'

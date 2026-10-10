@@ -1,3 +1,15 @@
+import type {
+  AgentConfig,
+  AgentSnapshot,
+  ConnectionConfig,
+} from '@sketch-test/generation-protocol';
+
+export type {
+  AgentConfig,
+  AgentSnapshot,
+  ConnectionConfig,
+} from '@sketch-test/generation-protocol';
+
 import type { PlanAsset, PlanProposal } from '@sketch-test/generation-protocol';
 
 export type { PlanAsset, PlanProposal } from '@sketch-test/generation-protocol';
@@ -336,7 +348,78 @@ export interface Dataset {
 
 // ── API Client ──
 
+export interface ProviderConnection extends ConnectionConfig {
+  id: string;
+}
+export interface AgentExecution {
+  id: string;
+  status: string;
+  agent: AgentSnapshot | null;
+  workerId: string | null;
+  createdAt: string;
+  completedAt: string | null;
+  attempt: number;
+  errorCode: string | null;
+  inputHash: string | null;
+  resultHash: string | null;
+  modelSnapshot: string | null;
+  config: { provider?: string; model?: string; objective?: string };
+  events: Array<{
+    id: string;
+    attempt: number;
+    type: string;
+    createdAt: string;
+    payload: {
+      at?: string;
+      tool?: string;
+      durationMs?: number;
+      success?: boolean;
+      inputTokens?: number;
+      outputTokens?: number;
+      errorCode?: string;
+    };
+  }>;
+  outputs: Array<{
+    id: string;
+    status: string;
+    testCaseId: string | null;
+    originalDefinition: unknown;
+    sourceInfo: Record<string, unknown>;
+  }>;
+}
 export const cpClient = {
+  listAgents: () => request<{ agents: AgentSnapshot[] }>('/api/agents'),
+  saveAgent: (config: AgentConfig, id?: string, expectedVersion?: number) =>
+    request<{ agent: AgentSnapshot }>(id ? `/api/agents/${id}` : '/api/agents', {
+      method: id ? 'PUT' : 'POST',
+      body: JSON.stringify(id ? { config, expectedVersion } : config),
+    }),
+  agentVersions: (id: string) =>
+    request<{ versions: Array<{ config: AgentSnapshot; createdAt: string }> }>(
+      `/api/agents/${id}/versions`,
+    ),
+  listConnections: () =>
+    request<{ connections: ProviderConnection[] }>('/api/provider-connections'),
+  addConnection: (config: ConnectionConfig) =>
+    request<{ connection: ProviderConnection }>('/api/provider-connections', {
+      method: 'POST',
+      body: JSON.stringify(config),
+    }),
+  checkConnection: (id: string) =>
+    request<{ available: boolean; models: string[]; message: string }>(
+      `/api/provider-connections/${id}/check`,
+      { method: 'POST', body: '{}' },
+    ),
+  execution: (id: string) => request<AgentExecution>(`/api/generation-jobs/${id}/execution`),
+  caseProvenance: (id: string) =>
+    request<{
+      sources: Array<{
+        jobId: string;
+        draftId: string;
+        sourceInfo: Record<string, unknown>;
+        reviewedAt: string | null;
+      }>;
+    }>(`/api/test-cases/${id}/provenance`),
   // ── Auth ──
 
   getGuestSession(): Promise<{ enabled: true; user: User; token: string } | { enabled: false }> {
@@ -643,10 +726,18 @@ export const cpClient = {
     strategy: string,
     endpointIds?: string[],
     objective?: string,
+    agentId?: string,
   ) {
     return request<GenerationJob>('/api/generation-jobs', {
       method: 'POST',
-      body: JSON.stringify({ workspaceId, apiVersionId, strategy, endpointIds, objective }),
+      body: JSON.stringify({
+        workspaceId,
+        apiVersionId,
+        strategy,
+        endpointIds,
+        objective,
+        agentId,
+      }),
     });
   },
 
@@ -654,7 +745,14 @@ export const cpClient = {
     return request<{
       configured: boolean;
       available: boolean;
-      workers: Array<{ workerId: string; provider: string; model: string; harnessVersion: string }>;
+      workers: Array<{
+        workerId: string;
+        provider: string;
+        model: string;
+        harnessVersion: string;
+        connectionRef?: string;
+        agentConfigVersion?: 1;
+      }>;
     }>('/api/ai/capabilities');
   },
 
@@ -913,6 +1011,19 @@ export const cpClient = {
 };
 
 export interface PlanSuggestion {
+  agent?: AgentSnapshot | null;
+  workerId?: string | null;
+  attempt?: number;
+  inputHash?: string;
+  originalProposal?: unknown;
+  events?: Array<{
+    type: string;
+    at: string;
+    tool?: string;
+    success: boolean;
+    inputTokens?: number;
+    outputTokens?: number;
+  }>;
   id: string;
   status: string;
   trigger: string;
@@ -930,16 +1041,18 @@ export interface PlanSuggestion {
 }
 export const planClient = {
   list: () =>
-    request<{ jobs: PlanSuggestion[]; settings: { enabled: boolean } }>('/api/plan-suggestions'),
-  settings: (enabled: boolean) =>
+    request<{ jobs: PlanSuggestion[]; settings: { enabled: boolean; agentId?: string | null } }>(
+      '/api/plan-suggestions',
+    ),
+  settings: (enabled: boolean, agentId?: string) =>
     request<{ enabled: boolean }>('/api/plan-suggestions/settings', {
       method: 'PUT',
-      body: JSON.stringify({ enabled }),
+      body: JSON.stringify({ enabled, agentId }),
     }),
-  generate: (objective: string, parentId?: string, revision?: number) =>
+  generate: (objective: string, parentId?: string, revision?: number, agentId?: string) =>
     request<{ job: PlanSuggestion }>('/api/plan-suggestions', {
       method: 'POST',
-      body: JSON.stringify({ objective, parentId, revision }),
+      body: JSON.stringify({ objective, parentId, revision, agentId }),
     }),
   save: (id: string, revision: number, proposal: PlanProposal) =>
     request<{ job: PlanSuggestion }>(`/api/plan-suggestions/${encodeURIComponent(id)}/save`, {

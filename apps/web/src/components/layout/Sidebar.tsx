@@ -6,6 +6,7 @@ import {
   Cube,
   FileArrowUp,
   FlowArrow,
+  GearSix,
   House,
   MapTrifold,
   PlugsConnected,
@@ -75,6 +76,19 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
               </button>
             );
           })}
+        </nav>
+        <nav className="nav-group" aria-label="设置">
+          <button
+            type="button"
+            className={`nav-item ${isActive('/settings/agents') ? 'nav-item--active' : ''}`}
+            onClick={() => {
+              navigate('/settings/agents');
+              onClose();
+            }}
+          >
+            <GearSix size={20} />
+            <span>Agent 管理</span>
+          </button>
         </nav>
       </aside>
       {open ? (

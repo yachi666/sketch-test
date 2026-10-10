@@ -1,0 +1,655 @@
+{
+  "id": "ap_faa3ad23099a4086",
+  "status": "completed",
+  "trigger": "手动生成",
+  "parentId": null,
+  "objective": "选择一个已发布的只读 GitHub 仓库元数据用例，形成一份最小回归计划草稿。保留来源，不发布、不运行。",
+  "assets": [
+    {
+      "id": "tc_6846e19d",
+      "key": "tc_6846e19d",
+      "name": "读取 nodejs/node 仓库元数据返回 200 且 full_name 正确",
+      "type": "test",
+      "route": "GET /repos/${env.owner}/${env.repo}",
+      "version": 2,
+      "versionId": "tcv_3ec1a7d0",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_fa206a0a"
+    },
+    {
+      "id": "tc_c56b6082",
+      "key": "tc_c56b6082",
+      "name": "读取 nodejs/node 仓库元数据应返回 200 且 full_name 为 nodejs/node",
+      "type": "test",
+      "route": "GET /repos/${env.owner}/${env.repo}",
+      "version": 1,
+      "versionId": "tcv_5dbcca7f",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_fa206a0a"
+    },
+    {
+      "id": "tc_ef021a34",
+      "key": "tc_ef021a34",
+      "name": "Status 200: POST /api/auth/login",
+      "type": "test",
+      "route": "POST /api/auth/login",
+      "version": 1,
+      "versionId": "tcv_e4127cb2",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "tc_f2a3f13e",
+      "key": "tc_f2a3f13e",
+      "name": "Node.js 公开仓库真实响应 · 单用例",
+      "type": "test",
+      "route": "GET /repos/${env.owner}/${env.repo}",
+      "version": 1,
+      "versionId": "tcv_ee267af2",
+      "sideEffect": "read-only"
+    },
+    {
+      "id": "wf_5b2bc9b1",
+      "key": "wf_5b2bc9b1",
+      "name": "修复复测：GitHub 流程编辑保存",
+      "type": "workflow",
+      "route": "业务流程",
+      "version": 3,
+      "versionId": "wfv_e9f5f34c",
+      "sideEffect": "unknown"
+    },
+    {
+      "id": "wf_5f60effa",
+      "key": "wf_5f60effa",
+      "name": "公开仓库 · 失败定位验收",
+      "type": "workflow",
+      "route": "业务流程",
+      "version": 1,
+      "versionId": "wfv_05daf19e",
+      "sideEffect": "unknown"
+    },
+    {
+      "id": "wf_64af47d8",
+      "key": "wf_64af47d8",
+      "name": "GitHub 真实元数据和提交历史回归",
+      "type": "workflow",
+      "route": "业务流程",
+      "version": 3,
+      "versionId": "wfv_f13180f4",
+      "sideEffect": "unknown"
+    },
+    {
+      "id": "wf_d56a636c",
+      "key": "wf_d56a636c",
+      "name": "公开仓库 · 元数据回归",
+      "type": "workflow",
+      "route": "业务流程",
+      "version": 1,
+      "versionId": "wfv_2c50e75e",
+      "sideEffect": "unknown"
+    },
+    {
+      "id": "wf_e0e13c81",
+      "key": "wf_e0e13c81",
+      "name": "历史分页验收 2026-10-08T15:10:25.602Z",
+      "type": "workflow",
+      "route": "业务流程",
+      "version": 1,
+      "versionId": "wfv_1f87f538",
+      "sideEffect": "unknown"
+    },
+    {
+      "id": "wf_efc03873",
+      "key": "wf_efc03873",
+      "name": "GitHub 公开仓库 · 真实响应回归",
+      "type": "workflow",
+      "route": "业务流程",
+      "version": 1,
+      "versionId": "wfv_f85319f4",
+      "sideEffect": "unknown"
+    },
+    {
+      "id": "draft_06fdee56",
+      "key": "draft_06fdee56",
+      "name": "Status 200: GET /api/contact-information",
+      "type": "draft",
+      "route": "GET /api/contact-information",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_0dcb9670",
+      "key": "draft_0dcb9670",
+      "name": "Status 200: POST /api/workspace/import-export/save",
+      "type": "draft",
+      "route": "POST /api/workspace/import-export/save",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_0fc1057f",
+      "key": "draft_0fc1057f",
+      "name": "Status 204: POST /api/workspace/shift-definitions/reorder",
+      "type": "draft",
+      "route": "POST /api/workspace/shift-definitions/reorder",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_1e58b694",
+      "key": "draft_1e58b694",
+      "name": "Status 200: PUT /api/workspace/accounts/{id}",
+      "type": "draft",
+      "route": "PUT /api/workspace/accounts/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_1ef2e68d",
+      "key": "draft_1ef2e68d",
+      "name": "Status 204: DELETE /api/workspace/linux-passwords/{id}",
+      "type": "draft",
+      "route": "DELETE /api/workspace/linux-passwords/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_228d52d3",
+      "key": "draft_228d52d3",
+      "name": "Status 200: GET /api/workspace/linux-passwords",
+      "type": "draft",
+      "route": "GET /api/workspace/linux-passwords",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_24eceadb",
+      "key": "draft_24eceadb",
+      "name": "Status 204: DELETE /api/workspace/shift-definitions/{id}",
+      "type": "draft",
+      "route": "DELETE /api/workspace/shift-definitions/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_255ca0b6",
+      "key": "draft_255ca0b6",
+      "name": "Status 200: POST /api/workspace/validation/resolve",
+      "type": "draft",
+      "route": "POST /api/workspace/validation/resolve",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_2add365e",
+      "key": "draft_2add365e",
+      "name": "Status 204: DELETE /api/workspace/accounts/{id}",
+      "type": "draft",
+      "route": "DELETE /api/workspace/accounts/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_2feef070",
+      "key": "draft_2feef070",
+      "name": "Status 204: POST /api/workspace/accounts/{id}/disable",
+      "type": "draft",
+      "route": "POST /api/workspace/accounts/{id}/disable",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_3622b65b",
+      "key": "draft_3622b65b",
+      "name": "Status 200: GET /api/workspace/linux-passwords/access-audits",
+      "type": "draft",
+      "route": "GET /api/workspace/linux-passwords/access-audits",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_43a392d4",
+      "key": "draft_43a392d4",
+      "name": "Status 204: DELETE /api/workspace/staff/{id}",
+      "type": "draft",
+      "route": "DELETE /api/workspace/staff/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_4531a16e",
+      "key": "draft_4531a16e",
+      "name": "Status 200: GET /api/auth/me",
+      "type": "draft",
+      "route": "GET /api/auth/me",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_4d08e0ca",
+      "key": "draft_4d08e0ca",
+      "name": "Status 200: GET /api/workspace/accounts",
+      "type": "draft",
+      "route": "GET /api/workspace/accounts",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_539fe385",
+      "key": "draft_539fe385",
+      "name": "Status 200: POST /api/workspace/linux-passwords",
+      "type": "draft",
+      "route": "POST /api/workspace/linux-passwords",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_54eb8e36",
+      "key": "draft_54eb8e36",
+      "name": "Status 200: POST /api/workspace/staff",
+      "type": "draft",
+      "route": "POST /api/workspace/staff",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_5b28c2fb",
+      "key": "draft_5b28c2fb",
+      "name": "Status 200: GET /api/workspace/teams",
+      "type": "draft",
+      "route": "GET /api/workspace/teams",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_6042fe06",
+      "key": "draft_6042fe06",
+      "name": "Status 200: POST /api/workspace/accounts",
+      "type": "draft",
+      "route": "POST /api/workspace/accounts",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_61c036c6",
+      "key": "draft_61c036c6",
+      "name": "Status 204: POST /api/workspace/accounts/{id}/enable",
+      "type": "draft",
+      "route": "POST /api/workspace/accounts/{id}/enable",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_69a58c67",
+      "key": "draft_69a58c67",
+      "name": "Status 200: POST /api/workspace/shift-definitions",
+      "type": "draft",
+      "route": "POST /api/workspace/shift-definitions",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_69d538ea",
+      "key": "draft_69d538ea",
+      "name": "Status 200: PUT /api/workspace/linux-passwords/{id}",
+      "type": "draft",
+      "route": "PUT /api/workspace/linux-passwords/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_6e2c87f1",
+      "key": "draft_6e2c87f1",
+      "name": "Status 200: POST /api/auth/activate",
+      "type": "draft",
+      "route": "POST /api/auth/activate",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_73a47e60",
+      "key": "draft_73a47e60",
+      "name": "Status 204: POST /api/auth/change-password",
+      "type": "draft",
+      "route": "POST /api/auth/change-password",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_75ded606",
+      "key": "draft_75ded606",
+      "name": "Status 200: GET /api/shifts",
+      "type": "draft",
+      "route": "GET /api/shifts",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_7a4c542b",
+      "key": "draft_7a4c542b",
+      "name": "Status 200: POST /api/workspace/teams",
+      "type": "draft",
+      "route": "POST /api/workspace/teams",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_7d80c7f7",
+      "key": "draft_7d80c7f7",
+      "name": "Status 200: POST /api/contact-information",
+      "type": "draft",
+      "route": "POST /api/contact-information",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_7e3d555f",
+      "key": "draft_7e3d555f",
+      "name": "Status 200: PUT /api/workspace/staff/{id}",
+      "type": "draft",
+      "route": "PUT /api/workspace/staff/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_8021aac0",
+      "key": "draft_8021aac0",
+      "name": "Status 200: GET /api/staff",
+      "type": "draft",
+      "route": "GET /api/staff",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_82c44fe7",
+      "key": "draft_82c44fe7",
+      "name": "Status 200: POST /api/workspace/staff/batch",
+      "type": "draft",
+      "route": "POST /api/workspace/staff/batch",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_85f647a9",
+      "key": "draft_85f647a9",
+      "name": "Status 204: DELETE /api/workspace/teams/{id}",
+      "type": "draft",
+      "route": "DELETE /api/workspace/teams/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_91a49768",
+      "key": "draft_91a49768",
+      "name": "Status 200: GET /api/workspace/accounts/{id}",
+      "type": "draft",
+      "route": "GET /api/workspace/accounts/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_95f518aa",
+      "key": "draft_95f518aa",
+      "name": "Status 200: GET /api/workspace/shift-definitions",
+      "type": "draft",
+      "route": "GET /api/workspace/shift-definitions",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_96c7a8f8",
+      "key": "draft_96c7a8f8",
+      "name": "Status 200: POST /api/workspace/validation/{id}/preview-remediation",
+      "type": "draft",
+      "route": "POST /api/workspace/validation/{id}/preview-remediation",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_9a1abe20",
+      "key": "draft_9a1abe20",
+      "name": "Status 200: GET /api/workspace/linux-password-directories",
+      "type": "draft",
+      "route": "GET /api/workspace/linux-password-directories",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_9af41739",
+      "key": "draft_9af41739",
+      "name": "Status 200: POST /api/workspace/validation/{id}/apply-remediation",
+      "type": "draft",
+      "route": "POST /api/workspace/validation/{id}/apply-remediation",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_9b96b978",
+      "key": "draft_9b96b978",
+      "name": "Status 200: PUT /api/workspace/teams/{id}",
+      "type": "draft",
+      "route": "PUT /api/workspace/teams/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_9bfa9380",
+      "key": "draft_9bfa9380",
+      "name": "Status 200: GET /api/shift-codes",
+      "type": "draft",
+      "route": "GET /api/shift-codes",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_9d946fec",
+      "key": "draft_9d946fec",
+      "name": "Status 200: PUT /api/workspace/shift-definitions/{id}",
+      "type": "draft",
+      "route": "PUT /api/workspace/shift-definitions/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_9e476189",
+      "key": "draft_9e476189",
+      "name": "Status 200: GET /api/workspace/teams/{id}",
+      "type": "draft",
+      "route": "GET /api/workspace/teams/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_a7cb8141",
+      "key": "draft_a7cb8141",
+      "name": "Status 200: PUT /api/workspace/access-policy",
+      "type": "draft",
+      "route": "PUT /api/workspace/access-policy",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_a87c70b3",
+      "key": "draft_a87c70b3",
+      "name": "Status 200: GET /api/workspace/roster",
+      "type": "draft",
+      "route": "GET /api/workspace/roster",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_b7ee0d5e",
+      "key": "draft_b7ee0d5e",
+      "name": "Status 204: POST /api/auth/logout",
+      "type": "draft",
+      "route": "POST /api/auth/logout",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_ba76b2d9",
+      "key": "draft_ba76b2d9",
+      "name": "Status 200: GET /api/workspace/overview",
+      "type": "draft",
+      "route": "GET /api/workspace/overview",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_c5405f6d",
+      "key": "draft_c5405f6d",
+      "name": "Status 200: GET /api/staff/{id}",
+      "type": "draft",
+      "route": "GET /api/staff/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_c7a9048a",
+      "key": "draft_c7a9048a",
+      "name": "Status 200: POST /api/workspace/linux-passwords/credentials/{credentialId}/secret",
+      "type": "draft",
+      "route": "POST /api/workspace/linux-passwords/credentials/{credentialId}/secret",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_c9c25bcb",
+      "key": "draft_c9c25bcb",
+      "name": "Status 200: GET /api/workspace/shift-definitions/{id}",
+      "type": "draft",
+      "route": "GET /api/workspace/shift-definitions/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_ca876713",
+      "key": "draft_ca876713",
+      "name": "GET /api/auth/me 读取当前登录用户（只读正向）",
+      "type": "draft",
+      "route": "GET /api/auth/me",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_cad9f327",
+      "key": "draft_cad9f327",
+      "name": "Status 200: GET /api/teams",
+      "type": "draft",
+      "route": "GET /api/teams",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_cd24c5d0",
+      "key": "draft_cd24c5d0",
+      "name": "Status 200: GET /api/workspace/linux-passwords/{id}",
+      "type": "draft",
+      "route": "GET /api/workspace/linux-passwords/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_ce666309",
+      "key": "draft_ce666309",
+      "name": "Status 204: POST /api/workspace/accounts/{id}/reset-password",
+      "type": "draft",
+      "route": "POST /api/workspace/accounts/{id}/reset-password",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    }
+  ],
+  "proposal": {
+    "gaps": [],
+    "name": "GitHub 仓库元数据最小回归草稿",
+    "members": [
+      {
+        "key": "tc_6846e19d",
+        "reason": "已发布用例（版本 tcv_3ec1a7d0, v2），路由与目标一致，只读，断言 200 与 full_name 正确。"
+      },
+      {
+        "key": "tc_c56b6082",
+        "reason": "已发布用例（版本 tcv_5dbcca7f, v1），同路由只读，断言 200 与 full_name=nodejs/node，保留用于跨版本对照；与前者重复，如追求最简可仅留一条。"
+      }
+    ],
+    "objective": "选取一个已发布的只读 GitHub 仓库元数据用例，形成最小回归计划草稿，保留来源，不发布、不运行。",
+    "explanation": "仅纳入与 GET /repos/${env.owner}/${env.repo} 元数据读取一致的已发布用例：tc_6846e19d（v2，含 full_name 断言）与 tc_c56b6082（v1，同路由同断言，属同类重复，可按需保留其一或两者共同校验版本差异）。两者均为侧写为只读的已发布版本。其余公开工作流（如 wf_5b2bc9b1 保存类流程、wf_e0e13c81 分页等）超出本次最小只读元数据范围，不纳入；tc_ef021a34 属 /api/auth/login，与本次目标无关，不纳入；tc_f2a3f13e 未标注版本信息，无法确认是否已发布版本，故不纳入。所有 draft_ 前缀条目均为草稿且仅涉及 /api/workspace 与 /api/auth 等非 GitHub 元数据接口，按规则只能列为缺口，且与本次目标无关，故全部不作为缺口列出。",
+    "precautions": [
+      "仅纳入只读已发布用例；不改动、不新增已发布版本（版本不可变）。",
+      "执行前固定 env.owner/env.repo 目标与用例版本，保证可复核来源。",
+      "仅保存为草稿，不发布、不运行，等待人工确认。"
+    ],
+    "noNewFailures": true,
+    "blockOnInfraError": true
+  },
+  "revision": 1,
+  "savedAt": null,
+  "suiteId": null,
+  "errorCode": null,
+  "createdAt": "2026-10-10T08:25:03.455Z",
+  "model": {
+    "model": "deepseek-flash",
+    "provider": "deepseek"
+  },
+  "agent": {
+    "id": "ag_5b2ab1fe-a912-420e-9168-de57cf8bcc7b",
+    "name": "测试计划 Agent",
+    "model": "deepseek-flash",
+    "avatar": "plan",
+    "enabled": true,
+    "retries": 2,
+    "version": 1,
+    "provider": "deepseek",
+    "timeoutMs": 120000,
+    "capability": "plan",
+    "connectionId": "conn_77f58f4f-4a01-429c-803a-baf2c7ca570d",
+    "instructions": "根据已有已发布用例制定可复核的测试计划，不编造用例 ID。",
+    "connectionRef": "default",
+    "schemaVersion": "sketch-test.agent/v1",
+    "connectionName": "团队 DeepSeek",
+    "maxOutputTokens": 4096
+  },
+  "workerId": "ai_2139fa8f-714a-4770-957f-bbfabbf891cf",
+  "attempt": 1,
+  "inputHash": "fadbcc417ab5d05af28359f4550cfd21f1dc928c50ef236fd659086d17f87b88",
+  "originalProposal": {
+    "gaps": [],
+    "name": "GitHub 仓库元数据最小回归草稿",
+    "members": [
+      {
+        "key": "tc_6846e19d",
+        "reason": "已发布用例（版本 tcv_3ec1a7d0, v2），路由与目标一致，只读，断言 200 与 full_name 正确。"
+      },
+      {
+        "key": "tc_c56b6082",
+        "reason": "已发布用例（版本 tcv_5dbcca7f, v1），同路由只读，断言 200 与 full_name=nodejs/node，保留用于跨版本对照；与前者重复，如追求最简可仅留一条。"
+      }
+    ],
+    "objective": "选取一个已发布的只读 GitHub 仓库元数据用例，形成最小回归计划草稿，保留来源，不发布、不运行。",
+    "explanation": "仅纳入与 GET /repos/${env.owner}/${env.repo} 元数据读取一致的已发布用例：tc_6846e19d（v2，含 full_name 断言）与 tc_c56b6082（v1，同路由同断言，属同类重复，可按需保留其一或两者共同校验版本差异）。两者均为侧写为只读的已发布版本。其余公开工作流（如 wf_5b2bc9b1 保存类流程、wf_e0e13c81 分页等）超出本次最小只读元数据范围，不纳入；tc_ef021a34 属 /api/auth/login，与本次目标无关，不纳入；tc_f2a3f13e 未标注版本信息，无法确认是否已发布版本，故不纳入。所有 draft_ 前缀条目均为草稿且仅涉及 /api/workspace 与 /api/auth 等非 GitHub 元数据接口，按规则只能列为缺口，且与本次目标无关，故全部不作为缺口列出。",
+    "precautions": [
+      "仅纳入只读已发布用例；不改动、不新增已发布版本（版本不可变）。",
+      "执行前固定 env.owner/env.repo 目标与用例版本，保证可复核来源。",
+      "仅保存为草稿，不发布、不运行，等待人工确认。"
+    ],
+    "noNewFailures": true,
+    "blockOnInfraError": true
+  },
+  "events": [
+    {
+      "at": "2026-10-10T08:25:07.852Z",
+      "type": "model.completed",
+      "success": true,
+      "durationMs": 3213,
+      "inputTokens": 5032,
+      "outputTokens": 537
+    },
+    {
+      "at": "2026-10-10T08:25:07.858Z",
+      "tool": "propose_plan",
+      "type": "tool.completed",
+      "success": true
+    }
+  ],
+  "sourceHash": "f3d40821b415c134af1b6ea3d095b616e1f712866f15659946f81321056338b0"
+}

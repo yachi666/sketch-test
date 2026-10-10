@@ -1,0 +1,29 @@
+{
+  "checkedAt": "2026-10-10T08:01:44.653Z",
+  "jobId": "gj_811dc055",
+  "draftId": "draft_f511ff49",
+  "testCaseId": "tc_36b8015d",
+  "provider": "deepseek",
+  "model": "deepseek-v4-flash",
+  "durationMs": 4728,
+  "completed": true,
+  "acceptedWithoutPublishing": true,
+  "sourceHashMatches": true,
+  "definitionAndProvenancePreservedAfterReview": true,
+  "persistedAgentId": false,
+  "persistedAgentVersion": false,
+  "testcaseVersionFields": [
+    "id",
+    "test_case_id",
+    "version",
+    "definition",
+    "side_effect",
+    "published_by",
+    "published_at",
+    "testCaseId",
+    "sideEffect",
+    "publishedBy",
+    "publishedAt"
+  ],
+  "draftPublishedAtAmbiguity": true
+}

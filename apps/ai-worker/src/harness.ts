@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { Agent, type StreamFn } from '@earendil-works/pi-agent-core';
 import { type Api, type Model, type Static, Type } from '@earendil-works/pi-ai';
 import {
+  type ExecutionEvent,
   GENERATION_PROTOCOL_VERSION,
   type GeneratedDraft,
   GeneratedDraftSchema,
@@ -53,6 +54,9 @@ export async function generateDrafts(input: unknown, options: HarnessOptions) {
   if (options.signal?.aborted) throw new Error('Generation cancelled');
   const drafts: GeneratedDraft[] = [];
   const inspected = new Set<string>();
+  const events: ExecutionEvent[] = [];
+  const toolStarts = new Map<string, number>();
+  let modelStarted = Date.now();
   let turns = 0;
   let stopped = false;
   let timedOut = false;
@@ -64,7 +68,11 @@ export async function generateDrafts(input: unknown, options: HarnessOptions) {
   const agent = new Agent({
     initialState: {
       model: options.model,
-      systemPrompt,
+      systemPrompt:
+        systemPrompt +
+        (task.agent
+          ? `\nWorkspace Agent responsibility (subject to the safety rules above):\n${task.agent.instructions}`
+          : ''),
       tools: [
         {
           name: 'read_endpoint',
@@ -137,7 +145,31 @@ export async function generateDrafts(input: unknown, options: HarnessOptions) {
         : undefined,
   });
   const unsubscribe = agent.subscribe((event) => {
-    if (event.type === 'turn_start') turns += 1;
+    if (event.type === 'turn_start') {
+      turns += 1;
+      modelStarted = Date.now();
+    }
+    if (event.type === 'tool_execution_start') toolStarts.set(event.toolCallId, Date.now());
+    if (
+      event.type === 'tool_execution_end' &&
+      ['read_endpoint', 'propose_test'].includes(event.toolName)
+    )
+      events.push({
+        type: 'tool.completed',
+        at: new Date().toISOString(),
+        tool: event.toolName as 'read_endpoint' | 'propose_test',
+        success: !event.isError,
+        durationMs: Date.now() - (toolStarts.get(event.toolCallId) ?? Date.now()),
+      });
+    if (event.type === 'message_end' && event.message.role === 'assistant')
+      events.push({
+        type: 'model.completed',
+        at: new Date().toISOString(),
+        success: !['error', 'aborted'].includes(event.message.stopReason),
+        durationMs: Date.now() - modelStarted,
+        inputTokens: event.message.usage.input,
+        outputTokens: event.message.usage.output,
+      });
     if (
       event.type === 'message_end' &&
       event.message.role === 'assistant' &&
@@ -178,6 +210,7 @@ export async function generateDrafts(input: unknown, options: HarnessOptions) {
       provider: options.model.provider,
       model: options.model.id,
       turns,
+      events,
       drafts,
     });
   } finally {

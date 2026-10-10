@@ -58,6 +58,7 @@ describe('runMigrations', () => {
             { version: 2, name: 'ai-generation', checksum: 'ai-generation-v1' },
             { version: 3, name: 'ai-plans', checksum: 'ai-plans-v1' },
             { version: 4, name: 'reliability', checksum: 'reliability-v1' },
+            { version: 5, name: 'agents', checksum: 'agents-v1' },
           ],
         };
       }

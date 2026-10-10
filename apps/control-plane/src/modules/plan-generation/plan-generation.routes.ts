@@ -13,6 +13,7 @@ export async function planGenerationRoutes(app: FastifyInstance) {
   }));
   const create = z
     .object({
+      agentId: z.string().optional(),
       objective: z.string().trim().min(1).max(4096),
       parentId: z.string().optional(),
       revision: z.number().int().optional(),
@@ -28,6 +29,7 @@ export async function planGenerationRoutes(app: FastifyInstance) {
           body.data.objective,
           body.data.parentId,
           body.data.revision,
+          body.data.agentId,
         ),
       };
     } catch (e) {
@@ -37,9 +39,22 @@ export async function planGenerationRoutes(app: FastifyInstance) {
     }
   });
   app.put('/api/plan-suggestions/settings', async (req, reply) => {
-    const body = z.object({ enabled: z.boolean() }).strict().safeParse(req.body);
+    const body = z
+      .object({ enabled: z.boolean(), agentId: z.string().optional() })
+      .strict()
+      .safeParse(req.body);
     if (!body.success) return sendError(reply, 400, 'INVALID_INPUT', '无效设置');
-    return service.setPlanSettings(authenticatedUser(req).workspaceId, body.data.enabled);
+    try {
+      return await service.setPlanSettings(
+        authenticatedUser(req).workspaceId,
+        body.data.enabled,
+        body.data.agentId,
+      );
+    } catch (e) {
+      if (e instanceof GenerationError)
+        return sendError(reply, e.statusCode, 'PLAN_ERROR', e.message);
+      throw e;
+    }
   });
   for (const action of ['save', 'publish', 'cancel'] as const) {
     app.post(`/api/plan-suggestions/:id/${action}`, async (req, reply) => {

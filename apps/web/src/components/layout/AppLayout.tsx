@@ -20,6 +20,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     environments: { title: '环境管理', description: '隔离 Base URL、变量覆盖与运行环境' },
     variables: { title: '变量管理', description: '按环境和流程作用域管理变量与 Secret 引用' },
     reports: { title: '报告中心', description: '查看运行结果、证据与失败上下文' },
+    settings: { title: 'Agent 管理', description: '管理团队的 AI 角色、模型和连接' },
     agent: { title: '智能生成', description: '从 GitHub 代码或 API 契约生成有来源的测试草稿' },
   }[section] ?? { title: 'SketchTest', description: '' };
 

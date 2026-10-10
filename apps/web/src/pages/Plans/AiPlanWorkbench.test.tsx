@@ -6,13 +6,14 @@ import { AiPlanWorkbench } from './AiPlanWorkbench';
 
 const api = vi.hoisted(() => ({
   list: vi.fn(),
+  listAgents: vi.fn(),
   save: vi.fn(),
   generate: vi.fn(),
   settings: vi.fn(),
   publish: vi.fn(),
   cancel: vi.fn(),
 }));
-vi.mock('../../lib/cp-client', () => ({ planClient: api }));
+vi.mock('../../lib/cp-client', () => ({ planClient: api, cpClient: api }));
 const proposal = {
   name: '员工回归',
   objective: '员工管理',
@@ -66,6 +67,18 @@ function mount() {
 describe('AI plan review', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    api.listAgents.mockResolvedValue({
+      agents: [
+        {
+          id: 'ag_plan',
+          name: '计划 Agent',
+          version: 1,
+          enabled: true,
+          capability: 'plan',
+          model: 'test',
+        },
+      ],
+    });
     useAuthStore.setState({
       user: {
         id: 'u',
@@ -104,7 +117,9 @@ describe('AI plan review', () => {
       target: { value: '只保留只读用例' },
     });
     fireEvent.click(screen.getByRole('button', { name: '发送测试目标' }));
-    await waitFor(() => expect(api.generate).toHaveBeenCalledWith('只保留只读用例', 'p1', 1));
+    await waitFor(() =>
+      expect(api.generate).toHaveBeenCalledWith('只保留只读用例', 'p1', 1, 'ag_plan'),
+    );
     expect(await screen.findByText('计划正在生成')).toBeInTheDocument();
   });
   test('keeps unsaved edits when polling discovers another automatic suggestion', async () => {

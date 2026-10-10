@@ -1,0 +1,13 @@
+[
+  {
+    "id": "GET-/v1/forecast",
+    "parameterCount": 23,
+    "responseStatusCodes": [
+      200,
+      400
+    ],
+    "contractNotesCharacters": 6300,
+    "contractNotesLimit": 4096,
+    "exceedsLimit": true
+  }
+]

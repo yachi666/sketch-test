@@ -2,8 +2,11 @@ import { ArrowRight, ArrowsClockwise, GithubLogo, Robot, ShieldCheck } from '@ph
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ErrorCallout } from '../../components/shared/ErrorCallout';
+import type { AgentSnapshot } from '../../lib/cp-client';
 import { type ApiVersionSummary, cpClient, type GenerationJob } from '../../lib/cp-client';
 import { useAuthStore } from '../../stores/authStore';
+import { AgentAvatar } from '../AgentSettings';
+import { ExecutionDrawer } from '../AgentSettings/Execution';
 import './agent.css';
 
 type GenerationEndpoint = {
@@ -51,18 +54,28 @@ export function AgentPage() {
   const [objective, setObjective] = useState(
     '为关键接口生成正常响应与边界场景的回归草稿，列出契约中缺失的业务预期。',
   );
+  const [agents, setAgents] = useState<AgentSnapshot[]>([]);
+  const [agentId, setAgentId] = useState('');
+  const [trace, setTrace] = useState<string | null>(null);
+  const chosen = agents.find((a) => a.id === agentId);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const refresh = useCallback(
     async (clearError = false) => {
       if (!workspaceId) return;
       try {
-        const [available, assets, tasks] = await Promise.all([
+        const [available, assets, tasks, team] = await Promise.all([
           cpClient.aiCapabilities(),
           cpClient.listApiVersions(),
           cpClient.listGenerationJobs(workspaceId),
+          cpClient.listAgents(),
         ]);
         setCapability(available);
+        const eligible = team.agents.filter((a) => a.enabled && a.capability === 'test');
+        setAgents(eligible);
+        setAgentId((current) =>
+          eligible.some((a) => a.id === current) ? current : (eligible[0]?.id ?? ''),
+        );
         setVersions(assets.apiVersions);
         setJobs(tasks.jobs.filter((j) => j.strategy === 'pi'));
         setVersionId((current) =>
@@ -142,6 +155,7 @@ export function AgentPage() {
   };
   const start = async () => {
     if (
+      !agentId ||
       !workspaceId ||
       (sourceMode === 'repository' &&
         (!repositoryVersionId || repositoryVersionId !== versionId)) ||
@@ -154,7 +168,14 @@ export function AgentPage() {
     setBusy(true);
     setError(null);
     try {
-      await cpClient.startGeneration(workspaceId, versionId, 'pi', endpointIds, objective.trim());
+      await cpClient.startGeneration(
+        workspaceId,
+        versionId,
+        'pi',
+        endpointIds,
+        objective.trim(),
+        agentId,
+      );
       await refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : '创建任务失败');
@@ -173,7 +194,13 @@ export function AgentPage() {
       setBusy(false);
     }
   };
-  const model = capability?.workers[0];
+  const model = capability?.workers.find(
+    (w) =>
+      w.provider === chosen?.provider &&
+      w.model === chosen?.model &&
+      (w.connectionRef ?? 'default') === chosen?.connectionRef &&
+      w.agentConfigVersion === 1,
+  );
   return (
     <main className="page-view agent-workbench">
       <header className="agent-heading">
@@ -402,6 +429,40 @@ export function AgentPage() {
             </fieldset>
           ) : null}
           <label>
+            执行 Agent
+            <select
+              aria-label="执行 Agent"
+              value={agentId}
+              onChange={(e) => setAgentId(e.target.value)}
+            >
+              <option value="" disabled>
+                选择 Agent
+              </option>
+              {agents.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name} · v{a.version} / {a.provider} · {a.model}
+                </option>
+              ))}
+            </select>
+          </label>
+          {chosen ? (
+            <div className="agent-source-card">
+              <header>
+                <AgentAvatar agent={chosen} />
+                <strong>
+                  {chosen.name} · v{chosen.version}
+                </strong>
+              </header>
+              <p>
+                {chosen.provider} / {chosen.model}
+              </p>
+            </div>
+          ) : (
+            <p>
+              请先在 <Link to="/settings/agents">Agent 管理</Link> 中创建并启用用例生成 Agent。
+            </p>
+          )}
+          <label>
             测试目标
             <textarea
               aria-label="测试目标"
@@ -413,7 +474,7 @@ export function AgentPage() {
           </label>
           <p className="agent-note">
             测试目标及所选接口的路由、参数与结构证据会发送给所选模型；仓库原文不发送。请勿填写密钥或真实用户数据。单次最多生成
-            5 条草稿，预算 6 轮 / 120 秒。
+            5 条草稿，预算 6 轮；超时与输出限制采用所选 Agent 配置。
           </p>
           <button
             className="button button--primary"
@@ -423,7 +484,8 @@ export function AgentPage() {
               analyzing ||
               (sourceMode === 'repository' &&
                 (!repositoryVersionId || repositoryVersionId !== versionId)) ||
-              !capability?.available ||
+              !model ||
+              !agentId ||
               !versionId ||
               !endpointIds.length ||
               endpointVersionId !== versionId ||
@@ -437,7 +499,7 @@ export function AgentPage() {
         <aside className="paper-panel agent-runtime" aria-label="生成服务状态">
           <span className="agent-step">02 · 独立生成，明确边界</span>
           <h3>
-            {capability?.available
+            {model
               ? '生成服务在线'
               : capability?.configured
                 ? '等待 Worker 上线'
@@ -511,6 +573,13 @@ export function AgentPage() {
                 {statuses[job.status]}
               </span>
               <div className="agent-job-actions">
+                <button
+                  type="button"
+                  className="button button--outline button--sm"
+                  onClick={() => setTrace(job.id)}
+                >
+                  执行详情
+                </button>
                 {job.status === 'completed' ? (
                   <Link
                     className="button button--primary button--sm"
@@ -544,6 +613,7 @@ export function AgentPage() {
           ))
         )}
       </section>
+      {trace && <ExecutionDrawer id={trace} onClose={() => setTrace(null)} />}
     </main>
   );
 }

@@ -50,6 +50,7 @@ const OWNER_MUTATIONS = [
 ];
 
 const MAINTAINER_MUTATIONS = [
+  /^\/api\/provider-connections(?:\/|$)/,
   /^\/api\/environments(?:\/|$)/,
   /^\/api\/environment-versions(?:\/|$)/,
   /^\/api\/secrets(?:\/|$)/,

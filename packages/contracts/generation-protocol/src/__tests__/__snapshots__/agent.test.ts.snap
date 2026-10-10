@@ -1,0 +1,22 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Agent v1 wire format freezes identity, connection and behavior together 1`] = `
+{
+  "avatar": "contract",
+  "capability": "test",
+  "connectionId": "conn_team",
+  "connectionName": "Team OpenAI",
+  "connectionRef": "team",
+  "enabled": true,
+  "id": "ag_contract",
+  "instructions": "Use source evidence.",
+  "maxOutputTokens": 4096,
+  "model": "configured-model",
+  "name": "Contract Agent",
+  "provider": "openai",
+  "retries": 2,
+  "schemaVersion": "sketch-test.agent/v1",
+  "timeoutMs": 120000,
+  "version": 3,
+}
+`;
