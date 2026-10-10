@@ -17,9 +17,10 @@ pnpm --filter @sketch-test/control-plane... build
 |---|---|
 | CP_URL | CP 地址；远程部署用 HTTPS，本机和 Compose 内网允许 HTTP |
 | AI_WORKER_TOKEN | 与 CP 相同的专用 Worker 凭证，不能使用浏览器 JWT 或 Runner token |
-| AI_PROVIDER | `deepseek`、`openai` 或 `anthropic`，必须显式设置 |
+| AI_PROVIDER | `deepseek`、`openai`、`anthropic`、`zai` 或 `zai-coding-cn`，必须显式设置 |
 | AI_MODEL | 对应 Pi provider 目录的准确模型 ID |
 | AI_API_KEY | 模型密钥，仅存在 Worker 环境 |
+| AI_CONNECTION_REF | UI 中的连接引用，默认 `default`；同一厂商不同凭据使用不同引用 |
 | AI_WORKER_ID | 可选；默认每进程生成唯一 ID |
 
 ```bash
@@ -35,18 +36,19 @@ Compose 已提供 `ai` profile；使用项目原有生产配置和上表配置�
 
 ## 产品使用
 
-1. 导入 API，进入「智能生成」，选择固定版本和最多 5 个接口，填写测试目标。
-2. 在线 Worker 领取任务。页面展示真实等待、生成、失败、取消状态，可取消或重试。
-3. 「审阅草稿」展示完整请求、断言、风险、来源 hash 和生成依据。接受只创建未发布版本。
-4. 发布用例，选择已保存的环境版本运行。缺失变量、跨工作区环境和未发布版本会在执行前拒绝。
-5. 报告中心查看独立 Runner 的断言结论和脱敏事件。模型文本不充当执行结论。
+1. 在「Agent 管理 → 厂商连接」登记厂商与 Worker 连接引用，再创建 Agent，选择在线模型及职责、超时、重试和输出限制。每次保存生成不可变版本。多厂商、多模型分别部署独立 Worker；凭据由 Worker 环境提供，页面不接收密钥。
+2. 导入 API，进入「智能生成」，选择 Agent、固定 API 版本和最多 5 个接口，填写测试目标。
+3. 在线 Worker 领取任务。页面展示真实等待、生成、失败、取消状态，可取消或重试。
+4. 「审阅草稿」展示完整请求、断言、风险、来源 hash 和生成依据。接受只创建未发布版本。
+5. 发布用例，选择已保存的环境版本运行。缺失变量、跨工作区环境和未发布版本会在执行前拒绝。
+6. 报告中心查看独立 Runner 的断言结论和脱敏事件。模型文本不充当执行结论。
 
 ## 约束与恢复
 
 - 两个工具：`read_endpoint` 和 `propose_test`；没有文件、shell、Secret、任意 HTTP、发布或执行工具。
 - 输入只含经过裁剪的 API 结构和用户目标。目标/字段名称仍需使用者避免填写敏感数据，不提供通用 DLP。
 - 模型、API 版本与输入 hash 固定到任务。路径参数转为显式环境变量，例如 `/users/{id}` 使用 `${env.id}`，运行前必须配置。
-- 30 秒租约、8 秒续租；过期 Worker 不能提交。进程恢复后从冻结输入重做任务，最多自动领取 3 次。
+- 30 秒租约、8 秒续租；过期 Worker 不能提交。进程恢复后从冻结输入重做任务，按冻结 Agent 的重试预算领取（默认最多 3 次）。
 - 工作区最多 10 个活动任务；默认每任务 6 轮、5 草稿、4096 输出 token/轮、120 秒，监督进程额外宽限 3 秒后强制结束。
 - 完成提交幂等，数据库原子写入草稿与完成状态。取消会使续租失败；显式重试重新开放领取预算。
 - 错误只持久化 `MODEL_FAILED` / `TIMEOUT` / `INVALID_RESULT` / `LEASE_EXHAUSTED`，不写入原始 provider 错误或推理正文。
@@ -62,3 +64,13 @@ AI_E2E_DATABASE_URL=postgresql://localhost:5432/sketchtest_preview \
 ```
 
 单元测试用真实 Pi 循环与确定性模型流，不消耗模型额度。真实模型与浏览器联合结果见 [验收记录](../../docs/design/2026-09-12-pi-integration.md)。单任务 CLI 仍可用 `node apps/ai-worker/dist/main.js < task.json`；示例 sourceHash 为合成数据，真实产品任务必须通过 CP 创建。
+
+## Agent 与执行溯源
+
+管理页 `/settings/agents` 使用真实 Control Plane API。任务创建时锁定 Agent ID / 版本、厂商、模型、连接引用和配置；匹配的 Worker 才能领取，旧 Worker 不接收带 Agent 配置的任务。停用或修改 Agent 不改变已排队和历史任务。测试计划建议也绑定计划类型 Agent。
+
+智能生成的执行详情和用例详情中的生成来源展示冻结配置、Worker、输入哈希、领取次数、模型/工具耗时与 token 计数、原始草稿。任务状态可轮询；模型和工具明细在成功完成时统一提交，失败任务保留状态和错误码，不承诺完整逐步事件。别名模型无法推断底层快照，界面明确标为厂商未返回。连接检测只验证匹配 Worker 的心跳，真实生成才验证模型凭据。
+
+```bash
+pnpm --filter @sketch-test/control-plane exec tsx scripts/agents-e2e.ts
+```

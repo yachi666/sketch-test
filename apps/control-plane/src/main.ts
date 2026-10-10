@@ -1,3 +1,4 @@
+import { agentsRoutes } from './modules/agents/agents.routes.js';
 import { aiGenerationRoutes } from './modules/generation/ai-generation.routes.js';
 import { planGenerationRoutes } from './modules/plan-generation/plan-generation.routes.js';
 /**
@@ -90,6 +91,7 @@ async function main(): Promise<void> {
   await testAuthoringRoutes(app);
   await generationRoutes(app);
   await aiGenerationRoutes(app);
+  await agentsRoutes(app);
   await planGenerationRoutes(app);
   await scheduleRoutes(app);
   await testSuiteRoutes(app);

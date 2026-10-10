@@ -1,6 +1,7 @@
 /** Plan generation v1: curated asset identities in, review-only proposals out. */
 import { ContentHashSchema, EntityIdSchema } from '@sketch-test/contracts-common';
 import { z } from 'zod/v3';
+import { AgentSnapshotSchema, ExecutionEventSchema } from './agent.js';
 
 export const PlanAssetSchema = z
   .object({
@@ -40,6 +41,7 @@ export const PlanTaskSchema = z
     objective: z.string().min(1).max(4096),
     assets: z.array(PlanAssetSchema).min(1).max(150),
     previous: PlanProposalSchema.optional(),
+    agent: AgentSnapshotSchema.optional(),
     modelTarget: z.object({ provider: z.string(), model: z.string() }).strict(),
     limits: z
       .object({
@@ -59,6 +61,7 @@ export const PlanResultSchema = z
     inputHash: ContentHashSchema,
     provider: z.string(),
     model: z.string(),
+    events: z.array(ExecutionEventSchema).max(200).optional(),
     proposal: PlanProposalSchema,
   })
   .strict();

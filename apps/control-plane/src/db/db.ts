@@ -2,6 +2,7 @@ import pg from 'pg';
 import { applyAiGenerationSchema } from './migrations/002_ai_generation.js';
 import { applyAiPlansSchema } from './migrations/003_ai_plans.js';
 import { applyReliabilitySchema } from './migrations/004_reliability.js';
+import { applyAgentsSchema } from './migrations/005_agents.js';
 
 const { Pool } = pg;
 
@@ -443,6 +444,7 @@ const MIGRATIONS: Migration[] = [
   { version: 2, name: 'ai-generation', checksum: 'ai-generation-v1', up: applyAiGenerationSchema },
   { version: 3, name: 'ai-plans', checksum: 'ai-plans-v1', up: applyAiPlansSchema },
   { version: 4, name: 'reliability', checksum: 'reliability-v1', up: applyReliabilitySchema },
+  { version: 5, name: 'agents', checksum: 'agents-v1', up: applyAgentsSchema },
 ];
 
 /** Apply each immutable schema migration once, under a PostgreSQL advisory lock. */

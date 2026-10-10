@@ -16,3 +16,14 @@ test('no implicit model, provider, or credential fallback', () => {
     configuredModel({ AI_PROVIDER: 'deepseek', AI_MODEL: 'invented', AI_API_KEY: 'test-only' }),
   ).toThrow();
 });
+
+test('GLM uses the explicit official Pi provider', () => {
+  const { model } = configuredModel({
+    AI_PROVIDER: 'zai',
+    AI_MODEL: 'glm-4.7',
+    AI_API_KEY: 'test-only',
+  });
+  expect(model.provider).toBe('zai');
+  expect(model.id).toBe('glm-4.7');
+  expect(model.baseUrl).toBe('https://api.z.ai/api/coding/paas/v4');
+});

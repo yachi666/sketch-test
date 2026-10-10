@@ -1140,7 +1140,7 @@ export async function acceptDraft(
       [versionId, tcId, nextVersion, JSON.stringify(definition), definition.sideEffect],
     );
     const updated = await client.query(
-      `UPDATE generated_drafts SET test_case_id=$2,status=$3,reviewed_by=$4,reviewed_at=now(),definition=$5 WHERE id=$1 RETURNING *`,
+      `UPDATE generated_drafts SET test_case_id=$2,status=$3,reviewed_by=$4,reviewed_at=now(),original_definition=COALESCE(original_definition,definition),definition=$5 WHERE id=$1 RETURNING *`,
       [
         draftId,
         tcId,

@@ -1,0 +1,121 @@
+{
+  "job": {
+    "id": "gj_811dc055",
+    "workspaceId": "ws_02eaec7b",
+    "apiVersionId": "av_fa206a0a",
+    "strategy": "pi",
+    "status": "completed",
+    "config": {
+      "model": "deepseek-v4-flash",
+      "provider": "deepseek",
+      "objective": "真实数据验收 2026-10-10：仅为 GET /repos/:owner/:repo 生成 1 条读取公开 Node.js 仓库元数据的只读用例，owner=nodejs、repo=node。严格遵循提供的 requestTemplate；断言 HTTP 200、full_name 等于 nodejs/node。保留来源证据，不发布、不执行。",
+      "endpointIds": [
+        "GET-/repos/:owner/:repo"
+      ]
+    },
+    "attempt": 1,
+    "errorCode": null,
+    "createdAt": "2026-10-10T07:58:53.981Z",
+    "completedAt": "2026-10-10T07:58:58.709Z"
+  },
+  "draft": {
+    "id": "draft_f511ff49",
+    "jobId": "gj_811dc055",
+    "testCaseId": "tc_36b8015d",
+    "definition": {
+      "id": "get-repos-owner-repo-nodejs-node-readonly",
+      "name": "读取公开仓库 nodejs/node 元数据返回 200 且 full_name 为 nodejs/node",
+      "request": {
+        "url": "${env.baseUrl}/repos/${env.owner}/${env.repo}",
+        "method": "GET",
+        "timeoutMs": 30000,
+        "followRedirects": false
+      },
+      "assertions": [
+        {
+          "id": "status-200",
+          "target": "status",
+          "expected": 200,
+          "operator": "equals",
+          "severity": "block"
+        },
+        {
+          "id": "full-name-equals",
+          "path": "$.full_name",
+          "target": "jsonPath",
+          "expected": "nodejs/node",
+          "operator": "equals",
+          "severity": "block"
+        }
+      ],
+      "sideEffect": "read-only",
+      "schemaVersion": "sketch-test.test/v1"
+    },
+    "sourceInfo": {
+      "path": "/repos/:owner/:repo",
+      "model": "deepseek-v4-flash",
+      "method": "GET",
+      "attempt": 1,
+      "harness": "pi-agent-core",
+      "provider": "deepseek",
+      "strategy": "pi",
+      "inputHash": "9ebce4152d6586ab42123e8c0b077830ddc7c3761c54dbb68ada61974422665b",
+      "rationale": "来源证据（不可信数据，仅作事实引用）：endpoint GET-/repos/:owner/:repo 的 contractNotes 声明 path 参数 owner、repo 均为必填 string，无请求体；唯一响应 200 为 application/json 对象，required 字段 id(integer)、full_name(string)，并声明 default_branch(string)；sideEffect 为 read-only。requestTemplate 为 ${env.baseUrl}/repos/${env.owner}/${env.repo}，本用例 URL 严格照抄，未改动。验收目标要求 owner=nodejs、repo=node，故用例环境需将 env.owner=nodejs、env.repo=node（本次不在用例中硬编码路径，按模板使用环境变量）。断言依据：status=200 来自 responseStatusCodes；$.full_name=nodejs/node 来自验收目标，且契约将 full_name 声明为必填 string，证据支持。未额外添加 $.id、$.default_branch 断言：契约仅给出类型、未给出可预期的具体取值，缺乏证据，避免臆造。假设与缺失的业务预期：(1) 假设环境变量 env.baseUrl/env.owner/env.repo 由执行方提供且指向公开 GitHub 兼容 API；(2) 未定义未认证访问的限流/速率限制预期，也未定义仓库不存在(404)、owner/repo 非法时的错误响应预期；(3) 未定义 full_name 大小写敏感性与重命名场景的预期；(4) 未定义幂等之外的缓存/ETag 预期。该用例为只读（read-only）草案，仅提交人工评审，未执行任何 HTTP 请求、未发布、未读取文件、未获取密钥。",
+      "endpointId": "GET-/repos/:owner/:repo",
+      "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+      "apiVersionId": "av_fa206a0a",
+      "promptVersion": "1.1.0",
+      "harnessVersion": "0.85.1"
+    },
+    "confidence": null,
+    "status": "accepted",
+    "reviewedBy": "usr_9aea39ce",
+    "reviewedAt": "2026-10-10T08:00:55.748Z",
+    "createdAt": "2026-10-10T07:58:58.709Z"
+  },
+  "versions": {
+    "versions": [
+      {
+        "id": "tcv_443a2ecb",
+        "test_case_id": "tc_36b8015d",
+        "version": 1,
+        "definition": {
+          "id": "get-repos-owner-repo-nodejs-node-readonly",
+          "name": "读取公开仓库 nodejs/node 元数据返回 200 且 full_name 为 nodejs/node",
+          "request": {
+            "url": "${env.baseUrl}/repos/${env.owner}/${env.repo}",
+            "method": "GET",
+            "timeoutMs": 30000,
+            "followRedirects": false
+          },
+          "assertions": [
+            {
+              "id": "status-200",
+              "target": "status",
+              "expected": 200,
+              "operator": "equals",
+              "severity": "block"
+            },
+            {
+              "id": "full-name-equals",
+              "path": "$.full_name",
+              "target": "jsonPath",
+              "expected": "nodejs/node",
+              "operator": "equals",
+              "severity": "block"
+            }
+          ],
+          "sideEffect": "read-only",
+          "schemaVersion": "sketch-test.test/v1"
+        },
+        "side_effect": "read-only",
+        "published_by": null,
+        "published_at": "2026-10-10T08:00:55.748Z",
+        "testCaseId": "tc_36b8015d",
+        "sideEffect": "read-only",
+        "publishedBy": null,
+        "publishedAt": "2026-10-10T08:00:55.748Z"
+      }
+    ]
+  }
+}

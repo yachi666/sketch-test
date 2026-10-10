@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '../components/layout/AppLayout';
 import { AgentPage } from '../pages/Agent';
+import { AgentSettingsPage } from '../pages/AgentSettings';
 import { ApiManagementPage } from '../pages/ApiManagement';
 import { CapabilitiesPage } from '../pages/Capabilities';
 import { CasesPage } from '../pages/Cases';
@@ -22,6 +23,7 @@ function ProductRoutes() {
         <Route path="/import" element={<ImportPage />} />
         <Route path="/cases" element={<CasesPage />} />
         <Route path="/agent" element={<AgentPage />} />
+        <Route path="/settings/agents" element={<AgentSettingsPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="/reports/:runId/:legacyWorkflowId?" element={<ReportsDetailWrapper />} />
         <Route path="/variables" element={<VariablesView />} />

@@ -10,6 +10,7 @@ import type pg from 'pg';
 import { pool } from '../../db/db.js';
 import { transaction } from '../../db/transaction.js';
 import { draftId, generationJobId } from '../../shared/id.js';
+import { recordEvent, selectedAgent } from '../agents/agents.service.js';
 import { type EndpointDef, GenerationError } from './generation.service.js';
 
 const hash = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
@@ -82,16 +83,50 @@ function schemaShape(
   return out;
 }
 
+export function boundedNotes(value: Record<string, unknown>): string {
+  let text = JSON.stringify(value);
+  if (text.length <= 4096) return text;
+  const compact = {
+    ...value,
+    projectionNotice:
+      'Nested schemas omitted to fit the evidence budget; do not infer omitted constraints.',
+  };
+  const strip = (input: unknown): unknown =>
+    Array.isArray(input)
+      ? input.map(strip)
+      : input && typeof input === 'object'
+        ? Object.fromEntries(
+            Object.entries(input)
+              .filter(([k]) => !['properties', 'items'].includes(k))
+              .map(([k, v]) => [k, strip(v)]),
+          )
+        : input;
+  text = JSON.stringify(strip(compact));
+  if (text.length > 4096)
+    throw new GenerationError('接口证据超过单任务限制，请使用更小的接口契约', 400);
+  return text;
+}
+
 export async function enqueueAiGeneration(
   workspaceId: string,
   apiVersionId: string,
   objective: string,
   endpointIds?: string[],
+  agentId?: string,
 ) {
   const capability = await aiCapabilities(workspaceId);
   const worker = capability.workers[0];
   if (!worker) throw new GenerationError('AI Worker is not online for this workspace', 503);
   return transaction(async (client) => {
+    const agent = agentId
+      ? await selectedAgent(client, workspaceId, agentId, 'test', capability.workers)
+      : undefined;
+    if (!agent) {
+      const configured = await client.query('SELECT id FROM agents WHERE workspace_id=$1 LIMIT 1', [
+        workspaceId,
+      ]);
+      if (configured.rows.length) throw new GenerationError('请选择执行 Agent', 400);
+    }
     await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [
       `ai-generation:${workspaceId}`,
     ]);
@@ -119,14 +154,18 @@ export async function enqueueAiGeneration(
       apiVersionId,
       sourceHash: source.rows[0].content_hash,
       objective,
-      modelTarget: { provider: worker.provider, model: worker.model },
+      ...(agent ? { agent } : {}),
+      modelTarget: {
+        provider: agent?.provider ?? worker.provider,
+        model: agent?.model ?? worker.model,
+      },
       endpoints: selected.map((e) => ({
         id: e.id,
         method: e.method,
         path: e.path,
         summary: `${e.method} ${e.path}`,
         // Deliberately exclude examples, source prose, servers and auth values.
-        contractNotes: JSON.stringify({
+        contractNotes: boundedNotes({
           ...(source.rows[0].spec_json.metadata?.sourceType === 'code-discovery'
             ? {
                 sourceKind: 'static-spring-code',
@@ -169,7 +208,11 @@ export async function enqueueAiGeneration(
         ],
         sideEffect: ['GET', 'HEAD', 'OPTIONS'].includes(e.method) ? 'read-only' : 'high-risk',
       })),
-      limits: { maxDrafts: Math.min(selected.length, 5), timeoutMs: 120000 },
+      limits: {
+        maxDrafts: Math.min(selected.length, 5),
+        timeoutMs: agent?.timeoutMs ?? 120000,
+        ...(agent ? { maxOutputTokens: agent.maxOutputTokens } : {}),
+      },
     });
     if (!parsed.success)
       throw new GenerationError(
@@ -187,6 +230,7 @@ export async function enqueueAiGeneration(
           objective,
           endpointIds: task.endpoints.map((e) => e.id),
           ...task.modelTarget,
+          ...(agent ? { agent } : {}),
         }),
       ],
     );
@@ -194,6 +238,12 @@ export async function enqueueAiGeneration(
       `INSERT INTO ai_generation_tasks (job_id,workspace_id,task,input_hash) VALUES ($1,$2,$3,$4)`,
       [id, workspaceId, JSON.stringify(task), hash(task)],
     );
+    if (agent)
+      await client.query('UPDATE ai_generation_tasks SET max_attempts=$2 WHERE job_id=$1', [
+        id,
+        agent.retries + 1,
+      ]);
+    await recordEvent(client, id, 0, 'queued');
     return result.rows[0];
   });
 }
@@ -217,9 +267,16 @@ export async function claimAiGeneration(workspaceId: string, worker: WorkerIdent
     const selected = await client.query(
       `SELECT t.*,j.status FROM ai_generation_tasks t JOIN generation_jobs j ON j.id=t.job_id
       WHERE t.workspace_id=$1 AND t.task->'modelTarget'->>'provider'=$2 AND t.task->'modelTarget'->>'model'=$3
+      AND (t.task->'agent' IS NULL OR ($5::boolean AND t.task->'agent'->>'connectionRef'=$4))
       AND (j.status='pending' OR (j.status='running' AND t.leased_until < now()))
       ORDER BY j.created_at FOR UPDATE OF t,j SKIP LOCKED LIMIT 1`,
-      [workspaceId, worker.provider, worker.model],
+      [
+        workspaceId,
+        worker.provider,
+        worker.model,
+        worker.connectionRef ?? 'default',
+        worker.agentConfigVersion === 1,
+      ],
     );
     const row = selected.rows[0] as TaskRow | undefined;
     if (!row) return null;
@@ -232,6 +289,9 @@ export async function claimAiGeneration(workspaceId: string, worker: WorkerIdent
         `UPDATE ai_generation_tasks SET error_code='LEASE_EXHAUSTED' WHERE job_id=$1`,
         [row.job_id],
       );
+      await recordEvent(client, row.job_id, row.attempt, 'failed', {
+        errorCode: 'LEASE_EXHAUSTED',
+      });
       return null;
     }
     const leaseToken = randomUUID();
@@ -243,6 +303,9 @@ export async function claimAiGeneration(workspaceId: string, worker: WorkerIdent
       `UPDATE generation_jobs SET status='running',completed_at=NULL WHERE id=$1`,
       [row.job_id],
     );
+    await recordEvent(client, row.job_id, row.attempt + 1, 'claimed', {
+      workerId: worker.workerId,
+    });
     return { task: GenerationTaskSchema.parse(row.task), leaseToken, attempt: row.attempt + 1 };
   });
 }
@@ -326,6 +389,13 @@ export async function completeAiGeneration(
           JSON.stringify(draft.definition),
           JSON.stringify({
             strategy: 'pi',
+            ...(row.task.agent
+              ? {
+                  agentId: row.task.agent.id,
+                  agentVersion: row.task.agent.version,
+                  agent: row.task.agent,
+                }
+              : {}),
             method: draft.definition.request.method,
             path: row.task.endpoints.find((e) => e.id === draft.endpointId)?.path,
             endpointId: draft.endpointId,
@@ -350,6 +420,18 @@ export async function completeAiGeneration(
         ],
       );
     }
+    await client.query(
+      'UPDATE generated_drafts SET original_definition=definition WHERE job_id=$1 AND original_definition IS NULL',
+      [jobId],
+    );
+    for (const event of result.events ?? [])
+      await recordEvent(client, jobId, row.attempt, event.type, event);
+    await recordEvent(client, jobId, row.attempt, 'completed', {
+      provider: result.provider,
+      model: result.model,
+      draftCount: result.drafts.length,
+      turns: result.turns,
+    });
     await client.query(`UPDATE ai_generation_tasks SET result_hash=$2 WHERE job_id=$1`, [
       jobId,
       resultHash,
@@ -370,6 +452,7 @@ export async function failAiGeneration(
   return transaction(async (client) => {
     const row = await lockedTask(client, workspaceId, jobId);
     checkLease(row, workerId, token);
+    await recordEvent(client, jobId, row.attempt, 'failed', { errorCode });
     await client.query(`UPDATE ai_generation_tasks SET error_code=$2 WHERE job_id=$1`, [
       jobId,
       errorCode,
@@ -390,6 +473,12 @@ export async function changeAiGeneration(
       `ai-generation:${workspaceId}`,
     ]);
     const row = await lockedTask(client, workspaceId, jobId);
+    await recordEvent(
+      client,
+      jobId,
+      row.attempt,
+      action === 'cancel' ? 'cancelled' : 'retry.requested',
+    );
     if (action === 'cancel') {
       if (!['pending', 'running'].includes(row.status))
         throw new GenerationError('Only active jobs can be cancelled', 409);
@@ -407,8 +496,8 @@ export async function changeAiGeneration(
       if (Number(count.rows[0].count) >= 10)
         throw new GenerationError('Workspace generation queue is full', 429);
       await client.query(
-        `UPDATE ai_generation_tasks SET lease_token=NULL,leased_until=NULL,error_code=NULL,max_attempts=attempt+3 WHERE job_id=$1`,
-        [jobId],
+        `UPDATE ai_generation_tasks SET lease_token=NULL,leased_until=NULL,error_code=NULL,max_attempts=attempt+$2 WHERE job_id=$1`,
+        [jobId, (row.task.agent?.retries ?? 2) + 1],
       );
       await client.query(
         `UPDATE generation_jobs SET status='pending',completed_at=NULL WHERE id=$1`,

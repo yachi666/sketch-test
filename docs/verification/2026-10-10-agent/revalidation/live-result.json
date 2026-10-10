@@ -1,0 +1,1314 @@
+{
+  "at": "2026-10-10T08:32:04.828Z",
+  "checks": [
+    "在线连接检查",
+    "停用 Agent 拒绝新任务",
+    "过期版本编辑拒绝",
+    "离线模型拒绝生成，不自动替换模型",
+    "真实 DeepSeek 生成完成",
+    "排队任务配置不受后续修改与停用影响",
+    "审核接口接受草稿并保存修改",
+    "未发布版本不能运行",
+    "独立 Runner 对真实 GitHub API 执行通过",
+    "用例详情来源绑定准确",
+    "修改名称后仍保留原始模型输出",
+    "真实计划 Agent 生成单成员建议并保留配置来源"
+  ],
+  "agent": {
+    "name": "真实数据验收 Agent · 08:32:04",
+    "avatar": "contract",
+    "capability": "test",
+    "enabled": true,
+    "connectionId": "conn_77f58f4f-4a01-429c-803a-baf2c7ca570d",
+    "model": "deepseek-flash",
+    "instructions": "根据接口证据生成正常、边界和异常用例。所有结果进入待审核草稿。 保留原始来源和断言依据。",
+    "timeoutMs": 120000,
+    "retries": 2,
+    "maxOutputTokens": 4096,
+    "schemaVersion": "sketch-test.agent/v1",
+    "id": "ag_afcc2237-3fdd-4651-8fea-d76b24712ec8",
+    "version": 1,
+    "provider": "deepseek",
+    "connectionRef": "default",
+    "connectionName": "团队 DeepSeek"
+  },
+  "source": {
+    "apiVersionId": "av_fa206a0a",
+    "contentHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b"
+  },
+  "job": {
+    "id": "gj_662e4841",
+    "workspaceId": "ws_02eaec7b",
+    "apiVersionId": "av_fa206a0a",
+    "strategy": "pi",
+    "status": "pending",
+    "createdAt": "2026-10-10T08:32:04.848Z"
+  },
+  "execution": {
+    "id": "gj_662e4841",
+    "status": "completed",
+    "config": {
+      "agent": {
+        "id": "ag_afcc2237-3fdd-4651-8fea-d76b24712ec8",
+        "name": "真实数据验收 Agent · 08:32:04",
+        "model": "deepseek-flash",
+        "avatar": "contract",
+        "enabled": true,
+        "retries": 2,
+        "version": 1,
+        "provider": "deepseek",
+        "timeoutMs": 120000,
+        "capability": "test",
+        "connectionId": "conn_77f58f4f-4a01-429c-803a-baf2c7ca570d",
+        "instructions": "根据接口证据生成正常、边界和异常用例。所有结果进入待审核草稿。 保留原始来源和断言依据。",
+        "connectionRef": "default",
+        "schemaVersion": "sketch-test.agent/v1",
+        "connectionName": "团队 DeepSeek",
+        "maxOutputTokens": 4096
+      },
+      "model": "deepseek-flash",
+      "provider": "deepseek",
+      "objective": "真实功能验收：只生成 1 条公开 Node.js GitHub 仓库元数据只读用例，严格使用 requestTemplate，断言 HTTP 200 以及 $.full_name 等于 nodejs/node。owner 和 repo 由环境变量提供。",
+      "endpointIds": [
+        "GET-/repos/:owner/:repo"
+      ]
+    },
+    "createdAt": "2026-10-10T08:32:04.848Z",
+    "completedAt": "2026-10-10T08:32:11.468Z",
+    "attempt": 1,
+    "errorCode": null,
+    "workerId": "ai_2139fa8f-714a-4770-957f-bbfabbf891cf",
+    "inputHash": "9dec48e36ddd57e7ce9f4b16bb7b64f7c3178ef20e362fe95b34cf5bd77f236c",
+    "resultHash": "136a8d748affcdac2816715c78e0b46c813fbdf4e929cb58d4bf22dd013eb0cc",
+    "agent": {
+      "id": "ag_afcc2237-3fdd-4651-8fea-d76b24712ec8",
+      "name": "真实数据验收 Agent · 08:32:04",
+      "model": "deepseek-flash",
+      "avatar": "contract",
+      "enabled": true,
+      "retries": 2,
+      "version": 1,
+      "provider": "deepseek",
+      "timeoutMs": 120000,
+      "capability": "test",
+      "connectionId": "conn_77f58f4f-4a01-429c-803a-baf2c7ca570d",
+      "instructions": "根据接口证据生成正常、边界和异常用例。所有结果进入待审核草稿。 保留原始来源和断言依据。",
+      "connectionRef": "default",
+      "schemaVersion": "sketch-test.agent/v1",
+      "connectionName": "团队 DeepSeek",
+      "maxOutputTokens": 4096
+    },
+    "modelSnapshot": null,
+    "events": [
+      {
+        "id": "10",
+        "attempt": 0,
+        "type": "queued",
+        "payload": {},
+        "createdAt": "2026-10-10T08:32:04.848Z"
+      },
+      {
+        "id": "11",
+        "attempt": 1,
+        "type": "claimed",
+        "payload": {
+          "workerId": "ai_2139fa8f-714a-4770-957f-bbfabbf891cf"
+        },
+        "createdAt": "2026-10-10T08:32:06.657Z"
+      },
+      {
+        "id": "12",
+        "attempt": 1,
+        "type": "model.completed",
+        "payload": {
+          "at": "2026-10-10T08:32:07.781Z",
+          "type": "model.completed",
+          "success": true,
+          "durationMs": 1029,
+          "inputTokens": 572,
+          "outputTokens": 53
+        },
+        "createdAt": "2026-10-10T08:32:11.468Z"
+      },
+      {
+        "id": "13",
+        "attempt": 1,
+        "type": "tool.completed",
+        "payload": {
+          "at": "2026-10-10T08:32:07.786Z",
+          "tool": "read_endpoint",
+          "type": "tool.completed",
+          "success": true,
+          "durationMs": 4
+        },
+        "createdAt": "2026-10-10T08:32:11.468Z"
+      },
+      {
+        "id": "14",
+        "attempt": 1,
+        "type": "model.completed",
+        "payload": {
+          "at": "2026-10-10T08:32:11.309Z",
+          "type": "model.completed",
+          "success": true,
+          "durationMs": 3523,
+          "inputTokens": 379,
+          "outputTokens": 572
+        },
+        "createdAt": "2026-10-10T08:32:11.468Z"
+      },
+      {
+        "id": "15",
+        "attempt": 1,
+        "type": "tool.completed",
+        "payload": {
+          "at": "2026-10-10T08:32:11.312Z",
+          "tool": "propose_test",
+          "type": "tool.completed",
+          "success": true,
+          "durationMs": 2
+        },
+        "createdAt": "2026-10-10T08:32:11.468Z"
+      },
+      {
+        "id": "16",
+        "attempt": 1,
+        "type": "completed",
+        "payload": {
+          "model": "deepseek-flash",
+          "turns": 2,
+          "provider": "deepseek",
+          "draftCount": 1
+        },
+        "createdAt": "2026-10-10T08:32:11.468Z"
+      }
+    ],
+    "outputs": [
+      {
+        "id": "draft_a5347a59",
+        "status": "modified",
+        "testCaseId": "tc_44b2a8b3",
+        "originalDefinition": {
+          "id": "get-repos-owner-repo-public-read-200",
+          "name": "获取公开仓库元数据返回 200 且 full_name 为 nodejs/node",
+          "request": {
+            "url": "${env.baseUrl}/repos/${env.owner}/${env.repo}",
+            "method": "GET",
+            "timeoutMs": 30000,
+            "followRedirects": false
+          },
+          "assertions": [
+            {
+              "id": "status-200",
+              "target": "status",
+              "expected": 200,
+              "operator": "equals",
+              "severity": "block"
+            },
+            {
+              "id": "full-name",
+              "path": "$.full_name",
+              "target": "jsonPath",
+              "expected": "nodejs/node",
+              "operator": "equals",
+              "severity": "block"
+            }
+          ],
+          "sideEffect": "read-only",
+          "schemaVersion": "sketch-test.test/v1"
+        },
+        "sourceInfo": {
+          "path": "/repos/:owner/:repo",
+          "agent": {
+            "id": "ag_afcc2237-3fdd-4651-8fea-d76b24712ec8",
+            "name": "真实数据验收 Agent · 08:32:04",
+            "model": "deepseek-flash",
+            "avatar": "contract",
+            "enabled": true,
+            "retries": 2,
+            "version": 1,
+            "provider": "deepseek",
+            "timeoutMs": 120000,
+            "capability": "test",
+            "connectionId": "conn_77f58f4f-4a01-429c-803a-baf2c7ca570d",
+            "instructions": "根据接口证据生成正常、边界和异常用例。所有结果进入待审核草稿。 保留原始来源和断言依据。",
+            "connectionRef": "default",
+            "schemaVersion": "sketch-test.agent/v1",
+            "connectionName": "团队 DeepSeek",
+            "maxOutputTokens": 4096
+          },
+          "model": "deepseek-flash",
+          "method": "GET",
+          "agentId": "ag_afcc2237-3fdd-4651-8fea-d76b24712ec8",
+          "attempt": 1,
+          "harness": "pi-agent-core",
+          "provider": "deepseek",
+          "strategy": "pi",
+          "inputHash": "9dec48e36ddd57e7ce9f4b16bb7b64f7c3178ef20e362fe95b34cf5bd77f236c",
+          "rationale": "来源：read_endpoint(GET-/repos/:owner/:repo) 的契约摘要。证据要点：(1) requestTemplate 为 ${env.baseUrl}/repos/${env.owner}/${env.repo}，测试 URL 与之逐字一致；(2) 该方法为 read-only，无请求体（requestBodyRequired=false），因此不构造 body；(3) 文档化响应仅 200，responses[0].content.application/json 为 object，required 字段为 id 与 full_name，其中 full_name 类型 string、nullable=false，故断言 $.full_name 等于 nodejs/node 有明确类型依据。用例设计：owner/repo 由环境变量提供，本用例目标为 nodejs/node 这一公开仓库，需在执行环境中将 env.owner=nodejs、env.repo=nodejs 设置为前提（此为运行时前置条件，非接口契约）。假设与缺失的业务预期：契约未规定 full_name 的大小写归一化与 owner/repo 的符号规范化规则，故断言采用 GitHub 公开仓库的标准规范全名 nodejs/node（大写比对）；契约未提供 404/403 等错误状态码定义，且本次目标仅要求 1 条只读正常用例，故不生成边界与异常用例（例如不存在仓库期望 404、路径参数为空或含非法字符、未认证限流 403）——这些需在补充错误响应契约后再评审。契约亦未声明 default_branch 的固定取值，虽其类型为 string，但当前无证据支持具体期望值，故未对其添加断言。未使用任何置信度评分；本草案为未审核产物。",
+          "endpointId": "GET-/repos/:owner/:repo",
+          "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+          "agentVersion": 1,
+          "apiVersionId": "av_fa206a0a",
+          "promptVersion": "1.1.0",
+          "harnessVersion": "1.1.0"
+        }
+      }
+    ]
+  },
+  "history": {
+    "versions": [
+      {
+        "config": {
+          "id": "ag_afcc2237-3fdd-4651-8fea-d76b24712ec8",
+          "name": "真实数据验收 Agent · 08:32:04",
+          "model": "deepseek-flash",
+          "avatar": "contract",
+          "enabled": false,
+          "retries": 2,
+          "version": 4,
+          "provider": "deepseek",
+          "timeoutMs": 120000,
+          "capability": "test",
+          "connectionId": "conn_77f58f4f-4a01-429c-803a-baf2c7ca570d",
+          "instructions": "根据接口证据生成正常、边界和异常用例。所有结果进入待审核草稿。 保留原始来源和断言依据。",
+          "connectionRef": "default",
+          "schemaVersion": "sketch-test.agent/v1",
+          "connectionName": "团队 DeepSeek",
+          "maxOutputTokens": 4096
+        },
+        "createdAt": "2026-10-10T08:32:04.866Z"
+      },
+      {
+        "config": {
+          "id": "ag_afcc2237-3fdd-4651-8fea-d76b24712ec8",
+          "name": "真实数据验收 Agent · 08:32:04",
+          "model": "verification-unavailable-model",
+          "avatar": "contract",
+          "enabled": true,
+          "retries": 2,
+          "version": 3,
+          "provider": "deepseek",
+          "timeoutMs": 120000,
+          "capability": "test",
+          "connectionId": "conn_77f58f4f-4a01-429c-803a-baf2c7ca570d",
+          "instructions": "根据接口证据生成正常、边界和异常用例。所有结果进入待审核草稿。 保留原始来源和断言依据。",
+          "connectionRef": "default",
+          "schemaVersion": "sketch-test.agent/v1",
+          "connectionName": "团队 DeepSeek",
+          "maxOutputTokens": 4096
+        },
+        "createdAt": "2026-10-10T08:32:04.861Z"
+      },
+      {
+        "config": {
+          "id": "ag_afcc2237-3fdd-4651-8fea-d76b24712ec8",
+          "name": "真实数据验收 Agent · 08:32:04",
+          "model": "deepseek-flash",
+          "avatar": "contract",
+          "enabled": false,
+          "retries": 2,
+          "version": 2,
+          "provider": "deepseek",
+          "timeoutMs": 120000,
+          "capability": "test",
+          "connectionId": "conn_77f58f4f-4a01-429c-803a-baf2c7ca570d",
+          "instructions": "根据接口证据生成正常、边界和异常用例。所有结果进入待审核草稿。 保留原始来源和断言依据。",
+          "connectionRef": "default",
+          "schemaVersion": "sketch-test.agent/v1",
+          "connectionName": "团队 DeepSeek",
+          "maxOutputTokens": 4096
+        },
+        "createdAt": "2026-10-10T08:32:04.854Z"
+      },
+      {
+        "config": {
+          "id": "ag_afcc2237-3fdd-4651-8fea-d76b24712ec8",
+          "name": "真实数据验收 Agent · 08:32:04",
+          "model": "deepseek-flash",
+          "avatar": "contract",
+          "enabled": true,
+          "retries": 2,
+          "version": 1,
+          "provider": "deepseek",
+          "timeoutMs": 120000,
+          "capability": "test",
+          "connectionId": "conn_77f58f4f-4a01-429c-803a-baf2c7ca570d",
+          "instructions": "根据接口证据生成正常、边界和异常用例。所有结果进入待审核草稿。 保留原始来源和断言依据。",
+          "connectionRef": "default",
+          "schemaVersion": "sketch-test.agent/v1",
+          "connectionName": "团队 DeepSeek",
+          "maxOutputTokens": 4096
+        },
+        "createdAt": "2026-10-10T08:32:04.839Z"
+      }
+    ]
+  },
+  "accepted": {
+    "testCaseId": "tc_44b2a8b3",
+    "versionId": "tcv_97fb78f6",
+    "version": 1,
+    "draft": {
+      "id": "draft_a5347a59",
+      "status": "modified"
+    }
+  },
+  "published": {
+    "id": "tcv_97fb78f6",
+    "test_case_id": "tc_44b2a8b3",
+    "version": 1,
+    "definition": {
+      "id": "get-repos-owner-repo-public-read-200",
+      "name": "真实链路验收 · GitHub nodejs/node · gj_662e4841",
+      "request": {
+        "url": "${env.baseUrl}/repos/${env.owner}/${env.repo}",
+        "method": "GET",
+        "timeoutMs": 30000,
+        "followRedirects": false
+      },
+      "assertions": [
+        {
+          "id": "status-200",
+          "target": "status",
+          "expected": 200,
+          "operator": "equals",
+          "severity": "block"
+        },
+        {
+          "id": "full-name",
+          "path": "$.full_name",
+          "target": "jsonPath",
+          "expected": "nodejs/node",
+          "operator": "equals",
+          "severity": "block"
+        }
+      ],
+      "sideEffect": "read-only",
+      "schemaVersion": "sketch-test.test/v1"
+    },
+    "side_effect": "read-only",
+    "published_by": "usr_9aea39ce",
+    "published_at": "2026-10-10T08:32:59.844Z",
+    "testCaseId": "tc_44b2a8b3",
+    "sideEffect": "read-only",
+    "publishedBy": "usr_9aea39ce",
+    "publishedAt": "2026-10-10T08:32:59.844Z"
+  },
+  "run": {
+    "runId": "run_3e91608b",
+    "environmentVersionId": "envv_2e8751d6",
+    "testCaseVersionId": "tcv_97fb78f6"
+  },
+  "report": {
+    "run": {
+      "id": "run_3e91608b",
+      "sourceName": "真实链路验收 · GitHub nodejs/node · gj_662e4841",
+      "apiVersionId": "av_fa206a0a",
+      "workflowVersionId": null,
+      "testCaseVersionId": "tcv_97fb78f6",
+      "environmentVersionId": "envv_2e8751d6",
+      "status": "passed",
+      "runnerId": "rnr_65e01ca3",
+      "claimedAt": "2026-10-10T08:33:00.511Z",
+      "createdAt": "2026-10-10T08:32:59.848Z",
+      "finishedAt": "2026-10-10T08:33:01.301Z"
+    },
+    "steps": [
+      {
+        "stepIndex": 0,
+        "phase": "main",
+        "name": "步骤 1",
+        "method": "GET",
+        "url": "https://api.github.com/repos/nodejs/node",
+        "events": [
+          {
+            "stepIndex": 0,
+            "eventType": "step.started",
+            "payload": {
+              "runId": "run_3e91608b",
+              "stepId": "tcv_97fb78f6-step",
+              "attempt": 1,
+              "traceId": "a9ba8600d4ab6a9f02203c1dcdbd0e7c",
+              "sequence": 2,
+              "eventType": "step.started",
+              "timestamp": "2026-10-10T08:33:00.519Z",
+              "resolvedUrl": "https://api.github.com/repos/nodejs/node"
+            },
+            "timestamp": "2026-10-10T08:33:01.275Z"
+          },
+          {
+            "stepIndex": 0,
+            "eventType": "request.prepared",
+            "payload": {
+              "url": "https://api.github.com/repos/nodejs/node",
+              "runId": "run_3e91608b",
+              "method": "GET",
+              "stepId": "tcv_97fb78f6-step",
+              "attempt": 1,
+              "headers": {
+                "traceparent": "00-a9ba8600d4ab6a9f02203c1dcdbd0e7c-9971af807edf6ded-01"
+              },
+              "traceId": "a9ba8600d4ab6a9f02203c1dcdbd0e7c",
+              "sequence": 3,
+              "eventType": "request.prepared",
+              "timestamp": "2026-10-10T08:33:00.519Z"
+            },
+            "timestamp": "2026-10-10T08:33:01.282Z"
+          },
+          {
+            "stepIndex": 0,
+            "eventType": "request.sent",
+            "payload": {
+              "runId": "run_3e91608b",
+              "sentAt": "2026-10-10T08:33:00.519Z",
+              "stepId": "tcv_97fb78f6-step",
+              "attempt": 1,
+              "traceId": "a9ba8600d4ab6a9f02203c1dcdbd0e7c",
+              "sequence": 4,
+              "eventType": "request.sent",
+              "timestamp": "2026-10-10T08:33:00.519Z"
+            },
+            "timestamp": "2026-10-10T08:33:01.283Z"
+          },
+          {
+            "stepIndex": 0,
+            "eventType": "response.received",
+            "payload": {
+              "runId": "run_3e91608b",
+              "stepId": "tcv_97fb78f6-step",
+              "attempt": 1,
+              "headers": {
+                "date": "Sat, 10 Oct 2026 08:33:01 GMT",
+                "etag": "W/\"ec519ab4ae2da91d5f814cf2e2a77013a26425ffcbb0a35f926254d495fc1af1\"",
+                "vary": "Accept,Accept-Encoding, Accept, X-Requested-With",
+                "server": "github.com",
+                "content-type": "application/json; charset=utf-8",
+                "accept-ranges": "bytes",
+                "cache-control": "public, max-age=60, s-maxage=60",
+                "last-modified": "Sat, 10 Oct 2026 08:31:52 GMT",
+                "content-length": "1482",
+                "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+                "x-frame-options": "deny",
+                "content-encoding": "gzip",
+                "x-ratelimit-used": "12",
+                "x-xss-protection": "0",
+                "x-ratelimit-limit": "60",
+                "x-ratelimit-reset": "1791623549",
+                "x-github-media-type": "github.v3; format=json",
+                "x-github-request-id": "47AB:F52A5:18F2CBF:288559C:6AC9F83C",
+                "x-github-edge-region": "southeastasia",
+                "x-ratelimit-resource": "core",
+                "x-ratelimit-remaining": "48",
+                "x-content-type-options": "nosniff",
+                "content-security-policy": "default-src 'none'",
+                "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+                "access-control-allow-origin": "*",
+                "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning",
+                "x-github-api-version-selected": "2022-11-28"
+              },
+              "traceId": "a9ba8600d4ab6a9f02203c1dcdbd0e7c",
+              "sequence": 5,
+              "eventType": "response.received",
+              "timestamp": "2026-10-10T08:33:01.268Z",
+              "durationMs": 745,
+              "statusCode": 200,
+              "bodyPreview": "{\"id\":27193779,\"node_id\":\"MDEwOlJlcG9zaXRvcnkyNzE5Mzc3OQ==\",\"name\":\"node\",\"full_name\":\"nodejs/node\",\"private\":false,\"owner\":{\"login\":\"nodejs\",\"id\":9950313,\"node_id\":\"MDEyOk9yZ2FuaXphdGlvbjk5NTAzMTM=\",\"avatar_url\":\"https://avatars.githubusercontent.com/u/9950313?v=4\",\"gravatar_id\":\"\",\"url\":\"https://api.github.com/users/nodejs\",\"html_url\":\"https://github.com/nodejs\",\"followers_url\":\"https://api.github.com/users/nodejs/followers\",\"following_url\":\"https://api.github.com/users/nodejs/following{/other_user}\",\"gists_url\":\"https://api.github.com/users/nodejs/gists{/gist_id}\",\"starred_url\":\"https://api.github.com/users/nodejs/starred{/owner}{/repo}\",\"subscriptions_url\":\"https://api.github.com/users/nodejs/subscriptions\",\"organizations_url\":\"https://api.github.com/users/nodejs/orgs\",\"repos_url\":\"https://api.github.com/users/nodejs/repos\",\"events_url\":\"https://api.github.com/users/nodejs/events{/privacy}\",\"received_events_url\":\"https://api.github.com/users/nodejs/received_events\",\"type\":\"Organization\",\"user_view_type\":\"public\",\"site_admin\":false},\"html_url\":\"https://github.com/nodejs/node\",\"description\":\"Node.js JavaScript runtime ✨🐢🚀✨\",\"fork\":false,\"url\":\"https://api.github.com/repos/nodejs/node\",\"forks_url\":\"https://api.github.com/repos/nodejs/node/forks\",\"keys_url\":\"https://api.github.com/repos/nodejs/node/keys{/key_id}\",\"collaborators_url\":\"https://api.github.com/repos/nodejs/node/collaborators{/collaborator}\",\"teams_url\":\"https://api.github.com/repos/nodejs/node/teams\",\"hooks_url\":\"https://api.github.com/repos/nodejs/node/hooks\",\"issue_events_url\":\"https://api.github.com/repos/nodejs/node/issues/events{/number}\",\"events_url\":\"https://api.github.com/repos/nodejs/node/events\",\"assignees_url\":\"https://api.github.com/repos/nodejs/node/assignees{/user}\",\"branches_url\":\"https://api.github.com/repos/nodejs/node/branches{/branch}\",\"tags_url\":\"https://api.github.com/repos/nodejs/node/tags\",\"blobs_url\":\"https://api.github.com/repos/nodejs/node/git/blobs{/sha}\",\"git_tags_url\":\"https://api.github.com/repos/nodejs/node/git/tags{/sha}\",\"git_refs_url\":\"https://api.github.com/repos/nodejs/node/git/refs{/sha}\",\"trees_url\":\"https://api.github.com/repos/nodejs/node/git/trees{/sha}\",\"statuses_url\":\"https://api.github.com/repos/nodejs/node/statuses/{sha}\",\"languages_url\":\"https://api.github.com/repos/nodejs/node/languages\",\"stargazers_url\":\"https://api.github.com/repos/nodejs/node/stargazers\",\"contributors_url\":\"https://api.github.com/repos/nodejs/node/contributors\",\"subscribers_url\":\"https://api.github.com/repos/nodejs/node/subscribers\",\"subscription_url\":\"https://api.github.com/repos/nodejs/node/subscription\",\"commits_url\":\"https://api.github.com/repos/nodejs/node/commits{/sha}\",\"git_commits_url\":\"https://api.github.com/repos/nodejs/node/git/commits{/sha}\",\"comments_url\":\"https://api.github.com/repos/nodejs/node/comments{/number}\",\"issue_comment_url\":\"https://api.github.com/repos/nodejs/node/issues/comments{/number}\",\"contents_url\":\"https://api.github.com/repos/nodejs/node/contents/{+path}\",\"compare_url\":\"https://api.github.com/repos/nodejs/node/compare/{base}...{head}\",\"merges_url\":\"https://api.github.com/repos/nodejs/node/merges\",\"archive_url\":\"https://api.github.com/repos/nodejs/node/{archive_format}{/ref}\",\"downloads_url\":\"https://api.github.com/repos/nodejs/node/downloads\",\"issues_url\":\"https://api.github.com/repos/nodejs/node/issues{/number}\",\"pulls_url\":\"https://api.github.com/repos/nodejs/node/pulls{/number}\",\"milestones_url\":\"https://api.github.com/repos/nodejs/node/milestones{/number}\",\"notifications_url\":\"https://api.github.com/repos/nodejs/node/notifications{?since,all,participating}\",\"labels_url\":\"https://api.github.com/repos/nodejs/node/labels{/name}\",\"releases_url\":\"https://api.github.com/repos/nodejs/node/releases{/id}\",\"deployments_url\":\"https://api.github.com/repos/nodejs/node/deployments\",\"created_at\":\"2014-11-26T19:57:11Z\",\"updated_at\":\"2026-10-10T08:31:52Z\",\"pushed_at\":\"2026-10-10T08:29:52Z\",\"git_url\":\"git://github.com/nodejs/node.git\",\"ssh_url\":\"git@github.com:nodejs/node.git\",\"clone_url\":\"https://github.com/nodejs/node.g",
+              "bodySizeBytes": 5953
+            },
+            "timestamp": "2026-10-10T08:33:01.284Z"
+          },
+          {
+            "stepIndex": 0,
+            "eventType": "assertion.evaluated",
+            "payload": {
+              "runId": "run_3e91608b",
+              "actual": "200",
+              "passed": true,
+              "stepId": "tcv_97fb78f6-step",
+              "attempt": 1,
+              "traceId": "a9ba8600d4ab6a9f02203c1dcdbd0e7c",
+              "expected": "200",
+              "sequence": 6,
+              "severity": "block",
+              "eventType": "assertion.evaluated",
+              "timestamp": "2026-10-10T08:33:01.269Z",
+              "assertionId": "status-200"
+            },
+            "timestamp": "2026-10-10T08:33:01.285Z"
+          },
+          {
+            "stepIndex": 0,
+            "eventType": "assertion.evaluated",
+            "payload": {
+              "runId": "run_3e91608b",
+              "actual": "\"nodejs/node\"",
+              "passed": true,
+              "stepId": "tcv_97fb78f6-step",
+              "attempt": 1,
+              "traceId": "a9ba8600d4ab6a9f02203c1dcdbd0e7c",
+              "expected": "\"nodejs/node\"",
+              "sequence": 7,
+              "severity": "block",
+              "eventType": "assertion.evaluated",
+              "timestamp": "2026-10-10T08:33:01.269Z",
+              "assertionId": "full-name"
+            },
+            "timestamp": "2026-10-10T08:33:01.285Z"
+          },
+          {
+            "stepIndex": 0,
+            "eventType": "step.finished",
+            "payload": {
+              "runId": "run_3e91608b",
+              "status": "passed",
+              "stepId": "tcv_97fb78f6-step",
+              "attempt": 1,
+              "retries": 0,
+              "traceId": "a9ba8600d4ab6a9f02203c1dcdbd0e7c",
+              "sequence": 8,
+              "eventType": "step.finished",
+              "timestamp": "2026-10-10T08:33:01.269Z",
+              "totalDurationMs": 745,
+              "assertionsFailed": 0,
+              "assertionsPassed": 2
+            },
+            "timestamp": "2026-10-10T08:33:01.286Z"
+          }
+        ],
+        "assertions": [
+          {
+            "assertionId": "status-200",
+            "passed": true,
+            "expected": "200",
+            "actual": "200",
+            "severity": "block",
+            "attempt": 1
+          },
+          {
+            "assertionId": "full-name",
+            "passed": true,
+            "expected": "\"nodejs/node\"",
+            "actual": "\"nodejs/node\"",
+            "severity": "block",
+            "attempt": 1
+          }
+        ],
+        "status": "passed",
+        "durationMs": 745
+      }
+    ],
+    "runEvents": []
+  },
+  "provenance": {
+    "sources": [
+      {
+        "jobId": "gj_662e4841",
+        "draftId": "draft_a5347a59",
+        "sourceInfo": {
+          "path": "/repos/:owner/:repo",
+          "agent": {
+            "id": "ag_afcc2237-3fdd-4651-8fea-d76b24712ec8",
+            "name": "真实数据验收 Agent · 08:32:04",
+            "model": "deepseek-flash",
+            "avatar": "contract",
+            "enabled": true,
+            "retries": 2,
+            "version": 1,
+            "provider": "deepseek",
+            "timeoutMs": 120000,
+            "capability": "test",
+            "connectionId": "conn_77f58f4f-4a01-429c-803a-baf2c7ca570d",
+            "instructions": "根据接口证据生成正常、边界和异常用例。所有结果进入待审核草稿。 保留原始来源和断言依据。",
+            "connectionRef": "default",
+            "schemaVersion": "sketch-test.agent/v1",
+            "connectionName": "团队 DeepSeek",
+            "maxOutputTokens": 4096
+          },
+          "model": "deepseek-flash",
+          "method": "GET",
+          "agentId": "ag_afcc2237-3fdd-4651-8fea-d76b24712ec8",
+          "attempt": 1,
+          "harness": "pi-agent-core",
+          "provider": "deepseek",
+          "strategy": "pi",
+          "inputHash": "9dec48e36ddd57e7ce9f4b16bb7b64f7c3178ef20e362fe95b34cf5bd77f236c",
+          "rationale": "来源：read_endpoint(GET-/repos/:owner/:repo) 的契约摘要。证据要点：(1) requestTemplate 为 ${env.baseUrl}/repos/${env.owner}/${env.repo}，测试 URL 与之逐字一致；(2) 该方法为 read-only，无请求体（requestBodyRequired=false），因此不构造 body；(3) 文档化响应仅 200，responses[0].content.application/json 为 object，required 字段为 id 与 full_name，其中 full_name 类型 string、nullable=false，故断言 $.full_name 等于 nodejs/node 有明确类型依据。用例设计：owner/repo 由环境变量提供，本用例目标为 nodejs/node 这一公开仓库，需在执行环境中将 env.owner=nodejs、env.repo=nodejs 设置为前提（此为运行时前置条件，非接口契约）。假设与缺失的业务预期：契约未规定 full_name 的大小写归一化与 owner/repo 的符号规范化规则，故断言采用 GitHub 公开仓库的标准规范全名 nodejs/node（大写比对）；契约未提供 404/403 等错误状态码定义，且本次目标仅要求 1 条只读正常用例，故不生成边界与异常用例（例如不存在仓库期望 404、路径参数为空或含非法字符、未认证限流 403）——这些需在补充错误响应契约后再评审。契约亦未声明 default_branch 的固定取值，虽其类型为 string，但当前无证据支持具体期望值，故未对其添加断言。未使用任何置信度评分；本草案为未审核产物。",
+          "endpointId": "GET-/repos/:owner/:repo",
+          "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+          "agentVersion": 1,
+          "apiVersionId": "av_fa206a0a",
+          "promptVersion": "1.1.0",
+          "harnessVersion": "1.1.0"
+        },
+        "status": "modified",
+        "reviewedAt": "2026-10-10T08:32:59.832Z"
+      }
+    ]
+  },
+  "planJobId": "ap_2c512f42017d4bb8",
+  "plan": {
+    "id": "ap_2c512f42017d4bb8",
+    "status": "completed",
+    "trigger": "手动生成",
+    "parentId": null,
+    "objective": "验收：严格只选用例 tc_44b2a8b3，生成单成员最小只读回归计划。该用例已发布并通过 GitHub 真实数据执行。不要添加其他成员或待补齐项。仅生成草稿。",
+    "assets": [
+      {
+        "id": "tc_44b2a8b3",
+        "key": "tc_44b2a8b3",
+        "name": "真实链路验收 · GitHub nodejs/node · gj_662e4841",
+        "type": "test",
+        "route": "GET /repos/${env.owner}/${env.repo}",
+        "version": 1,
+        "versionId": "tcv_97fb78f6",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_fa206a0a"
+      },
+      {
+        "id": "tc_6846e19d",
+        "key": "tc_6846e19d",
+        "name": "读取 nodejs/node 仓库元数据返回 200 且 full_name 正确",
+        "type": "test",
+        "route": "GET /repos/${env.owner}/${env.repo}",
+        "version": 2,
+        "versionId": "tcv_3ec1a7d0",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_fa206a0a"
+      },
+      {
+        "id": "tc_c56b6082",
+        "key": "tc_c56b6082",
+        "name": "读取 nodejs/node 仓库元数据应返回 200 且 full_name 为 nodejs/node",
+        "type": "test",
+        "route": "GET /repos/${env.owner}/${env.repo}",
+        "version": 1,
+        "versionId": "tcv_5dbcca7f",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_fa206a0a"
+      },
+      {
+        "id": "tc_ef021a34",
+        "key": "tc_ef021a34",
+        "name": "Status 200: POST /api/auth/login",
+        "type": "test",
+        "route": "POST /api/auth/login",
+        "version": 1,
+        "versionId": "tcv_e4127cb2",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "tc_f2a3f13e",
+        "key": "tc_f2a3f13e",
+        "name": "Node.js 公开仓库真实响应 · 单用例",
+        "type": "test",
+        "route": "GET /repos/${env.owner}/${env.repo}",
+        "version": 1,
+        "versionId": "tcv_ee267af2",
+        "sideEffect": "read-only"
+      },
+      {
+        "id": "wf_5b2bc9b1",
+        "key": "wf_5b2bc9b1",
+        "name": "修复复测：GitHub 流程编辑保存",
+        "type": "workflow",
+        "route": "业务流程",
+        "version": 3,
+        "versionId": "wfv_e9f5f34c",
+        "sideEffect": "unknown"
+      },
+      {
+        "id": "wf_5f60effa",
+        "key": "wf_5f60effa",
+        "name": "公开仓库 · 失败定位验收",
+        "type": "workflow",
+        "route": "业务流程",
+        "version": 1,
+        "versionId": "wfv_05daf19e",
+        "sideEffect": "unknown"
+      },
+      {
+        "id": "wf_64af47d8",
+        "key": "wf_64af47d8",
+        "name": "GitHub 真实元数据和提交历史回归",
+        "type": "workflow",
+        "route": "业务流程",
+        "version": 3,
+        "versionId": "wfv_f13180f4",
+        "sideEffect": "unknown"
+      },
+      {
+        "id": "wf_d56a636c",
+        "key": "wf_d56a636c",
+        "name": "公开仓库 · 元数据回归",
+        "type": "workflow",
+        "route": "业务流程",
+        "version": 1,
+        "versionId": "wfv_2c50e75e",
+        "sideEffect": "unknown"
+      },
+      {
+        "id": "wf_e0e13c81",
+        "key": "wf_e0e13c81",
+        "name": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "type": "workflow",
+        "route": "业务流程",
+        "version": 1,
+        "versionId": "wfv_1f87f538",
+        "sideEffect": "unknown"
+      },
+      {
+        "id": "wf_efc03873",
+        "key": "wf_efc03873",
+        "name": "GitHub 公开仓库 · 真实响应回归",
+        "type": "workflow",
+        "route": "业务流程",
+        "version": 1,
+        "versionId": "wfv_f85319f4",
+        "sideEffect": "unknown"
+      },
+      {
+        "id": "draft_06fdee56",
+        "key": "draft_06fdee56",
+        "name": "Status 200: GET /api/contact-information",
+        "type": "draft",
+        "route": "GET /api/contact-information",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_0dcb9670",
+        "key": "draft_0dcb9670",
+        "name": "Status 200: POST /api/workspace/import-export/save",
+        "type": "draft",
+        "route": "POST /api/workspace/import-export/save",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_0fc1057f",
+        "key": "draft_0fc1057f",
+        "name": "Status 204: POST /api/workspace/shift-definitions/reorder",
+        "type": "draft",
+        "route": "POST /api/workspace/shift-definitions/reorder",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_1e58b694",
+        "key": "draft_1e58b694",
+        "name": "Status 200: PUT /api/workspace/accounts/{id}",
+        "type": "draft",
+        "route": "PUT /api/workspace/accounts/{id}",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_1ef2e68d",
+        "key": "draft_1ef2e68d",
+        "name": "Status 204: DELETE /api/workspace/linux-passwords/{id}",
+        "type": "draft",
+        "route": "DELETE /api/workspace/linux-passwords/{id}",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_228d52d3",
+        "key": "draft_228d52d3",
+        "name": "Status 200: GET /api/workspace/linux-passwords",
+        "type": "draft",
+        "route": "GET /api/workspace/linux-passwords",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_24eceadb",
+        "key": "draft_24eceadb",
+        "name": "Status 204: DELETE /api/workspace/shift-definitions/{id}",
+        "type": "draft",
+        "route": "DELETE /api/workspace/shift-definitions/{id}",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_255ca0b6",
+        "key": "draft_255ca0b6",
+        "name": "Status 200: POST /api/workspace/validation/resolve",
+        "type": "draft",
+        "route": "POST /api/workspace/validation/resolve",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_2add365e",
+        "key": "draft_2add365e",
+        "name": "Status 204: DELETE /api/workspace/accounts/{id}",
+        "type": "draft",
+        "route": "DELETE /api/workspace/accounts/{id}",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_2feef070",
+        "key": "draft_2feef070",
+        "name": "Status 204: POST /api/workspace/accounts/{id}/disable",
+        "type": "draft",
+        "route": "POST /api/workspace/accounts/{id}/disable",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_3622b65b",
+        "key": "draft_3622b65b",
+        "name": "Status 200: GET /api/workspace/linux-passwords/access-audits",
+        "type": "draft",
+        "route": "GET /api/workspace/linux-passwords/access-audits",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_43a392d4",
+        "key": "draft_43a392d4",
+        "name": "Status 204: DELETE /api/workspace/staff/{id}",
+        "type": "draft",
+        "route": "DELETE /api/workspace/staff/{id}",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_4531a16e",
+        "key": "draft_4531a16e",
+        "name": "Status 200: GET /api/auth/me",
+        "type": "draft",
+        "route": "GET /api/auth/me",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_4d08e0ca",
+        "key": "draft_4d08e0ca",
+        "name": "Status 200: GET /api/workspace/accounts",
+        "type": "draft",
+        "route": "GET /api/workspace/accounts",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_539fe385",
+        "key": "draft_539fe385",
+        "name": "Status 200: POST /api/workspace/linux-passwords",
+        "type": "draft",
+        "route": "POST /api/workspace/linux-passwords",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_54eb8e36",
+        "key": "draft_54eb8e36",
+        "name": "Status 200: POST /api/workspace/staff",
+        "type": "draft",
+        "route": "POST /api/workspace/staff",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_5b28c2fb",
+        "key": "draft_5b28c2fb",
+        "name": "Status 200: GET /api/workspace/teams",
+        "type": "draft",
+        "route": "GET /api/workspace/teams",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_6042fe06",
+        "key": "draft_6042fe06",
+        "name": "Status 200: POST /api/workspace/accounts",
+        "type": "draft",
+        "route": "POST /api/workspace/accounts",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_61c036c6",
+        "key": "draft_61c036c6",
+        "name": "Status 204: POST /api/workspace/accounts/{id}/enable",
+        "type": "draft",
+        "route": "POST /api/workspace/accounts/{id}/enable",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_69a58c67",
+        "key": "draft_69a58c67",
+        "name": "Status 200: POST /api/workspace/shift-definitions",
+        "type": "draft",
+        "route": "POST /api/workspace/shift-definitions",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_69d538ea",
+        "key": "draft_69d538ea",
+        "name": "Status 200: PUT /api/workspace/linux-passwords/{id}",
+        "type": "draft",
+        "route": "PUT /api/workspace/linux-passwords/{id}",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_6e2c87f1",
+        "key": "draft_6e2c87f1",
+        "name": "Status 200: POST /api/auth/activate",
+        "type": "draft",
+        "route": "POST /api/auth/activate",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_73a47e60",
+        "key": "draft_73a47e60",
+        "name": "Status 204: POST /api/auth/change-password",
+        "type": "draft",
+        "route": "POST /api/auth/change-password",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_75ded606",
+        "key": "draft_75ded606",
+        "name": "Status 200: GET /api/shifts",
+        "type": "draft",
+        "route": "GET /api/shifts",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_7a4c542b",
+        "key": "draft_7a4c542b",
+        "name": "Status 200: POST /api/workspace/teams",
+        "type": "draft",
+        "route": "POST /api/workspace/teams",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_7d80c7f7",
+        "key": "draft_7d80c7f7",
+        "name": "Status 200: POST /api/contact-information",
+        "type": "draft",
+        "route": "POST /api/contact-information",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_7e3d555f",
+        "key": "draft_7e3d555f",
+        "name": "Status 200: PUT /api/workspace/staff/{id}",
+        "type": "draft",
+        "route": "PUT /api/workspace/staff/{id}",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_8021aac0",
+        "key": "draft_8021aac0",
+        "name": "Status 200: GET /api/staff",
+        "type": "draft",
+        "route": "GET /api/staff",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_82c44fe7",
+        "key": "draft_82c44fe7",
+        "name": "Status 200: POST /api/workspace/staff/batch",
+        "type": "draft",
+        "route": "POST /api/workspace/staff/batch",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_85f647a9",
+        "key": "draft_85f647a9",
+        "name": "Status 204: DELETE /api/workspace/teams/{id}",
+        "type": "draft",
+        "route": "DELETE /api/workspace/teams/{id}",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_91a49768",
+        "key": "draft_91a49768",
+        "name": "Status 200: GET /api/workspace/accounts/{id}",
+        "type": "draft",
+        "route": "GET /api/workspace/accounts/{id}",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_95f518aa",
+        "key": "draft_95f518aa",
+        "name": "Status 200: GET /api/workspace/shift-definitions",
+        "type": "draft",
+        "route": "GET /api/workspace/shift-definitions",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_96c7a8f8",
+        "key": "draft_96c7a8f8",
+        "name": "Status 200: POST /api/workspace/validation/{id}/preview-remediation",
+        "type": "draft",
+        "route": "POST /api/workspace/validation/{id}/preview-remediation",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_9a1abe20",
+        "key": "draft_9a1abe20",
+        "name": "Status 200: GET /api/workspace/linux-password-directories",
+        "type": "draft",
+        "route": "GET /api/workspace/linux-password-directories",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_9af41739",
+        "key": "draft_9af41739",
+        "name": "Status 200: POST /api/workspace/validation/{id}/apply-remediation",
+        "type": "draft",
+        "route": "POST /api/workspace/validation/{id}/apply-remediation",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_9b96b978",
+        "key": "draft_9b96b978",
+        "name": "Status 200: PUT /api/workspace/teams/{id}",
+        "type": "draft",
+        "route": "PUT /api/workspace/teams/{id}",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_9bfa9380",
+        "key": "draft_9bfa9380",
+        "name": "Status 200: GET /api/shift-codes",
+        "type": "draft",
+        "route": "GET /api/shift-codes",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_9d946fec",
+        "key": "draft_9d946fec",
+        "name": "Status 200: PUT /api/workspace/shift-definitions/{id}",
+        "type": "draft",
+        "route": "PUT /api/workspace/shift-definitions/{id}",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_9e476189",
+        "key": "draft_9e476189",
+        "name": "Status 200: GET /api/workspace/teams/{id}",
+        "type": "draft",
+        "route": "GET /api/workspace/teams/{id}",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_a7cb8141",
+        "key": "draft_a7cb8141",
+        "name": "Status 200: PUT /api/workspace/access-policy",
+        "type": "draft",
+        "route": "PUT /api/workspace/access-policy",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_a87c70b3",
+        "key": "draft_a87c70b3",
+        "name": "Status 200: GET /api/workspace/roster",
+        "type": "draft",
+        "route": "GET /api/workspace/roster",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_b7ee0d5e",
+        "key": "draft_b7ee0d5e",
+        "name": "Status 204: POST /api/auth/logout",
+        "type": "draft",
+        "route": "POST /api/auth/logout",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_ba76b2d9",
+        "key": "draft_ba76b2d9",
+        "name": "Status 200: GET /api/workspace/overview",
+        "type": "draft",
+        "route": "GET /api/workspace/overview",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_c5405f6d",
+        "key": "draft_c5405f6d",
+        "name": "Status 200: GET /api/staff/{id}",
+        "type": "draft",
+        "route": "GET /api/staff/{id}",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_c7a9048a",
+        "key": "draft_c7a9048a",
+        "name": "Status 200: POST /api/workspace/linux-passwords/credentials/{credentialId}/secret",
+        "type": "draft",
+        "route": "POST /api/workspace/linux-passwords/credentials/{credentialId}/secret",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_c9c25bcb",
+        "key": "draft_c9c25bcb",
+        "name": "Status 200: GET /api/workspace/shift-definitions/{id}",
+        "type": "draft",
+        "route": "GET /api/workspace/shift-definitions/{id}",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_ca876713",
+        "key": "draft_ca876713",
+        "name": "GET /api/auth/me 读取当前登录用户（只读正向）",
+        "type": "draft",
+        "route": "GET /api/auth/me",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_cad9f327",
+        "key": "draft_cad9f327",
+        "name": "Status 200: GET /api/teams",
+        "type": "draft",
+        "route": "GET /api/teams",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_cd24c5d0",
+        "key": "draft_cd24c5d0",
+        "name": "Status 200: GET /api/workspace/linux-passwords/{id}",
+        "type": "draft",
+        "route": "GET /api/workspace/linux-passwords/{id}",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      },
+      {
+        "id": "draft_ce666309",
+        "key": "draft_ce666309",
+        "name": "Status 204: POST /api/workspace/accounts/{id}/reset-password",
+        "type": "draft",
+        "route": "POST /api/workspace/accounts/{id}/reset-password",
+        "sideEffect": "read-only",
+        "apiVersionId": "av_ea093aaa"
+      }
+    ],
+    "proposal": {
+      "gaps": [],
+      "name": "GitHub 仓库元数据只读验收（单用例）",
+      "members": [
+        {
+          "key": "tc_44b2a8b3",
+          "reason": "用户唯一指定成员；已发布用例，版本 tcv_97fb78f6（v1），sideEffect 为 read-only，路由 GET /repos/${env.owner}/${env.repo}，符合只读最小验收范围。"
+        }
+      ],
+      "objective": "仅用 tc_44b2a8b3 验证 GET /repos/${env.owner}/${env.repo} 的真实只读链路可复核执行。",
+      "explanation": "用户明确要求单成员最小只读计划，故仅纳入已发布的 tc_44b2a8b3（版本 tcv_97fb78f6，v1），其为只读路由 GET /repos/${env.owner}/${env.repo}。同路由的其他已发布用例（tc_6846e19d、tc_c56b6082、tc_f2a3f13e）及全部工作流均按用户范围排除，未纳入。所有草稿资产按规则只能作为缺口，而用户要求不添加待补齐项，故 gaps 为空。未提供测试用例数量、覆盖率或历史执行数据，故不作相关陈述。",
+      "precautions": [
+        "仅创建草稿，不执行、不发布任何用例或工作流。",
+        "执行前确认 env.owner、env.repo 指向预期仓库，避免误验证其他目标。",
+        "用例版本 tcv_97fb78f6 为不可变版本，如需变更请新建版本而非改动既有版本。"
+      ],
+      "noNewFailures": false,
+      "blockOnInfraError": true
+    },
+    "revision": 1,
+    "savedAt": null,
+    "suiteId": null,
+    "errorCode": null,
+    "createdAt": "2026-10-10T08:33:01.883Z",
+    "model": {
+      "model": "deepseek-flash",
+      "provider": "deepseek"
+    },
+    "agent": {
+      "id": "ag_5b2ab1fe-a912-420e-9168-de57cf8bcc7b",
+      "name": "测试计划 Agent",
+      "model": "deepseek-flash",
+      "avatar": "plan",
+      "enabled": true,
+      "retries": 2,
+      "version": 1,
+      "provider": "deepseek",
+      "timeoutMs": 120000,
+      "capability": "plan",
+      "connectionId": "conn_77f58f4f-4a01-429c-803a-baf2c7ca570d",
+      "instructions": "根据已有已发布用例制定可复核的测试计划，不编造用例 ID。",
+      "connectionRef": "default",
+      "schemaVersion": "sketch-test.agent/v1",
+      "connectionName": "团队 DeepSeek",
+      "maxOutputTokens": 4096
+    },
+    "workerId": "ai_2139fa8f-714a-4770-957f-bbfabbf891cf",
+    "attempt": 1,
+    "inputHash": "05da2db9e4cbde545a2d0ead5b9f9ef48f7f53c9e76708ee2478ea87217156a7",
+    "originalProposal": {
+      "gaps": [],
+      "name": "GitHub 仓库元数据只读验收（单用例）",
+      "members": [
+        {
+          "key": "tc_44b2a8b3",
+          "reason": "用户唯一指定成员；已发布用例，版本 tcv_97fb78f6（v1），sideEffect 为 read-only，路由 GET /repos/${env.owner}/${env.repo}，符合只读最小验收范围。"
+        }
+      ],
+      "objective": "仅用 tc_44b2a8b3 验证 GET /repos/${env.owner}/${env.repo} 的真实只读链路可复核执行。",
+      "explanation": "用户明确要求单成员最小只读计划，故仅纳入已发布的 tc_44b2a8b3（版本 tcv_97fb78f6，v1），其为只读路由 GET /repos/${env.owner}/${env.repo}。同路由的其他已发布用例（tc_6846e19d、tc_c56b6082、tc_f2a3f13e）及全部工作流均按用户范围排除，未纳入。所有草稿资产按规则只能作为缺口，而用户要求不添加待补齐项，故 gaps 为空。未提供测试用例数量、覆盖率或历史执行数据，故不作相关陈述。",
+      "precautions": [
+        "仅创建草稿，不执行、不发布任何用例或工作流。",
+        "执行前确认 env.owner、env.repo 指向预期仓库，避免误验证其他目标。",
+        "用例版本 tcv_97fb78f6 为不可变版本，如需变更请新建版本而非改动既有版本。"
+      ],
+      "noNewFailures": false,
+      "blockOnInfraError": true
+    },
+    "events": [
+      {
+        "at": "2026-10-10T08:33:05.666Z",
+        "type": "model.completed",
+        "success": true,
+        "durationMs": 2583,
+        "inputTokens": 4766,
+        "outputTokens": 440
+      },
+      {
+        "at": "2026-10-10T08:33:05.670Z",
+        "tool": "propose_plan",
+        "type": "tool.completed",
+        "success": true
+      }
+    ],
+    "sourceHash": "44e0729d20a448fabf730f5b3e5a9aecb2c0033ad2e55c195da5dd005934c788"
+  },
+  "observations": [
+    {
+      "severity": "content-quality",
+      "finding": "模型生成依据误写 env.repo=nodejs，正确值为 node；冻结执行环境为 owner=nodejs、repo=node，实际请求与两个断言均通过。",
+      "impact": "生成说明不能代替运行证据，仍需审核。"
+    }
+  ]
+}

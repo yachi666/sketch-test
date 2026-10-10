@@ -1,3 +1,7 @@
+import { AgentSnapshotSchema, ExecutionEventSchema } from './agent.js';
+
+export * from './agent.js';
+
 /**
  * Generation protocol v1 — the independent AI Worker boundary.
  * Inputs are an explicitly curated API projection, never secrets or raw repositories.
@@ -41,6 +45,7 @@ export const GenerationTaskSchema = z
     apiVersionId: EntityIdSchema,
     sourceHash: ContentHashSchema,
     objective: z.string().min(1).max(4096),
+    agent: AgentSnapshotSchema.optional(),
     modelTarget: z
       .object({ provider: z.string().min(1).max(128), model: z.string().min(1).max(256) })
       .strict()
@@ -93,6 +98,7 @@ export const GenerationResultSchema = z
     promptVersion: SemanticVersionSchema,
     provider: z.string().min(1).max(128),
     model: z.string().min(1).max(256),
+    events: z.array(ExecutionEventSchema).max(200).optional(),
     turns: z.number().int().positive(),
     drafts: z.array(GeneratedDraftSchema).min(1).max(20),
   })
@@ -101,6 +107,11 @@ export type GenerationResult = z.infer<typeof GenerationResultSchema>;
 
 export const WorkerIdentitySchema = z
   .object({
+    connectionRef: z
+      .string()
+      .regex(/^[a-zA-Z0-9_.-]{1,80}$/)
+      .optional(),
+    agentConfigVersion: z.literal(1).optional(),
     capabilities: z.array(z.literal('plan')).optional(),
     workerId: EntityIdSchema,
     provider: z.string().min(1).max(128),

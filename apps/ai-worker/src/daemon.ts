@@ -13,6 +13,8 @@ async function main() {
   process.once('SIGTERM', () => controller.abort());
   const identity = {
     capabilities: ['plan' as const],
+    agentConfigVersion: 1 as const,
+    connectionRef: process.env['AI_CONNECTION_REF'] ?? 'default',
     workerId: process.env['AI_WORKER_ID'] ?? `ai_${randomUUID()}`,
     provider: model.provider,
     model: model.id,

@@ -22,6 +22,7 @@ const StartGenerationBodySchema = z.object({
   strategy: z.enum(['example', 'schema', 'status-codes', 'pi']),
   endpointIds: z.array(z.string()).min(1).max(100).optional(),
   objective: z.string().min(1).max(4096).optional(),
+  agentId: z.string().min(1).max(128).optional(),
 });
 
 const AcceptDraftBodySchema = z.object({
@@ -54,6 +55,7 @@ export async function generationRoutes(app: FastifyInstance): Promise<void> {
               parsed.data.apiVersionId,
               parsed.data.objective ?? '依据 API 契约生成可审阅的回归测试，明确缺失的业务预期。',
               parsed.data.endpointIds,
+              parsed.data.agentId,
             )
           : await generateTests(
               parsed.data.workspaceId,

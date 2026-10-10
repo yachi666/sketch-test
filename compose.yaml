@@ -140,6 +140,7 @@ services:
       AI_WORKER_TOKEN: ${AI_WORKER_TOKEN:-}
       AI_PROVIDER: ${AI_PROVIDER:-}
       AI_MODEL: ${AI_MODEL:-}
+      AI_CONNECTION_REF: ${AI_CONNECTION_REF:-default}
       AI_API_KEY: ${AI_API_KEY:-}
     depends_on:
       control-plane:
