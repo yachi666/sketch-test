@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest a new feature for SketchTest
 title: 'feat: '
-labels: ['enhancement', 'triage']
+labels: ['enhancement', 'needs-triage']
 assignees: []
 ---
 

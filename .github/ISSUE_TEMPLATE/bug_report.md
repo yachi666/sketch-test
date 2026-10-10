@@ -2,7 +2,7 @@
 name: Bug report
 about: Report a bug in SketchTest
 title: 'fix: '
-labels: ['bug', 'triage']
+labels: ['bug', 'needs-triage']
 assignees: []
 ---
 
@@ -27,8 +27,8 @@ assignees: []
 ## Environment
 
 - OS: [e.g. macOS 15.0]
-- Node: [e.g. 24.0.0]
-- pnpm: [e.g. 11.8.0]
+- Node: [e.g. 24.15.0]
+- pnpm: [e.g. 12.10.1]
 
 ## Additional context
 

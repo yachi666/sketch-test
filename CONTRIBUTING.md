@@ -1,62 +1,61 @@
 # Contributing to SketchTest
 
-## Getting started
+Use [GitHub issues](https://github.com/yachi666/sketch-test/issues/new/choose) for bugs
+and feature proposals. For vulnerabilities, use the [private reporting process](SECURITY.md).
+
+## Get started
+
+Follow the [README](README.md#quick-start) to install the pinned pnpm version,
+configure dependencies, and verify a clean checkout. Read [CLAUDE.md](CLAUDE.md)
+and the relevant package's `CLAUDE.md` before changing code.
 
 ```bash
-git clone <repo-url>
-cd sketch-test
-pnpm install
-pnpm dev          # Start all apps in dev mode
+git switch master
+git pull --ff-only
+git switch -c feat/your-feature
+pnpm install --frozen-lockfile
 ```
 
-**Requirements**: Node ^22.22.2, ^24.15.0, or >=26.0.0; pnpm >=12.10.1.
+Use TypeScript strict mode, Biome, and the shared pnpm catalog. Do not add ESLint
+or Prettier. Control Plane, Runner, and AI Worker remain separate processes;
+shared contracts are the only stable package boundaries.
 
-## Development workflow
+## Validate your change
 
-1. **Create a branch** from `master`:
-   ```bash
-   git checkout -b feat/your-feature
-   ```
+```bash
+pnpm turbo run lint check test build --force
+node scripts/check-repository.mjs
+```
 
-2. **Write code** following our conventions:
-   - TypeScript strict mode everywhere
-   - Biome for formatting and linting (2-space indent, single quotes, semicolons)
-   - Zod schemas for all runtime validation — types derived via `z.infer<>`
-   - Exported schemas use `Schema` suffix; inferred types use the bare name
+For runtime, container, or cross-process changes, also run:
 
-3. **Commit** using conventional commits:
-   ```bash
-   git commit -m "feat(scope): description"
-   ```
-   Types: `feat`, `fix`, `refactor`, `docs`, `chore`, `test`, `ci`.
+```bash
+pnpm --filter web exec playwright install chromium
+E2E_MANAGED_POSTGRES=1 pnpm e2e:product
+pnpm e2e:compose
+```
 
-4. **Check** before pushing:
-   ```bash
-   pnpm check      # TypeScript type-check
-   pnpm lint       # Biome lint
-   pnpm format     # Biome format
-   pnpm test       # All tests (vitest)
-   ```
+Add focused regression coverage for changed behavior. Contract schema changes
+must update all consumers and golden snapshots in the same PR. Published versions
+are immutable. Never commit `.env`, credentials, generated build output, or local databases.
 
-5. **Open a PR** against `master`.
+## Open a pull request
 
-## Code conventions
+Target `master` and describe the problem, resulting behavior, and validation.
+Use a Conventional Commit title, such as `fix(runner): preserve ordered events`.
+Keep unrelated work in separate PRs and link the relevant issue when one exists.
 
-### Contracts
-- All 6 `packages/contracts/*` packages are **stable seams**. Before modifying a contract, check all downstream consumers.
-- Published versions (ApiVersion, TestCaseVersion, WorkflowVersion, EnvironmentVersion, DatasetVersion) are **immutable**.
-- Add new schemas to `contracts-common` only when needed by 2+ other packages.
+The protected branch requires passing checks, an up-to-date branch, resolved
+review conversations, and linear history. PRs are squash-merged and their branches
+are deleted automatically. Only one human maintainer is currently configured, so
+independent approval is not mandatory; this is not an instruction to skip review.
 
-### Testing
-- **Unit tests**: `vitest run` per package — fast, no external deps.
-- **Golden tests**: Zod output serialized to JSON, compared against checked-in snapshots.
-- **Integration tests**: Use the Hermetic Fixture Server (`packages/test-fixtures/hermetic-fixture-server`).
-- **Fault injection**: Set `FAULT_MODE` and `FAULT_TARGET` env vars.
+## Version changes
 
-## Project structure
+Run `pnpm changeset` when a package change needs a version bump and changelog entry.
+Documentation, tests, and repository automation alone usually do not need one.
+After the change reaches `master` and CI passes, automation creates or updates a
+version PR. That PR must pass the same CI and be reviewed and merged normally.
+No workflow pushes version commits directly to `master` or publishes npm packages.
 
-See [CLAUDE.md](CLAUDE.md) for the full monorepo map and [docs/](docs/) for architecture and planning documents.
-
-## Questions?
-
-Open a [discussion](https://github.com/your-org/sketch-test/discussions) or file an issue.
+See [GitHub automation](docs/GITHUB_AUTOMATION.md) for maintenance and troubleshooting.

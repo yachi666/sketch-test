@@ -1,0 +1,14 @@
+changelog:
+  exclude:
+    labels: [duplicate, invalid, wontfix]
+  categories:
+    - title: Features
+      labels: [enhancement]
+    - title: Fixes
+      labels: [bug]
+    - title: Dependencies
+      labels: [dependencies]
+    - title: Documentation
+      labels: [documentation]
+    - title: Maintenance
+      labels: ['*']

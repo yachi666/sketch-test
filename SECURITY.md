@@ -8,14 +8,14 @@
 
 ## Reporting a vulnerability
 
-**Do not open a public issue.** Email security@sketchtest.dev with:
+**Do not open a public issue.** Use [GitHub private vulnerability reporting](https://github.com/yachi666/sketch-test/security/advisories/new) with:
 
 - Description of the vulnerability
 - Steps to reproduce
 - Affected versions
 - Suggested fix (if available)
 
-We aim to acknowledge within 48 hours and publish a fix within 7 days.
+The maintainer will assess the report privately and coordinate remediation and disclosure with you. This pre-release project does not offer a guaranteed response or fix SLA.
 
 ## Security design
 

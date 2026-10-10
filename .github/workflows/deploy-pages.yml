@@ -1,34 +1,19 @@
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches: [master]
+  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter web build
-      - uses: actions/upload-pages-artifact@v5
-        with:
-          path: apps/web/dist
-
   deploy:
-    needs: build
+    if: github.ref == 'refs/heads/master'
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     permissions:
       pages: write
@@ -37,6 +22,8 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # Deploy the artifact produced in this same CI run; do not check out or
+      # execute repository code in a job with deployment permissions.
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5

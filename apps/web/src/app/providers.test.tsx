@@ -1,5 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, expect, test, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { Link, Route, Routes } from 'react-router-dom';
+import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
 const { getGuestSessionMock, getMeMock } = vi.hoisted(() => ({
   getGuestSessionMock: vi.fn(),
@@ -51,4 +52,29 @@ test('provisions a guest session before rendering the product', async () => {
   await waitFor(() => {
     expect(useAuthStore.getState()).toMatchObject({ token: 'guest-token', user: guestUser });
   });
+});
+
+afterEach(() => {
+  cleanup();
+  vi.unstubAllEnvs();
+  window.history.replaceState({}, '', '/');
+});
+
+test('renders and navigates routes under the configured Pages base path', async () => {
+  vi.stubEnv('BASE_URL', '/sketch-test/');
+  window.history.replaceState({}, '', '/sketch-test/reports');
+  getGuestSessionMock.mockResolvedValue({ enabled: true, token: 'guest-token', user: guestUser });
+
+  render(
+    <Providers>
+      <Routes>
+        <Route path="/reports" element={<Link to="/">返回工作台</Link>} />
+        <Route path="/" element={<div>产品工作台</div>} />
+      </Routes>
+    </Providers>,
+  );
+
+  fireEvent.click(await screen.findByRole('link', { name: '返回工作台' }));
+  expect(await screen.findByText('产品工作台')).toBeInTheDocument();
+  expect(window.location.pathname).toBe('/sketch-test/');
 });
