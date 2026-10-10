@@ -76,6 +76,8 @@ function databaseUrl(name) {
 
 async function startManagedPostgres() {
   postgresPort = await freePort();
+  const minioImage = 'sketchtest/minio:RELEASE.2025-09-07T16-13-09Z';
+  command('docker', ['build', '--target', 'server', '-t', minioImage, 'ops/minio']);
   command('docker', [
     'run',
     '-d',
@@ -257,7 +259,7 @@ async function main() {
     `MINIO_ROOT_USER=${accessKey}`,
     '-e',
     `MINIO_ROOT_PASSWORD=${secretKey}`,
-    'minio/minio:RELEASE.2025-09-07T16-13-09Z',
+    minioImage,
     'server',
     '/data',
     '--console-address',

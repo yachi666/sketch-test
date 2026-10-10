@@ -190,3 +190,7 @@ Grafana 提供只读匿名本机看板 `sketchtest-operations`。此配置面向
 历史未标记编码的哈希与证据文件不回写；若旧 JSONB 已丢失原始键顺序，
 校验结果包含 `unverifiableLegacyEventIds` 并维持 `valid:false`，不能据此声称篡改
 或将历史记录强行标记为校验通过。需要可信新证据时重新运行已发布版本。
+
+### MinIO source-built images
+
+The original MinIO server/client images are no longer publicly pullable from Docker Hub or Quay. Compose and product E2E build the same pinned releases through `ops/minio/Dockerfile`, verifying upstream source archive SHA-256 values before compilation. The image includes the upstream AGPL license and source/revision labels. A cold build requires GitHub, the Go module proxy and the official Go/Alpine base images; allow extra time for the first build. The object-data volume and S3 API remain unchanged. See the [upstream source-build instructions](https://github.com/minio/minio#build-docker-image).
