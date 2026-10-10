@@ -1,7 +1,9 @@
+import { WorkflowDefinitionSchema } from '@sketch-test/workflow-dsl';
 import type { FastifyInstance } from 'fastify';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { sendError } from '../../shared/errors.js';
 import { authenticatedUser } from '../iam/auth.middleware.js';
+import { ArazzoImportError, importArazzoWorkflows } from './arazzo-import.service.js';
 import {
   compileWorkflowPreview,
   createWorkflow,
@@ -28,135 +30,111 @@ const UpdateWorkflowBodySchema = z.object({
   description: z.string().max(4096).optional(),
 });
 
+const LegacyDefinitionSchema = z.object({
+  schemaVersion: z.string().optional(),
+  name: z.string().min(1).max(256),
+  steps: z
+    .array(
+      z.object({
+        id: z.string().min(1).max(256),
+        name: z.string().min(1).max(256),
+        useTest: z.string().min(1).max(256).optional(),
+        method: z.string().min(1).max(10).optional(),
+        url: z.string().max(4096).optional(),
+        headers: z.record(z.string(), z.string()).optional(),
+        body: z.unknown().optional(),
+        extract: z
+          .array(
+            z.object({
+              name: z.string().min(1).max(128),
+              source: z.string().min(1).max(10),
+              expression: z.string().min(1).max(1024),
+              scope: z.string().max(10).optional(),
+            }),
+          )
+          .optional(),
+        assertions: z
+          .array(
+            z.object({
+              target: z.string().min(1).max(64),
+              path: z.string().max(1024).optional(),
+              operator: z.string().min(1).max(64),
+              expected: z.unknown().optional(),
+              description: z.string().max(1024).optional(),
+            }),
+          )
+          .optional(),
+        onFailure: z.string().max(32).optional(),
+        maxRetries: z.number().int().min(0).max(10).optional(),
+        timeoutMs: z.number().int().positive().max(300_000).optional(),
+        enabled: z.boolean().optional(),
+        sideEffect: z.string().max(32).optional(),
+      }),
+    )
+    .min(1)
+    .max(50),
+  teardown: z
+    .array(
+      z.object({
+        id: z.string().min(1).max(256),
+        name: z.string().min(1).max(256),
+        method: z.string().min(1).max(10),
+        url: z.string().max(4096),
+        headers: z.record(z.string(), z.string()).optional(),
+        body: z.unknown().optional(),
+        maxRetries: z.number().int().min(0).max(3).optional(),
+        enabled: z.boolean().optional(),
+      }),
+    )
+    .max(20)
+    .optional(),
+});
+
 const SaveDraftBodySchema = z.object({
-  definition: z.object({
-    schemaVersion: z.string().optional(),
-    name: z.string().min(1).max(256),
-    steps: z
-      .array(
-        z.object({
-          id: z.string().min(1).max(256),
-          name: z.string().min(1).max(256),
-          useTest: z.string().min(1).max(256).optional(),
-          method: z.string().min(1).max(10).optional(),
-          url: z.string().max(4096).optional(),
-          headers: z.record(z.string(), z.string()).optional(),
-          body: z.unknown().optional(),
-          extract: z
-            .array(
-              z.object({
-                name: z.string().min(1).max(128),
-                source: z.string().min(1).max(10),
-                expression: z.string().min(1).max(1024),
-                scope: z.string().max(10).optional(),
-              }),
-            )
-            .optional(),
-          assertions: z
-            .array(
-              z.object({
-                target: z.string().min(1).max(64),
-                operator: z.string().min(1).max(64),
-                expected: z.unknown().optional(),
-                description: z.string().max(1024).optional(),
-              }),
-            )
-            .optional(),
-          onFailure: z.string().max(32).optional(),
-          maxRetries: z.number().int().min(0).max(10).optional(),
-          timeoutMs: z.number().int().positive().max(300_000).optional(),
-          enabled: z.boolean().optional(),
-          sideEffect: z.string().max(32).optional(),
-        }),
-      )
-      .min(1)
-      .max(50),
-    teardown: z
-      .array(
-        z.object({
-          id: z.string().min(1).max(256),
-          name: z.string().min(1).max(256),
-          method: z.string().min(1).max(10),
-          url: z.string().max(4096),
-          headers: z.record(z.string(), z.string()).optional(),
-          body: z.unknown().optional(),
-          maxRetries: z.number().int().min(0).max(3).optional(),
-          enabled: z.boolean().optional(),
-        }),
-      )
-      .max(20)
-      .optional(),
-  }),
+  definition: z.union([WorkflowDefinitionSchema, LegacyDefinitionSchema]),
 });
 
 const PublishBodySchema = z.object({
   publishedBy: z.string().min(1).max(128).optional(),
 });
 
-const CompileBodySchema = z.object({
-  definition: z.object({
-    schemaVersion: z.string().optional(),
-    name: z.string().min(1).max(256),
-    steps: z
-      .array(
-        z.object({
-          id: z.string().min(1).max(256),
-          name: z.string().min(1).max(256),
-          useTest: z.string().min(1).max(256).optional(),
-          method: z.string().min(1).max(10).optional(),
-          url: z.string().max(4096).optional(),
-          headers: z.record(z.string(), z.string()).optional(),
-          body: z.unknown().optional(),
-          extract: z
-            .array(
-              z.object({
-                name: z.string().min(1).max(128),
-                source: z.string().min(1).max(10),
-                expression: z.string().min(1).max(1024),
-                scope: z.string().max(10).optional(),
-              }),
-            )
-            .optional(),
-          assertions: z
-            .array(
-              z.object({
-                target: z.string().min(1).max(64),
-                operator: z.string().min(1).max(64),
-                expected: z.unknown().optional(),
-                description: z.string().max(1024).optional(),
-              }),
-            )
-            .optional(),
-          onFailure: z.string().max(32).optional(),
-          maxRetries: z.number().int().min(0).max(10).optional(),
-          timeoutMs: z.number().int().positive().max(300_000).optional(),
-          enabled: z.boolean().optional(),
-          sideEffect: z.string().max(32).optional(),
-        }),
-      )
-      .min(1)
-      .max(50),
-    teardown: z
-      .array(
-        z.object({
-          id: z.string().min(1).max(256),
-          name: z.string().min(1).max(256),
-          method: z.string().min(1).max(10),
-          url: z.string().max(4096),
-          headers: z.record(z.string(), z.string()).optional(),
-          body: z.unknown().optional(),
-          maxRetries: z.number().int().min(0).max(3).optional(),
-          enabled: z.boolean().optional(),
-        }),
-      )
-      .max(20)
-      .optional(),
-  }),
+const ImportArazzoBodySchema = z.object({
+  sourceText: z
+    .string()
+    .min(1)
+    .max(2 * 1024 * 1024),
+  sourceLocation: z.string().url().max(4096),
+  sources: z.record(z.string().min(1).max(128), z.string().min(1).max(256)),
 });
+
+const CompileBodySchema = SaveDraftBodySchema;
 
 // ─── Routes ──────────────────────────────────────────────────────
 
 export async function workflowRoutes(app: FastifyInstance): Promise<void> {
+  /** Import Arazzo 1.1 workflows bound to immutable ApiVersions in this workspace. */
+  app.post('/api/workflows/import/arazzo', async (request, reply) => {
+    const parsed = ImportArazzoBodySchema.safeParse(request.body);
+    if (!parsed.success) {
+      return sendError(reply, 400, 'INVALID_INPUT', 'Invalid Arazzo import request', [
+        { field: 'body', message: parsed.error.message },
+      ]);
+    }
+    try {
+      const imported = await importArazzoWorkflows({
+        ...parsed.data,
+        workspaceId: authenticatedUser(request).workspaceId,
+      });
+      return reply.status(201).send(imported);
+    } catch (error) {
+      if (error instanceof ArazzoImportError) {
+        return sendError(reply, 422, 'ARAZZO_IMPORT_FAILED', error.message);
+      }
+      console.error('[workflow] Arazzo import error:', error);
+      return sendError(reply, 500, 'INTERNAL_ERROR', 'Failed to import Arazzo workflows');
+    }
+  });
+
   /** POST /api/workflows — Create a new workflow. */
   app.post('/api/workflows', async (request, reply) => {
     const parsed = CreateWorkflowBodySchema.safeParse(request.body);

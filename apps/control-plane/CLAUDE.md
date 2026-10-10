@@ -6,7 +6,7 @@
 
 The Control Plane is the central API server. It manages workspaces, users, API versions, test cases, workflows, environments, datasets, test suites, policies, and schedules. It creates runs, hands out leases to Runners, collects step events, and serves reports to the Web UI and CLI.
 
-The current product surface contains approximately 109 route declarations and 28 PostgreSQL tables. Treat these counts as descriptive rather than completion evidence.
+Route registration in `src/main.ts` and versioned migrations in `src/db` are the source of truth for the current API and database surface.
 
 ## Quick start
 
@@ -17,7 +17,7 @@ DATABASE_URL=postgresql://localhost:5432/sketchtest pnpm dev:cp
 
 ## API surface
 
-~80 endpoints across 14 route modules. See `src/modules/<name>/<name>.routes.ts` for route definitions.
+See `src/modules/<name>/<name>.routes.ts` for route definitions.
 
 | Module | Purpose |
 |--------|---------|
@@ -27,7 +27,7 @@ DATABASE_URL=postgresql://localhost:5432/sketchtest pnpm dev:cp
 | run | API versions, runs, execution plans, scheduling |
 | lease | Runner long-poll (`GET /api/runs/next`), atomic claim, idempotent event upload |
 | runner-registry | Runner registration, heartbeat, status lifecycle |
-| workflow | Workflow CRUD, versioning, compile, publish |
+| workflow | Workflow CRUD, Arazzo 1.1 import, versioning, compile, publish |
 | test-authoring | Test case CRUD, versioning, publish, compare |
 | test-suite | Test suite CRUD, versioning, quality gate evaluation |
 | generation | Generation jobs, draft review (accept/reject) |
@@ -40,7 +40,7 @@ DATABASE_URL=postgresql://localhost:5432/sketchtest pnpm dev:cp
 
 ```
 apps/control-plane/src/
-  main.ts                  # Fastify bootstrap, 16 route modules registered
+  main.ts                  # Fastify bootstrap and route registration
   db/db.ts                 # PostgreSQL pool + domain-grouped schema migrations
   shared/id.ts             # EntityId generation (prefixed, URL-safe)
   modules/
@@ -49,10 +49,10 @@ apps/control-plane/src/
     import/                # Multi-format import + diff
     run/                   # Run CRUD, ExecutionPlan builder, lease (FOR UPDATE SKIP LOCKED)
     runner-registry/       # Registration + heartbeat + lifecycle
-    workflow/              # CRUD + versioning + WorkflowDefinition → ExecutionPlan compiler
+    workflow/              # Arazzo import + CRUD/versioning + WorkflowDefinition → ExecutionPlan
     test-authoring/        # Test case CRUD + versioning + publishing
     test-suite/            # Test suite CRUD + quality gate evaluation
-    generation/            # Rule-based test generation engine
+    generation/            # Rule and Pi jobs, fenced leases, validated draft review
     environment/           # Environment + secrets (encrypted at rest)
     dataset/               # Dataset CRUD + JSON/CSV import
     policy/                # Policy CRUD + evaluation engine
@@ -75,6 +75,12 @@ All tables use TEXT primary keys (prefixed, URL-safe identifiers) and JSONB for 
 4. **Secrets are redacted on the Runner side** before upload — CP stores encrypted values, never sees plaintext at rest.
 5. **Published versions are immutable** — ApiVersion, TestCaseVersion, WorkflowVersion, EnvironmentVersion, DatasetVersion.
 6. **Control Plane, Runner, and Web are independent processes** — they share only versioned contracts.
+7. **Arazzo imports bind only current-workspace ApiVersions** — source retrieval
+   URL and canonical content hash are verified before raw source persistence;
+   workflow/version creation is transactional.
+8. **TestSuiteVersions are non-empty and immutable** — members must have a
+   published executable version, duplicate members are normalized at creation,
+   and suites referenced by schedules cannot be partially deleted.
 
 ## Dependencies
 
@@ -85,3 +91,23 @@ All tables use TEXT primary keys (prefixed, URL-safe identifiers) and JSONB for 
 - `@sketch-test/runner-protocol` — ExecutionPlan, RunEvents, lease protocol
 - `@sketch-test/test-dsl` — TestDefinition, assertions
 - `@sketch-test/workflow-dsl` — WorkflowDefinition (compiler input)
+
+## GitHub repository sources (2026-09-23)
+
+`POST /api/import/repository` accepts a public GitHub repository URL, optional ref and directory. It pins and verifies the snapshot, discovers bounded Spring code facts via the adapter and stores an immutable workspace-owned ApiVersion. Never execute repository code or pass raw code/defaults/credentials to the model. Explicitly retain unsupported-semantics diagnostics. AI completion derives code provenance from this stored version. See `docs/design/2026-09-23-github-generation.md` at the repository root.
+
+## AI plan suggestions (2026-09-28)
+
+`modules/plan-generation` owns workspace settings and fenced plan jobs (migration
+003). `GET/POST /api/plan-suggestions`, settings, save, cancel and publish routes
+require workspace authorization. Explicitly enumerated `/api/ai-worker/plans/*`
+routes require the workspace-bound worker token. Enabled workspaces are checked
+every 30 seconds when a capable worker polls; inventory hashes deduplicate
+suggestions. Inventory is bounded to 75 published tests, 25 compiled workflows
+and 50 pending drafts. Do not send raw definitions or environment values.
+
+Save uses optimistic revisions and never publishes. Publish revalidates
+referenced versions and transactionally creates a TestSuite and immutable v1;
+pending gaps are excluded, no Runner task is created. Lease completion is fenced
+and idempotent. See `docs/design/2026-09-28-ai-plan-generation.md` at the root and
+`scripts/plan-generation-e2e.ts` for the disposable PostgreSQL acceptance test.

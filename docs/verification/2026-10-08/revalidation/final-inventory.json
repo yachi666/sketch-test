@@ -1,0 +1,1935 @@
+{
+  "capturedAt": "2026-10-08T16:12:40.610Z",
+  "workspaceId": "ws_02eaec7b",
+  "runs": {
+    "runs": [
+      {
+        "id": "run_258d976f",
+        "status": "passed",
+        "runnerId": "rnr_5add256e",
+        "claimedAt": "2026-10-08T16:06:56.350455+00:00",
+        "createdAt": "2026-10-08T16:06:55.975253+00:00",
+        "finishedAt": "2026-10-08T16:06:57.607281+00:00",
+        "sourceName": "修复复测：GitHub 流程编辑保存",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_e9f5f34c"
+      },
+      {
+        "id": "run_72d8544d",
+        "status": "passed",
+        "runnerId": "rnr_5add256e",
+        "claimedAt": "2026-10-08T16:04:51.851864+00:00",
+        "createdAt": "2026-10-08T16:04:49.536818+00:00",
+        "finishedAt": "2026-10-08T16:04:53.594252+00:00",
+        "sourceName": "GitHub 真实元数据和提交历史回归",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_f13180f4"
+      },
+      {
+        "id": "run_917733c9",
+        "status": "passed",
+        "runnerId": "rnr_5add256e",
+        "claimedAt": "2026-10-08T16:00:01.697666+00:00",
+        "createdAt": "2026-10-08T16:00:01.369381+00:00",
+        "finishedAt": "2026-10-08T16:00:02.60836+00:00",
+        "sourceName": "GitHub 公开仓库 · 真实响应回归",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_f85319f4"
+      },
+      {
+        "id": "run_44895576",
+        "status": "passed",
+        "runnerId": "rnr_5add256e",
+        "claimedAt": "2026-10-08T15:59:11.315942+00:00",
+        "createdAt": "2026-10-08T15:59:11.302372+00:00",
+        "finishedAt": "2026-10-08T15:59:12.42545+00:00",
+        "sourceName": "GitHub 公开仓库 · 真实响应回归",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_f85319f4"
+      },
+      {
+        "id": "run_96cdc835",
+        "status": "passed",
+        "runnerId": "rnr_5add256e",
+        "claimedAt": "2026-10-08T15:57:48.013073+00:00",
+        "createdAt": "2026-10-08T15:57:47.267654+00:00",
+        "finishedAt": "2026-10-08T15:57:49.56486+00:00",
+        "sourceName": "读取 nodejs/node 仓库元数据应返回 200 且 full_name 为 nodejs/node",
+        "apiVersionId": "av_fa206a0a",
+        "testCaseVersionId": "tcv_5dbcca7f",
+        "workflowVersionId": null
+      },
+      {
+        "id": "run_baec5f04",
+        "status": "passed",
+        "runnerId": "rnr_5add256e",
+        "claimedAt": "2026-10-08T15:57:37.520459+00:00",
+        "createdAt": "2026-10-08T15:57:37.103381+00:00",
+        "finishedAt": "2026-10-08T15:57:38.954986+00:00",
+        "sourceName": "GitHub 真实元数据和提交历史回归",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_0f2d735b"
+      },
+      {
+        "id": "run_02ccfe0e",
+        "status": "failed",
+        "runnerId": "rnr_8414f10d",
+        "claimedAt": "2026-10-08T15:26:28.127619+00:00",
+        "createdAt": "2026-10-08T15:26:27.652367+00:00",
+        "finishedAt": "2026-10-08T15:26:28.139739+00:00",
+        "sourceName": "GitHub 真实元数据和提交历史回归",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_c289c262"
+      },
+      {
+        "id": "run_f76d293c",
+        "status": "passed",
+        "runnerId": "rnr_8414f10d",
+        "claimedAt": "2026-10-08T15:24:22.045532+00:00",
+        "createdAt": "2026-10-08T15:24:21.669453+00:00",
+        "finishedAt": "2026-10-08T15:24:23.545138+00:00",
+        "sourceName": "GitHub 真实元数据和提交历史回归",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_0f2d735b"
+      },
+      {
+        "id": "run_a170cee5",
+        "status": "passed",
+        "runnerId": "rnr_69840a6a",
+        "claimedAt": "2026-10-08T15:20:46.198776+00:00",
+        "createdAt": "2026-10-08T15:20:44.849087+00:00",
+        "finishedAt": "2026-10-08T15:20:46.744867+00:00",
+        "sourceName": "读取 nodejs/node 仓库元数据返回 200 且 full_name 正确 · 人工修正变量版本",
+        "apiVersionId": "av_fa206a0a",
+        "testCaseVersionId": "tcv_3ec1a7d0",
+        "workflowVersionId": null
+      },
+      {
+        "id": "run_1be0d384",
+        "status": "failed",
+        "runnerId": "rnr_69840a6a",
+        "claimedAt": "2026-10-08T15:20:43.466119+00:00",
+        "createdAt": "2026-10-08T15:20:42.824617+00:00",
+        "finishedAt": "2026-10-08T15:20:44.184425+00:00",
+        "sourceName": "读取 nodejs/node 仓库元数据返回 200 且 full_name 正确",
+        "apiVersionId": "av_fa206a0a",
+        "testCaseVersionId": "tcv_087f8817",
+        "workflowVersionId": null
+      },
+      {
+        "id": "run_f5138313",
+        "status": "passed",
+        "runnerId": "rnr_69840a6a",
+        "claimedAt": "2026-10-08T15:19:24.664146+00:00",
+        "createdAt": "2026-10-08T15:19:23.875897+00:00",
+        "finishedAt": "2026-10-08T15:19:26.03883+00:00",
+        "sourceName": "GitHub 真实元数据和提交历史回归",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_0f2d735b"
+      },
+      {
+        "id": "run_c657eafd",
+        "status": "passed",
+        "runnerId": "rnr_69840a6a",
+        "claimedAt": "2026-10-08T15:16:14.049208+00:00",
+        "createdAt": "2026-10-08T15:16:10.89788+00:00",
+        "finishedAt": "2026-10-08T15:16:15.450726+00:00",
+        "sourceName": "GitHub 公开仓库 · 真实响应回归",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_f85319f4"
+      },
+      {
+        "id": "run_697cf472",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:14:47.068395+00:00",
+        "createdAt": "2026-10-08T15:14:46.261918+00:00",
+        "finishedAt": "2026-10-08T15:14:47.794604+00:00",
+        "sourceName": "Node.js 公开仓库真实响应 · 单用例",
+        "apiVersionId": null,
+        "testCaseVersionId": "tcv_ee267af2",
+        "workflowVersionId": null
+      },
+      {
+        "id": "run_d173d45d",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:12:22.204264+00:00",
+        "createdAt": "2026-10-08T15:11:28.335549+00:00",
+        "finishedAt": "2026-10-08T15:12:23.126011+00:00",
+        "sourceName": "GitHub 公开仓库 · 真实响应回归",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_f85319f4"
+      },
+      {
+        "id": "run_9b0a7c26",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:12:20.181294+00:00",
+        "createdAt": "2026-10-08T15:10:29.271181+00:00",
+        "finishedAt": "2026-10-08T15:12:20.197764+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_7639b258",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:12:18.156481+00:00",
+        "createdAt": "2026-10-08T15:10:29.269752+00:00",
+        "finishedAt": "2026-10-08T15:12:18.173598+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_4e3562c5",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:12:16.135328+00:00",
+        "createdAt": "2026-10-08T15:10:29.268411+00:00",
+        "finishedAt": "2026-10-08T15:12:16.150532+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_acd68805",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:12:14.102723+00:00",
+        "createdAt": "2026-10-08T15:10:29.267111+00:00",
+        "finishedAt": "2026-10-08T15:12:14.129765+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_4b696e9a",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:12:12.0763+00:00",
+        "createdAt": "2026-10-08T15:10:29.26573+00:00",
+        "finishedAt": "2026-10-08T15:12:12.093397+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_cf2090f7",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:12:10.054606+00:00",
+        "createdAt": "2026-10-08T15:10:29.264503+00:00",
+        "finishedAt": "2026-10-08T15:12:10.06993+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_89da8dbc",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:12:08.026674+00:00",
+        "createdAt": "2026-10-08T15:10:29.263236+00:00",
+        "finishedAt": "2026-10-08T15:12:08.045257+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_496b4f7c",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:12:06.000023+00:00",
+        "createdAt": "2026-10-08T15:10:29.261816+00:00",
+        "finishedAt": "2026-10-08T15:12:06.017739+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_e96ce8a4",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:12:03.971604+00:00",
+        "createdAt": "2026-10-08T15:10:29.260471+00:00",
+        "finishedAt": "2026-10-08T15:12:03.990738+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_f2000d2c",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:12:01.945238+00:00",
+        "createdAt": "2026-10-08T15:10:29.259186+00:00",
+        "finishedAt": "2026-10-08T15:12:01.962943+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_899b382f",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:59.918164+00:00",
+        "createdAt": "2026-10-08T15:10:29.257821+00:00",
+        "finishedAt": "2026-10-08T15:11:59.935065+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_082a3d26",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:57.891354+00:00",
+        "createdAt": "2026-10-08T15:10:29.256153+00:00",
+        "finishedAt": "2026-10-08T15:11:57.907185+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_986178b8",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:55.862194+00:00",
+        "createdAt": "2026-10-08T15:10:29.254897+00:00",
+        "finishedAt": "2026-10-08T15:11:55.880121+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_f66de084",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:53.835242+00:00",
+        "createdAt": "2026-10-08T15:10:29.253541+00:00",
+        "finishedAt": "2026-10-08T15:11:53.852992+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_19a00bd7",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:51.80804+00:00",
+        "createdAt": "2026-10-08T15:10:29.252287+00:00",
+        "finishedAt": "2026-10-08T15:11:51.825496+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_e7d0d953",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:49.782683+00:00",
+        "createdAt": "2026-10-08T15:10:29.250771+00:00",
+        "finishedAt": "2026-10-08T15:11:49.804789+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_d0edff80",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:47.754096+00:00",
+        "createdAt": "2026-10-08T15:10:29.24928+00:00",
+        "finishedAt": "2026-10-08T15:11:47.770554+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_d24d380a",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:45.728828+00:00",
+        "createdAt": "2026-10-08T15:10:29.247878+00:00",
+        "finishedAt": "2026-10-08T15:11:45.747005+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_724ed364",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:43.701778+00:00",
+        "createdAt": "2026-10-08T15:10:29.246605+00:00",
+        "finishedAt": "2026-10-08T15:11:43.719451+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_45eb722a",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:41.676265+00:00",
+        "createdAt": "2026-10-08T15:10:29.24531+00:00",
+        "finishedAt": "2026-10-08T15:11:41.695961+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_ef241cd9",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:39.648086+00:00",
+        "createdAt": "2026-10-08T15:10:29.244037+00:00",
+        "finishedAt": "2026-10-08T15:11:39.665768+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_bee562dd",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:37.623385+00:00",
+        "createdAt": "2026-10-08T15:10:29.242669+00:00",
+        "finishedAt": "2026-10-08T15:11:37.639171+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_025972ee",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:35.593991+00:00",
+        "createdAt": "2026-10-08T15:10:29.241268+00:00",
+        "finishedAt": "2026-10-08T15:11:35.612286+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_b98f55d6",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:33.570662+00:00",
+        "createdAt": "2026-10-08T15:10:29.239853+00:00",
+        "finishedAt": "2026-10-08T15:11:33.588035+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_f30382f7",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:31.547446+00:00",
+        "createdAt": "2026-10-08T15:10:29.238509+00:00",
+        "finishedAt": "2026-10-08T15:11:31.562623+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_07019fdd",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:29.524188+00:00",
+        "createdAt": "2026-10-08T15:10:29.237179+00:00",
+        "finishedAt": "2026-10-08T15:11:29.538043+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_fdffc10b",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:27.499164+00:00",
+        "createdAt": "2026-10-08T15:10:29.235932+00:00",
+        "finishedAt": "2026-10-08T15:11:27.516101+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_890ee240",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:25.476495+00:00",
+        "createdAt": "2026-10-08T15:10:29.234595+00:00",
+        "finishedAt": "2026-10-08T15:11:25.494755+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_c837b63a",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:23.453808+00:00",
+        "createdAt": "2026-10-08T15:10:29.233283+00:00",
+        "finishedAt": "2026-10-08T15:11:23.470411+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_d80786b5",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:21.433342+00:00",
+        "createdAt": "2026-10-08T15:10:29.231954+00:00",
+        "finishedAt": "2026-10-08T15:11:21.447737+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_ddb11375",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:19.399402+00:00",
+        "createdAt": "2026-10-08T15:10:29.230455+00:00",
+        "finishedAt": "2026-10-08T15:11:19.426344+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_f1ca98a4",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:17.367552+00:00",
+        "createdAt": "2026-10-08T15:10:29.22896+00:00",
+        "finishedAt": "2026-10-08T15:11:17.388976+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_931d784d",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:15.338251+00:00",
+        "createdAt": "2026-10-08T15:10:29.227511+00:00",
+        "finishedAt": "2026-10-08T15:11:15.356634+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_dd0b1a5c",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:13.310351+00:00",
+        "createdAt": "2026-10-08T15:10:29.226231+00:00",
+        "finishedAt": "2026-10-08T15:11:13.328581+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_c5057146",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:11.280213+00:00",
+        "createdAt": "2026-10-08T15:10:29.224896+00:00",
+        "finishedAt": "2026-10-08T15:11:11.299442+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_afa1b8b6",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:09.260282+00:00",
+        "createdAt": "2026-10-08T15:10:29.223393+00:00",
+        "finishedAt": "2026-10-08T15:11:09.273485+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_0d0c46a0",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:07.234116+00:00",
+        "createdAt": "2026-10-08T15:10:29.222078+00:00",
+        "finishedAt": "2026-10-08T15:11:07.251716+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_919246c9",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:05.21075+00:00",
+        "createdAt": "2026-10-08T15:10:29.220699+00:00",
+        "finishedAt": "2026-10-08T15:11:05.229378+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_ff309b15",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:03.185569+00:00",
+        "createdAt": "2026-10-08T15:10:29.219373+00:00",
+        "finishedAt": "2026-10-08T15:11:03.204473+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_457157ac",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:11:01.156508+00:00",
+        "createdAt": "2026-10-08T15:10:29.218044+00:00",
+        "finishedAt": "2026-10-08T15:11:01.175457+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_fa58f7a7",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:10:59.138945+00:00",
+        "createdAt": "2026-10-08T15:10:29.21649+00:00",
+        "finishedAt": "2026-10-08T15:10:59.150525+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_600f1e06",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:10:57.125331+00:00",
+        "createdAt": "2026-10-08T15:10:29.215066+00:00",
+        "finishedAt": "2026-10-08T15:10:57.133808+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_0e2b5fdf",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:10:55.100063+00:00",
+        "createdAt": "2026-10-08T15:10:29.213619+00:00",
+        "finishedAt": "2026-10-08T15:10:55.116358+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_aa734350",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:10:53.074579+00:00",
+        "createdAt": "2026-10-08T15:10:29.212151+00:00",
+        "finishedAt": "2026-10-08T15:10:53.092387+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_a15c5ab7",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:10:51.051084+00:00",
+        "createdAt": "2026-10-08T15:10:29.210714+00:00",
+        "finishedAt": "2026-10-08T15:10:51.069429+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_e78d6001",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:10:49.027089+00:00",
+        "createdAt": "2026-10-08T15:10:29.209331+00:00",
+        "finishedAt": "2026-10-08T15:10:49.043666+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_012aa40e",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:10:47.001808+00:00",
+        "createdAt": "2026-10-08T15:10:29.207726+00:00",
+        "finishedAt": "2026-10-08T15:10:47.015732+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_0b3ee0da",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:10:44.977363+00:00",
+        "createdAt": "2026-10-08T15:10:29.206255+00:00",
+        "finishedAt": "2026-10-08T15:10:44.998843+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_6ffeba73",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:10:42.950273+00:00",
+        "createdAt": "2026-10-08T15:10:29.20479+00:00",
+        "finishedAt": "2026-10-08T15:10:42.968318+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_eda720b3",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:10:40.92392+00:00",
+        "createdAt": "2026-10-08T15:10:29.203226+00:00",
+        "finishedAt": "2026-10-08T15:10:40.941872+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_3a02523d",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:10:38.897919+00:00",
+        "createdAt": "2026-10-08T15:10:29.201732+00:00",
+        "finishedAt": "2026-10-08T15:10:38.914618+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_dc3d7b6d",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:10:36.871194+00:00",
+        "createdAt": "2026-10-08T15:10:29.200065+00:00",
+        "finishedAt": "2026-10-08T15:10:36.889292+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_8ebc54d8",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:10:34.848744+00:00",
+        "createdAt": "2026-10-08T15:10:29.198151+00:00",
+        "finishedAt": "2026-10-08T15:10:34.867222+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_5e67ab1b",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:10:32.828822+00:00",
+        "createdAt": "2026-10-08T15:10:29.196062+00:00",
+        "finishedAt": "2026-10-08T15:10:32.845071+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_2a3586ee",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:10:30.803646+00:00",
+        "createdAt": "2026-10-08T15:10:29.194273+00:00",
+        "finishedAt": "2026-10-08T15:10:30.821887+00:00",
+        "sourceName": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_1f87f538"
+      },
+      {
+        "id": "run_f7507226",
+        "status": "failed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:10:28.577994+00:00",
+        "createdAt": "2026-10-08T15:10:26.651215+00:00",
+        "finishedAt": "2026-10-08T15:10:28.794423+00:00",
+        "sourceName": "公开仓库 · 失败定位验收",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_05daf19e"
+      },
+      {
+        "id": "run_9354f0de",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:10:26.14628+00:00",
+        "createdAt": "2026-10-08T15:10:25.613823+00:00",
+        "finishedAt": "2026-10-08T15:10:26.56913+00:00",
+        "sourceName": "公开仓库 · 元数据回归",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_2c50e75e"
+      },
+      {
+        "id": "run_84626abc",
+        "status": "passed",
+        "runnerId": "rnr_53c757d8",
+        "claimedAt": "2026-10-08T15:09:57.233327+00:00",
+        "createdAt": "2026-10-08T15:09:56.918023+00:00",
+        "finishedAt": "2026-10-08T15:09:58.015581+00:00",
+        "sourceName": "GitHub 公开仓库 · 真实响应回归",
+        "apiVersionId": null,
+        "testCaseVersionId": null,
+        "workflowVersionId": "wfv_f85319f4"
+      }
+    ],
+    "total": 72,
+    "summary": {
+      "other": 0,
+      "total": 72,
+      "active": 0,
+      "failed": 3,
+      "passed": 69,
+      "cancelled": 0,
+      "unresolved": 0
+    },
+    "page": 1,
+    "pageSize": 100
+  },
+  "apiVersions": {
+    "apiVersions": [
+      {
+        "id": "av_d26bc0a0",
+        "sourceType": "url",
+        "sourceLocation": "https://raw.githubusercontent.com/open-meteo/open-meteo/main/openapi/forecast.yml",
+        "contentHash": "512e29bca2afb06a088cc27fae5c6793a05e272c6404a67e3632cecb87f8516f",
+        "createdAt": "2026-10-08T15:57:37.089Z",
+        "label": "https://raw.githubusercontent.com/open-meteo/open-meteo/main/openapi/forecast.yml",
+        "endpointCount": 1,
+        "diagnosticCount": 1
+      },
+      {
+        "id": "av_fa206a0a",
+        "sourceType": "url",
+        "sourceLocation": "http://sketchtest-verification-sources/github-public-acceptance.json",
+        "contentHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+        "createdAt": "2026-10-08T15:19:23.850Z",
+        "label": "http://sketchtest-verification-sources/github-public-acceptance.json",
+        "endpointCount": 2,
+        "diagnosticCount": 0
+      },
+      {
+        "id": "av_240776b7",
+        "sourceType": "url",
+        "sourceLocation": "http://sketchtest-verification-sources/open-meteo-compatible.json",
+        "contentHash": "e5a9a2c0fc854c978448484a46139d8279dc4e3621c73556aed3b8237e6c629b",
+        "createdAt": "2026-10-08T15:17:55.300Z",
+        "label": "http://sketchtest-verification-sources/open-meteo-compatible.json",
+        "endpointCount": 1,
+        "diagnosticCount": 0
+      },
+      {
+        "id": "av_ea093aaa",
+        "sourceType": "code-discovery",
+        "sourceLocation": "https://github.com/yachi666/support-roster-server/tree/f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "contentHash": "c9d94c6bbbfdc8df0f2797b0f64a789756539cd9cea77d26169c871b4a7113f0",
+        "createdAt": "2026-10-08T15:09:56.124Z",
+        "label": "https://github.com/yachi666/support-roster-server",
+        "endpointCount": 59,
+        "diagnosticCount": 72
+      }
+    ]
+  },
+  "workflows": {
+    "workflows": [
+      {
+        "id": "wf_5b2bc9b1",
+        "workspaceId": "ws_02eaec7b",
+        "name": "修复复测：GitHub 流程编辑保存",
+        "description": "",
+        "createdAt": "2026-10-08T15:57:39.166Z",
+        "updatedAt": "2026-10-08T15:57:39.166Z",
+        "latestVersion": {
+          "id": "wfv_e9f5f34c",
+          "workflowId": "wf_5b2bc9b1",
+          "version": 3,
+          "definition": {
+            "id": "wf_5b2bc9b1",
+            "name": "修复复测：GitHub 流程编辑保存",
+            "tags": [
+              "arazzo-1.1"
+            ],
+            "steps": [
+              {
+                "id": "metadata",
+                "name": "metadata",
+                "enabled": true,
+                "extract": [],
+                "useTest": {
+                  "url": "https://api.github.com/repos/nodejs/node",
+                  "kind": "inline",
+                  "method": "GET",
+                  "headers": {
+                    "Accept": "application/vnd.github+json"
+                  }
+                },
+                "onFailure": "stop",
+                "assertions": [
+                  {
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals"
+                  }
+                ],
+                "sideEffect": "read-only"
+              },
+              {
+                "id": "commits",
+                "name": "commits",
+                "enabled": true,
+                "extract": [],
+                "useTest": {
+                  "url": "https://api.github.com/repos/nodejs/node/commits?per_page=30",
+                  "kind": "inline",
+                  "method": "GET"
+                },
+                "onFailure": "stop",
+                "assertions": [
+                  {
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals"
+                  }
+                ],
+                "sideEffect": "read-only"
+              }
+            ],
+            "source": {
+              "type": "arazzo",
+              "contentHash": "0b7aa29ae499aad9c76143dafbf7e22e1f69248caba41e5ef0c95cdaa3eed66a",
+              "sourceLabel": "http://sketchtest-verification-sources/github-real.arazzo.yml",
+              "sourceObjectKey": "workflow-sources/sha256/0b7aa29ae499aad9c76143dafbf7e22e1f69248caba41e5ef0c95cdaa3eed66a.arazzo",
+              "specificationVersion": "1.1.0"
+            },
+            "schemaVersion": "sketch-test.workflow/v1"
+          },
+          "compiledPlan": {
+            "steps": [
+              {
+                "method": "GET",
+                "stepId": "metadata",
+                "enabled": true,
+                "headers": {
+                  "Accept": "application/vnd.github+json"
+                },
+                "sequence": 0,
+                "onFailure": "stop",
+                "timeoutMs": 30000,
+                "assertions": [
+                  {
+                    "id": "assert-0-0",
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals",
+                    "severity": "block"
+                  }
+                ],
+                "maxRetries": 0,
+                "sideEffect": "read-only",
+                "extractions": [],
+                "urlTemplate": "https://api.github.com/repos/nodejs/node",
+                "retryBaseDelayMs": 1000,
+                "retryOnNetworkError": true,
+                "retryBackoffMultiplier": 2
+              },
+              {
+                "method": "GET",
+                "stepId": "commits",
+                "enabled": true,
+                "sequence": 1,
+                "onFailure": "stop",
+                "timeoutMs": 30000,
+                "assertions": [
+                  {
+                    "id": "assert-1-0",
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals",
+                    "severity": "block"
+                  }
+                ],
+                "maxRetries": 0,
+                "sideEffect": "read-only",
+                "extractions": [],
+                "urlTemplate": "https://api.github.com/repos/nodejs/node/commits?per_page=30",
+                "retryBaseDelayMs": 1000,
+                "retryOnNetworkError": true,
+                "retryBackoffMultiplier": 2
+              }
+            ],
+            "planId": "plan_7465b5d2",
+            "planHash": "4709be9b1761e164844288c95b32d76045c4b873a3703435850167b042530066",
+            "compiledAt": "2026-10-08T16:06:39.257Z",
+            "schemaVersion": "sketch-test.runner-protocol/v1",
+            "workflowVersionId": "wfv_e9f5f34c"
+          },
+          "publishedBy": "web",
+          "publishedAt": "2026-10-08T16:06:39.257+00:00"
+        }
+      },
+      {
+        "id": "wf_82d536d2",
+        "workspaceId": "ws_02eaec7b",
+        "name": "修复复测：空地址发布应拒绝",
+        "description": "",
+        "createdAt": "2026-10-08T15:57:39.142Z",
+        "updatedAt": "2026-10-08T15:57:39.142Z",
+        "latestVersion": {
+          "id": "wfv_26851219",
+          "workflowId": "wf_82d536d2",
+          "version": 1,
+          "definition": {
+            "name": "Empty URL rejection",
+            "steps": [
+              {
+                "id": "empty",
+                "url": "",
+                "name": "empty",
+                "method": "GET"
+              }
+            ]
+          },
+          "compiledPlan": null,
+          "publishedBy": null,
+          "publishedAt": "2026-10-08T15:57:39.147+00:00"
+        }
+      },
+      {
+        "id": "wf_64af47d8",
+        "workspaceId": "ws_02eaec7b",
+        "name": "GitHub 真实元数据和提交历史回归",
+        "description": "",
+        "createdAt": "2026-10-08T15:19:23.863Z",
+        "updatedAt": "2026-10-08T15:19:23.863Z",
+        "latestVersion": {
+          "id": "wfv_f13180f4",
+          "workflowId": "wf_64af47d8",
+          "version": 3,
+          "definition": {
+            "id": "wf_64af47d8",
+            "name": "GitHub 真实元数据和提交历史回归",
+            "tags": [
+              "arazzo-1.1"
+            ],
+            "steps": [
+              {
+                "id": "metadata",
+                "name": "metadata",
+                "enabled": true,
+                "extract": [],
+                "useTest": {
+                  "url": "https://api.github.com/repos/nodejs/node",
+                  "kind": "inline",
+                  "method": "GET"
+                },
+                "onFailure": "stop",
+                "assertions": [
+                  {
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals"
+                  }
+                ],
+                "sideEffect": "read-only"
+              },
+              {
+                "id": "commits",
+                "name": "commits",
+                "enabled": true,
+                "extract": [],
+                "useTest": {
+                  "url": "https://api.github.com/repos/nodejs/node/commits?per_page=30",
+                  "kind": "inline",
+                  "method": "GET"
+                },
+                "onFailure": "stop",
+                "assertions": [
+                  {
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals"
+                  }
+                ],
+                "sideEffect": "read-only"
+              }
+            ],
+            "source": {
+              "type": "arazzo",
+              "contentHash": "3876e5b9dc2c7c5db76102a1a70982ac8a79e888a23a6a620aaec99c72b45cae",
+              "sourceLabel": "http://sketchtest-verification-sources/github-real.arazzo.yml",
+              "sourceObjectKey": "workflow-sources/sha256/3876e5b9dc2c7c5db76102a1a70982ac8a79e888a23a6a620aaec99c72b45cae.arazzo",
+              "specificationVersion": "1.1.0"
+            },
+            "schemaVersion": "sketch-test.workflow/v1"
+          },
+          "compiledPlan": {
+            "steps": [
+              {
+                "method": "GET",
+                "stepId": "metadata",
+                "enabled": true,
+                "sequence": 0,
+                "onFailure": "stop",
+                "timeoutMs": 30000,
+                "assertions": [
+                  {
+                    "id": "assert-0-0",
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals",
+                    "severity": "block"
+                  }
+                ],
+                "maxRetries": 0,
+                "sideEffect": "read-only",
+                "extractions": [],
+                "urlTemplate": "https://api.github.com/repos/nodejs/node",
+                "retryBaseDelayMs": 1000,
+                "retryOnNetworkError": true,
+                "retryBackoffMultiplier": 2
+              },
+              {
+                "method": "GET",
+                "stepId": "commits",
+                "enabled": true,
+                "sequence": 1,
+                "onFailure": "stop",
+                "timeoutMs": 30000,
+                "assertions": [
+                  {
+                    "id": "assert-1-0",
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals",
+                    "severity": "block"
+                  }
+                ],
+                "maxRetries": 0,
+                "sideEffect": "read-only",
+                "extractions": [],
+                "urlTemplate": "https://api.github.com/repos/nodejs/node/commits?per_page=30",
+                "retryBaseDelayMs": 1000,
+                "retryOnNetworkError": true,
+                "retryBackoffMultiplier": 2
+              }
+            ],
+            "planId": "plan_a3e9c0e0",
+            "planHash": "c55ac3d6f99ed4adf6a6d3bab7952056370448ae36be48c2215d76056fc0f2bd",
+            "compiledAt": "2026-10-08T16:04:49.532Z",
+            "schemaVersion": "sketch-test.runner-protocol/v1",
+            "workflowVersionId": "wfv_f13180f4"
+          },
+          "publishedBy": null,
+          "publishedAt": "2026-10-08T16:04:49.532+00:00"
+        }
+      },
+      {
+        "id": "wf_e0e13c81",
+        "workspaceId": "ws_02eaec7b",
+        "name": "历史分页验收 2026-10-08T15:10:25.602Z",
+        "description": "报告验收 2026-10-08T15:10:25.602Z",
+        "createdAt": "2026-10-08T15:10:29.186Z",
+        "updatedAt": "2026-10-08T15:10:29.186Z",
+        "latestVersion": {
+          "id": "wfv_1f87f538",
+          "workflowId": "wf_e0e13c81",
+          "version": 1,
+          "definition": {
+            "name": "历史分页验收 2026-10-08T15:10:25.602Z",
+            "steps": [
+              {
+                "id": "health",
+                "url": "http://control-plane:3802/health",
+                "name": "本地服务连通性",
+                "method": "GET",
+                "assertions": [
+                  {
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals",
+                    "description": "HTTP 状态为 200"
+                  }
+                ]
+              }
+            ]
+          },
+          "compiledPlan": {
+            "steps": [
+              {
+                "method": "GET",
+                "stepId": "health",
+                "enabled": true,
+                "sequence": 0,
+                "onFailure": "stop",
+                "timeoutMs": 30000,
+                "assertions": [
+                  {
+                    "id": "assert-0-0",
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals",
+                    "severity": "block",
+                    "description": "HTTP 状态为 200"
+                  }
+                ],
+                "maxRetries": 0,
+                "sideEffect": "read-only",
+                "extractions": [],
+                "urlTemplate": "http://control-plane:3802/health",
+                "retryBaseDelayMs": 1000,
+                "retryOnNetworkError": true,
+                "retryBackoffMultiplier": 2
+              }
+            ],
+            "planId": "plan_73e046e9",
+            "planHash": "f3b9e31fb38a3d8d49a3e9ceaca2492fbd8878b3abfff303d4dcdf9968de58e3",
+            "compiledAt": "2026-10-08T15:10:29.191Z",
+            "schemaVersion": "sketch-test.runner-protocol/v1",
+            "workflowVersionId": "wfv_1f87f538"
+          },
+          "publishedBy": null,
+          "publishedAt": "2026-10-08T15:10:29.191+00:00"
+        }
+      },
+      {
+        "id": "wf_5f60effa",
+        "workspaceId": "ws_02eaec7b",
+        "name": "公开仓库 · 失败定位验收",
+        "description": "报告验收 2026-10-08T15:10:25.602Z",
+        "createdAt": "2026-10-08T15:10:26.633Z",
+        "updatedAt": "2026-10-08T15:10:26.633Z",
+        "latestVersion": {
+          "id": "wfv_05daf19e",
+          "workflowId": "wf_5f60effa",
+          "version": 1,
+          "definition": {
+            "name": "公开仓库 · 失败定位验收",
+            "steps": [
+              {
+                "id": "repository",
+                "url": "https://api.github.com/repos/nodejs/node",
+                "name": "读取 Node.js 公开仓库",
+                "method": "GET",
+                "headers": {
+                  "Accept": "application/vnd.github+json"
+                },
+                "onFailure": "stop",
+                "timeoutMs": 20000,
+                "assertions": [
+                  {
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals",
+                    "description": "HTTP 状态为 200"
+                  },
+                  {
+                    "path": "$.full_name",
+                    "target": "jsonPath",
+                    "expected": "intentionally-wrong",
+                    "operator": "equals",
+                    "description": "故意设置错误预期，验证失败定位"
+                  }
+                ],
+                "maxRetries": 0
+              },
+              {
+                "id": "after",
+                "url": "http://control-plane:3802/health",
+                "name": "失败后不再执行",
+                "method": "GET",
+                "assertions": [
+                  {
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals",
+                    "description": "HTTP 状态为 200"
+                  }
+                ]
+              }
+            ],
+            "teardown": [
+              {
+                "id": "cleanup",
+                "url": "http://control-plane:3802/health",
+                "name": "清理阶段连通性检查",
+                "method": "GET",
+                "maxRetries": 0
+              }
+            ]
+          },
+          "compiledPlan": {
+            "steps": [
+              {
+                "method": "GET",
+                "stepId": "repository",
+                "enabled": true,
+                "headers": {
+                  "Accept": "application/vnd.github+json"
+                },
+                "sequence": 0,
+                "onFailure": "stop",
+                "timeoutMs": 20000,
+                "assertions": [
+                  {
+                    "id": "assert-0-0",
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals",
+                    "severity": "block",
+                    "description": "HTTP 状态为 200"
+                  },
+                  {
+                    "id": "assert-0-1",
+                    "path": "$.full_name",
+                    "target": "jsonPath",
+                    "expected": "intentionally-wrong",
+                    "operator": "equals",
+                    "severity": "block",
+                    "description": "故意设置错误预期，验证失败定位"
+                  }
+                ],
+                "maxRetries": 0,
+                "sideEffect": "read-only",
+                "extractions": [],
+                "urlTemplate": "https://api.github.com/repos/nodejs/node",
+                "retryBaseDelayMs": 1000,
+                "retryOnNetworkError": true,
+                "retryBackoffMultiplier": 2
+              },
+              {
+                "method": "GET",
+                "stepId": "after",
+                "enabled": true,
+                "sequence": 1,
+                "onFailure": "stop",
+                "timeoutMs": 30000,
+                "assertions": [
+                  {
+                    "id": "assert-1-0",
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals",
+                    "severity": "block",
+                    "description": "HTTP 状态为 200"
+                  }
+                ],
+                "maxRetries": 0,
+                "sideEffect": "read-only",
+                "extractions": [],
+                "urlTemplate": "http://control-plane:3802/health",
+                "retryBaseDelayMs": 1000,
+                "retryOnNetworkError": true,
+                "retryBackoffMultiplier": 2
+              }
+            ],
+            "planId": "plan_2d66b3ca",
+            "planHash": "53fd2c372bd928d88854ee3e9bb676a32154113a69534385ef8cc9223cc0e6f9",
+            "teardown": {
+              "steps": [
+                {
+                  "method": "GET",
+                  "stepId": "cleanup",
+                  "enabled": true,
+                  "sequence": 0,
+                  "timeoutMs": 30000,
+                  "assertions": [],
+                  "maxRetries": 0,
+                  "sideEffect": "cleanup-required",
+                  "extractions": [],
+                  "urlTemplate": "http://control-plane:3802/health"
+                }
+              ],
+              "strategy": "always"
+            },
+            "compiledAt": "2026-10-08T15:10:26.647Z",
+            "schemaVersion": "sketch-test.runner-protocol/v1",
+            "workflowVersionId": "wfv_05daf19e"
+          },
+          "publishedBy": null,
+          "publishedAt": "2026-10-08T15:10:26.647+00:00"
+        }
+      },
+      {
+        "id": "wf_d56a636c",
+        "workspaceId": "ws_02eaec7b",
+        "name": "公开仓库 · 元数据回归",
+        "description": "报告验收 2026-10-08T15:10:25.602Z",
+        "createdAt": "2026-10-08T15:10:25.603Z",
+        "updatedAt": "2026-10-08T15:10:25.603Z",
+        "latestVersion": {
+          "id": "wfv_2c50e75e",
+          "workflowId": "wf_d56a636c",
+          "version": 1,
+          "definition": {
+            "name": "公开仓库 · 元数据回归",
+            "steps": [
+              {
+                "id": "repository",
+                "url": "https://api.github.com/repos/nodejs/node",
+                "name": "读取 Node.js 公开仓库",
+                "method": "GET",
+                "headers": {
+                  "Accept": "application/vnd.github+json"
+                },
+                "onFailure": "stop",
+                "timeoutMs": 20000,
+                "assertions": [
+                  {
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals",
+                    "description": "HTTP 状态为 200"
+                  },
+                  {
+                    "path": "$.full_name",
+                    "target": "jsonPath",
+                    "expected": "nodejs/node",
+                    "operator": "equals",
+                    "description": "仓库标识符合公开事实"
+                  }
+                ],
+                "maxRetries": 0
+              }
+            ]
+          },
+          "compiledPlan": {
+            "steps": [
+              {
+                "method": "GET",
+                "stepId": "repository",
+                "enabled": true,
+                "headers": {
+                  "Accept": "application/vnd.github+json"
+                },
+                "sequence": 0,
+                "onFailure": "stop",
+                "timeoutMs": 20000,
+                "assertions": [
+                  {
+                    "id": "assert-0-0",
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals",
+                    "severity": "block",
+                    "description": "HTTP 状态为 200"
+                  },
+                  {
+                    "id": "assert-0-1",
+                    "path": "$.full_name",
+                    "target": "jsonPath",
+                    "expected": "nodejs/node",
+                    "operator": "equals",
+                    "severity": "block",
+                    "description": "仓库标识符合公开事实"
+                  }
+                ],
+                "maxRetries": 0,
+                "sideEffect": "read-only",
+                "extractions": [],
+                "urlTemplate": "https://api.github.com/repos/nodejs/node",
+                "retryBaseDelayMs": 1000,
+                "retryOnNetworkError": true,
+                "retryBackoffMultiplier": 2
+              }
+            ],
+            "planId": "plan_86b7d8c5",
+            "planHash": "424bd4ca17d071faf10a076ed22b8daf0bceec338910c39ea4d6fdfecc58dfea",
+            "compiledAt": "2026-10-08T15:10:25.611Z",
+            "schemaVersion": "sketch-test.runner-protocol/v1",
+            "workflowVersionId": "wfv_2c50e75e"
+          },
+          "publishedBy": null,
+          "publishedAt": "2026-10-08T15:10:25.611+00:00"
+        }
+      },
+      {
+        "id": "wf_efc03873",
+        "workspaceId": "ws_02eaec7b",
+        "name": "GitHub 公开仓库 · 真实响应回归",
+        "description": "",
+        "createdAt": "2026-10-08T15:09:56.907Z",
+        "updatedAt": "2026-10-08T15:09:56.907Z",
+        "latestVersion": {
+          "id": "wfv_f85319f4",
+          "workflowId": "wf_efc03873",
+          "version": 1,
+          "definition": {
+            "name": "GitHub 公开仓库 · 真实响应回归",
+            "steps": [
+              {
+                "id": "repository",
+                "url": "https://api.github.com/repos/nodejs/node",
+                "name": "读取 Node.js 仓库真实元数据",
+                "method": "GET",
+                "headers": {
+                  "Accept": "application/vnd.github+json"
+                },
+                "timeoutMs": 20000,
+                "assertions": [
+                  {
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals"
+                  },
+                  {
+                    "path": "$.full_name",
+                    "target": "jsonPath",
+                    "expected": "nodejs/node",
+                    "operator": "equals"
+                  }
+                ],
+                "maxRetries": 0
+              }
+            ]
+          },
+          "compiledPlan": {
+            "steps": [
+              {
+                "method": "GET",
+                "stepId": "repository",
+                "enabled": true,
+                "headers": {
+                  "Accept": "application/vnd.github+json"
+                },
+                "sequence": 0,
+                "onFailure": "stop",
+                "timeoutMs": 20000,
+                "assertions": [
+                  {
+                    "id": "assert-0-0",
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals",
+                    "severity": "block"
+                  },
+                  {
+                    "id": "assert-0-1",
+                    "path": "$.full_name",
+                    "target": "jsonPath",
+                    "expected": "nodejs/node",
+                    "operator": "equals",
+                    "severity": "block"
+                  }
+                ],
+                "maxRetries": 0,
+                "sideEffect": "read-only",
+                "extractions": [],
+                "urlTemplate": "https://api.github.com/repos/nodejs/node",
+                "retryBaseDelayMs": 1000,
+                "retryOnNetworkError": true,
+                "retryBackoffMultiplier": 2
+              }
+            ],
+            "planId": "plan_6a2d997a",
+            "planHash": "1d30cad7a6527779e1da0009b943494acc0fc7bf4eb5f4b2e3abca9a6ade32b2",
+            "compiledAt": "2026-10-08T15:09:56.915Z",
+            "schemaVersion": "sketch-test.runner-protocol/v1",
+            "workflowVersionId": "wfv_f85319f4"
+          },
+          "publishedBy": null,
+          "publishedAt": "2026-10-08T15:09:56.915+00:00"
+        }
+      }
+    ]
+  },
+  "testCases": {
+    "testCases": [
+      {
+        "id": "tc_c56b6082",
+        "workspaceId": "ws_02eaec7b",
+        "apiVersionId": "av_fa206a0a",
+        "name": "读取 nodejs/node 仓库元数据应返回 200 且 full_name 为 nodejs/node",
+        "description": "",
+        "createdAt": "2026-10-08T15:57:47.248Z",
+        "updatedAt": "2026-10-08T15:57:47.248Z",
+        "latestVersion": {
+          "id": "tcv_5dbcca7f",
+          "test_case_id": "tc_c56b6082",
+          "version": 1,
+          "definition": {
+            "id": "get-repos-owner-repo-nodejs-node-read-success",
+            "name": "读取 nodejs/node 仓库元数据应返回 200 且 full_name 为 nodejs/node",
+            "request": {
+              "url": "${env.baseUrl}/repos/${env.owner}/${env.repo}",
+              "method": "GET",
+              "timeoutMs": 30000,
+              "followRedirects": false
+            },
+            "assertions": [
+              {
+                "id": "status-200",
+                "target": "status",
+                "expected": 200,
+                "operator": "equals",
+                "severity": "block"
+              },
+              {
+                "id": "full-name-matches",
+                "path": "$.full_name",
+                "target": "jsonPath",
+                "expected": "nodejs/node",
+                "operator": "equals",
+                "severity": "block"
+              }
+            ],
+            "sideEffect": "read-only",
+            "schemaVersion": "sketch-test.test/v1"
+          },
+          "side_effect": "read-only",
+          "published_by": "usr_9aea39ce",
+          "published_at": "2026-10-08T15:57:47.258Z",
+          "testCaseId": "tc_c56b6082",
+          "sideEffect": "read-only",
+          "publishedBy": "usr_9aea39ce",
+          "publishedAt": "2026-10-08T15:57:47.258Z"
+        }
+      },
+      {
+        "id": "tc_6846e19d",
+        "workspaceId": "ws_02eaec7b",
+        "apiVersionId": "av_fa206a0a",
+        "name": "读取 nodejs/node 仓库元数据返回 200 且 full_name 正确",
+        "description": "",
+        "createdAt": "2026-10-08T15:20:42.813Z",
+        "updatedAt": "2026-10-08T15:20:42.813Z",
+        "latestVersion": {
+          "id": "tcv_3ec1a7d0",
+          "test_case_id": "tc_6846e19d",
+          "version": 2,
+          "definition": {
+            "id": "get-repo-nodejs-node-success",
+            "name": "读取 nodejs/node 仓库元数据返回 200 且 full_name 正确 · 人工修正变量版本",
+            "request": {
+              "url": "${env.baseUrl}/repos/${env.owner}/${env.repo}",
+              "method": "GET",
+              "timeoutMs": 30000,
+              "followRedirects": false
+            },
+            "assertions": [
+              {
+                "id": "status-is-200",
+                "target": "status",
+                "expected": 200,
+                "operator": "equals",
+                "severity": "block"
+              },
+              {
+                "id": "full-name-is-nodejs-node",
+                "path": "$.full_name",
+                "target": "jsonPath",
+                "expected": "nodejs/node",
+                "operator": "equals",
+                "severity": "block"
+              }
+            ],
+            "sideEffect": "read-only",
+            "schemaVersion": "sketch-test.test/v1"
+          },
+          "side_effect": "read-only",
+          "published_by": "usr_9aea39ce",
+          "published_at": "2026-10-08T15:20:44.845Z",
+          "testCaseId": "tc_6846e19d",
+          "sideEffect": "read-only",
+          "publishedBy": "usr_9aea39ce",
+          "publishedAt": "2026-10-08T15:20:44.845Z"
+        }
+      },
+      {
+        "id": "tc_f2a3f13e",
+        "workspaceId": "ws_02eaec7b",
+        "apiVersionId": null,
+        "name": "Node.js 公开仓库真实响应 · 单用例",
+        "description": "",
+        "createdAt": "2026-10-08T15:14:46.230Z",
+        "updatedAt": "2026-10-08T15:14:46.230Z",
+        "latestVersion": {
+          "id": "tcv_b1f97d4d",
+          "test_case_id": "tc_f2a3f13e",
+          "version": 2,
+          "definition": {
+            "id": "github-repository",
+            "name": "Node.js 公开仓库真实响应 · 单用例 第二版",
+            "request": {
+              "url": "${env.baseUrl}/repos/${env.owner}/${env.repo}",
+              "method": "GET",
+              "headers": {
+                "Accept": "application/vnd.github+json"
+              }
+            },
+            "assertions": [
+              {
+                "id": "status",
+                "target": "status",
+                "expected": 200,
+                "operator": "equals",
+                "severity": "block"
+              },
+              {
+                "id": "repo",
+                "path": "$.full_name",
+                "target": "jsonPath",
+                "expected": "nodejs/node",
+                "operator": "equals",
+                "severity": "block"
+              }
+            ],
+            "sideEffect": "read-only",
+            "schemaVersion": "sketch-test.test/v1"
+          },
+          "side_effect": "read-only",
+          "published_by": null,
+          "published_at": "2026-10-08T15:14:48.279Z",
+          "testCaseId": "tc_f2a3f13e",
+          "sideEffect": "read-only",
+          "publishedBy": null,
+          "publishedAt": "2026-10-08T15:14:48.279Z"
+        }
+      },
+      {
+        "id": "tc_ef021a34",
+        "workspaceId": "ws_02eaec7b",
+        "apiVersionId": "av_ea093aaa",
+        "name": "Status 200: POST /api/auth/login",
+        "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。",
+        "createdAt": "2026-10-08T15:12:23.876Z",
+        "updatedAt": "2026-10-08T15:12:23.876Z",
+        "latestVersion": {
+          "id": "tcv_e4127cb2",
+          "test_case_id": "tc_ef021a34",
+          "version": 1,
+          "definition": {
+            "id": "test_draft_8ffbb471",
+            "name": "Status 200: POST /api/auth/login",
+            "extract": [],
+            "request": {
+              "url": "/api/auth/login",
+              "body": {
+                "type": "json",
+                "value": {
+                  "staffId": "a"
+                },
+                "mediaType": "application/json"
+              },
+              "method": "POST",
+              "headers": {
+                "Content-Type": "application/json"
+              },
+              "timeoutMs": 30000,
+              "followRedirects": false
+            },
+            "assertions": [
+              {
+                "id": "assert_0",
+                "target": "status",
+                "expected": 200,
+                "operator": "equals",
+                "severity": "block"
+              }
+            ],
+            "sideEffect": "read-only",
+            "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。",
+            "schemaVersion": "sketch-test.test/v1"
+          },
+          "side_effect": "read-only",
+          "published_by": "usr_9aea39ce",
+          "published_at": "2026-10-08T15:12:23.887Z",
+          "testCaseId": "tc_ef021a34",
+          "sideEffect": "read-only",
+          "publishedBy": "usr_9aea39ce",
+          "publishedAt": "2026-10-08T15:12:23.887Z"
+        }
+      }
+    ]
+  },
+  "generationJobs": {
+    "jobs": [
+      {
+        "id": "gj_cf91952c",
+        "workspaceId": "ws_02eaec7b",
+        "apiVersionId": "av_fa206a0a",
+        "strategy": "pi",
+        "status": "completed",
+        "createdAt": "2026-10-08T15:57:39.171Z",
+        "completedAt": "2026-10-08T15:57:46.706Z",
+        "config": {
+          "model": "deepseek-v4-flash",
+          "provider": "deepseek",
+          "objective": "生成一条读取公开 Node.js 仓库元数据的只读正向用例；owner=nodejs，repo=node。必须使用提供的 requestTemplate，断言 HTTP 200、full_name 等于 nodejs/node。",
+          "endpointIds": [
+            "GET-/repos/:owner/:repo"
+          ]
+        },
+        "attempt": 1,
+        "draftCount": 1,
+        "coveredEndpointCount": 1,
+        "errorCode": null
+      },
+      {
+        "id": "gj_750034c4",
+        "workspaceId": "ws_02eaec7b",
+        "apiVersionId": "av_fa206a0a",
+        "strategy": "pi",
+        "status": "completed",
+        "createdAt": "2026-10-08T15:19:26.910Z",
+        "completedAt": "2026-10-08T15:19:32.315Z",
+        "config": {
+          "model": "deepseek-v4-flash",
+          "provider": "deepseek",
+          "objective": "生成一条读取公开 Node.js 仓库元数据的只读正向用例。只使用 GET /repos/{owner}/{repo}，owner=nodejs，repo=node；基地址 ${env.baseUrl}。断言状态 200、full_name 等于 nodejs/node。不要生成提交历史列表用例。",
+          "endpointIds": [
+            "GET-/repos/:owner/:repo"
+          ]
+        },
+        "attempt": 1,
+        "draftCount": 1,
+        "coveredEndpointCount": 1,
+        "errorCode": null
+      },
+      {
+        "id": "gj_9c6997d5",
+        "workspaceId": "ws_02eaec7b",
+        "apiVersionId": "av_ea093aaa",
+        "strategy": "pi",
+        "status": "completed",
+        "createdAt": "2026-10-08T15:09:59.003Z",
+        "completedAt": "2026-10-08T15:10:02.952Z",
+        "config": {
+          "model": "deepseek-v4-flash",
+          "provider": "deepseek",
+          "objective": "依据这个公开仓库的 GET 接口生成一条只读正向测试草稿，保留源代码证据；不执行，不生成写操作。",
+          "endpointIds": [
+            "code_GET_406629bb093dcd7a89ac"
+          ]
+        },
+        "attempt": 1,
+        "draftCount": 1,
+        "coveredEndpointCount": 1,
+        "errorCode": null
+      },
+      {
+        "id": "gj_13e027f6",
+        "workspaceId": "ws_02eaec7b",
+        "apiVersionId": "av_ea093aaa",
+        "strategy": "status-codes",
+        "status": "completed",
+        "createdAt": "2026-10-08T15:09:58.981Z",
+        "completedAt": "2026-10-08T15:09:59.010Z",
+        "config": {
+          "endpointIds": []
+        },
+        "attempt": null,
+        "draftCount": 57,
+        "coveredEndpointCount": 57,
+        "errorCode": null
+      }
+    ]
+  },
+  "schedules": {
+    "schedules": [
+      {
+        "id": "sched_19858afb",
+        "workspaceId": "ws_02eaec7b",
+        "testSuiteId": "ts_fa44a676",
+        "cronExpression": "* * * * *",
+        "environmentId": null,
+        "enabled": false,
+        "createdAt": "2026-10-08T15:09:58.976Z"
+      }
+    ]
+  }
+}

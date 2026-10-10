@@ -10,6 +10,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { pool } from '../../db/db.js';
 import { sendError } from '../../shared/errors.js';
+import { AI_WORKER_ROUTES } from '../generation/ai-worker.auth.js';
 import { type AuthUser, authenticateBearer } from './auth.middleware.js';
 import type { User } from './iam.service.js';
 
@@ -28,6 +29,7 @@ const PUBLIC_ROUTES = new Set([
   'GET /ready',
   'GET /metrics',
   'POST /api/auth/login',
+  'POST /api/auth/guest',
 ]);
 
 const RUNNER_ROUTES = new Set([
@@ -65,6 +67,11 @@ interface OwnershipRule {
 const OWNERSHIP_RULES: OwnershipRule[] = [
   {
     route: /^\/api\/api-versions\/:id$/,
+    param: 'id',
+    query: 'SELECT workspace_id FROM api_versions WHERE id = $1',
+  },
+  {
+    route: /^\/api\/api-versions\/:id\/endpoints\/:endpointId\/openapi$/,
     param: 'id',
     query: 'SELECT workspace_id FROM api_versions WHERE id = $1',
   },
@@ -265,7 +272,7 @@ export async function authorizeControlPlaneRequest(
   reply: FastifyReply,
 ): Promise<void> {
   const key = routeKey(request);
-  if (PUBLIC_ROUTES.has(key) || RUNNER_ROUTES.has(key)) return;
+  if (PUBLIC_ROUTES.has(key) || RUNNER_ROUTES.has(key) || AI_WORKER_ROUTES.has(key)) return;
   if (!request.headers.authorization && (await allowInitialWorkspaceBootstrap(request))) return;
 
   const user = await authenticateUser(request, reply);

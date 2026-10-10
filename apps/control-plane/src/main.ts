@@ -1,3 +1,5 @@
+import { aiGenerationRoutes } from './modules/generation/ai-generation.routes.js';
+import { planGenerationRoutes } from './modules/plan-generation/plan-generation.routes.js';
 /**
  * @sketch-test/control-plane — production API server
  *
@@ -28,6 +30,7 @@ import { eventRoutes } from './modules/run/event.routes.js';
 import { leaseRoutes } from './modules/run/lease.routes.js';
 import { runRoutes } from './modules/run/run.routes.js';
 import { scheduleRoutes } from './modules/run/schedule.routes.js';
+import { startScheduleDispatcher } from './modules/run/schedule-dispatcher.js';
 import { runnerRegistryRoutes } from './modules/runner-registry/runner-registry.routes.js';
 import { testAuthoringRoutes } from './modules/test-authoring/test-authoring.routes.js';
 import { testSuiteRoutes } from './modules/test-suite/test-suite.routes.js';
@@ -86,14 +89,20 @@ async function main(): Promise<void> {
   await workflowRoutes(app);
   await testAuthoringRoutes(app);
   await generationRoutes(app);
+  await aiGenerationRoutes(app);
+  await planGenerationRoutes(app);
   await scheduleRoutes(app);
   await testSuiteRoutes(app);
   await datasetRoutes(app);
   await policyRoutes(app);
 
+  let stopScheduler = async () => {};
+  app.addHook('onClose', async () => stopScheduler());
+
   // Start server
   try {
     await app.listen({ port: config.port, host: config.host });
+    stopScheduler = startScheduleDispatcher(app.log);
     console.log(`[control-plane] Listening on http://${config.host}:${config.port}`);
     console.log(`[control-plane] Health check: http://localhost:${config.port}/health`);
   } catch (err) {

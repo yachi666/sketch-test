@@ -1,0 +1,13 @@
+import {api,save,assert,finish} from './client.mjs';
+const original = (await api('/api/workflow-versions/wfv_0f2d735b')).version;
+assert(original?.definition,'original version available');
+const saved = (await api('/api/workflows/wf_64af47d8/versions',{definition:original.definition})).version;
+assert.deepEqual(saved.definition,original.definition);
+const published = await api(`/api/workflow-versions/${saved.id}/publish`,{});
+assert.equal(published.published,true);
+const run = await api('/api/runs/from-workflow',{workflowVersionId:saved.id});
+assert.equal((await finish(run.runId)).run.status,'passed');
+assert.deepEqual((await api('/api/workflow-versions/wfv_0f2d735b')).version.definition,original.definition);
+const integrity = await api(`/api/runs/${run.runId}/evidence-verify`);assert.equal(integrity.valid,true);
+save('workflow-api-roundtrip.json',{originalVersionId:original.id,newVersionId:saved.id,version:saved,run,integrity});
+console.log('PASS restored original workflow as a new version, preserved full contract and original published version');

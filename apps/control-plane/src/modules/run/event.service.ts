@@ -11,6 +11,22 @@ export interface IncomingEvent {
   payload: unknown;
 }
 
+/** Encoding v1: JSON values with recursively sorted object keys; array order is significant. */
+export function canonicalEventJson(value: unknown): string {
+  const json = JSON.parse(JSON.stringify(value)) as unknown;
+  function sort(item: unknown): unknown {
+    if (Array.isArray(item)) return item.map(sort);
+    if (item && typeof item === 'object')
+      return Object.fromEntries(
+        Object.entries(item)
+          .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+          .map(([key, child]) => [key, sort(child)]),
+      );
+    return item;
+  }
+  return JSON.stringify(sort(json));
+}
+
 const DEFAULT_INLINE_MAX_BYTES = 64 * 1024;
 
 function inlineMaxBytes(): number {
@@ -39,7 +55,7 @@ export async function insertEvents(
 
   for (const evt of events) {
     const id = evt.id ?? eventId();
-    const payloadStr = JSON.stringify(evt.payload);
+    const payloadStr = canonicalEventJson(evt.payload);
     const contentHash = createHash('sha256').update(payloadStr).digest('hex');
     const payloadSizeBytes = Buffer.byteLength(payloadStr);
     const payloadObjectKey =
@@ -58,8 +74,8 @@ export async function insertEvents(
 
     const result = await pool.query(
       `INSERT INTO step_events
-         (id, run_id, step_index, event_type, payload_json, content_hash, payload_size_bytes, payload_object_key)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         (id, run_id, step_index, event_type, payload_json, content_hash, payload_size_bytes, payload_object_key, hash_encoding)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'canonical-json-v1')
          ON CONFLICT (id) DO NOTHING`,
       [
         id,
@@ -185,7 +201,7 @@ export async function verifyEvidenceIntegrity(
   const manifest = await buildEvidenceManifest(runId);
   // Re-compute the chain hash from stored events
   const result = await pool.query(
-    `SELECT id, payload_json, content_hash, payload_object_key
+    `SELECT id, payload_json, content_hash, payload_object_key, hash_encoding
      FROM step_events WHERE run_id = $1 ORDER BY step_index, created_at`,
     [runId],
   );
@@ -194,9 +210,11 @@ export async function verifyEvidenceIntegrity(
     result.rows.map(async (row) => {
       const payloadStr = row.payload_object_key
         ? new TextDecoder().decode((await objectStore.get(row.payload_object_key)).body)
-        : typeof row.payload_json === 'string'
-          ? row.payload_json
-          : JSON.stringify(row.payload_json);
+        : row.hash_encoding === 'canonical-json-v1'
+          ? canonicalEventJson(row.payload_json)
+          : typeof row.payload_json === 'string'
+            ? row.payload_json
+            : JSON.stringify(row.payload_json);
       return { id: row.id, hash: createHash('sha256').update(payloadStr).digest('hex') };
     }),
   );
@@ -205,7 +223,18 @@ export async function verifyEvidenceIntegrity(
     .update(hashes.map((h) => h.hash).join(''))
     .digest('hex');
 
+  const unverifiableLegacyEventIds = result.rows
+    .filter(
+      (row, i) =>
+        !row.hash_encoding &&
+        !row.payload_object_key &&
+        row.content_hash &&
+        row.content_hash !== hashes[i]?.hash,
+    )
+    .map((row) => row.id as string);
   return {
+    encoding: 'per-event',
+    unverifiableLegacyEventIds,
     valid: reManifestHash === manifest.manifestHash,
     storedHash: manifest.manifestHash,
     computedHash: reManifestHash,

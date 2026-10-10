@@ -331,7 +331,10 @@ export function isValidCronExpression(expression: string): boolean {
  * Manually trigger a scheduled run immediately.
  * Creates one immutable Run for every member in the latest TestSuiteVersion.
  */
-export async function triggerSchedule(id: string): Promise<ScheduleTriggerResult | null> {
+export async function triggerSchedule(
+  id: string,
+  scheduledAt?: Date,
+): Promise<ScheduleTriggerResult | null> {
   const schedule = await getSchedule(id);
   if (!schedule) return null;
 
@@ -417,10 +420,72 @@ export async function triggerSchedule(id: string): Promise<ScheduleTriggerResult
     plans.push(storedContent);
   }
 
+  if (schedule.environmentId) {
+    const result = await pool.query(
+      `SELECT v.* FROM environment_versions v JOIN environments e ON e.id=v.environment_id WHERE e.id=$1 AND e.workspace_id=$2 ORDER BY v.version DESC LIMIT 1`,
+      [schedule.environmentId, schedule.workspaceId],
+    );
+    const environment = result.rows[0];
+    if (!environment) throw new ScheduleTriggerError('Schedule environment version not found');
+    if (environment.require_approval || environment.runner_labels?.length)
+      throw new ScheduleTriggerError(
+        'Scheduled environment requires approval or Runner constraints that cannot be enforced',
+      );
+    const variables = {
+      ...environment.variables,
+      baseUrl: environment.base_url.replace(/\/$/, ''),
+    } as Record<string, string>;
+    function bind(value: unknown): unknown {
+      if (typeof value === 'string')
+        return value.replace(/\$\{env\.([^}]+)\}/g, (_match, key: string) => {
+          if (!Object.hasOwn(variables, key))
+            throw new ScheduleTriggerError(`Environment variable ${key} is required`);
+          return variables[key] as string;
+        });
+      if (Array.isArray(value)) return value.map(bind);
+      if (value && typeof value === 'object')
+        return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, bind(item)]));
+      return value;
+    }
+    for (const plan of plans) {
+      plan.steps = bind(plan.steps) as ExecutionPlan['steps'];
+      if (plan.teardown)
+        plan.teardown = bind(plan.teardown) as NonNullable<ExecutionPlan['teardown']>;
+      plan.environmentVersionId = environment.id;
+      plan.planHash = executionPlanContentHash(plan.steps, plan.teardown?.steps);
+    }
+  }
+  if (plans.some((plan) => /\$\{env\.[^}]+\}/.test(JSON.stringify([plan.steps, plan.teardown]))))
+    throw new ScheduleTriggerError('Select an environment to resolve scheduled request inputs');
   const client = await pool.connect();
   const runIds: string[] = [];
   try {
     await client.query('BEGIN');
+    if (scheduledAt) {
+      // Serialize schedule edits with dispatch; the unique minute claim and Runs commit together.
+      const locked = await client.query<ScheduleRow>(
+        'SELECT * FROM schedule_configs WHERE id=$1 FOR UPDATE',
+        [id],
+      );
+      const current = locked.rows[0];
+      if (
+        !current?.enabled ||
+        !cronMatches(current.cron_expression, scheduledAt) ||
+        current.test_suite_id !== schedule.testSuiteId ||
+        current.environment_id !== schedule.environmentId
+      ) {
+        await client.query('ROLLBACK');
+        return null;
+      }
+      const claim = await client.query(
+        'INSERT INTO schedule_dispatches(schedule_id, scheduled_at) VALUES($1, $2) ON CONFLICT DO NOTHING',
+        [id, scheduledAt.toISOString()],
+      );
+      if (!claim.rowCount) {
+        await client.query('ROLLBACK');
+        return null;
+      }
+    }
     for (const plan of plans) {
       const newRunId = runId();
       runIds.push(newRunId);
@@ -437,6 +502,11 @@ export async function triggerSchedule(id: string): Promise<ScheduleTriggerResult
         ],
       );
     }
+    if (scheduledAt)
+      await client.query(
+        'UPDATE schedule_dispatches SET run_ids=$3 WHERE schedule_id=$1 AND scheduled_at=$2',
+        [id, scheduledAt.toISOString(), JSON.stringify(runIds)],
+      );
     await client.query('COMMIT');
   } catch (error) {
     await client.query('ROLLBACK');
@@ -452,9 +522,7 @@ export async function triggerSchedule(id: string): Promise<ScheduleTriggerResult
  * Find all enabled schedules whose cron expression matches the current time
  * (within a 1-minute window).
  */
-export async function getDueSchedules(): Promise<Schedule[]> {
-  const now = new Date();
-  const oneMinuteAgo = new Date(now.getTime() - 60_000);
+export async function getDueSchedules(now = new Date()): Promise<Schedule[]> {
   const result = await pool.query<ScheduleRow>(
     `SELECT * FROM schedule_configs WHERE enabled = true ORDER BY created_at`,
   );
@@ -463,10 +531,8 @@ export async function getDueSchedules(): Promise<Schedule[]> {
   const due: Schedule[] = [];
   for (const row of result.rows) {
     const schedule = toSchedule(row);
-    // Check current minute and the minute before (to handle edge cases)
+    // Dispatch only the current UTC minute. No implicit catch-up after downtime.
     if (cronMatches(schedule.cronExpression, now)) {
-      due.push(schedule);
-    } else if (cronMatches(schedule.cronExpression, oneMinuteAgo)) {
       due.push(schedule);
     }
   }

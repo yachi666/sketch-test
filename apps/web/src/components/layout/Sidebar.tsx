@@ -1,11 +1,33 @@
-import { Cube, FlowArrow, PlugsConnected, Pulse, X } from '@phosphor-icons/react';
+import {
+  BracketsCurly,
+  CalendarCheck,
+  ChartBar,
+  ClipboardText,
+  Cube,
+  FileArrowUp,
+  FlowArrow,
+  House,
+  MapTrifold,
+  PlugsConnected,
+  Robot,
+  Stack,
+  X,
+} from '@phosphor-icons/react';
 import type { ElementType } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const navItems: Array<{ path: string; label: string; icon: ElementType; accent?: boolean }> = [
+  { path: '/', label: '工作台', icon: House },
+  { path: '/capabilities', label: '能力地图', icon: MapTrifold },
+  { path: '/workflows', label: '业务流程', icon: FlowArrow },
   { path: '/apis', label: '接口管理', icon: PlugsConnected },
-  { path: '/workflows', label: '流程执行', icon: FlowArrow },
-  { path: '/runs', label: '运行报告', icon: Pulse },
+  { path: '/import', label: '导入中心', icon: FileArrowUp },
+  { path: '/cases', label: '用例管理', icon: ClipboardText },
+  { path: '/plans', label: '测试计划', icon: CalendarCheck },
+  { path: '/environments', label: '环境管理', icon: Stack },
+  { path: '/variables', label: '变量管理', icon: BracketsCurly },
+  { path: '/reports', label: '报告中心', icon: ChartBar },
+  { path: '/agent', label: '智能生成', icon: Robot },
 ];
 
 export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {

@@ -28,3 +28,11 @@ groups:
           severity: info
         annotations:
           summary: Control Plane has received no traffic
+
+      - alert: SketchTestDependencyDown
+        expr: sketchtest_dependency_up == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: SketchTest dependency is not ready

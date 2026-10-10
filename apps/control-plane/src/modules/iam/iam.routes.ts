@@ -7,7 +7,7 @@
  */
 
 import type { FastifyInstance } from 'fastify';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { sendError } from '../../shared/errors.js';
 import { signJwt } from '../../shared/jwt.js';
 import { authenticatedUser } from './auth.middleware.js';
@@ -15,6 +15,7 @@ import {
   createServiceAccount,
   createUser,
   createWorkspace,
+  getUser,
   getUserByEmail,
   getWorkspace,
   listServiceAccounts,
@@ -202,6 +203,55 @@ export async function iamRoutes(app: FastifyInstance): Promise<void> {
   // ═══════════════════════════════════════════════════════════════════════════
   // Auth
   // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * POST /api/auth/guest — Provision the explicitly configured guest identity.
+   *
+   * This endpoint is disabled by default and intended for login-free demo/QA
+   * deployments. It still issues a signed, workspace-bound JWT so every
+   * downstream authorization and ownership check remains active.
+   */
+  app.post('/api/auth/guest', async (request, reply) => {
+    if (process.env['GUEST_ACCESS_ENABLED'] !== 'true') {
+      return reply.header('cache-control', 'no-store').send({ enabled: false });
+    }
+
+    const userId = process.env['GUEST_USER_ID'];
+    const workspaceId = process.env['GUEST_WORKSPACE_ID'];
+    if (!userId || !workspaceId) {
+      return sendError(reply, 503, 'NOT_CONFIGURED', 'Guest access is not configured');
+    }
+
+    try {
+      const user = await getUser(userId);
+      if (!user || user.workspaceId !== workspaceId) {
+        return sendError(reply, 503, 'NOT_CONFIGURED', 'Guest identity is not available');
+      }
+
+      const token = signJwt({
+        sub: user.id,
+        email: user.email,
+        displayName: user.displayName,
+        role: user.role,
+        workspaceId: user.workspaceId,
+      });
+
+      reply.header('cache-control', 'no-store').send({
+        enabled: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          displayName: user.displayName,
+          role: user.role,
+          workspaceId: user.workspaceId,
+        },
+        token,
+      });
+    } catch (err) {
+      request.log.error({ err }, 'Failed to provision guest session');
+      return sendError(reply, 500, 'INTERNAL_ERROR', 'Guest session provisioning failed');
+    }
+  });
 
   /**
    * POST /api/auth/login — Authenticate with email and password.

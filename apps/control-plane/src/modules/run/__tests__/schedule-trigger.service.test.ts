@@ -43,7 +43,7 @@ function validPlan(): ExecutionPlan {
       stepId: 'health',
       sequence: 0,
       method: 'GET' as const,
-      urlTemplate: '${env.baseUrl}/health',
+      urlTemplate: 'https://example.test/health',
       maxRetries: 0,
       retryBaseDelayMs: 1000,
       retryBackoffMultiplier: 2,
@@ -125,7 +125,7 @@ describe('triggerSchedule', () => {
       name: 'Health check',
       request: {
         method: 'GET',
-        url: '${env.baseUrl}/health',
+        url: 'https://example.test/health',
         timeoutMs: 5000,
       },
       assertions: [
@@ -173,4 +173,45 @@ describe('triggerSchedule', () => {
     await expect(triggerSchedule('sched-1')).rejects.toThrow(/invalid content hash/);
     expect(mockClientQuery).not.toHaveBeenCalled();
   });
+});
+
+test('a cron minute already claimed creates no duplicate Runs', async () => {
+  const row = { ...scheduleRow(), cron_expression: '* * * * *' };
+  mockQuery
+    .mockResolvedValueOnce({ rows: [row] })
+    .mockResolvedValueOnce({
+      rows: [{ id: 'tsv-1', members_json: [{ type: 'workflow', id: 'wf-1' }] }],
+    })
+    .mockResolvedValueOnce({ rows: [{ compiled_plan: validPlan() }] });
+  mockClientQuery.mockImplementation(async (sql: string) => {
+    if (sql.includes('FOR UPDATE')) return { rows: [row] };
+    if (sql.includes('INSERT INTO schedule_dispatches')) return { rowCount: 0, rows: [] };
+    return { rows: [] };
+  });
+  expect(await triggerSchedule('sched-1', new Date('2026-10-08T10:00:00Z'))).toBeNull();
+  expect(mockClientQuery.mock.calls.some(([sql]) => String(sql).includes('INSERT INTO runs'))).toBe(
+    false,
+  );
+  expect(mockClientQuery).toHaveBeenLastCalledWith('ROLLBACK');
+});
+
+test('cron claim and all Runs roll back together if insertion fails', async () => {
+  const row = { ...scheduleRow(), cron_expression: '* * * * *' };
+  mockQuery
+    .mockResolvedValueOnce({ rows: [row] })
+    .mockResolvedValueOnce({
+      rows: [{ id: 'tsv-1', members_json: [{ type: 'workflow', id: 'wf-1' }] }],
+    })
+    .mockResolvedValueOnce({ rows: [{ compiled_plan: validPlan() }] });
+  mockClientQuery.mockImplementation(async (sql: string) => {
+    if (sql.includes('FOR UPDATE')) return { rows: [row] };
+    if (sql.includes('INSERT INTO schedule_dispatches')) return { rowCount: 1, rows: [] };
+    if (sql.includes('INSERT INTO runs')) throw new Error('storage unavailable');
+    return { rows: [] };
+  });
+  await expect(triggerSchedule('sched-1', new Date('2026-10-08T10:00:00Z'))).rejects.toThrow(
+    'storage unavailable',
+  );
+  expect(mockClientQuery).toHaveBeenLastCalledWith('ROLLBACK');
+  expect(mockClientQuery).not.toHaveBeenCalledWith('COMMIT');
 });

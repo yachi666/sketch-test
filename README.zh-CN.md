@@ -9,11 +9,16 @@ SketchTest 是一个基于 TypeScript monorepo 的 REST API 自动化测试平�
 
 ## 当前已实现能力
 
-- OpenAPI、Postman、HAR、RAML Adapter 和格式检测。
-- Canonical API、测试 DSL、流程 DSL、Runner Protocol 与公共类型的
+- OpenAPI 3.0.4/3.1.2/3.2.0（JSON 与 YAML 1.2）、Postman、HAR、RAML
+  Adapter 和格式检测。
+- Arazzo 1.1 顺序 HTTP 流程导入/导出；通过检索 URL 与内容哈希绑定不可变的
+  OpenAPI 导入版本。
+- Canonical API、测试 DSL、流程 DSL、Runner Protocol、Generation Protocol 与公共类型的
   版本化 Zod 契约。
 - Fastify Control Plane：身份、导入、环境和 Secret、测试编写、流程、
   生成草稿、套件、策略、调度、Runner 租约、事件和报告。
+- GitHub 公开仓库 URL → 固定 Commit → Spring Controller/简单 DTO 分析 → AI 待审测试草稿；保留源码行号与实际覆盖数，见 [验收及边界](docs/design/2026-09-23-github-generation.md)。
+- 独立 Pi AI Worker：有界生成、持久化租约和人工审阅草稿，见 [配置说明](apps/ai-worker/README.md)。
 - 独立 Node.js Runner：重试、轮询、变量提取、断言、脱敏和有序事件。
 - React Web 提供经过认证、由 Control Plane 驱动的 API 导入、流程发布执行和
   运行报告主路径。
@@ -30,13 +35,14 @@ Web / CLI
     │ 版本化 HTTP API
     ▼
 Control Plane ─── PostgreSQL
+    ├── Generation Protocol ─── 独立 Pi AI Worker
     │ Runner Protocol
     ▼
 独立 Runner ─── 被测系统
 ```
 
-`packages/contracts` 下的五个契约包是唯一稳定边界。Control Plane、Runner
-以及未来 Worker 必须保持独立进程。已经发布的 `ApiVersion`、
+`packages/contracts` 下的六个契约包是唯一稳定边界。Control Plane、Runner
+以及 AI Worker 必须保持独立进程。已经发布的 `ApiVersion`、
 `TestCaseVersion`、`WorkflowVersion`、`EnvironmentVersion` 和
 `DatasetVersion` 不可修改。
 
@@ -51,8 +57,8 @@ Control Plane ─── PostgreSQL
 
 ## 环境要求
 
-- Node.js 22 或 24
-- pnpm 11.8+
+- Node.js 22.22.2+、24.15.0+ 或 26+（当前测试工具链要求）
+- pnpm 12.10.1
 - Control Plane 运行和集成测试所需的 PostgreSQL
 
 ## 安装与验证
@@ -74,8 +80,9 @@ E2E_MANAGED_POSTGRES=1 pnpm e2e:product
 
 该命令创建隔离的 PostgreSQL 与 MinIO，启动构建后的 Control Plane、Runner、
 Web 和仅用于测试的服务器，验证登录、导入、发布、租约、执行、CLI、报告和
-浏览器全链路；随后把数据库和全部对象证据恢复到一次性目标，并在 `finally`
-中删除临时资源。
+浏览器全链路。主导入路径实际执行 OpenAPI 3.2 → Arazzo 1.1 →
+`WorkflowVersion` → `ExecutionPlan`；随后把数据库和全部对象证据恢复到一次性
+目标，并在 `finally` 中删除临时资源。
 
 还可以从新 Compose 数据卷构建并启动打包镜像，验证 Control Plane、Web
 健康状态以及独立 Runner 心跳：
@@ -101,6 +108,7 @@ pnpm dev:fixture   # 测试服务器，127.0.0.1:3800
 export DATABASE_URL='postgresql://localhost:5432/sketchtest'
 export JWT_SECRET='replace-with-a-long-random-development-secret'
 export SECRET_KEY='replace-with-a-32-byte-secret'
+export IMPORT_ALLOWED_HOSTS='specs.example.test'
 ```
 
 Fixture Server 只能作为测试基础设施，生产路由和 Web 操作不得依赖它。
@@ -126,6 +134,8 @@ docs/                领域、架构、状态与执行目标
 
 部署、验证、备份、恢复、升级和回滚命令见
 [`docs/OPERATIONS.md`](docs/OPERATIONS.md)。
+OpenAPI/Arazzo 的可执行兼容边界及 Overlay 决策见
+[`docs/OPENAPI_COMPATIBILITY.md`](docs/OPENAPI_COMPATIBILITY.md)。
 
 ## 当前生产缺口
 

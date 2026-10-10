@@ -24,7 +24,7 @@ import {
   SemanticVersionSchema,
   SideEffectLevelSchema,
 } from '@sketch-test/contracts-common';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 // ─── Schema Version ─────────────────────────────────────────────
 
@@ -150,6 +150,8 @@ export const ExecutionPlanSchema = z
     workflowVersionId: EntityIdSchema.optional(),
     /** The TestCaseVersion this single-test plan was compiled from. */
     testCaseVersionId: EntityIdSchema.optional(),
+    /** Environment version whose non-secret variables were frozen into executable steps. */
+    environmentVersionId: EntityIdSchema.optional(),
     /** The Run that owns this immutable ad-hoc editor plan. */
     adHocRunId: EntityIdSchema.optional(),
     /** When this plan was compiled. */

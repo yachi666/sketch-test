@@ -1,0 +1,38 @@
+{
+  "id": "tcv_ee267af2",
+  "testCaseId": "tc_f2a3f13e",
+  "version": 1,
+  "definition": {
+    "id": "github-repository",
+    "name": "Node.js 公开仓库真实响应 · 单用例",
+    "request": {
+      "url": "${env.baseUrl}/repos/${env.owner}/${env.repo}",
+      "method": "GET",
+      "headers": {
+        "Accept": "application/vnd.github+json"
+      }
+    },
+    "assertions": [
+      {
+        "id": "status",
+        "target": "status",
+        "expected": 200,
+        "operator": "equals",
+        "severity": "block"
+      },
+      {
+        "id": "repo",
+        "path": "$.full_name",
+        "target": "jsonPath",
+        "expected": "nodejs/node",
+        "operator": "equals",
+        "severity": "block"
+      }
+    ],
+    "sideEffect": "read-only",
+    "schemaVersion": "sketch-test.test/v1"
+  },
+  "sideEffect": "read-only",
+  "publishedBy": null,
+  "publishedAt": "2026-10-08T15:14:46.237Z"
+}

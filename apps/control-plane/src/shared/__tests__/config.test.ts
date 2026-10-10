@@ -18,6 +18,7 @@ describe('loadControlPlaneConfig', () => {
       port: 3802,
       logLevel: 'info',
       webOrigins: ['http://127.0.0.1:5173', 'http://localhost:5173'],
+      importAllowedHosts: ['127.0.0.1', 'localhost', '[::1]'],
     });
   });
 
@@ -30,23 +31,23 @@ describe('loadControlPlaneConfig', () => {
     expect(() => loadControlPlaneConfig({ NODE_ENV: 'production' })).toThrow(/DATABASE_URL/);
   });
 
-  test.each([
-    'JWT_SECRET',
-    'SECRET_KEY',
-    'RUNNER_REGISTRATION_TOKEN',
-  ] as const)('requires a strong production %s', (missing) => {
-    const env: NodeJS.ProcessEnv = {
-      NODE_ENV: 'production',
-      DATABASE_URL: 'postgresql://db/sketchtest',
-      JWT_SECRET: strong,
-      SECRET_KEY: strong,
-      RUNNER_REGISTRATION_TOKEN: strong,
-      ...storage,
-      WEB_ORIGINS: 'https://app.example.com',
-    };
-    delete env[missing];
-    expect(() => loadControlPlaneConfig(env)).toThrow(new RegExp(missing));
-  });
+  test.each(['JWT_SECRET', 'SECRET_KEY', 'RUNNER_REGISTRATION_TOKEN'] as const)(
+    'requires a strong production %s',
+    (missing) => {
+      const env: NodeJS.ProcessEnv = {
+        NODE_ENV: 'production',
+        DATABASE_URL: 'postgresql://db/sketchtest',
+        JWT_SECRET: strong,
+        SECRET_KEY: strong,
+        RUNNER_REGISTRATION_TOKEN: strong,
+        ...storage,
+        WEB_ORIGINS: 'https://app.example.com',
+        IMPORT_ALLOWED_HOSTS: 'specs.example.com',
+      };
+      delete env[missing];
+      expect(() => loadControlPlaneConfig(env)).toThrow(new RegExp(missing));
+    },
+  );
 
   test('accepts a complete production configuration', () => {
     expect(
@@ -58,9 +59,14 @@ describe('loadControlPlaneConfig', () => {
         RUNNER_REGISTRATION_TOKEN: strong,
         ...storage,
         WEB_ORIGINS: 'https://app.example.com',
+        IMPORT_ALLOWED_HOSTS: 'specs.example.com, specs-backup.example.com:8443',
         CP_PORT: '8080',
       }),
-    ).toMatchObject({ nodeEnv: 'production', port: 8080 });
+    ).toMatchObject({
+      nodeEnv: 'production',
+      port: 8080,
+      importAllowedHosts: ['specs.example.com', 'specs-backup.example.com:8443'],
+    });
   });
 
   test.each(Object.keys(storage))('requires production storage setting %s', (missing) => {
@@ -72,6 +78,7 @@ describe('loadControlPlaneConfig', () => {
       RUNNER_REGISTRATION_TOKEN: strong,
       ...storage,
       WEB_ORIGINS: 'https://app.example.com',
+      IMPORT_ALLOWED_HOSTS: 'specs.example.com',
     };
     delete env[missing];
     expect(() => loadControlPlaneConfig(env)).toThrow(new RegExp(missing));
@@ -86,7 +93,22 @@ describe('loadControlPlaneConfig', () => {
         SECRET_KEY: strong,
         RUNNER_REGISTRATION_TOKEN: strong,
         ...storage,
+        IMPORT_ALLOWED_HOSTS: 'specs.example.com',
       }),
     ).toThrow(/WEB_ORIGINS/);
+  });
+
+  test('requires explicit import hosts in production', () => {
+    expect(() =>
+      loadControlPlaneConfig({
+        NODE_ENV: 'production',
+        DATABASE_URL: 'postgresql://db/sketchtest',
+        JWT_SECRET: strong,
+        SECRET_KEY: strong,
+        RUNNER_REGISTRATION_TOKEN: strong,
+        ...storage,
+        WEB_ORIGINS: 'https://app.example.com',
+      }),
+    ).toThrow(/IMPORT_ALLOWED_HOSTS/);
   });
 });

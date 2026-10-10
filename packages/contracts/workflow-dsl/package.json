@@ -15,7 +15,7 @@
     "build": "tsc --noEmit false --allowImportingTsExtensions false --incremental false",
     "check": "tsc --noEmit",
     "lint": "biome check",
-    "test": "vitest run",
+    "test": "vitest run --exclude '**/dist/**'",
     "clean": "rm -rf dist/ tsconfig.tsbuildinfo"
   },
   "dependencies": {

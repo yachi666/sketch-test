@@ -1,0 +1,19 @@
+{
+  "events": [
+    {
+      "id": "audit_90de96c9",
+      "workspaceId": "ws_02eaec7b",
+      "actorType": "runner",
+      "actorId": "runner-secret-channel",
+      "action": "secret.decrypt",
+      "resourceType": "secret",
+      "resourceId": "sec_dc89a55e",
+      "outcome": "success",
+      "requestId": "verification-secret-decrypt",
+      "metadata": {
+        "secretName": "verification-local-sentinel"
+      },
+      "createdAt": "2026-10-08T15:09:59.019Z"
+    }
+  ]
+}

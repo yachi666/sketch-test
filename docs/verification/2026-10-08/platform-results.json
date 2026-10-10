@@ -1,0 +1,281 @@
+{
+  "startedAt": "2026-10-08T15:09:43.290Z",
+  "workspaceId": "ws_02eaec7b",
+  "checks": [
+    {
+      "name": "readiness PostgreSQL + S3",
+      "status": "passed",
+      "value": {
+        "status": "ready",
+        "db": "connected",
+        "objectStore": "connected",
+        "timestamp": "2026-10-08T15:09:43.315Z"
+      }
+    },
+    {
+      "name": "request correlation",
+      "status": "passed",
+      "value": 200
+    },
+    {
+      "name": "Open-Meteo official OpenAPI URL import",
+      "status": "failed",
+      "error": "POST /api/import: 422 {\"code\":\"IMPORT_FAILED\",\"message\":\"Import failed: OpenAPI info.version \\\"1.0\\\" cannot be represented by the current CanonicalApiModel semantic-version field.\",\"correlationId\":\"c9fc4d86-bb79-4266-9acb-0c7a93b594d2\"}"
+    },
+    {
+      "name": "GitHub commit-pinned real repository discovery",
+      "status": "passed",
+      "value": {
+        "apiVersionId": "av_ea093aaa",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "endpointCount": 59,
+        "scannedFiles": 86
+      }
+    },
+    {
+      "name": "real public GitHub data imported as dataset",
+      "status": "passed",
+      "value": {
+        "dataset": {
+          "id": "ds_6558887c",
+          "workspaceId": "ws_02eaec7b",
+          "name": "Node.js 公开仓库真实快照 · 2026-10-08",
+          "description": "",
+          "createdAt": "2026-10-08T15:09:56.892Z"
+        },
+        "version": {
+          "id": "dsv_013f46b7",
+          "datasetId": "ds_6558887c",
+          "version": 1,
+          "rows": [
+            {
+              "full_name": "nodejs/node",
+              "default_branch": "main",
+              "language": "JavaScript",
+              "archived": false,
+              "stargazers_count": 122436,
+              "updated_at": "2026-10-08T14:10:48Z"
+            }
+          ],
+          "sensitiveFields": [],
+          "createdAt": "2026-10-08T15:09:56.895Z"
+        }
+      }
+    },
+    {
+      "name": "versioned public API environment",
+      "status": "passed",
+      "value": {
+        "id": "envv_a2179b45",
+        "environmentId": "env_61c31b76",
+        "version": 2,
+        "baseUrl": "https://api.github.com",
+        "variables": {
+          "repo": "node",
+          "owner": "nodejs"
+        },
+        "runnerLabels": [],
+        "requireApproval": false,
+        "createdAt": "2026-10-08T15:09:56.904Z"
+      }
+    },
+    {
+      "name": "published business workflow with real public response",
+      "status": "passed",
+      "value": {
+        "runId": "run_84626abc",
+        "status": "passed"
+      }
+    },
+    {
+      "name": "immutable evidence manifest, integrity and W3C trace",
+      "status": "failed",
+      "error": "GET /api/runs/run_84626abc/integrity: 404 {\"message\":\"Route GET:/api/runs/run_84626abc/integrity not found\",\"error\":\"Not Found\",\"statusCode\":404}"
+    },
+    {
+      "name": "test plan + quality gate + manual schedule dispatch",
+      "status": "failed",
+      "error": "POST /api/schedules/sched_19858afb/trigger: 404 {\"message\":\"Route POST:/api/schedules/sched_19858afb/trigger not found\",\"error\":\"Not Found\",\"statusCode\":404}"
+    },
+    {
+      "name": "rule generation from real repository API",
+      "status": "failed",
+      "error": "The expression evaluated to a falsy value:\n\n  assert(drafts.drafts.length>0)\n"
+    },
+    {
+      "name": "real AI Worker capability and queued generation",
+      "status": "passed",
+      "value": {
+        "cap": {
+          "configured": true,
+          "available": true,
+          "workers": [
+            {
+              "model": "deepseek-v4-flash",
+              "provider": "deepseek",
+              "workerId": "ai_1972a40b-1226-475a-bf08-6c772731de83",
+              "capabilities": [
+                "plan"
+              ],
+              "harnessVersion": "0.85.1"
+            }
+          ]
+        },
+        "job": {
+          "id": "gj_9c6997d5",
+          "workspaceId": "ws_02eaec7b",
+          "apiVersionId": "av_ea093aaa",
+          "strategy": "pi",
+          "status": "pending",
+          "createdAt": "2026-10-08T15:09:59.003Z"
+        }
+      }
+    },
+    {
+      "name": "policy CRUD and explicit evaluation",
+      "status": "passed",
+      "value": {
+        "policy": {
+          "policy": {
+            "id": "pol_0cdac77e",
+            "workspaceId": "ws_02eaec7b",
+            "name": "验收策略 · 只读角色边界",
+            "description": "",
+            "rules": [
+              {
+                "id": "deny-write",
+                "condition": {
+                  "action": "verification.write"
+                },
+                "effect": "deny",
+                "priority": 10
+              }
+            ],
+            "priority": 0,
+            "enabled": true,
+            "createdAt": "2026-10-08T15:09:59.010Z",
+            "updatedAt": "2026-10-08T15:09:59.010Z"
+          }
+        },
+        "evaluation": {
+          "decision": "allow",
+          "matchedRules": [],
+          "reason": "No matching policy rule found — default allow"
+        }
+      }
+    },
+    {
+      "name": "secret masking and decrypt audit correlation",
+      "status": "passed",
+      "value": {
+        "secretId": "sec_dc89a55e",
+        "auditEvents": 1,
+        "masked": true
+      }
+    },
+    {
+      "name": "Prometheus metrics normalized labels",
+      "status": "passed",
+      "value": {
+        "normalized": true,
+        "histogramBuckets": false
+      }
+    }
+  ],
+  "assets": {
+    "repositoryApi": "av_ea093aaa",
+    "dataset": {
+      "dataset": {
+        "id": "ds_6558887c",
+        "workspaceId": "ws_02eaec7b",
+        "name": "Node.js 公开仓库真实快照 · 2026-10-08",
+        "description": "",
+        "createdAt": "2026-10-08T15:09:56.892Z"
+      },
+      "version": {
+        "id": "dsv_013f46b7",
+        "datasetId": "ds_6558887c",
+        "version": 1,
+        "rows": [
+          {
+            "full_name": "nodejs/node",
+            "default_branch": "main",
+            "language": "JavaScript",
+            "archived": false,
+            "stargazers_count": 122436,
+            "updated_at": "2026-10-08T14:10:48Z"
+          }
+        ],
+        "sensitiveFields": [],
+        "createdAt": "2026-10-08T15:09:56.895Z"
+      }
+    },
+    "environment": {
+      "id": "env_61c31b76",
+      "workspaceId": "ws_02eaec7b",
+      "name": "GitHub 公开 API · 只读验收",
+      "description": "",
+      "createdAt": "2026-10-08T15:09:56.899Z"
+    },
+    "environmentVersion": {
+      "id": "envv_a2179b45",
+      "environmentId": "env_61c31b76",
+      "version": 2,
+      "baseUrl": "https://api.github.com",
+      "variables": {
+        "repo": "node",
+        "owner": "nodejs"
+      },
+      "runnerLabels": [],
+      "requireApproval": false,
+      "createdAt": "2026-10-08T15:09:56.904Z"
+    },
+    "workflow": {
+      "workflowId": "wf_efc03873",
+      "versionId": "wfv_f85319f4"
+    },
+    "runId": "run_84626abc",
+    "aiJob": {
+      "id": "gj_9c6997d5",
+      "workspaceId": "ws_02eaec7b",
+      "apiVersionId": "av_ea093aaa",
+      "strategy": "pi",
+      "status": "pending",
+      "createdAt": "2026-10-08T15:09:59.003Z"
+    },
+    "policy": {
+      "policy": {
+        "id": "pol_0cdac77e",
+        "workspaceId": "ws_02eaec7b",
+        "name": "验收策略 · 只读角色边界",
+        "description": "",
+        "rules": [
+          {
+            "id": "deny-write",
+            "condition": {
+              "action": "verification.write"
+            },
+            "effect": "deny",
+            "priority": 10
+          }
+        ],
+        "priority": 0,
+        "enabled": true,
+        "createdAt": "2026-10-08T15:09:59.010Z",
+        "updatedAt": "2026-10-08T15:09:59.010Z"
+      }
+    }
+  },
+  "sources": [
+    {
+      "url": "https://github.com/yachi666/support-roster-server",
+      "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939"
+    },
+    {
+      "url": "https://api.github.com/repos/nodejs/node",
+      "fetchedAt": "2026-10-08T15:09:56.887Z",
+      "sha256": "bc174d0de76b14caf7df3e5bdc375da5831f2ccb2c4da96228d94f1d463730fe"
+    }
+  ],
+  "completedAt": "2026-10-08T15:09:59.025Z"
+}

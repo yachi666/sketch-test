@@ -2,7 +2,7 @@
   "name": "@sketch-test/adapter-har",
   "version": "0.0.0",
   "private": true,
-  "description": "HAR (HTTP Archive) v1.2 → CanonicalApiModel adapter",
+  "description": "HAR (HTTP Archive) v1.2 \u2192 CanonicalApiModel adapter",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./src/index.ts",
@@ -16,13 +16,12 @@
     "build": "tsc --noEmit false --allowImportingTsExtensions false --incremental false",
     "check": "tsc --noEmit",
     "lint": "biome check",
-    "test": "vitest run",
+    "test": "vitest run --exclude '**/dist/**'",
     "clean": "rm -rf dist/ tsconfig.tsbuildinfo"
   },
   "dependencies": {
     "@sketch-test/contracts-common": "workspace:*",
-    "@sketch-test/canonical-api-model": "workspace:*",
-    "zod": "catalog:"
+    "@sketch-test/canonical-api-model": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:",

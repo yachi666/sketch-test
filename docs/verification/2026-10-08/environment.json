@@ -1,0 +1,8 @@
+{
+  "workspaceId": "ws_02eaec7b",
+  "web": "http://localhost:8180",
+  "controlPlane": "http://127.0.0.1:3812",
+  "project": "sketchtest-verification-20261008",
+  "createdAt": "2026-10-08T15:07:31.742Z",
+  "persistent": true
+}

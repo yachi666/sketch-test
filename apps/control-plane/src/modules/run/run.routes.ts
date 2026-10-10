@@ -1,21 +1,23 @@
 import type { FastifyInstance } from 'fastify';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { pool } from '../../db/db.js';
 import { sendError } from '../../shared/errors.js';
+import { GenerationError } from '../generation/generation.service.js';
 import { authenticatedUser } from '../iam/auth.middleware.js';
+import { runPublishedTest } from './published-test-run.service.js';
 import {
   createPersistedRunFromSteps,
   createRunFromWorkflow,
   getApiVersion,
   getRun,
-  listRuns,
 } from './run.service.js';
+import { queryRuns, RunQuerySchema } from './run-query.service.js';
 
 const CustomRunBodySchema = z.object({
   steps: z
     .array(
       z.object({
-        method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']),
+        method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'QUERY']),
         url: z.string().min(1).max(4096),
         headers: z.record(z.string(), z.string()).optional(),
         body: z.unknown().optional(),
@@ -58,6 +60,33 @@ const CustomRunBodySchema = z.object({
 });
 
 export async function runRoutes(app: FastifyInstance): Promise<void> {
+  app.post('/api/test-case-versions/:id/run', async (request, reply) => {
+    const parsed = z
+      .object({
+        environmentVersionId: z.string().min(1),
+        confirmSideEffects: z.boolean().default(false),
+      })
+      .strict()
+      .safeParse(request.body);
+    if (!parsed.success)
+      return sendError(reply, 400, 'INVALID_INPUT', 'Select an environment version');
+    try {
+      return reply
+        .status(201)
+        .send(
+          await runPublishedTest(
+            authenticatedUser(request).workspaceId,
+            (request.params as { id: string }).id,
+            parsed.data.environmentVersionId,
+            parsed.data.confirmSideEffects,
+          ),
+        );
+    } catch (error) {
+      if (error instanceof GenerationError)
+        return sendError(reply, error.statusCode, 'RUN_ERROR', error.message);
+      throw error;
+    }
+  });
   /** List all imported API versions. */
   app.get('/api/api-versions', async (request, reply) => {
     const result = await pool.query(
@@ -99,6 +128,7 @@ export async function runRoutes(app: FastifyInstance): Promise<void> {
       sourceLocation: apiVersion.source_location,
       contentHash: apiVersion.content_hash,
       createdAt: apiVersion.created_at,
+      metadata: spec.metadata,
       endpoints: spec.endpoints ?? [],
       schemas: spec.schemas ?? {},
       diagnostics: spec.diagnostics ?? [],
@@ -159,8 +189,9 @@ export async function runRoutes(app: FastifyInstance): Promise<void> {
 
   /** List all runs. */
   app.get('/api/runs', async (request, reply) => {
-    const runs = await listRuns(authenticatedUser(request).workspaceId);
-    reply.send({ runs });
+    const parsed = RunQuerySchema.safeParse(request.query);
+    if (!parsed.success) return sendError(reply, 400, 'INVALID_INPUT', 'Invalid run filters');
+    reply.send(await queryRuns(authenticatedUser(request).workspaceId, parsed.data));
   });
 
   /** Get a single run with its step events. */

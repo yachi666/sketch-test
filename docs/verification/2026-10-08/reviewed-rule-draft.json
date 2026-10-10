@@ -1,0 +1,43 @@
+{
+  "id": "draft_8ffbb471",
+  "jobId": "gj_13e027f6",
+  "testCaseId": null,
+  "definition": {
+    "name": "Status 200: POST /api/auth/login",
+    "extract": [],
+    "request": {
+      "url": "/api/auth/login",
+      "body": {
+        "staffId": "a"
+      },
+      "method": "POST",
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    },
+    "assertions": [
+      {
+        "target": "status",
+        "expected": 200,
+        "operator": "equals"
+      }
+    ],
+    "sideEffect": "read-only",
+    "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。",
+    "schemaVersion": "sketch-test.test/v1"
+  },
+  "sourceInfo": {
+    "path": "/api/auth/login",
+    "rule": "status-code:200",
+    "method": "POST",
+    "strategy": "status-codes",
+    "confidence": 0.5,
+    "endpointId": "code_POST_0601f3f5960a860ab7fa",
+    "apiVersionId": "av_ea093aaa"
+  },
+  "confidence": 0.5,
+  "status": "pending",
+  "reviewedBy": null,
+  "reviewedAt": null,
+  "createdAt": "2026-10-08T15:09:58.989Z"
+}

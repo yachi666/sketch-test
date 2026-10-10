@@ -1,0 +1,20 @@
+{
+  "ready": {
+    "status": 503,
+    "body": {
+      "status": "not_ready",
+      "db": "connected",
+      "objectStore": "disconnected",
+      "timestamp": "2026-10-08T15:16:07.716Z"
+    },
+    "elapsedMs": 5123
+  },
+  "live": {
+    "status": 200,
+    "body": {
+      "status": "ok",
+      "timestamp": "2026-10-08T15:16:07.721Z"
+    },
+    "elapsedMs": 2
+  }
+}

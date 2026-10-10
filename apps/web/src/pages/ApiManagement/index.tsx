@@ -1,83 +1,199 @@
-import { ArrowClockwise, Database, PlugsConnected, Warning } from '@phosphor-icons/react';
-import { CpImportPanel } from '../../components/api/CpImportPanel';
-import { useApiVersions } from '../../hooks/useApi';
+import type { ApiSchemaNode, Endpoint } from '@sketch-test/canonical-api-model';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  endpointDetailFromCanonical,
+  schemaDisplayNodesFromCanonical,
+} from '../../components/api/endpointDetailFromCanonical';
+import { type ApiVersionSummary, cpClient } from '../../lib/cp-client';
+import { useEnvironmentStore } from '../../stores/environmentStore';
+import { useVariableStore } from '../../stores/variableStore';
+import type {
+  ApiChangeItem,
+  ApiEndpoint,
+  ApiSource,
+  ApiVersionDiff,
+  ApiVersionInfo,
+  EndpointDetail,
+  SchemaDisplayNode,
+} from '../../types';
+import { ApiView } from '../../views/ApiView';
+
+interface CatalogState {
+  sources: ApiSource[];
+  endpoints: ApiEndpoint[];
+  versions: ApiVersionInfo[];
+  details: Record<string, EndpointDetail>;
+  schemas: Record<string, SchemaDisplayNode>;
+  diff: ApiVersionDiff | null;
+}
+
+const emptyCatalog: CatalogState = {
+  sources: [],
+  endpoints: [],
+  versions: [],
+  details: {},
+  schemas: {},
+  diff: null,
+};
+
+function sourceType(value: string): ApiVersionInfo['sourceType'] {
+  return value === 'raml' || value === 'manual' ? value : 'openapi';
+}
+
+function sourceLabel(version: ApiVersionSummary): string {
+  return version.label || version.sourceLocation.split('/').filter(Boolean).at(-1) || version.id;
+}
+
+function toVersionInfo(version: ApiVersionSummary, index: number): ApiVersionInfo {
+  const label = sourceLabel(version);
+  return {
+    id: version.id,
+    sourceId: version.id,
+    label,
+    sourceType: sourceType(version.sourceType),
+    fileName: label,
+    // The catalog summary deliberately does not expose source metadata beyond the immutable
+    // version record, so avoid inventing a semantic version for the display.
+    version: '—',
+    endpointCount: version.endpointCount,
+    schemaCount: 0,
+    importedAt: version.createdAt,
+    isActive: index === 0,
+  };
+}
+
+function asCanonicalEndpoints(value: unknown): Endpoint[] {
+  return Array.isArray(value) ? (value as Endpoint[]) : [];
+}
+
+function asCanonicalSchemas(value: unknown): Record<string, ApiSchemaNode> {
+  return value && typeof value === 'object' ? (value as Record<string, ApiSchemaNode>) : {};
+}
+
+function mapDiff(
+  base: ApiVersionSummary,
+  target: ApiVersionSummary,
+  result: { changes: unknown[] },
+): ApiVersionDiff {
+  const changes: ApiChangeItem[] = result.changes.flatMap((change) => {
+    if (!change || typeof change !== 'object') return [];
+    const entry = change as Record<string, unknown>;
+    const type = entry['type'];
+    if (type !== 'added' && type !== 'removed' && type !== 'modified') return [];
+    return [
+      {
+        changeType: type as ApiChangeItem['changeType'],
+        endpointId: String(entry['path'] ?? ''),
+        path: String(entry['path'] ?? ''),
+        description: String(entry['summary'] ?? ''),
+        breaking: entry['breaking'] === true,
+        affectedTestCases: 0,
+        affectedWorkflows: 0,
+      },
+    ];
+  });
+  return {
+    baseVersionId: base.id,
+    baseVersionLabel: sourceLabel(base),
+    targetVersionId: target.id,
+    targetVersionLabel: sourceLabel(target),
+    summary: {
+      addedEndpoints: changes.filter((change) => change.changeType === 'added').length,
+      removedEndpoints: changes.filter((change) => change.changeType === 'removed').length,
+      modifiedEndpoints: changes.filter((change) => change.changeType === 'modified').length,
+      breakingChanges: changes.filter((change) => change.breaking).length,
+    },
+    changes,
+  };
+}
 
 export function ApiManagementPage() {
-  const { data: apiVersions, loading, error, refetch } = useApiVersions();
+  const navigate = useNavigate();
+  const { variables } = useVariableStore();
+  const { activeEnvironmentId } = useEnvironmentStore();
+  const [catalog, setCatalog] = useState<CatalogState>(emptyCatalog);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setError(null);
+    try {
+      const { apiVersions } = await cpClient.listApiVersions();
+      const details = await Promise.all(
+        apiVersions.map(async (version) => ({
+          summary: version,
+          value: await cpClient.getApiVersion(version.id),
+        })),
+      );
+      const nextSchemas: Record<string, SchemaDisplayNode> = {};
+      const nextDetails: Record<string, EndpointDetail> = {};
+      const endpoints: ApiEndpoint[] = [];
+      for (const { summary, value } of details) {
+        const schemas = schemaDisplayNodesFromCanonical(asCanonicalSchemas(value.schemas));
+        Object.assign(nextSchemas, schemas);
+        for (const endpoint of asCanonicalEndpoints(value.endpoints)) {
+          // Canonical endpoint IDs are stable across immutable API versions. Scope the UI row key
+          // by version so that the same operation in two versions remains independently viewable.
+          const rowId = `${summary.id}:${endpoint.id}`;
+          endpoints.push({
+            id: rowId,
+            method: endpoint.method,
+            path: endpoint.path,
+            summary: endpoint.summary ?? '',
+            description: endpoint.description,
+            coverage: null,
+            cases: null,
+            tags: endpoint.tags ?? [],
+            deprecated: endpoint.deprecated,
+            versionId: summary.id,
+            updatedAt: summary.createdAt,
+          });
+          nextDetails[rowId] = endpointDetailFromCanonical(endpoint, schemas);
+        }
+      }
+      let diff: ApiVersionDiff | null = null;
+      if (apiVersions.length >= 2) {
+        const [target, base] = apiVersions;
+        diff = mapDiff(base, target, await cpClient.diffApiVersions(base.id, target.id));
+      }
+      setCatalog({
+        sources: apiVersions.map((version) => ({
+          id: version.id,
+          name: sourceLabel(version),
+          sourceLabel: version.sourceLocation,
+          sourceType: sourceType(version.sourceType),
+          createdAt: version.createdAt,
+          updatedAt: version.createdAt,
+        })),
+        endpoints,
+        versions: apiVersions.map(toVersionInfo),
+        details: nextDetails,
+        schemas: nextSchemas,
+        diff,
+      });
+    } catch (reason) {
+      setCatalog(emptyCatalog);
+      setError(reason instanceof Error ? reason.message : '无法读取接口目录。');
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   return (
-    <main className="page-view">
-      <div className="page-intro">
-        <div>
-          <span className="eyebrow">CANONICAL API CATALOG</span>
-          <h2>接口资产</h2>
-          <p>以下内容直接来自 Control Plane，不使用浏览器内置样例数据。</p>
-        </div>
-        <button className="button button--outline" type="button" onClick={() => void refetch()}>
-          <ArrowClockwise size={18} />
-          刷新
-        </button>
-      </div>
-
-      <CpImportPanel onImport={() => void refetch()} />
-
-      {error ? (
-        <section className="paper-panel" role="alert">
-          <div className="section-heading">
-            <Warning size={22} weight="duotone" />
-            <div>
-              <h3>无法连接 Control Plane</h3>
-              <p>{error}</p>
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      <section className="table-panel" aria-busy={loading}>
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">IMMUTABLE VERSIONS</span>
-            <h3>API Versions</h3>
-          </div>
-          <span className="status-badge">{apiVersions?.length ?? 0} 个版本</span>
-        </div>
-
-        {loading ? <p>正在从 Control Plane 加载…</p> : null}
-        {!loading && !error && apiVersions?.length === 0 ? (
-          <div className="empty-state">
-            <Database size={42} weight="duotone" />
-            <h3>尚未导入 API</h3>
-            <p>使用上方导入表单创建第一个不可变 ApiVersion。</p>
-          </div>
-        ) : null}
-
-        {apiVersions && apiVersions.length > 0 ? (
-          <div className="data-table">
-            <div className="data-row data-row--head">
-              <span>来源</span>
-              <span>格式</span>
-              <span>端点</span>
-              <span>内容哈希</span>
-              <span>创建时间</span>
-            </div>
-            {apiVersions.map((version) => (
-              <div className="data-row" key={version.id}>
-                <span>
-                  <PlugsConnected size={17} />
-                  <strong>{version.sourceLocation}</strong>
-                  <code>{version.id}</code>
-                </span>
-                <span>{version.sourceType}</span>
-                <span>{version.endpointCount ?? '—'}</span>
-                <span>
-                  <code title={version.contentHash}>{version.contentHash.slice(0, 12)}…</code>
-                </span>
-                <span>{new Date(version.createdAt).toLocaleString()}</span>
-              </div>
-            ))}
-          </div>
-        ) : null}
-      </section>
-    </main>
+    <ApiView
+      {...catalog}
+      imported={catalog.versions.length > 0}
+      variables={variables}
+      activeEnvironmentId={activeEnvironmentId}
+      loadError={error}
+      onRetryLoad={load}
+      onImport={() => navigate('/import')}
+      onCreate={() => {}}
+      onUpdate={() => {}}
+      onDelete={() => {}}
+      readOnly
+    />
   );
 }

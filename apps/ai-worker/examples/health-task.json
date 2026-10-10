@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "sketch-test.generation/v1",
+  "jobId": "job-local-health",
+  "workspaceId": "ws-local",
+  "apiVersionId": "api-local-health",
+  "sourceHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "objective": "为健康检查创建一个待人工审阅的回归草稿。只根据给定响应约定提出断言。",
+  "endpoints": [
+    {
+      "id": "health",
+      "method": "GET",
+      "path": "/health",
+      "summary": "Health check",
+      "contractNotes": "A successful health check responds with HTTP 200.",
+      "responseStatusCodes": [200],
+      "sideEffect": "read-only"
+    }
+  ],
+  "limits": {
+    "maxTurns": 6,
+    "maxDrafts": 1,
+    "timeoutMs": 60000,
+    "maxOutputTokens": 4096
+  }
+}

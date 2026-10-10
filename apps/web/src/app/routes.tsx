@@ -1,40 +1,40 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '../components/layout/AppLayout';
+import { AgentPage } from '../pages/Agent';
 import { ApiManagementPage } from '../pages/ApiManagement';
-import { LoginPage } from '../pages/Login';
-import { RunsPage } from '../pages/Runs';
-import { WorkflowsPage } from '../pages/Workflows';
-import { useAuthStore } from '../stores/authStore';
+import { CapabilitiesPage } from '../pages/Capabilities';
+import { CasesPage } from '../pages/Cases';
+import DashboardOverview from '../pages/Dashboard';
+import EnvironmentView from '../pages/Environments';
+import { ImportPage } from '../pages/Import';
+import { PlansPage } from '../pages/Plans';
+import { ReportsDetailWrapper, ReportsPage } from '../pages/Reports';
+import VariablesView from '../pages/Variables';
+import WorkflowsPage from '../pages/Workflows';
 
-function ProtectedProductRoutes() {
+function ProductRoutes() {
   return (
     <AppLayout>
       <Routes>
-        <Route path="/" element={<Navigate to="/apis" replace />} />
+        <Route path="/" element={<DashboardOverview />} />
+        <Route path="/capabilities" element={<CapabilitiesPage />} />
         <Route path="/apis" element={<ApiManagementPage />} />
+        <Route path="/import" element={<ImportPage />} />
+        <Route path="/cases" element={<CasesPage />} />
+        <Route path="/agent" element={<AgentPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/reports/:runId/:legacyWorkflowId?" element={<ReportsDetailWrapper />} />
+        <Route path="/variables" element={<VariablesView />} />
+        <Route path="/environments" element={<EnvironmentView />} />
         <Route path="/workflows" element={<WorkflowsPage />} />
-        <Route path="/runs" element={<RunsPage />} />
-        <Route path="*" element={<Navigate to="/apis" replace />} />
+        <Route path="/workflows/:id" element={<WorkflowsPage />} />
+        <Route path="/plans" element={<PlansPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppLayout>
   );
 }
 
 export function AppRoutes() {
-  const token = useAuthStore((state) => state.token);
-  const hydrated = useAuthStore((state) => state.hydrated);
-
-  if (!hydrated) {
-    return <main className="auth-loading">正在验证会话…</main>;
-  }
-
-  return (
-    <Routes>
-      <Route path="/login" element={token ? <Navigate to="/apis" replace /> : <LoginPage />} />
-      <Route
-        path="*"
-        element={token ? <ProtectedProductRoutes /> : <Navigate to="/login" replace />}
-      />
-    </Routes>
-  );
+  return <ProductRoutes />;
 }

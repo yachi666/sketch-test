@@ -1,0 +1,19 @@
+{
+  "id": "gj_cf91952c",
+  "workspaceId": "ws_02eaec7b",
+  "apiVersionId": "av_fa206a0a",
+  "strategy": "pi",
+  "status": "completed",
+  "config": {
+    "model": "deepseek-v4-flash",
+    "provider": "deepseek",
+    "objective": "生成一条读取公开 Node.js 仓库元数据的只读正向用例；owner=nodejs，repo=node。必须使用提供的 requestTemplate，断言 HTTP 200、full_name 等于 nodejs/node。",
+    "endpointIds": [
+      "GET-/repos/:owner/:repo"
+    ]
+  },
+  "attempt": 1,
+  "errorCode": null,
+  "createdAt": "2026-10-08T15:57:39.171Z",
+  "completedAt": "2026-10-08T15:57:46.706Z"
+}

@@ -40,6 +40,7 @@ Thumbs.db
 # Logs
 *.log
 logs/
+.services/
 pnpm-debug.log*
 
 # Playwright
@@ -57,3 +58,9 @@ __screenshots__/
 
 # Archives (built packages)
 *.tgz
+
+# Local Control Plane object storage contains runtime evidence, not source.
+.sketchtest/
+
+# Local agent scratch files (not design or acceptance documentation)
+.superpowers/

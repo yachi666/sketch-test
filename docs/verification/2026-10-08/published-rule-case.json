@@ -1,0 +1,45 @@
+{
+  "id": "tcv_e4127cb2",
+  "test_case_id": "tc_ef021a34",
+  "version": 1,
+  "definition": {
+    "id": "test_draft_8ffbb471",
+    "name": "Status 200: POST /api/auth/login",
+    "extract": [],
+    "request": {
+      "url": "/api/auth/login",
+      "body": {
+        "type": "json",
+        "value": {
+          "staffId": "a"
+        },
+        "mediaType": "application/json"
+      },
+      "method": "POST",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "timeoutMs": 30000,
+      "followRedirects": false
+    },
+    "assertions": [
+      {
+        "id": "assert_0",
+        "target": "status",
+        "expected": 200,
+        "operator": "equals",
+        "severity": "block"
+      }
+    ],
+    "sideEffect": "read-only",
+    "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。",
+    "schemaVersion": "sketch-test.test/v1"
+  },
+  "side_effect": "read-only",
+  "published_by": "usr_9aea39ce",
+  "published_at": "2026-10-08T15:12:23.887Z",
+  "testCaseId": "tc_ef021a34",
+  "sideEffect": "read-only",
+  "publishedBy": "usr_9aea39ce",
+  "publishedAt": "2026-10-08T15:12:23.887Z"
+}

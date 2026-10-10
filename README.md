@@ -9,12 +9,17 @@ independent Runner, and records ordered, redacted `RunEvent` evidence.
 
 ## What is implemented
 
-- OpenAPI, Postman, HAR, and RAML adapters plus format detection.
+- OpenAPI 3.0.4/3.1.2/3.2.0 (JSON and YAML 1.2), Postman, HAR, and
+  RAML adapters plus format detection.
+- Arazzo 1.1 sequential HTTP workflow import/export, bound to immutable
+  OpenAPI imports with retrieval-URL and content-hash verification.
 - Versioned Zod contracts for the canonical API model, test DSL, workflow DSL,
-  Runner protocol, and common primitives.
+  Runner protocol, generation protocol, and common primitives.
 - Fastify Control Plane modules for identity, import, environments and
   secrets, test authoring, workflows, generation drafts, suites, policies,
   scheduling, Runner leases, events, and reports.
+- Public GitHub URL → pinned commit → Spring Controller/simple DTO discovery → AI drafts with code-line provenance and actual coverage. See [acceptance and limits](docs/design/2026-09-23-github-generation.md).
+- Independent Pi AI Worker with bounded generation tasks, fenced leases, and human-reviewed drafts. See [AI Worker setup](apps/ai-worker/README.md).
 - Independent Node.js Runner with retries, polling, extraction, assertions,
   redaction, and ordered event production.
 - React Web application exposes authenticated, Control Plane-backed API import,
@@ -33,13 +38,14 @@ Web / CLI
     │ versioned HTTP API
     ▼
 Control Plane ─── PostgreSQL
+    ├── Generation Protocol ─── Independent Pi AI Worker
     │ Runner Protocol
     ▼
 Independent Runner ─── System under test
 ```
 
-The five packages under `packages/contracts` are the only stable seams.
-Control Plane, Runner, and future workers remain independent processes.
+The six packages under `packages/contracts` are the only stable seams.
+Control Plane, Runner, and AI Worker remain independent processes.
 Published `ApiVersion`, `TestCaseVersion`, `WorkflowVersion`,
 `EnvironmentVersion`, and `DatasetVersion` records are immutable.
 
@@ -54,8 +60,8 @@ Secrets are resolved by the Runner and redacted before event upload.
 
 ## Requirements
 
-- Node.js 22 or 24
-- pnpm 11.8+
+- Node.js 22.22.2+, 24.15.0+, or 26+ (required by the current test toolchain)
+- pnpm 12.10.1
 - PostgreSQL for Control Plane runtime and integration tests
 
 ## Install and verify
@@ -78,9 +84,10 @@ E2E_MANAGED_POSTGRES=1 pnpm e2e:product
 
 It creates isolated PostgreSQL and MinIO resources, starts the built Control
 Plane, Runner, Web, and test-only server, verifies login → import → publish →
-lease → execution → CLI/report/browser evidence, restores the database and all
-object evidence into disposable recovery targets, and removes temporary
-resources in `finally`.
+lease → execution → CLI/report/browser evidence. The primary import path is
+OpenAPI 3.2 → Arazzo 1.1 → `WorkflowVersion` → `ExecutionPlan`. It restores the
+database and all object evidence into disposable recovery targets and removes
+temporary resources in `finally`.
 
 Build and start the packaged images against new Compose volumes, then verify
 Control Plane/Web health and an independent Runner heartbeat:
@@ -107,6 +114,7 @@ Example development configuration:
 export DATABASE_URL='postgresql://localhost:5432/sketchtest'
 export JWT_SECRET='replace-with-a-long-random-development-secret'
 export SECRET_KEY='replace-with-a-32-byte-secret'
+export IMPORT_ALLOWED_HOSTS='specs.example.test'
 ```
 
 The fixture server is test infrastructure. Production routes and Web actions
@@ -134,6 +142,8 @@ productization objective and evidence matrix live in
 
 Deployment, verification, backup, restore, upgrade, and rollback commands are
 in [`docs/OPERATIONS.md`](docs/OPERATIONS.md).
+The executable OpenAPI/Arazzo support boundary and Overlay decision are in
+[`docs/OPENAPI_COMPATIBILITY.md`](docs/OPENAPI_COMPATIBILITY.md).
 
 ## Current production gaps
 

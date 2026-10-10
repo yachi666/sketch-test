@@ -9,3 +9,21 @@
 .sketchtest
 coverage
 docs/archive
+
+# Local credentials, development processes and evidence are never build inputs.
+**/.services
+**/.sketchtest
+
+# Reproducible caches and local review artifacts
+**/.npm-cache
+**/.vite
+**/logs
+**/*.log
+**/.superpowers
+**/.playwright-mcp
+**/test-results
+**/playwright-report
+**/.DS_Store
+
+# TypeScript incremental state is local and platform-specific.
+**/*.tsbuildinfo

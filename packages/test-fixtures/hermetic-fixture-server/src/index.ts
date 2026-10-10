@@ -108,7 +108,7 @@ function json(res: ServerResponse, status: number, body: unknown): void {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, QUERY',
   });
   res.end(JSON.stringify(body, null, 2));
 }
@@ -162,7 +162,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
     res.writeHead(204, {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, QUERY',
     });
     res.end();
     return;
@@ -188,6 +188,17 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
   // ── Health ──
   if (method === 'GET' && pathname === '/health') {
     return json(res, 200, { status: 'ok', time: FIXED_NOW.toISOString() });
+  }
+
+  // ── OpenAPI 3.2 QUERY: structured search request ──
+  if (method === 'QUERY' && pathname === '/api/search') {
+    const body = await parseBody<{ term?: string }>(req);
+    return json(res, 200, {
+      term: body.term ?? '',
+      matches: [...users.values()].filter((user) =>
+        user.name.toLowerCase().includes((body.term ?? '').toLowerCase()),
+      ).length,
+    });
   }
 
   // ── Reset (admin) ──
@@ -388,7 +399,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
 
 function generateOpenApiSpec(): unknown {
   return {
-    openapi: '3.1.0',
+    openapi: '3.2.0',
     info: {
       title: 'Hermetic Fixture API',
       version: '1.0.0',
@@ -397,6 +408,27 @@ function generateOpenApiSpec(): unknown {
     },
     servers: [{ url: `http://127.0.0.1:${PORT}`, description: 'Fixture Server' }],
     paths: {
+      '/api/search': {
+        query: {
+          operationId: 'searchUsers',
+          summary: '结构化搜索用户',
+          tags: ['Users'],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: { term: { type: 'string' } },
+                },
+              },
+            },
+          },
+          responses: {
+            '200': { description: '搜索成功' },
+          },
+        },
+      },
       '/api/users': {
         post: {
           operationId: 'createUser',

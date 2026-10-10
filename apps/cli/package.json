@@ -11,12 +11,9 @@
     "dev": "tsx src/index.ts",
     "check": "tsc --noEmit",
     "lint": "biome check",
-    "test": "vitest run"
+    "test": "vitest run --exclude '**/dist/**'"
   },
-  "dependencies": {
-    "@sketch-test/contracts-common": "workspace:*",
-    "@sketch-test/runner-protocol": "workspace:*"
-  },
+  "dependencies": {},
   "devDependencies": {
     "tsx": "catalog:",
     "typescript": "catalog:",

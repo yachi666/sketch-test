@@ -4,6 +4,7 @@ export interface ControlPlaneConfig {
   port: number;
   logLevel: string;
   webOrigins: string[];
+  importAllowedHosts: string[];
 }
 
 const REQUIRED_PRODUCTION_SECRETS = [
@@ -36,6 +37,13 @@ export function loadControlPlaneConfig(env: NodeJS.ProcessEnv = process.env): Co
     throw new Error('CP_PORT must be an integer between 1 and 65535');
   }
 
+  if (env['AI_WORKER_TOKEN'] || env['AI_WORKER_WORKSPACE_ID']) {
+    if ((env['AI_WORKER_TOKEN']?.length ?? 0) < 32 || !env['AI_WORKER_WORKSPACE_ID'])
+      throw new Error(
+        'AI_WORKER_TOKEN (32+ characters) and AI_WORKER_WORKSPACE_ID must be configured together',
+      );
+  }
+
   if (nodeEnv === 'production') {
     if (!env['DATABASE_URL']) {
       throw new Error('DATABASE_URL must be set in production');
@@ -45,11 +53,18 @@ export function loadControlPlaneConfig(env: NodeJS.ProcessEnv = process.env): Co
       if (!env[name]) throw new Error(`${name} must be set in production`);
     }
     if (!env['WEB_ORIGINS']) throw new Error('WEB_ORIGINS must be set in production');
+    if (!env['IMPORT_ALLOWED_HOSTS']) {
+      throw new Error('IMPORT_ALLOWED_HOSTS must be set in production');
+    }
   }
 
   const webOrigins = (env['WEB_ORIGINS'] ?? 'http://127.0.0.1:5173,http://localhost:5173')
     .split(',')
     .map((origin) => origin.trim())
+    .filter(Boolean);
+  const importAllowedHosts = (env['IMPORT_ALLOWED_HOSTS'] ?? '127.0.0.1,localhost,[::1]')
+    .split(',')
+    .map((host) => host.trim().toLowerCase())
     .filter(Boolean);
 
   return {
@@ -58,5 +73,6 @@ export function loadControlPlaneConfig(env: NodeJS.ProcessEnv = process.env): Co
     port,
     logLevel: env['LOG_LEVEL'] ?? 'info',
     webOrigins,
+    importAllowedHosts,
   };
 }

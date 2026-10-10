@@ -1,0 +1,11 @@
+import {assert,api,save,original,finish,dir} from './live-client.mjs';
+import {readFileSync} from 'node:fs';
+const draft=JSON.parse(readFileSync(new URL('github-ai-draft-review.json',dir)));
+const result={draftId:draft.id,originalUrl:draft.definition.request.url};
+const corrected={...draft.definition,request:{...draft.definition.request,url:'${env.baseUrl}/repos/${env.owner}/${env.repo}'}};
+result.reviewCorrection=await api(`/api/drafts/${draft.id}/accept`,{modifications:corrected},'POST',{status:400});
+const accepted=await api(`/api/drafts/${draft.id}/accept`,{});await api(`/api/test-case-versions/${accepted.versionId}/publish`,{});
+const run=await api(`/api/test-case-versions/${accepted.versionId}/run`,{environmentVersionId:original.assets.environmentVersion.id});
+const report=await finish(run.runId);result.unmodified={accepted,run,status:report.run.status,request:report.steps.flatMap(s=>s.events).find(e=>e.eventType==='request.prepared')?.payload.url};
+const fixed=await api(`/api/test-cases/${accepted.testCaseId}/versions`,{definition:{...corrected,name:corrected.name+' · 人工修正变量版本'}});const vid=fixed.id??fixed.version?.id;await api(`/api/test-case-versions/${vid}/publish`,{});
+const correctedRun=await api(`/api/test-case-versions/${vid}/run`,{environmentVersionId:original.assets.environmentVersion.id});const correctedReport=await finish(correctedRun.runId);assert.equal(correctedReport.run.status,'passed');result.manuallyCorrected={versionId:vid,run:correctedRun,status:correctedReport.run.status};save('ai-execution-results.json',result);console.log(JSON.stringify(result,null,2));

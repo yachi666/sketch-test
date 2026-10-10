@@ -1,0 +1,61 @@
+{
+  "verifiedAt": "2026-09-28T10:35:56.440Z",
+  "realModel": true,
+  "settings": {
+    "enabled": true
+  },
+  "jobs": [
+    {
+      "id": "ap_5a447af171bb4f96",
+      "parentId": "ap_f8956374ee0f4bdd",
+      "status": "completed",
+      "trigger": "对话调整",
+      "name": "员工管理回归",
+      "members": 1,
+      "gaps": 2,
+      "model": {
+        "model": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      "sourceHash": "e6b34c9208ba2958382160d2e61fe45585c3a58d78f9b4ba5a5ef603c80b780f",
+      "savedAt": "2026-09-28T10:33:24.936Z",
+      "revision": 2,
+      "published": false
+    },
+    {
+      "id": "ap_f8956374ee0f4bdd",
+      "parentId": "ap_797eca43479d4538",
+      "status": "completed",
+      "trigger": "对话调整",
+      "name": "员工写路径回归（草案）",
+      "members": 4,
+      "gaps": 2,
+      "model": {
+        "model": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      "sourceHash": "e6b34c9208ba2958382160d2e61fe45585c3a58d78f9b4ba5a5ef603c80b780f",
+      "savedAt": null,
+      "revision": 1,
+      "published": false
+    },
+    {
+      "id": "ap_797eca43479d4538",
+      "parentId": null,
+      "status": "completed",
+      "trigger": "用例资产变化后自动建议",
+      "name": "关键业务回归计划：工作区员工生命周期 + 公开仓库验收工作流",
+      "members": 4,
+      "gaps": 2,
+      "model": {
+        "model": "deepseek-v4-flash",
+        "provider": "deepseek"
+      },
+      "sourceHash": "e6b34c9208ba2958382160d2e61fe45585c3a58d78f9b4ba5a5ef603c80b780f",
+      "savedAt": null,
+      "revision": 1,
+      "published": false
+    }
+  ],
+  "targetApiExecuted": false
+}

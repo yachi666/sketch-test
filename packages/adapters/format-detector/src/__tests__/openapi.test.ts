@@ -30,6 +30,26 @@ describe('detectFormat — OpenAPI / Swagger', () => {
     expect(results[0]!.version).toBe('3.1');
   });
 
+  it('detects OpenAPI 3.2 QUERY operations in the endpoint count', () => {
+    const input = {
+      openapi: '3.2.0',
+      info: { title: 'Search API', version: '1.0.0' },
+      paths: {
+        '/search': {
+          query: { responses: { '200': { description: 'OK' } } },
+          get: { responses: { '200': { description: 'OK' } } },
+        },
+      },
+    };
+
+    const results = detectFormat(input);
+    expect(results[0]).toMatchObject({
+      format: 'openapi',
+      version: '3.2',
+      details: { endpointCount: 2 },
+    });
+  });
+
   it('detects Swagger 2.0', () => {
     const input = {
       swagger: '2.0',

@@ -76,7 +76,9 @@ function validateExecutionPlan(plan: ExecutionPlan): string[] {
       issues.push(`Step ${step.sequence}: missing enabled flag`);
     if (typeof step.timeoutMs !== 'number' || step.timeoutMs <= 0)
       issues.push(`Step ${step.sequence}: invalid timeoutMs`);
-    if (!['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'].includes(step.method)) {
+    if (
+      !['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'QUERY'].includes(step.method)
+    ) {
       issues.push(`Step ${step.sequence}: invalid method ${step.method}`);
     }
     if (!step.onFailure) issues.push(`Step ${step.sequence}: missing onFailure`);

@@ -3,7 +3,7 @@ ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable
 WORKDIR /workspace
 COPY . .
-RUN pnpm install --frozen-lockfile
+RUN CI=true pnpm install --frozen-lockfile
 RUN pnpm --filter '@sketch-test/runner...' run build
 RUN pnpm --filter @sketch-test/runner deploy --prod --legacy /deploy
 

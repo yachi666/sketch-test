@@ -27,6 +27,7 @@ async function createApp() {
   const app = Fastify({ logger: false });
   app.addHook('preHandler', authorizeControlPlaneRequest);
   app.get('/health', async () => ({ ok: true }));
+  app.post('/api/auth/guest', async () => ({ ok: true }));
   app.get('/private', async (request) => ({ workspaceId: request.user?.workspaceId }));
   app.post('/private', async () => ({ ok: true }));
   app.post('/api/secrets', async () => ({ ok: true }));
@@ -61,9 +62,11 @@ describe('authorizeControlPlaneRequest', () => {
     const app = await createApp();
 
     const publicResponse = await app.inject({ method: 'GET', url: '/health' });
+    const guestResponse = await app.inject({ method: 'POST', url: '/api/auth/guest' });
     const privateResponse = await app.inject({ method: 'GET', url: '/private' });
 
     expect(publicResponse.statusCode).toBe(200);
+    expect(guestResponse.statusCode).toBe(200);
     expect(privateResponse.statusCode).toBe(401);
     expect(privateResponse.json()).toMatchObject({ code: 'UNAUTHORIZED' });
     await app.close();

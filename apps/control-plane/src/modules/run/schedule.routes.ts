@@ -6,7 +6,7 @@
  */
 
 import type { FastifyInstance } from 'fastify';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { sendError } from '../../shared/errors.js';
 import { authenticatedUser } from '../iam/auth.middleware.js';
 import {

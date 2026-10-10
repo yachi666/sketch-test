@@ -30,6 +30,7 @@
 
 import type { ExecutionPlan } from '@sketch-test/runner-protocol';
 import { loadRunnerConfig } from './config.js';
+import { mapUploadEvents } from './event-upload.js';
 import { executePlan } from './index.js';
 
 // ── Configuration ──
@@ -218,24 +219,7 @@ async function executeRun(run: CpRun): Promise<void> {
     runnerVersion: RUNNER_VERSION,
   });
 
-  // Build stepId → stepIndex map from the plan
-  const stepIndexMap = new Map<string, number>();
-  for (let i = 0; i < run.plan.steps.length; i++) {
-    const step = run.plan.steps[i];
-    if (step) stepIndexMap.set(step.stepId, i);
-  }
-  stepIndexMap.set('run', -1); // run-level events (run.started, run.finished)
-
-  // Upload events batch, mapping stepId to stepIndex
-  const uploadBatch = result.events
-    .filter((e) => e.stepId !== 'run') // skip run-level events for step_events table
-    .map((e) => ({
-      id: `${run.id}-evt-${e.sequence}`,
-      runId: run.id,
-      stepIndex: stepIndexMap.get(e.stepId) ?? 0,
-      eventType: e.eventType,
-      payload: e,
-    }));
+  const uploadBatch = mapUploadEvents(run.id, run.plan, result.events);
 
   if (uploadBatch.length > 0) {
     await uploadEvents(run.id, uploadBatch);

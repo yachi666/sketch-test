@@ -1,0 +1,73 @@
+{
+  "checks": [
+    {
+      "name": "official real OpenAPI with documented version-only normalization",
+      "status": "failed",
+      "error": "POST /api/import: 422 {\"code\":\"IMPORT_FAILED\",\"message\":\"Failed to fetch spec from http://sketchtest-verification-sources/open-meteo-normalized.yml: fetch failed\",\"correlationId\":\"e6d61d22-3a87-4f98-8f27-13d9a369c61f\"}"
+    },
+    {
+      "name": "public GitHub versioned TestCase execution + immutable old version",
+      "status": "passed",
+      "value": {
+        "versionId": "tcv_ee267af2",
+        "run": {
+          "runId": "run_697cf472",
+          "environmentVersionId": "envv_a2179b45",
+          "testCaseVersionId": "tcv_ee267af2"
+        },
+        "immutable": true
+      }
+    },
+    {
+      "name": "real AI plan suggestion editable save then explicit publication",
+      "status": "passed",
+      "value": {
+        "jobId": "ap_d678738278464dba",
+        "published": {
+          "suiteId": "ts_5f3bc54e153c4b04"
+        },
+        "members": [
+          {
+            "key": "wf_efc03873",
+            "reason": "名称与用户指定完全一致，为唯一命中的已发布业务流程，作为本次只读回归的唯一步骤容器。"
+          }
+        ]
+      }
+    },
+    {
+      "name": "policy evaluates declared resource constraints",
+      "status": "failed",
+      "error": "Expected values to be strictly equal:\n+ actual - expected\n\n+ undefined\n- 'require-approval'\n"
+    },
+    {
+      "name": "unsupported import gives explicit diagnostics and no false success",
+      "status": "passed",
+      "value": {
+        "code": "IMPORT_FAILED",
+        "message": "Import host is not allowed: example.invalid",
+        "correlationId": "3cdce785-4eeb-488a-85e2-a88beb00f879"
+      }
+    },
+    {
+      "name": "trace correlation independently verified",
+      "status": "passed",
+      "value": {
+        "traceId": "3e9631b3a69fcac8161425b36bf0ca1e",
+        "eventCount": 7
+      }
+    }
+  ],
+  "assets": {
+    "testRun": {
+      "runId": "run_697cf472",
+      "environmentVersionId": "envv_a2179b45",
+      "testCaseVersionId": "tcv_ee267af2"
+    },
+    "testCaseId": "tc_f2a3f13e",
+    "aiPlan": {
+      "id": "ap_d678738278464dba",
+      "suiteId": "ts_5f3bc54e153c4b04"
+    }
+  },
+  "completedAt": "2026-10-08T15:14:48.313Z"
+}

@@ -1,10 +1,10 @@
 # @sketch-test/adapter-postman
 
-> Postman Collection v2.1 → CanonicalApiModel adapter
+> Postman Collection v2.1/v3 → CanonicalApiModel adapter and execution-preserving migration manifest
 
 ## Role
 
-Converts Postman Collection v2.1 exports (and Postman Environments) into the platform's unified `CanonicalApiModel`. This is the most feature-rich adapter — it handles folder hierarchies, variable resolution, auth extraction, assertion mapping, and workflow hint generation.
+Converts Postman Collection v2.1 exports, v3 YAML directory bundles, and Postman Environments into the platform's unified `CanonicalApiModel`. It also produces a separate lossless execution manifest so Postman-specific ordering, scripts, examples, and extension resources survive the canonical projection.
 
 ## Architecture
 
@@ -23,12 +23,14 @@ src/
 ## Scope
 
 - Postman Collection v2.1 JSON
+- Postman Collection v3.0 YAML directory bundle (`*.request.yaml`, `definition.yaml`, and `.resources/`)
 - Item groups (folders) → flattened with path prefix in endpoint labels
 - Request: method, URL (with `{{variable}}` templates), headers, body
 - Response: saved examples → `Response[]`
 - Auth: Basic, Bearer, API Key, OAuth 2.0 → `SecurityScheme`
 - Variables: collection and environment variables → resolved at import time
-- Postman test scripts (pm.test, pm.expect) → `Assertion[]`
+- Postman test scripts (pm.test, pm.expect) → `Assertion[]` where equivalently expressible
+- Full script source, examples, request order, and unknown v3 extension resources → `PostmanExecutionModel` for review/migration
 - Diagnostics for unsupported constructs (pre-request scripts, Newman-specific features)
 
 ## Mapping
@@ -56,13 +58,26 @@ const result = importPostmanCollection(collectionJson, {
 });
 // result.model: CanonicalApiModel | null
 // result.diagnostics: Diagnostic[]
+// result.executionModel: PostmanExecutionModel (lossless source semantics)
+```
+
+For v3, callers pass a filesystem-independent virtual file map:
+
+```typescript
+const result = importPostmanCollectionV3({
+  files: {
+    'definition.yaml': 'name: Orders',
+    'create.request.yaml': 'method: POST\nurl: https://example.test/orders',
+    'create.resources/scripts/test.js': 'pm.response.to.have.status(201)',
+  },
+}, options);
 ```
 
 ## Design invariants
 
 1. **Failed imports return `model: null`** — validation errors prevent partial output.
 2. **All structural elements carry source provenance** — Postman item path + index.
-3. **Warnings for unsupported constructs are never silently dropped** — pre-request scripts, Newman runners, etc.
+3. **Execution semantics are never silently dropped** — pre-request scripts, test scripts, examples, ordering, and v3 extension resources remain in the execution manifest even when not executable by the Runner.
 4. **Stable endpoint ids**: `METHOD-normalized/path` matching the OpenAPI adapter convention.
 5. **Output always passes `CanonicalApiModelSchema` validation**.
 

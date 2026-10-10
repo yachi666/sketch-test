@@ -1,0 +1,196 @@
+{
+  "run": {
+    "id": "run_1be0d384",
+    "sourceName": "读取 nodejs/node 仓库元数据返回 200 且 full_name 正确",
+    "apiVersionId": "av_fa206a0a",
+    "workflowVersionId": null,
+    "testCaseVersionId": "tcv_087f8817",
+    "environmentVersionId": "envv_a2179b45",
+    "status": "failed",
+    "runnerId": "rnr_69840a6a",
+    "claimedAt": "2026-10-08T15:20:43.466Z",
+    "createdAt": "2026-10-08T15:20:42.824Z",
+    "finishedAt": "2026-10-08T15:20:44.184Z"
+  },
+  "steps": [
+    {
+      "stepIndex": 0,
+      "phase": "main",
+      "name": "步骤 1",
+      "method": "GET",
+      "url": "https://api.github.com/repos/:owner/:repo",
+      "events": [
+        {
+          "stepIndex": 0,
+          "eventType": "step.started",
+          "payload": {
+            "runId": "run_1be0d384",
+            "stepId": "tcv_087f8817-step",
+            "attempt": 1,
+            "traceId": "3a5500ed54fd4fbcceaad21da14de84f",
+            "sequence": 2,
+            "eventType": "step.started",
+            "timestamp": "2026-10-08T15:20:43.468Z",
+            "resolvedUrl": "https://api.github.com/repos/:owner/:repo"
+          },
+          "timestamp": "2026-10-08T15:20:44.174Z"
+        },
+        {
+          "stepIndex": 0,
+          "eventType": "request.prepared",
+          "payload": {
+            "url": "https://api.github.com/repos/:owner/:repo",
+            "runId": "run_1be0d384",
+            "method": "GET",
+            "stepId": "tcv_087f8817-step",
+            "attempt": 1,
+            "headers": {
+              "traceparent": "00-3a5500ed54fd4fbcceaad21da14de84f-eacf94ebd2b22fac-01"
+            },
+            "traceId": "3a5500ed54fd4fbcceaad21da14de84f",
+            "sequence": 3,
+            "eventType": "request.prepared",
+            "timestamp": "2026-10-08T15:20:43.468Z"
+          },
+          "timestamp": "2026-10-08T15:20:44.175Z"
+        },
+        {
+          "stepIndex": 0,
+          "eventType": "request.sent",
+          "payload": {
+            "runId": "run_1be0d384",
+            "sentAt": "2026-10-08T15:20:43.468Z",
+            "stepId": "tcv_087f8817-step",
+            "attempt": 1,
+            "traceId": "3a5500ed54fd4fbcceaad21da14de84f",
+            "sequence": 4,
+            "eventType": "request.sent",
+            "timestamp": "2026-10-08T15:20:43.468Z"
+          },
+          "timestamp": "2026-10-08T15:20:44.175Z"
+        },
+        {
+          "stepIndex": 0,
+          "eventType": "response.received",
+          "payload": {
+            "runId": "run_1be0d384",
+            "stepId": "tcv_087f8817-step",
+            "attempt": 1,
+            "headers": {
+              "date": "Thu, 08 Oct 2026 15:20:44 GMT",
+              "vary": "Accept-Encoding, Accept, X-Requested-With",
+              "server": "github.com",
+              "content-type": "application/json; charset=utf-8",
+              "content-length": "121",
+              "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+              "x-frame-options": "deny",
+              "content-encoding": "gzip",
+              "x-ratelimit-used": "18",
+              "x-xss-protection": "0",
+              "x-ratelimit-limit": "60",
+              "x-ratelimit-reset": "1791473403",
+              "x-github-media-type": "github.v3; format=json",
+              "x-github-request-id": "2AB3:1C56C:4CEF5A:7DC52C:6AC7B4CB",
+              "x-github-edge-region": "southeastasia",
+              "x-ratelimit-resource": "core",
+              "x-ratelimit-remaining": "42",
+              "x-content-type-options": "nosniff",
+              "content-security-policy": "default-src 'none'",
+              "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+              "access-control-allow-origin": "*",
+              "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning",
+              "x-github-api-version-selected": "2022-11-28"
+            },
+            "traceId": "3a5500ed54fd4fbcceaad21da14de84f",
+            "sequence": 5,
+            "eventType": "response.received",
+            "timestamp": "2026-10-08T15:20:44.172Z",
+            "durationMs": 704,
+            "statusCode": 404,
+            "bodyPreview": "{\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}",
+            "bodySizeBytes": 118
+          },
+          "timestamp": "2026-10-08T15:20:44.176Z"
+        },
+        {
+          "stepIndex": 0,
+          "eventType": "assertion.evaluated",
+          "payload": {
+            "runId": "run_1be0d384",
+            "actual": "404",
+            "passed": false,
+            "stepId": "tcv_087f8817-step",
+            "attempt": 1,
+            "traceId": "3a5500ed54fd4fbcceaad21da14de84f",
+            "expected": "200",
+            "sequence": 6,
+            "severity": "block",
+            "eventType": "assertion.evaluated",
+            "timestamp": "2026-10-08T15:20:44.172Z",
+            "assertionId": "status-is-200"
+          },
+          "timestamp": "2026-10-08T15:20:44.176Z"
+        },
+        {
+          "stepIndex": 0,
+          "eventType": "assertion.evaluated",
+          "payload": {
+            "runId": "run_1be0d384",
+            "actual": "(not found)",
+            "passed": false,
+            "stepId": "tcv_087f8817-step",
+            "attempt": 1,
+            "traceId": "3a5500ed54fd4fbcceaad21da14de84f",
+            "expected": "\"nodejs/node\"",
+            "sequence": 7,
+            "severity": "block",
+            "eventType": "assertion.evaluated",
+            "timestamp": "2026-10-08T15:20:44.172Z",
+            "assertionId": "full-name-is-nodejs-node"
+          },
+          "timestamp": "2026-10-08T15:20:44.176Z"
+        },
+        {
+          "stepIndex": 0,
+          "eventType": "step.finished",
+          "payload": {
+            "runId": "run_1be0d384",
+            "status": "failed",
+            "stepId": "tcv_087f8817-step",
+            "attempt": 1,
+            "retries": 0,
+            "traceId": "3a5500ed54fd4fbcceaad21da14de84f",
+            "sequence": 8,
+            "eventType": "step.finished",
+            "timestamp": "2026-10-08T15:20:44.172Z",
+            "totalDurationMs": 704,
+            "assertionsFailed": 2,
+            "assertionsPassed": 0
+          },
+          "timestamp": "2026-10-08T15:20:44.177Z"
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "status-is-200",
+          "passed": false,
+          "expected": "200",
+          "actual": "404",
+          "severity": "block",
+          "attempt": 1
+        },
+        {
+          "assertionId": "full-name-is-nodejs-node",
+          "passed": false,
+          "expected": "\"nodejs/node\"",
+          "actual": "(not found)",
+          "severity": "block",
+          "attempt": 1
+        }
+      ],
+      "status": "failed",
+      "durationMs": 704
+    }
+  ],
+  "runEvents": []
+}

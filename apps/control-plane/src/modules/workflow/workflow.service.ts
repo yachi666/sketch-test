@@ -9,6 +9,7 @@
  */
 
 import type { ExecutionPlan } from '@sketch-test/runner-protocol';
+import type { WorkflowDefinition } from '@sketch-test/workflow-dsl';
 import { pool } from '../../db/db.js';
 import { workflowId, workflowVersionId } from '../../shared/id.js';
 import { type CompileResult, compileWorkflow, type WorkflowDefInput } from './workflow-compiler.js';
@@ -29,7 +30,7 @@ export interface WorkflowVersion {
   id: string;
   workflowId: string;
   version: number;
-  definition: WorkflowDefInput;
+  definition: WorkflowDefInput | WorkflowDefinition;
   compiledPlan: ExecutionPlan | null;
   publishedBy: string | null;
   publishedAt: string;
@@ -53,7 +54,7 @@ function rowToVersion(row: Record<string, unknown>): WorkflowVersion {
     id: row['id'] as string,
     workflowId: row['workflow_id'] as string,
     version: row['version'] as number,
-    definition: row['definition'] as WorkflowDefInput,
+    definition: row['definition'] as WorkflowDefInput | WorkflowDefinition,
     compiledPlan: (row['compiled_plan'] as ExecutionPlan) ?? null,
     publishedBy: (row['published_by'] as string) ?? null,
     publishedAt: row['published_at'] as string,
@@ -112,16 +113,26 @@ export async function getWorkflow(
   return { ...workflow, latestVersion };
 }
 
-/** List all workflows in a workspace. */
+/** List workflows with their latest version for catalog and variable-source projections. */
 export async function listWorkflows(workspaceId: string): Promise<Workflow[]> {
   const result = await pool.query(
-    `SELECT * FROM workflows
-     WHERE workspace_id = $1
-     ORDER BY updated_at DESC
+    `SELECT w.*, to_jsonb(latest) AS latest_version
+     FROM workflows w
+     LEFT JOIN LATERAL (
+       SELECT v.* FROM workflow_versions v
+       WHERE v.workflow_id = w.id
+       ORDER BY v.version DESC
+       LIMIT 1
+     ) latest ON true
+     WHERE w.workspace_id = $1
+     ORDER BY w.updated_at DESC, w.id DESC
      LIMIT 100`,
     [workspaceId],
   );
-  return result.rows.map(rowToWorkflow);
+  return result.rows.map((row) => ({
+    ...rowToWorkflow(row),
+    latestVersion: row['latest_version'] ? rowToVersion(row['latest_version']) : null,
+  }));
 }
 
 /** Update a workflow's name and/or description. */
@@ -170,7 +181,7 @@ export async function deleteWorkflow(id: string): Promise<void> {
 /** Save a new draft version for a workflow. Auto-increments the version number. */
 export async function saveDraft(
   workflowId: string,
-  definition: WorkflowDefInput,
+  definition: WorkflowDefInput | WorkflowDefinition,
 ): Promise<WorkflowVersion> {
   // Get the current max version
   const maxResult = await pool.query(
@@ -220,7 +231,7 @@ export async function publishVersion(
     throw new Error(`Workflow version ${versionId} not found`);
   }
 
-  const definition = row.definition as WorkflowDefInput;
+  const definition = row.definition as WorkflowDefInput | WorkflowDefinition;
   const workspaceId = row.workspace_id as string;
 
   // Compile the definition
@@ -297,7 +308,7 @@ export async function getLatestPublishedVersion(
 
 /** Compile a workflow definition and return diagnostics (preview, no persistence). */
 export async function compileWorkflowPreview(
-  definition: WorkflowDefInput,
+  definition: WorkflowDefInput | WorkflowDefinition,
   workspaceId: string,
 ): Promise<CompileResult> {
   return compileWorkflow(definition, {

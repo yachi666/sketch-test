@@ -1,0 +1,97 @@
+{
+  "uid": "sketchtest-operations",
+  "title": "SketchTest 平台运行观测",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Control Plane 可达性",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "sketchtest-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "up{job=\"sketchtest-control-plane\"}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "请求速率",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "sketchtest-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (route) (rate(sketchtest_http_requests_total[5m]))"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "服务端 P95 请求耗时（秒）",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "sketchtest-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(sketchtest_http_request_duration_seconds_bucket[5m])))"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "5xx 错误比例",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "sketchtest-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(sketchtest_http_requests_total{status=~\"5..\"}[5m])) / clamp_min(sum(rate(sketchtest_http_requests_total[5m])), 0.001)"
+        }
+      ]
+    }
+  ]
+}

@@ -47,6 +47,11 @@ beforeAll(async () => {
       return json(res, 201, { received: parsed, echo: true });
     }
 
+    if (method === 'QUERY' && url.pathname === '/api/search') {
+      const body = await readBody(req);
+      return json(res, 200, { method, query: body ? JSON.parse(body) : null });
+    }
+
     if (method === 'GET' && url.pathname === '/api/users/me') {
       const auth = req.headers['authorization'];
       if (!auth?.startsWith('Bearer ')) {
@@ -168,6 +173,36 @@ describe('executePlan: basic HTTP', () => {
     });
     const plan = makePlan([step]);
     const result = await executePlan(plan, { runId: 'run-002' });
+
+    expect(result.status).toBe('passed');
+    expect(result.stepsPassed).toBe(1);
+  });
+
+  test('executes an OpenAPI 3.2 QUERY request with a body', async () => {
+    const step = makeStep({
+      method: 'QUERY',
+      urlTemplate: `${serverUrl}/api/search`,
+      body: { term: 'book' },
+      headers: { 'Content-Type': 'application/json' },
+      assertions: [
+        {
+          id: 'query-status',
+          target: 'status',
+          operator: 'equals',
+          expected: 200,
+          severity: 'block',
+        },
+        {
+          id: 'query-method',
+          target: 'jsonPath',
+          path: '$.method',
+          operator: 'equals',
+          expected: 'QUERY',
+          severity: 'block',
+        },
+      ],
+    });
+    const result = await executePlan(makePlan([step]), { runId: 'run-query' });
 
     expect(result.status).toBe('passed');
     expect(result.stepsPassed).toBe(1);

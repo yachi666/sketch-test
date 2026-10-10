@@ -16,13 +16,13 @@
     "build": "tsc --noEmit false --allowImportingTsExtensions false --incremental false",
     "check": "tsc --noEmit",
     "lint": "biome check",
-    "test": "vitest run",
+    "test": "vitest run --exclude '**/dist/**'",
     "clean": "rm -rf dist/ tsconfig.tsbuildinfo"
   },
   "dependencies": {
     "@sketch-test/canonical-api-model": "workspace:*",
     "@sketch-test/contracts-common": "workspace:*",
-    "yaml": "^2"
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
     "@sketch-test/tsconfig": "workspace:*",

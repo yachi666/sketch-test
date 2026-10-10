@@ -295,11 +295,11 @@ export async function publishVersion(
   const result = await pool.query(
     `UPDATE test_case_versions
      SET published_by = $2, published_at = now()
-     WHERE id = $1
+     WHERE id = $1 AND published_by IS NULL
      RETURNING *`,
-    [versionId, publishedBy ?? null],
+    [versionId, publishedBy ?? 'system'],
   );
-  if (result.rows.length === 0) return null;
+  if (result.rows.length === 0) return getTestCaseVersion(versionId);
   return result.rows[0] as TestCaseVersionRow;
 }
 

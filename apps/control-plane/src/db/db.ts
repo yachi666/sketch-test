@@ -1,4 +1,7 @@
 import pg from 'pg';
+import { applyAiGenerationSchema } from './migrations/002_ai_generation.js';
+import { applyAiPlansSchema } from './migrations/003_ai_plans.js';
+import { applyReliabilitySchema } from './migrations/004_reliability.js';
 
 const { Pool } = pg;
 
@@ -8,6 +11,13 @@ export const pool = new Pool({
   connectionString: DATABASE_URL,
   max: 10,
   idleTimeoutMillis: 30_000,
+  connectionTimeoutMillis: 5_000,
+});
+
+// Idle client failures must not terminate the API; readiness probes report degradation.
+// Never log the connection string or server error detail (which can contain credentials).
+pool.on('error', () => {
+  console.error('[database] Idle connection lost; pool will reconnect on the next request');
 });
 
 /**
@@ -430,6 +440,9 @@ const MIGRATIONS: Migration[] = [
     checksum: 'initial-platform-schema-v1',
     up: applyInitialPlatformSchema,
   },
+  { version: 2, name: 'ai-generation', checksum: 'ai-generation-v1', up: applyAiGenerationSchema },
+  { version: 3, name: 'ai-plans', checksum: 'ai-plans-v1', up: applyAiPlansSchema },
+  { version: 4, name: 'reliability', checksum: 'reliability-v1', up: applyReliabilitySchema },
 ];
 
 /** Apply each immutable schema migration once, under a PostgreSQL advisory lock. */

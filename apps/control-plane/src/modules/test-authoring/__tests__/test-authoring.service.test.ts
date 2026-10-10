@@ -425,8 +425,18 @@ describe('publishVersion', () => {
     expect(version!.published_by).toBe('user-001');
   });
 
+  test('repeat publication returns the original record without rewriting provenance', async () => {
+    const original = makeVersionRow({
+      published_by: 'first-reviewer',
+      published_at: '2026-06-24T11:00:00Z',
+    });
+    mockQuery.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [original] });
+    expect(await publishVersion('tcv-001', 'second-reviewer')).toEqual(original);
+    expect(mockQuery.mock.calls[0]?.[0]).toContain('published_by IS NULL');
+  });
+
   test('returns null for non-existent version', async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [] });
+    mockQuery.mockResolvedValue({ rows: [] });
 
     const version = await publishVersion('non-existent', 'user-001');
     expect(version).toBeNull();

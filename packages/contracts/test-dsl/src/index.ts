@@ -25,7 +25,7 @@ import {
   SemanticVersionSchema,
   SideEffectLevelSchema,
 } from '@sketch-test/contracts-common';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 // ─── Schema Version ─────────────────────────────────────────────
 

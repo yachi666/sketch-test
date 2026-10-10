@@ -331,28 +331,26 @@ describe('updateUserRole', () => {
   });
 
   // Verify valid role transitions
-  test.each([
-    'owner' as const,
-    'maintainer' as const,
-    'editor' as const,
-    'viewer' as const,
-  ])('accepts valid role: %s', async (role) => {
-    mockQuery.mockResolvedValueOnce({
-      rows: [
-        {
-          id: 'u-r',
-          workspace_id: 'ws-1',
-          email: 'r@r.com',
-          display_name: 'R',
-          role,
-          created_at: '2026-01-01T00:00:00Z',
-        },
-      ],
-    });
+  test.each(['owner' as const, 'maintainer' as const, 'editor' as const, 'viewer' as const])(
+    'accepts valid role: %s',
+    async (role) => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [
+          {
+            id: 'u-r',
+            workspace_id: 'ws-1',
+            email: 'r@r.com',
+            display_name: 'R',
+            role,
+            created_at: '2026-01-01T00:00:00Z',
+          },
+        ],
+      });
 
-    const user = await updateUserRole('u-r', role);
-    expect(user!.role).toBe(role);
-  });
+      const user = await updateUserRole('u-r', role);
+      expect(user!.role).toBe(role);
+    },
+  );
 });
 
 // ─── verifyServiceAccountToken ────────────────────────────────────

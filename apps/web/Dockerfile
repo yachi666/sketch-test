@@ -3,10 +3,10 @@ ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable
 WORKDIR /workspace
 COPY . .
-RUN pnpm install --frozen-lockfile
+RUN CI=true pnpm install --frozen-lockfile
 ARG VITE_CP_BASE
 ENV VITE_CP_BASE=$VITE_CP_BASE
-RUN pnpm --filter web build
+RUN pnpm --filter 'web...' run build
 
 FROM nginx:1.29-alpine AS runtime
 COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf

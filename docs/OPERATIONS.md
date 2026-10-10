@@ -14,6 +14,10 @@ Copy `.env.example` to `.env`, replace every credential, and set browser-facing
 origins and URLs. Generate independent values with `openssl rand -hex 32`.
 Never reuse `JWT_SECRET`, `SECRET_KEY`, or `RUNNER_REGISTRATION_TOKEN`.
 Production CORS requires exact `WEB_ORIGINS`.
+Production API-description imports require an explicit comma-separated
+`IMPORT_ALLOWED_HOSTS` list. Entries may be a hostname (all ports) or an exact
+`host:port`; every redirect target is checked against the same list. Keep the
+list narrow and prefer HTTPS sources controlled by your organization.
 
 ## Pre-release verification
 
@@ -32,6 +36,13 @@ client tools and a reachable local server. The Compose smoke uses a unique
 project, ports, credentials, images, and volumes; it proves Control Plane and
 Web health plus an independently authenticated Runner heartbeat, then removes
 its disposable resources even on failure.
+
+The product path imports OpenAPI 3.2 from an allowlisted URL, binds an Arazzo
+1.1 workflow to that immutable `ApiVersion`, publishes its `WorkflowVersion`,
+executes `QUERY` through an independent Runner, and verifies recovery of both
+raw sources plus execution evidence. See
+[`OPENAPI_COMPATIBILITY.md`](OPENAPI_COMPATIBILITY.md) for the exact supported
+subset and fail-closed diagnostics.
 
 ## Deploy
 
@@ -154,3 +165,28 @@ pre-upgrade database and object checkpoint.
 `docker compose --profile runner down` preserves data. Adding `--volumes`
 permanently deletes local PostgreSQL and MinIO data and is only for disposable
 environments.
+
+## 本机观测栈与定时派发（2026-10-09）
+
+使用 `compose.yaml` 加 `compose.observability.yaml` 可运行 Prometheus、Grafana、
+Alertmanager 和本地通知接收器。端口默认仅绑定 loopback：9090、3000、9093，
+可以用 `PROMETHEUS_PORT`、`GRAFANA_PORT`、`ALERTMANAGER_PORT` 覆盖。
+Grafana 提供只读匿名本机看板 `sketchtest-operations`。此配置面向本机；
+外部共享需另行配置鉴权、TLS 和通知收件方。
+
+监控包含规范化路由的计数与耗时直方图、PostgreSQL/对象存储 readiness gauge。
+依赖不可用 30 秒触发告警；CP 不可达 2 分钟触发告警。
+通知与恢复消息写入 `alert-notifications` 卷的 `/data/notifications.jsonl`，
+本机配置不会发送邮件、Slack 或其他外部消息。Prometheus 保留 30 天指标。
+所有观测服务数据使用命名卷；验收后不要使用 `down --volumes`。
+
+控制面每 5 秒检查当前 UTC 分钟。`schedule_dispatches` 以规则和分钟为唯一键，
+派发标记与该次所有 Runs 在同一事务提交；多实例、重复轮询和重启不重复派发
+已提交的同一分钟。停机期间不补跑。环境要求审批或 Runner 标签约束但调度无法
+满足时拒绝派发；环境变量在创建 Run 时固定环境版本。应以运行报告确认结果，
+启用规则本身不是执行成功证明。
+
+新 RunEvent 使用 `canonical-json-v1` 递归排序对象键后哈希，数组顺序保持不变。
+历史未标记编码的哈希与证据文件不回写；若旧 JSONB 已丢失原始键顺序，
+校验结果包含 `unverifiableLegacyEventIds` 并维持 `valid:false`，不能据此声称篡改
+或将历史记录强行标记为校验通过。需要可信新证据时重新运行已发布版本。

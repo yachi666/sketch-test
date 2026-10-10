@@ -4,6 +4,7 @@
  * Tests content hashing, evidence manifest building, and integrity verification.
  * Uses a mocked pg pool to simulate database interactions.
  */
+import { createHash } from 'node:crypto';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // ─── Mock the database pool ────────────────────────────────────────
@@ -453,4 +454,37 @@ describe('verifyEvidenceIntegrity', () => {
     expect(result.valid).toBe(true);
     expect(result.eventCount).toBe(0);
   });
+});
+
+test('JSONB key reordering is verifiable for new events; changing a value fails', async () => {
+  mockQuery.mockReset().mockResolvedValue({ rowCount: 1 });
+  const inserted = await insertEvents('run-order', [
+    makeEvent({ payload: { z: 1, a: { z: 2, a: 3 }, list: [{ b: 2, a: 1 }] } }),
+  ]);
+  const row = {
+    id: 'evt-order',
+    payload_json: { a: { a: 3, z: 2 }, list: [{ a: 1, b: 2 }], z: 1 },
+    content_hash: inserted.contentHashes[0],
+    hash_encoding: 'canonical-json-v1',
+    step_index: 0,
+    created_at: '2026-10-08T00:00:00Z',
+  };
+  mockQuery.mockResolvedValue({ rows: [row] });
+  expect((await verifyEvidenceIntegrity('run-order')).valid).toBe(true);
+  row.payload_json.a.z = 9;
+  expect((await verifyEvidenceIntegrity('run-order')).valid).toBe(false);
+});
+
+test('legacy hashes are not silently rewritten or accepted after JSONB lost key order', async () => {
+  const row = {
+    id: 'evt-legacy',
+    payload_json: { a: 2, z: 1 },
+    content_hash: createHash('sha256').update('{"z":1,"a":2}').digest('hex'),
+  };
+  mockQuery.mockReset().mockResolvedValue({ rows: [row] });
+  expect(await verifyEvidenceIntegrity('legacy')).toMatchObject({
+    valid: false,
+    unverifiableLegacyEventIds: ['evt-legacy'],
+  });
+  expect(mockQuery.mock.calls.every(([sql]) => String(sql).startsWith('SELECT'))).toBe(true);
 });

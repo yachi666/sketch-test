@@ -19,14 +19,27 @@ describe('hermetic fixture server', () => {
     });
   });
 
-  test('serves deterministic health and OpenAPI 3.1 documents', async () => {
+  test('serves deterministic health and OpenAPI 3.2 documents', async () => {
     const health = await fetch(`${baseUrl}/health`).then((response) => response.json());
     const specification = await fetch(`${baseUrl}/openapi.json`).then((response) =>
       response.json(),
     );
 
     expect(health).toEqual({ status: 'ok', time: '2026-06-21T10:00:00.000Z' });
-    expect(specification).toMatchObject({ openapi: '3.1.0' });
+    expect(specification).toMatchObject({
+      openapi: '3.2.0',
+      paths: { '/api/search': { query: { operationId: 'searchUsers' } } },
+    });
+  });
+
+  test('executes the OpenAPI 3.2 QUERY operation with a request body', async () => {
+    const response = await fetch(`${baseUrl}/api/search`, {
+      method: 'QUERY',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ term: '测试' }),
+    });
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ term: '测试', matches: 1 });
   });
 
   test('reset restores the deterministic authentication sequence', async () => {

@@ -1,0 +1,108 @@
+{
+  "checks": [
+    {
+      "runId": "run_baec5f04",
+      "reportIdentical": true,
+      "manifestIdentical": true,
+      "integrity": {
+        "encoding": "per-event",
+        "unverifiableLegacyEventIds": [],
+        "valid": true,
+        "storedHash": "2220cb10691fc4db23bfcbdbf6d991cba0fa163ae06eb47bcf0b3f5fb73586a2",
+        "computedHash": "2220cb10691fc4db23bfcbdbf6d991cba0fa163ae06eb47bcf0b3f5fb73586a2",
+        "eventCount": 12
+      }
+    },
+    {
+      "runId": "run_96cdc835",
+      "reportIdentical": true,
+      "manifestIdentical": true,
+      "integrity": {
+        "encoding": "per-event",
+        "unverifiableLegacyEventIds": [],
+        "valid": true,
+        "storedHash": "8ba9c6dbd7c1db3a00e458407275083f6b067b39ee001a398489b1ed110333fe",
+        "computedHash": "8ba9c6dbd7c1db3a00e458407275083f6b067b39ee001a398489b1ed110333fe",
+        "eventCount": 7
+      }
+    },
+    {
+      "runId": "run_72d8544d",
+      "reportIdentical": true,
+      "manifestIdentical": true,
+      "integrity": {
+        "encoding": "per-event",
+        "unverifiableLegacyEventIds": [],
+        "valid": true,
+        "storedHash": "dc304fb3f5226135355f291da051df5bc9e8dbe9e9087b4f0f0ce384e48aff51",
+        "computedHash": "dc304fb3f5226135355f291da051df5bc9e8dbe9e9087b4f0f0ce384e48aff51",
+        "eventCount": 12
+      }
+    },
+    {
+      "runId": "run_258d976f",
+      "reportIdentical": true,
+      "manifestIdentical": true,
+      "integrity": {
+        "encoding": "per-event",
+        "unverifiableLegacyEventIds": [],
+        "valid": true,
+        "storedHash": "13a7260c052b91e8b5643e91835ca59bb9567b4459295bf20e209083a94b8980",
+        "computedHash": "13a7260c052b91e8b5643e91835ca59bb9567b4459295bf20e209083a94b8980",
+        "eventCount": 12
+      }
+    },
+    {
+      "runId": "run_44895576",
+      "reportIdentical": true,
+      "manifestIdentical": true,
+      "integrity": {
+        "encoding": "per-event",
+        "unverifiableLegacyEventIds": [],
+        "valid": true,
+        "storedHash": "6a7a2f65c98c93710f0d21edab6d717bade96720203e60976bf338f39010c7e2",
+        "computedHash": "6a7a2f65c98c93710f0d21edab6d717bade96720203e60976bf338f39010c7e2",
+        "eventCount": 7
+      }
+    },
+    {
+      "runId": "run_917733c9",
+      "reportIdentical": true,
+      "manifestIdentical": true,
+      "integrity": {
+        "encoding": "per-event",
+        "unverifiableLegacyEventIds": [],
+        "valid": true,
+        "storedHash": "7481c11f0b29ad08a9f329c937ae3f4e861b2a2050ace46311ab738fc1387052",
+        "computedHash": "7481c11f0b29ad08a9f329c937ae3f4e861b2a2050ace46311ab738fc1387052",
+        "eventCount": 7
+      }
+    }
+  ],
+  "verifiedAt": "2026-10-08T16:09:30.605Z",
+  "readiness": {
+    "status": "ready",
+    "db": "connected",
+    "objectStore": "connected",
+    "timestamp": "2026-10-08T16:09:30.632Z"
+  },
+  "runCount": 72,
+  "legacy": {
+    "encoding": "per-event",
+    "unverifiableLegacyEventIds": [
+      "run_84626abc-evt-2",
+      "run_84626abc-evt-3",
+      "run_84626abc-evt-4",
+      "run_84626abc-evt-5",
+      "run_84626abc-evt-6",
+      "run_84626abc-evt-7",
+      "run_84626abc-evt-8"
+    ],
+    "valid": false,
+    "storedHash": "44268d69e2dad526c0907caf47c9e487ebc18c028733d8f0f6e9a0a7160595c4",
+    "computedHash": "8a74f2fed923c1cf8573a671afc72ad477f9c72fb8359e6a4e2098c1e8c97209",
+    "eventCount": 7
+  },
+  "objects": 78,
+  "status": "passed"
+}

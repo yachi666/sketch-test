@@ -12,6 +12,7 @@ vi.mock('pg', () => ({
     Pool: class {
       connect = mocks.connect;
       query = mocks.query;
+      on = vi.fn();
     },
   },
 }));
@@ -54,6 +55,9 @@ describe('runMigrations', () => {
               name: 'initial-platform-schema',
               checksum: 'initial-platform-schema-v1',
             },
+            { version: 2, name: 'ai-generation', checksum: 'ai-generation-v1' },
+            { version: 3, name: 'ai-plans', checksum: 'ai-plans-v1' },
+            { version: 4, name: 'reliability', checksum: 'reliability-v1' },
           ],
         };
       }

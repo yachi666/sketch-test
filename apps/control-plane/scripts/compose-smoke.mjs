@@ -155,6 +155,7 @@ async function main() {
     WEB_PORT: String(webPort),
     MINIO_CONSOLE_PORT: String(minioConsolePort),
     WEB_ORIGINS: webUrl,
+    IMPORT_ALLOWED_HOSTS: 'specs.example.test',
     PUBLIC_CONTROL_PLANE_URL: controlPlaneUrl,
     LOG_LEVEL: 'warn',
   };

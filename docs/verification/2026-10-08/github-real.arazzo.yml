@@ -1,0 +1,37 @@
+arazzo: 1.1.0
+info:
+  title: GitHub real metadata and commits
+  version: 1.0.0
+sourceDescriptions:
+  - name: github
+    url: http://sketchtest-verification-sources/github-public-acceptance.json
+    type: openapi
+workflows:
+  - workflowId: githubRegression
+    summary: GitHub 真实元数据和提交历史回归
+    steps:
+      - stepId: metadata
+        operationId: $sourceDescriptions.github.getRepository
+        parameters:
+          - name: owner
+            in: path
+            value: nodejs
+          - name: repo
+            in: path
+            value: node
+        successCriteria:
+          - condition: $statusCode == 200
+      - stepId: commits
+        operationId: $sourceDescriptions.github.listCommits
+        parameters:
+          - name: owner
+            in: path
+            value: nodejs
+          - name: repo
+            in: path
+            value: node
+          - name: per_page
+            in: query
+            value: 30
+        successCriteria:
+          - condition: $statusCode == 200

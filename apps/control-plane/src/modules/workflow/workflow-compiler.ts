@@ -13,6 +13,7 @@
 
 import crypto from 'node:crypto';
 import type { ExecutionPlan, FrozenStep, FrozenTeardownStep } from '@sketch-test/runner-protocol';
+import type { WorkflowDefinition } from '@sketch-test/workflow-dsl';
 import { executionPlanContentHash } from '../../shared/execution-plan-hash.js';
 
 // ─── Editor DSL Types (what the web editor sends) ────────────────
@@ -112,6 +113,53 @@ export interface CompileResult {
 export interface CompileOptions {
   /** Resolver function that fetches a TestCaseVersion definition by ID. */
   resolveTest?: (testVersionId: string) => Promise<ResolvedTestDef | null>;
+}
+
+function normalizeWorkflowDefinition(
+  input: WorkflowDefInput | WorkflowDefinition,
+): WorkflowDefInput {
+  const firstStep = input.steps[0];
+  if (!firstStep || typeof firstStep.useTest !== 'object') {
+    return input as WorkflowDefInput;
+  }
+
+  const contract = input as WorkflowDefinition;
+  return {
+    schemaVersion: contract.schemaVersion,
+    name: contract.name,
+    steps: contract.steps.map((step) => {
+      const inline = step.useTest.kind === 'inline' ? step.useTest : undefined;
+      return {
+        id: step.id,
+        name: step.name,
+        useTest: step.useTest.kind === 'test-version' ? step.useTest.testVersionId : undefined,
+        method: inline?.method,
+        url: inline?.url,
+        headers: inline?.headers,
+        body: inline?.body,
+        assertions: step.assertions,
+        extract: step.extract,
+        onFailure: step.onFailure,
+        maxRetries: step.retry?.maxRetries,
+        timeoutMs: step.timeoutMs,
+        enabled: step.enabled,
+        sideEffect: step.sideEffect,
+      };
+    }),
+    teardown: contract.teardown?.steps.map((step) => {
+      const inline = step.useTest.kind === 'inline' ? step.useTest : undefined;
+      return {
+        id: step.id,
+        name: step.name,
+        method: inline?.method ?? 'GET',
+        url: inline?.url ?? '',
+        headers: inline?.headers,
+        body: inline?.body,
+        maxRetries: step.maxRetries,
+        enabled: step.enabled,
+      };
+    }),
+  };
 }
 
 // ─── Variable Reference Parsing ──────────────────────────────────
@@ -465,9 +513,10 @@ const DEFAULT_MAX_RETRIES = 0;
  * @returns CompileResult with the compiled plan and diagnostics.
  */
 export async function compileWorkflow(
-  definition: WorkflowDefInput,
+  input: WorkflowDefInput | WorkflowDefinition,
   options?: CompileOptions,
 ): Promise<CompileResult> {
+  const definition = normalizeWorkflowDefinition(input);
   const diagnostics: CompileDiagnostic[] = [];
 
   // ── Validate basic structure ──────────────────────────────────
@@ -553,6 +602,13 @@ export async function compileWorkflow(
       hasErrors = true;
       continue;
     }
+    if (!resolved.url.trim()) {
+      diagnostics.push({
+        severity: 'error',
+        message: `Step "${step.id}" requires a non-empty URL`,
+        stepId: step.id,
+      });
+    }
     resolvedSteps.push({ def: resolved, step });
   }
 
@@ -563,6 +619,15 @@ export async function compileWorkflow(
       message:
         'Some steps reference test versions but no resolver is available — compiling with inline data only',
     });
+  }
+
+  for (const step of definition.teardown ?? []) {
+    if (!step.url?.trim())
+      diagnostics.push({
+        severity: 'error',
+        message: `Teardown "${step.id}" requires a non-empty URL`,
+        stepId: step.id,
+      });
   }
 
   // ── Stop if there are errors ──────────────────────────────────
@@ -599,7 +664,7 @@ export async function compileWorkflow(
       retryOnNetworkError: true,
       onFailure,
       assertions: def.assertions.map((a, ai) => ({
-        id: `${planId}-assert-${i}-${ai}`,
+        id: `assert-${i}-${ai}`,
         description: a.description,
         target: (a.target as FrozenStep['assertions'][0]['target']) || 'status',
         path: a.path,

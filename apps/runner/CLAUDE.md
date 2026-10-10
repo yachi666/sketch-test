@@ -79,8 +79,6 @@ Built-in subset supports: `$.field.subfield`, `$[0].field`, and `$.data.items[*]
 ## Dependencies
 
 - `@sketch-test/contracts-common` — EntityId, HTTP types, ContentHash, Instant
-- `@sketch-test/canonical-api-model` — endpoint identifiers
-- `@sketch-test/test-dsl` — assertion operators, extraction sources
 - `@sketch-test/runner-protocol` — ExecutionPlan, FrozenStep, RunEvent union, RunEventSchema
 
 ## When to modify

@@ -1,3 +1,5 @@
+> 路线图说明：本文为 2026-06-21 的里程碑规划，不是当前完成度或任务清单。当前实现与验收见 [STATUS](STATUS.md)，Pi 集成见 [ADR 0002](adr/0002-pi-generation-harness.md)。
+
 # 自动化测试平台 V1 研发任务拆分
 
 > 文档状态：Draft v0.1  

@@ -9,26 +9,33 @@
     "build": "vite build",
     "clean": "rm -rf dist/ tsconfig.tsbuildinfo",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "vitest run",
+    "test": "vitest run --exclude '**/dist/**'",
     "check": "tsc --noEmit",
     "lint": "biome check"
   },
   "dependencies": {
     "@phosphor-icons/react": "catalog:",
+    "@sketch-test/adapter-har": "workspace:*",
+    "@sketch-test/adapter-postman": "workspace:*",
+    "@sketch-test/canonical-api-model": "workspace:*",
+    "@sketch-test/contracts-common": "workspace:*",
+    "@sketch-test/format-detector": "workspace:*",
     "@vitejs/plugin-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "react-router-dom": "^7.18.0",
+    "react-router-dom": "^7.18.4",
     "vite": "catalog:",
-    "zustand": "^5.0.14"
+    "yaml": "^2.9.1",
+    "zustand": "^5.0.15",
+    "@sketch-test/generation-protocol": "workspace:*"
   },
   "devDependencies": {
-    "@playwright/test": "1.61.1",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.3.0",
+    "@playwright/test": "1.64.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "jsdom": "^26.1.0",
+    "jsdom": "^30.1.2",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

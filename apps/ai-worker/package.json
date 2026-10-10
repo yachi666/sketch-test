@@ -1,0 +1,32 @@
+{
+  "name": "@sketch-test/ai-worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Independent Pi harness for evidence-backed GeneratedDrafts",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "build": "tsc --noEmit false --allowImportingTsExtensions false --incremental false",
+    "check": "tsc --noEmit",
+    "lint": "biome check",
+    "test": "vitest run --exclude '**/dist/**'",
+    "start": "node dist/main.js",
+    "dev": "tsx src/main.ts",
+    "serve": "node dist/daemon.js",
+    "dev:worker": "tsx src/daemon.ts",
+    "clean": "rm -rf dist/ tsconfig.tsbuildinfo"
+  },
+  "dependencies": {
+    "@earendil-works/pi-agent-core": "1.1.0",
+    "@earendil-works/pi-ai": "1.1.0",
+    "@sketch-test/generation-protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

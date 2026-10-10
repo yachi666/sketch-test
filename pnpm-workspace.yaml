@@ -6,6 +6,9 @@ packages:
   - "tooling/*"
 
 allowBuilds:
+  # Published packages are prebuilt; these scripts only print a no-op/version notice.
+  "@google/genai": false
+  protobufjs: false
   esbuild: true
   lefthook: true
 
@@ -13,17 +16,35 @@ catalog:
   # Runtime
   ajv: ^8.20.0
   ajv-formats: ^3.0.1
-  zod: ^3.24.0
-  react: 19.2.0
-  react-dom: 19.2.0
+  zod: ^4.6.5
+  react: 19.3.0
+  react-dom: 19.3.0
   "@phosphor-icons/react": ^2.1.10
   # Build
-  typescript: ^5.7.0
-  vite: 6.4.2
-  "@vitejs/plugin-react": 5.0.4
-  tsx: ^4.19.0
+  typescript: ^7.0.2
+  vite: 8.3.4
+  "@vitejs/plugin-react": 6.1.2
+  tsx: ^4.23.15
   # Test
-  vitest: ^3.2.6
-  "@types/node": ^22.0.0
-  "@types/react": ^19.2.17
-  "@types/react-dom": ^19.2.3
+  vitest: ^5.0.3
+  "@types/node": ^26.6.5
+  "@types/react": ^19.3.0
+  "@types/react-dom": ^19.3.0
+
+minimumReleaseAgeExclude:
+  - "@aws-sdk/checksums@3.1001.2"
+  - "@aws-sdk/client-s3@3.1149.0"
+  - "@aws-sdk/core@3.978.2"
+  - "@aws-sdk/credential-provider-env@3.972.73"
+  - "@aws-sdk/credential-provider-http@3.972.75"
+  - "@aws-sdk/credential-provider-ini@3.973.18"
+  - "@aws-sdk/credential-provider-login@3.972.80"
+  - "@aws-sdk/credential-provider-node@3.972.85"
+  - "@aws-sdk/credential-provider-process@3.972.73"
+  - "@aws-sdk/credential-provider-sso@3.973.17"
+  - "@aws-sdk/credential-provider-web-identity@3.972.79"
+  - "@aws-sdk/middleware-sdk-s3@3.972.78"
+  - "@aws-sdk/nested-clients@3.997.47"
+  - "@aws-sdk/signature-v4-multi-region@3.996.48"
+  - "@aws-sdk/token-providers@3.1149.0"
+  - "@types/node@26.6.5"

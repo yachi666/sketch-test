@@ -95,13 +95,29 @@ async function startManagedPostgres() {
   postgresContainerStarted = true;
 
   const deadline = Date.now() + 60_000;
+  let consecutiveReadyChecks = 0;
   while (Date.now() < deadline) {
     const result = spawnSync(
       'docker',
-      ['exec', postgresContainer, 'pg_isready', '-U', 'postgres', '-d', 'postgres'],
+      [
+        'exec',
+        '-e',
+        `PGPASSWORD=${postgresPassword}`,
+        postgresContainer,
+        'psql',
+        '-U',
+        'postgres',
+        '-d',
+        'postgres',
+        '--tuples-only',
+        '--no-align',
+        '--command',
+        'SELECT 1',
+      ],
       { cwd: repoRoot, stdio: 'ignore' },
     );
-    if (result.status === 0) return;
+    consecutiveReadyChecks = result.status === 0 ? consecutiveReadyChecks + 1 : 0;
+    if (consecutiveReadyChecks >= 3) return;
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
   throw new Error('Timed out waiting for managed PostgreSQL 18');
@@ -204,8 +220,6 @@ async function main() {
   } else {
     command('pg_isready', [], { capture: true });
   }
-  command('pnpm', ['build']);
-
   postgresCommand('dropdb', ['--if-exists', database], { capture: true });
   postgresCommand('createdb', [database]);
   databaseCreated = true;
@@ -221,6 +235,13 @@ async function main() {
   const controlPlaneUrl = `http://127.0.0.1:${controlPlanePort}`;
   const minioUrl = `http://127.0.0.1:${minioPort}`;
   const webUrl = `http://127.0.0.1:${webPort}`;
+
+  // Build the current worktree, then rebuild Web with the temporary Control Plane URL embedded in
+  // its production bundle. `vite preview` cannot read VITE_CP_BASE at server start.
+  command('pnpm', ['build', '--force']);
+  command('pnpm', ['--filter', 'web', 'build'], {
+    env: { ...process.env, VITE_CP_BASE: controlPlaneUrl },
+  });
 
   command('docker', [
     'run',
@@ -253,7 +274,7 @@ async function main() {
   });
   await s3.send(new CreateBucketCommand({ Bucket: bucket }));
 
-  start('fixture', 'pnpm', ['exec', 'tsx', 'src/index.ts'], {
+  start('fixture', process.execPath, ['--no-strip-types', 'dist/index.js'], {
     cwd: path.join(repoRoot, 'packages/test-fixtures/hermetic-fixture-server'),
     env: { FIXTURE_PORT: String(fixturePort) },
   });
@@ -277,13 +298,19 @@ async function main() {
       S3_BUCKET: bucket,
       EVIDENCE_INLINE_MAX_BYTES: '200',
       WEB_ORIGINS: webUrl,
+      IMPORT_ALLOWED_HOSTS: `127.0.0.1:${fixturePort}`,
     },
   });
   await waitFor(`${controlPlaneUrl}/health`);
-  start('web', 'pnpm', ['exec', 'vite', '--host', '127.0.0.1', '--port', String(webPort)], {
-    cwd: path.join(repoRoot, 'apps/web'),
-    env: { VITE_CP_BASE: controlPlaneUrl },
-  });
+  start(
+    'web',
+    process.execPath,
+    ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1', '--port', String(webPort)],
+    {
+      cwd: path.join(repoRoot, 'apps/web'),
+      env: { VITE_CP_BASE: controlPlaneUrl },
+    },
+  );
   await waitFor(webUrl);
   const ready = await json(`${controlPlaneUrl}/ready`);
   assert(ready.status === 'ready', 'readiness must include PostgreSQL and S3');
@@ -359,33 +386,42 @@ async function main() {
   assert(imported.endpointCount > 0, 'import must produce endpoints');
   assert(imported.sourceObjectKey.startsWith('api-sources/sha256/'), 'raw source must be durable');
 
-  const createdWorkflow = await json(`${controlPlaneUrl}/api/workflows`, {
-    method: 'POST',
-    headers: userHeaders,
-    body: { workspaceId, name: 'Cross-process health' },
-  });
-  const workflowId = createdWorkflow.workflow.id;
-  const draft = await json(`${controlPlaneUrl}/api/workflows/${workflowId}/versions`, {
+  const arazzoSource = `arazzo: 1.1.0
+info:
+  title: Cross-process OpenAPI 3.2 QUERY
+  version: 1.0.0
+sourceDescriptions:
+  - name: fixture
+    url: ${fixtureUrl}/openapi.json
+    type: openapi
+workflows:
+  - workflowId: searchFlow
+    summary: Execute a structured search through OpenAPI 3.2 QUERY
+    steps:
+      - stepId: search
+        operationId: $sourceDescriptions.fixture.searchUsers
+        requestBody:
+          contentType: application/json
+          payload:
+            term: 测试
+        successCriteria:
+          - condition: $statusCode == 200
+`;
+  const importedWorkflow = await json(`${controlPlaneUrl}/api/workflows/import/arazzo`, {
     method: 'POST',
     headers: userHeaders,
     body: {
-      definition: {
-        schemaVersion: '1.0.0',
-        name: 'Cross-process health',
-        steps: [
-          {
-            id: 'health',
-            name: 'Test-server health',
-            method: 'GET',
-            url: `${fixtureUrl}/health`,
-            assertions: [{ target: 'status', operator: 'equals', expected: 200 }],
-          },
-        ],
-        teardown: [],
-      },
+      sourceText: arazzoSource,
+      sourceLocation: `${fixtureUrl}/workflows/search.arazzo.yaml`,
+      sources: { fixture: imported.apiVersionId },
     },
   });
-  const workflowVersionId = draft.version.id;
+  assert(importedWorkflow.workflows.length === 1, 'Arazzo import must create one workflow');
+  assert(
+    importedWorkflow.sourceObjectKey.startsWith('workflow-sources/sha256/'),
+    'raw Arazzo source must be durable',
+  );
+  const workflowVersionId = importedWorkflow.workflows[0].workflowVersionId;
   const published = await json(
     `${controlPlaneUrl}/api/workflow-versions/${workflowVersionId}/publish`,
     { method: 'POST', headers: userHeaders, body: { publishedBy: 'product-e2e' } },
@@ -532,6 +568,7 @@ async function main() {
     env: {
       ...process.env,
       E2E_WEB_URL: webUrl,
+      E2E_CP_URL: controlPlaneUrl,
       E2E_RUN_ID: runId,
       E2E_WORKSPACE_ID: workspaceId,
       E2E_OWNER_EMAIL: 'owner@product-e2e.test',

@@ -5,12 +5,13 @@
  */
 
 import type { FastifyInstance } from 'fastify';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { sendError } from '../../shared/errors.js';
 import {
   createTestSuite,
   createTestSuiteVersion,
   deleteTestSuite,
+  EmptyTestSuiteVersionError,
   evaluateQualityGate,
   getTestSuite,
   getTestSuiteVersion,
@@ -18,6 +19,8 @@ import {
   listTestSuites,
   listTestSuiteVersions,
   RunNotFoundError,
+  TestSuiteGateConfigError,
+  TestSuiteInUseError,
   TestSuiteMemberNotFoundError,
   TestSuiteNotFoundError,
   TestSuiteVersionNotFoundError,
@@ -37,7 +40,7 @@ const TestSuiteMemberSchema = z.object({
 });
 
 const CreateTestSuiteVersionSchema = z.object({
-  members: z.array(TestSuiteMemberSchema).default([]),
+  members: z.array(TestSuiteMemberSchema).min(1).max(500),
   qualityGate: z
     .object({
       requiredWorkflows: z.array(z.string()).optional(),
@@ -131,6 +134,9 @@ export async function testSuiteRoutes(app: FastifyInstance): Promise<void> {
       await deleteTestSuite(id);
       reply.status(204).send();
     } catch (err) {
+      if (err instanceof TestSuiteInUseError) {
+        return sendError(reply, 409, 'CONFLICT', err.message);
+      }
       request.log.error({ err }, 'Failed to delete test suite');
       return sendError(reply, 500, 'INTERNAL_ERROR', 'Failed to delete test suite');
     }
@@ -162,7 +168,13 @@ export async function testSuiteRoutes(app: FastifyInstance): Promise<void> {
         return sendError(reply, 404, 'NOT_FOUND', err.message);
       }
       if (err instanceof TestSuiteMemberNotFoundError) {
-        return sendError(reply, 404, 'NOT_FOUND', err.message);
+        return sendError(reply, 422, 'INVALID_STATE', err.message);
+      }
+      if (err instanceof EmptyTestSuiteVersionError) {
+        return sendError(reply, 400, 'INVALID_INPUT', err.message);
+      }
+      if (err instanceof TestSuiteGateConfigError) {
+        return sendError(reply, 400, 'INVALID_INPUT', err.message);
       }
       const message = err instanceof Error ? err.message : 'Unknown error';
       if (message.includes('duplicate key') || message.includes('UNIQUE')) {

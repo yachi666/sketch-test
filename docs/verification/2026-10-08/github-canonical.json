@@ -1,0 +1,417 @@
+{
+  "id": "av_fa206a0a",
+  "sourceType": "url",
+  "sourceLocation": "http://sketchtest-verification-sources/github-public-acceptance.json",
+  "contentHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+  "createdAt": "2026-10-08T15:19:23.850Z",
+  "metadata": {
+    "extra": {
+      "openapiVersion": "3.2.0"
+    },
+    "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+    "ingestedAt": "2026-10-08T15:19:23.804Z",
+    "parserName": "@sketch-test/adapter-openapi",
+    "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+    "sourceType": "openapi",
+    "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+    "parserVersion": "0.1.0",
+    "sourceVersion": "1.0.0"
+  },
+  "endpoints": [
+    {
+      "id": "GET-/repos/:owner/:repo",
+      "path": "/repos/:owner/:repo",
+      "method": "GET",
+      "summary": "Read real Node.js repository metadata",
+      "responses": [
+        {
+          "id": "GET-/repos/:owner/:repo-resp-200",
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/GET-/repos/:owner/:repo-response-200-application_json"
+              },
+              "example": {
+                "id": 27193779,
+                "full_name": "nodejs/node",
+                "default_branch": "main"
+              }
+            }
+          },
+          "statusCode": 200,
+          "description": "Live public repository metadata",
+          "sourceLocation": {
+            "location": "$.paths./repos/{owner}/{repo}.get.responses.200",
+            "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+            "ingestedAt": "2026-10-08T15:19:23.804Z",
+            "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+            "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+            "sourceVersion": "1.0.0"
+          }
+        }
+      ],
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "/REPOS/{OWNER}/{REPO}-/repos/{owner}/{repo}-param-owner",
+          "in": "path",
+          "name": "owner",
+          "schema": {
+            "ref": "/schemas/GET-/repos/:owner/:repo-parameter-owner"
+          },
+          "example": "nodejs",
+          "required": true,
+          "deprecated": false,
+          "sourceLocation": {
+            "location": "paths./repos/{owner}/{repo}.parameters.owner",
+            "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+            "ingestedAt": "2026-10-08T15:19:23.804Z",
+            "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+            "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+            "sourceVersion": "1.0.0"
+          },
+          "allowEmptyValue": false
+        },
+        {
+          "id": "/REPOS/{OWNER}/{REPO}-/repos/{owner}/{repo}-param-repo",
+          "in": "path",
+          "name": "repo",
+          "schema": {
+            "ref": "/schemas/GET-/repos/:owner/:repo-parameter-repo"
+          },
+          "example": "node",
+          "required": true,
+          "deprecated": false,
+          "sourceLocation": {
+            "location": "paths./repos/{owner}/{repo}.parameters.repo",
+            "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+            "ingestedAt": "2026-10-08T15:19:23.804Z",
+            "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+            "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+            "sourceVersion": "1.0.0"
+          },
+          "allowEmptyValue": false
+        }
+      ],
+      "operationId": "getRepository",
+      "requestBodies": [],
+      "sourceLocations": [
+        {
+          "location": "$.paths./repos/{owner}/{repo}.get",
+          "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+          "ingestedAt": "2026-10-08T15:19:23.804Z",
+          "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+          "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+          "sourceVersion": "1.0.0"
+        }
+      ]
+    },
+    {
+      "id": "GET-/repos/:owner/:repo/commits",
+      "path": "/repos/:owner/:repo/commits",
+      "method": "GET",
+      "summary": "Read real public commit history",
+      "responses": [
+        {
+          "id": "GET-/repos/:owner/:repo/commits-resp-200",
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/GET-/repos/:owner/:repo/commits-response-200-application_json"
+              }
+            }
+          },
+          "statusCode": 200,
+          "description": "Live commits",
+          "sourceLocation": {
+            "location": "$.paths./repos/{owner}/{repo}/commits.get.responses.200",
+            "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+            "ingestedAt": "2026-10-08T15:19:23.804Z",
+            "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+            "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+            "sourceVersion": "1.0.0"
+          }
+        }
+      ],
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "/REPOS/{OWNER}/{REPO}/COMMITS-/repos/{owner}/{repo}/commits-param-owner",
+          "in": "path",
+          "name": "owner",
+          "schema": {
+            "ref": "/schemas/GET-/repos/:owner/:repo/commits-parameter-owner"
+          },
+          "example": "nodejs",
+          "required": true,
+          "deprecated": false,
+          "sourceLocation": {
+            "location": "paths./repos/{owner}/{repo}/commits.parameters.owner",
+            "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+            "ingestedAt": "2026-10-08T15:19:23.804Z",
+            "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+            "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+            "sourceVersion": "1.0.0"
+          },
+          "allowEmptyValue": false
+        },
+        {
+          "id": "/REPOS/{OWNER}/{REPO}/COMMITS-/repos/{owner}/{repo}/commits-param-repo",
+          "in": "path",
+          "name": "repo",
+          "schema": {
+            "ref": "/schemas/GET-/repos/:owner/:repo/commits-parameter-repo"
+          },
+          "example": "node",
+          "required": true,
+          "deprecated": false,
+          "sourceLocation": {
+            "location": "paths./repos/{owner}/{repo}/commits.parameters.repo",
+            "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+            "ingestedAt": "2026-10-08T15:19:23.804Z",
+            "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+            "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+            "sourceVersion": "1.0.0"
+          },
+          "allowEmptyValue": false
+        },
+        {
+          "id": "/REPOS/{OWNER}/{REPO}/COMMITS-/repos/{owner}/{repo}/commits-param-per_page",
+          "in": "query",
+          "name": "per_page",
+          "schema": {
+            "ref": "/schemas/GET-/repos/:owner/:repo/commits-parameter-per_page"
+          },
+          "example": 30,
+          "required": false,
+          "deprecated": false,
+          "sourceLocation": {
+            "location": "paths./repos/{owner}/{repo}/commits.parameters.per_page",
+            "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+            "ingestedAt": "2026-10-08T15:19:23.804Z",
+            "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+            "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+            "sourceVersion": "1.0.0"
+          },
+          "allowEmptyValue": false
+        }
+      ],
+      "operationId": "listCommits",
+      "requestBodies": [],
+      "sourceLocations": [
+        {
+          "location": "$.paths./repos/{owner}/{repo}/commits.get",
+          "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+          "ingestedAt": "2026-10-08T15:19:23.804Z",
+          "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+          "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+          "sourceVersion": "1.0.0"
+        }
+      ]
+    }
+  ],
+  "schemas": {
+    "/schemas/GET-/repos/:owner/:repo-parameter-repo": {
+      "id": "/schemas/GET-/repos/:owner/:repo-parameter-repo",
+      "type": "string",
+      "nullable": false,
+      "deprecated": false,
+      "sourceLocation": {
+        "location": "$.paths./repos/{owner}/{repo}.get.parameters.repo.schema",
+        "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+        "ingestedAt": "2026-10-08T15:19:23.804Z",
+        "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+        "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+        "sourceVersion": "1.0.0"
+      }
+    },
+    "/schemas/GET-/repos/:owner/:repo-parameter-owner": {
+      "id": "/schemas/GET-/repos/:owner/:repo-parameter-owner",
+      "type": "string",
+      "nullable": false,
+      "deprecated": false,
+      "sourceLocation": {
+        "location": "$.paths./repos/{owner}/{repo}.get.parameters.owner.schema",
+        "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+        "ingestedAt": "2026-10-08T15:19:23.804Z",
+        "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+        "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+        "sourceVersion": "1.0.0"
+      }
+    },
+    "/schemas/GET-/repos/:owner/:repo/commits-parameter-repo": {
+      "id": "/schemas/GET-/repos/:owner/:repo/commits-parameter-repo",
+      "type": "string",
+      "nullable": false,
+      "deprecated": false,
+      "sourceLocation": {
+        "location": "$.paths./repos/{owner}/{repo}/commits.get.parameters.repo.schema",
+        "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+        "ingestedAt": "2026-10-08T15:19:23.804Z",
+        "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+        "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+        "sourceVersion": "1.0.0"
+      }
+    },
+    "/schemas/GET-/repos/:owner/:repo/commits-parameter-owner": {
+      "id": "/schemas/GET-/repos/:owner/:repo/commits-parameter-owner",
+      "type": "string",
+      "nullable": false,
+      "deprecated": false,
+      "sourceLocation": {
+        "location": "$.paths./repos/{owner}/{repo}/commits.get.parameters.owner.schema",
+        "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+        "ingestedAt": "2026-10-08T15:19:23.804Z",
+        "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+        "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+        "sourceVersion": "1.0.0"
+      }
+    },
+    "/schemas/GET-/repos/:owner/:repo/commits-parameter-per_page": {
+      "id": "/schemas/GET-/repos/:owner/:repo/commits-parameter-per_page",
+      "type": "integer",
+      "nullable": false,
+      "deprecated": false,
+      "sourceLocation": {
+        "location": "$.paths./repos/{owner}/{repo}/commits.get.parameters.per_page.schema",
+        "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+        "ingestedAt": "2026-10-08T15:19:23.804Z",
+        "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+        "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+        "sourceVersion": "1.0.0"
+      }
+    },
+    "/schemas/GET-/repos/:owner/:repo-response-200-application_json": {
+      "id": "/schemas/GET-/repos/:owner/:repo-response-200-application_json",
+      "type": "object",
+      "nullable": false,
+      "required": [
+        "id",
+        "full_name"
+      ],
+      "deprecated": false,
+      "properties": {
+        "id": {
+          "ref": "/schemas/GET-/repos/:owner/:repo-response-200-application_json/properties/id",
+          "displayName": "id"
+        },
+        "full_name": {
+          "ref": "/schemas/GET-/repos/:owner/:repo-response-200-application_json/properties/full_name",
+          "displayName": "full_name"
+        },
+        "default_branch": {
+          "ref": "/schemas/GET-/repos/:owner/:repo-response-200-application_json/properties/default_branch",
+          "displayName": "default_branch"
+        }
+      },
+      "sourceLocation": {
+        "location": "$.paths./repos/{owner}/{repo}.get.responses.200.content.application/json.schema",
+        "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+        "ingestedAt": "2026-10-08T15:19:23.804Z",
+        "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+        "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+        "sourceVersion": "1.0.0"
+      }
+    },
+    "/schemas/GET-/repos/:owner/:repo/commits-response-200-application_json": {
+      "id": "/schemas/GET-/repos/:owner/:repo/commits-response-200-application_json",
+      "type": "array",
+      "items": {
+        "ref": "/schemas/GET-/repos/:owner/:repo/commits-response-200-application_json/items"
+      },
+      "nullable": false,
+      "deprecated": false,
+      "sourceLocation": {
+        "location": "$.paths./repos/{owner}/{repo}/commits.get.responses.200.content.application/json.schema",
+        "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+        "ingestedAt": "2026-10-08T15:19:23.804Z",
+        "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+        "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+        "sourceVersion": "1.0.0"
+      }
+    },
+    "/schemas/GET-/repos/:owner/:repo-response-200-application_json/properties/id": {
+      "id": "/schemas/GET-/repos/:owner/:repo-response-200-application_json/properties/id",
+      "type": "integer",
+      "nullable": false,
+      "deprecated": false,
+      "sourceLocation": {
+        "location": "$.paths./repos/{owner}/{repo}.get.responses.200.content.application/json.schema/properties/id",
+        "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+        "ingestedAt": "2026-10-08T15:19:23.804Z",
+        "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+        "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+        "sourceVersion": "1.0.0"
+      }
+    },
+    "/schemas/GET-/repos/:owner/:repo/commits-response-200-application_json/items": {
+      "id": "/schemas/GET-/repos/:owner/:repo/commits-response-200-application_json/items",
+      "type": "object",
+      "nullable": false,
+      "deprecated": false,
+      "properties": {
+        "sha": {
+          "ref": "/schemas/GET-/repos/:owner/:repo/commits-response-200-application_json/items/properties/sha",
+          "displayName": "sha"
+        }
+      },
+      "sourceLocation": {
+        "location": "$.paths./repos/{owner}/{repo}/commits.get.responses.200.content.application/json.schema/items",
+        "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+        "ingestedAt": "2026-10-08T15:19:23.804Z",
+        "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+        "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+        "sourceVersion": "1.0.0"
+      }
+    },
+    "/schemas/GET-/repos/:owner/:repo-response-200-application_json/properties/full_name": {
+      "id": "/schemas/GET-/repos/:owner/:repo-response-200-application_json/properties/full_name",
+      "type": "string",
+      "nullable": false,
+      "deprecated": false,
+      "sourceLocation": {
+        "location": "$.paths./repos/{owner}/{repo}.get.responses.200.content.application/json.schema/properties/full_name",
+        "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+        "ingestedAt": "2026-10-08T15:19:23.804Z",
+        "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+        "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+        "sourceVersion": "1.0.0"
+      }
+    },
+    "/schemas/GET-/repos/:owner/:repo-response-200-application_json/properties/default_branch": {
+      "id": "/schemas/GET-/repos/:owner/:repo-response-200-application_json/properties/default_branch",
+      "type": "string",
+      "nullable": false,
+      "deprecated": false,
+      "sourceLocation": {
+        "location": "$.paths./repos/{owner}/{repo}.get.responses.200.content.application/json.schema/properties/default_branch",
+        "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+        "ingestedAt": "2026-10-08T15:19:23.804Z",
+        "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+        "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+        "sourceVersion": "1.0.0"
+      }
+    },
+    "/schemas/GET-/repos/:owner/:repo/commits-response-200-application_json/items/properties/sha": {
+      "id": "/schemas/GET-/repos/:owner/:repo/commits-response-200-application_json/items/properties/sha",
+      "type": "string",
+      "nullable": false,
+      "deprecated": false,
+      "sourceLocation": {
+        "location": "$.paths./repos/{owner}/{repo}/commits.get.responses.200.content.application/json.schema/items/properties/sha",
+        "sourceId": "openapi-http---sketchtest-verification-sources-github-public-acceptance-json",
+        "ingestedAt": "2026-10-08T15:19:23.804Z",
+        "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+        "sourceLabel": "http://sketchtest-verification-sources/github-public-acceptance.json",
+        "sourceVersion": "1.0.0"
+      }
+    }
+  },
+  "diagnostics": [],
+  "servers": [
+    {
+      "id": "server-1",
+      "url": "https://api.github.com"
+    }
+  ]
+}

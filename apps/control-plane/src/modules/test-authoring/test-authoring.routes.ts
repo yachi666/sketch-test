@@ -1,7 +1,8 @@
 import type { FastifyInstance } from 'fastify';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { sendError } from '../../shared/errors.js';
 import { authenticatedUser } from '../iam/auth.middleware.js';
+import type { TestCaseVersionRow, TestCaseWithVersion } from './test-authoring.service.js';
 import {
   compareVersions,
   createTestCase,
@@ -38,6 +39,22 @@ const SaveDraftBodySchema = z.object({
 const PublishBodySchema = z.object({
   publishedBy: z.string().max(128).optional(),
 });
+
+function versionResponse(version: TestCaseVersionRow) {
+  return {
+    ...version,
+    testCaseId: version.test_case_id,
+    sideEffect: version.side_effect,
+    publishedBy: version.published_by,
+    publishedAt: version.published_at,
+  };
+}
+function caseResponse(testCase: TestCaseWithVersion) {
+  return {
+    ...testCase,
+    latestVersion: testCase.latestVersion ? versionResponse(testCase.latestVersion) : null,
+  };
+}
 
 // ─── Routes ────────────────────────────────────────────────────────
 
@@ -89,7 +106,7 @@ export async function testAuthoringRoutes(app: FastifyInstance): Promise<void> {
 
     try {
       const tcs = await listTestCases(query.workspaceId, query.apiVersionId);
-      reply.send({ testCases: tcs });
+      reply.send({ testCases: tcs.map(caseResponse) });
     } catch (err) {
       console.error('[test-authoring] listTestCases error:', err);
       return sendError(reply, 500, 'INTERNAL_ERROR', 'Failed to list test cases');
@@ -105,7 +122,7 @@ export async function testAuthoringRoutes(app: FastifyInstance): Promise<void> {
       if (!tc) {
         return sendError(reply, 404, 'NOT_FOUND', `Test case ${id} not found`);
       }
-      reply.send(tc);
+      reply.send(caseResponse(tc));
     } catch (err) {
       console.error('[test-authoring] getTestCase error:', err);
       return sendError(reply, 500, 'INTERNAL_ERROR', 'Failed to get test case');
@@ -194,7 +211,7 @@ export async function testAuthoringRoutes(app: FastifyInstance): Promise<void> {
 
     try {
       const versions = await listTestCaseVersions(id);
-      reply.send({ versions });
+      reply.send({ versions: versions.map(versionResponse) });
     } catch (err) {
       console.error('[test-authoring] listTestCaseVersions error:', err);
       return sendError(reply, 500, 'INTERNAL_ERROR', 'Failed to list versions');
@@ -210,7 +227,7 @@ export async function testAuthoringRoutes(app: FastifyInstance): Promise<void> {
       if (!version) {
         return sendError(reply, 404, 'NOT_FOUND', `Test case version ${id} not found`);
       }
-      reply.send(version);
+      reply.send(versionResponse(version));
     } catch (err) {
       console.error('[test-authoring] getTestCaseVersion error:', err);
       return sendError(reply, 500, 'INTERNAL_ERROR', 'Failed to get version');
@@ -221,14 +238,16 @@ export async function testAuthoringRoutes(app: FastifyInstance): Promise<void> {
   app.post('/api/test-case-versions/:id/publish', async (request, reply) => {
     const { id } = request.params as { id: string };
     const parsed = PublishBodySchema.safeParse(request.body);
-    const publishedBy = parsed.success ? parsed.data.publishedBy : undefined;
+    if (!parsed.success)
+      return sendError(reply, 400, 'INVALID_INPUT', 'Invalid publication request');
+    const publishedBy = authenticatedUser(request).id;
 
     try {
       const version = await publishVersion(id, publishedBy);
       if (!version) {
         return sendError(reply, 404, 'NOT_FOUND', `Test case version ${id} not found`);
       }
-      reply.send(version);
+      reply.send(versionResponse(version));
     } catch (err) {
       console.error('[test-authoring] publishVersion error:', err);
       return sendError(reply, 500, 'INTERNAL_ERROR', 'Failed to publish version');

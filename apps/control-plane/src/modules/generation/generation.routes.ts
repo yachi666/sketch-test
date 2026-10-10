@@ -1,6 +1,8 @@
 import type { FastifyInstance } from 'fastify';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { sendError } from '../../shared/errors.js';
+import { authenticatedUser } from '../iam/auth.middleware.js';
+import { enqueueAiGeneration } from './ai-generation.service.js';
 import {
   acceptDraft,
   GenerationError,
@@ -17,8 +19,9 @@ import {
 const StartGenerationBodySchema = z.object({
   workspaceId: z.string().min(1),
   apiVersionId: z.string().min(1),
-  strategy: z.enum(['example', 'schema', 'status-codes']),
-  endpointIds: z.array(z.string()).optional(),
+  strategy: z.enum(['example', 'schema', 'status-codes', 'pi']),
+  endpointIds: z.array(z.string()).min(1).max(100).optional(),
+  objective: z.string().min(1).max(4096).optional(),
 });
 
 const AcceptDraftBodySchema = z.object({
@@ -44,12 +47,20 @@ export async function generationRoutes(app: FastifyInstance): Promise<void> {
     }
 
     try {
-      const job = await generateTests(
-        parsed.data.workspaceId,
-        parsed.data.apiVersionId,
-        parsed.data.strategy,
-        parsed.data.endpointIds,
-      );
+      const job =
+        parsed.data.strategy === 'pi'
+          ? await enqueueAiGeneration(
+              parsed.data.workspaceId,
+              parsed.data.apiVersionId,
+              parsed.data.objective ?? '依据 API 契约生成可审阅的回归测试，明确缺失的业务预期。',
+              parsed.data.endpointIds,
+            )
+          : await generateTests(
+              parsed.data.workspaceId,
+              parsed.data.apiVersionId,
+              parsed.data.strategy,
+              parsed.data.endpointIds,
+            );
       reply.status(201).send({
         id: job.id,
         workspaceId: job.workspace_id,
@@ -86,6 +97,11 @@ export async function generationRoutes(app: FastifyInstance): Promise<void> {
           status: j.status,
           createdAt: j.created_at,
           completedAt: j.completed_at,
+          config: j.config,
+          attempt: j.attempt,
+          draftCount: j.draft_count,
+          coveredEndpointCount: j.covered_endpoint_count,
+          errorCode: j.error_code,
         })),
       });
     } catch (err) {
@@ -110,6 +126,8 @@ export async function generationRoutes(app: FastifyInstance): Promise<void> {
         strategy: job.strategy,
         status: job.status,
         config: job.config,
+        attempt: job.attempt,
+        errorCode: job.error_code,
         createdAt: job.created_at,
         completedAt: job.completed_at,
       });
@@ -180,12 +198,13 @@ export async function generationRoutes(app: FastifyInstance): Promise<void> {
   /** Accept a draft (creates test case and version). */
   app.post('/api/drafts/:id/accept', async (request, reply) => {
     const { id } = request.params as { id: string };
-    const parsed = AcceptDraftBodySchema.safeParse(request.body);
+    const parsed = AcceptDraftBodySchema.safeParse(request.body ?? {});
+    if (!parsed.success) return sendError(reply, 400, 'INVALID_INPUT', 'Invalid review');
 
     try {
       const result = await acceptDraft(
         id,
-        parsed.success ? parsed.data.reviewedBy : undefined,
+        authenticatedUser(request).id,
         parsed.success ? parsed.data.modifications : undefined,
       );
       reply.status(201).send({
@@ -209,12 +228,13 @@ export async function generationRoutes(app: FastifyInstance): Promise<void> {
   /** Reject a draft. */
   app.post('/api/drafts/:id/reject', async (request, reply) => {
     const { id } = request.params as { id: string };
-    const parsed = RejectDraftBodySchema.safeParse(request.body);
+    const parsed = RejectDraftBodySchema.safeParse(request.body ?? {});
+    if (!parsed.success) return sendError(reply, 400, 'INVALID_INPUT', 'Invalid review');
 
     try {
       const draft = await rejectDraft(
         id,
-        parsed.success ? parsed.data.reviewedBy : undefined,
+        authenticatedUser(request).id,
         parsed.success ? parsed.data.reason : undefined,
       );
       if (!draft) {
