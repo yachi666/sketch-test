@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/yachi666/sketch-test/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/yachi666/sketch-test/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/yachi666/sketch-test/actions/workflows/codeql.yml/badge.svg?branch=master)](https://github.com/yachi666/sketch-test/actions/workflows/codeql.yml)
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 English · [简体中文](README.zh-CN.md)
 
@@ -156,5 +156,5 @@ not public issues. See [SECURITY.md](SECURITY.md). Never commit credentials or `
 
 ## License
 
-SketchTest source is licensed under [Apache-2.0](LICENSE). Third-party components
+SketchTest source is licensed under [MIT](LICENSE). Third-party components
 retain their own licenses; the bundled source-built MinIO server and client are AGPL-3.0.
