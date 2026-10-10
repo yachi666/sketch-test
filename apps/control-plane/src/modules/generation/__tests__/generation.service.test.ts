@@ -6,13 +6,15 @@
  */
 import { describe, expect, test } from 'vitest';
 import {
-  type EndpointDef,
-  type SchemaNode,
   buildHappyPathRequest,
+  type EndpointDef,
+  endpointSourceInfo,
   generateBoundaryValue,
   generateInvalidValue,
   generateValidValue,
   resolveSchema,
+  type SchemaNode,
+  testCaseVersionInsertParams,
 } from '../generation.service';
 
 // ─── Helpers ────────────────────────────────────────────────────────
@@ -30,22 +32,6 @@ function makeEndpoint(overrides: Partial<EndpointDef> = {}): EndpointDef {
     responses: [{ id: 'resp-200', statusCode: 200, description: 'OK' }],
     ...overrides,
   };
-}
-
-function makeStringSchema(overrides: Partial<SchemaNode> = {}): SchemaNode {
-  return { type: 'string', ...overrides };
-}
-
-function makeNumberSchema(overrides: Partial<SchemaNode> = {}): SchemaNode {
-  return { type: 'number', ...overrides };
-}
-
-function makeIntSchema(overrides: Partial<SchemaNode> = {}): SchemaNode {
-  return { type: 'integer', ...overrides };
-}
-
-function makeObjectSchema(overrides: Partial<SchemaNode> = {}): SchemaNode {
-  return { type: 'object', properties: {}, required: [], ...overrides };
 }
 
 // ─── Schema Resolution ───────────────────────────────────────────────
@@ -451,5 +437,34 @@ describe('buildHappyPathRequest', () => {
     expect(result.method).toBe('DELETE');
     expect(result.url).toBe('/api/users/usr-123');
     expect(result.body).toBeUndefined();
+  });
+});
+
+describe('generation persistence helpers', () => {
+  test('adds the endpoint method and path to draft source metadata', () => {
+    expect(
+      endpointSourceInfo(
+        { endpointId: 'ep-001', rule: 'happy-path' },
+        { method: 'POST', path: '/api/orders' },
+      ),
+    ).toEqual({
+      endpointId: 'ep-001',
+      rule: 'happy-path',
+      method: 'POST',
+      path: '/api/orders',
+    });
+  });
+
+  test('binds every test_case_versions insert placeholder in column order', () => {
+    expect(
+      testCaseVersionInsertParams({
+        versionId: 'tcv-1',
+        testCaseId: 'tc-1',
+        version: 2,
+        definition: { name: 'Generated case' },
+        sideEffect: 'read-only',
+        publishedBy: 'QA',
+      }),
+    ).toEqual(['tcv-1', 'tc-1', 2, JSON.stringify({ name: 'Generated case' }), 'read-only', 'QA']);
   });
 });

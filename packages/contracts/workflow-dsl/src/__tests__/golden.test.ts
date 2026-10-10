@@ -170,6 +170,10 @@ describe('WorkflowStepSchema', () => {
         retry: { maxRetries: 2 },
         poll: { maxDurationMs: 60000, untilExpression: '$.data.ready === true' },
         inputs: [{ target: 'userId', valueExpression: '${steps.login.userId}' }],
+        assertions: [{ target: 'status', operator: 'equals', expected: 201 }],
+        extract: [{ name: 'userId', source: 'body', expression: '$.id', scope: 'workflow' }],
+        timeoutMs: 15_000,
+        sideEffect: 'cleanup-required',
       }).success,
     ).toBe(true);
   });
@@ -234,6 +238,21 @@ describe('WorkflowDefinitionSchema', () => {
 
   test('accepts valid workflow', () => {
     expect(WorkflowDefinitionSchema.safeParse(validWorkflow).success).toBe(true);
+  });
+
+  test('accepts immutable Arazzo source provenance', () => {
+    expect(
+      WorkflowDefinitionSchema.safeParse({
+        ...validWorkflow,
+        source: {
+          type: 'arazzo',
+          sourceLabel: 'https://example.test/workflows/create-user.arazzo.yaml',
+          sourceObjectKey: `workflow-sources/sha256/${'a'.repeat(64)}.arazzo`,
+          contentHash: 'a'.repeat(64),
+          specificationVersion: '1.1.0',
+        },
+      }).success,
+    ).toBe(true);
   });
 
   test('rejects empty steps', () => {

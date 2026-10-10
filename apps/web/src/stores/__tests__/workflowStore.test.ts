@@ -1,105 +1,56 @@
-/**
- * workflowStore unit tests.
- *
- * Tests workflow CRUD, runWorkflow, and CP integration.
- */
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+import type { WorkflowStep } from '../../types';
 
-// ─── Mock cpClient ─────────────────────────────────────────────────
-
-const { mockCreateCustomRun, mockGetRun, mockListWorkflows } = vi.hoisted(() => ({
-  mockCreateCustomRun: vi.fn(),
+const {
+  mockCreateRunFromWorkflow,
+  mockGetRun,
+  mockGetWorkflow,
+  mockListWorkflowVersions,
+  mockListWorkflows,
+  mockSaveWorkflowDraft,
+} = vi.hoisted(() => ({
+  mockCreateRunFromWorkflow: vi.fn(),
   mockGetRun: vi.fn(),
+  mockGetWorkflow: vi.fn(),
+  mockListWorkflowVersions: vi.fn(),
   mockListWorkflows: vi.fn(),
+  mockSaveWorkflowDraft: vi.fn(),
 }));
 
 vi.mock('../../lib/cp-client', () => ({
   cpClient: {
-    createCustomRun: (...args: unknown[]) => mockCreateCustomRun(...args),
+    createRunFromWorkflow: (...args: unknown[]) => mockCreateRunFromWorkflow(...args),
     getRun: (...args: unknown[]) => mockGetRun(...args),
+    getWorkflow: (...args: unknown[]) => mockGetWorkflow(...args),
+    listWorkflowVersions: (...args: unknown[]) => mockListWorkflowVersions(...args),
     listWorkflows: (...args: unknown[]) => mockListWorkflows(...args),
+    saveWorkflowDraft: (...args: unknown[]) => mockSaveWorkflowDraft(...args),
   },
-}));
-
-// ─── Mock storage lib ──────────────────────────────────────────────
-
-const { mockLsGet, mockLsGetJSON, mockLsSet, mockLsSetJSON } = vi.hoisted(() => ({
-  mockLsGet: vi.fn(),
-  mockLsGetJSON: vi.fn(),
-  mockLsSet: vi.fn(),
-  mockLsSetJSON: vi.fn(),
-}));
-
-vi.mock('../../lib/storage', () => ({
-  lsGet: (...args: unknown[]) => mockLsGet(...args),
-  lsGetJSON: (...args: unknown[]) => mockLsGetJSON(...args),
-  lsSet: (...args: unknown[]) => mockLsSet(...args),
-  lsSetJSON: (...args: unknown[]) => mockLsSetJSON(...args),
-  LS_WORKFLOW_KEY: 'sketchtest.workflow:v1',
-  LS_ACTIVE_WORKFLOW_KEY: 'sketchtest.active-workflow:v1',
-}));
-
-// ─── Mock data ─────────────────────────────────────────────────────
-
-import type { WorkflowStep, ExecutionLog } from '../../types';
-
-const { mockInitialSteps, mockTestStep, mockTestStep2 } = vi.hoisted(() => {
-  const testStep: WorkflowStep = {
-    id: 'step-1',
-    name: 'Get Users',
-    method: 'GET',
-    path: '/users',
-    icon: 'user',
-    tone: 'green',
-    variableName: 'userId',
-    variablePath: '$.data.id',
-    expectedStatus: 200,
-    assertion: '$.id exists',
-  };
-
-  const testStep2: WorkflowStep = {
-    id: 'step-2',
-    name: 'Create User',
-    method: 'POST',
-    path: '/users',
-    icon: 'user',
-    tone: 'green',
-    variableName: '',
-    variablePath: '',
-    expectedStatus: 201,
-    assertion: '',
-  };
-
-  return {
-    mockInitialSteps: [testStep, testStep2, { ...testStep, id: 'step-3', name: 'Get User', path: '/users/1' }],
-    mockTestStep: testStep,
-    mockTestStep2: testStep2,
-  };
-});
-
-const testStep = mockTestStep;
-const testStep2 = mockTestStep2;
-
-vi.mock('../../data', () => ({
-  initialSteps: mockInitialSteps,
-  initialLogs: [] as ExecutionLog[],
-  workflows: [{ id: 'wf-default', name: 'Default Workflow' }],
-  workflowStepsMap: {} as Record<string, WorkflowStep[]>,
-  makeLogs: () => [] as ExecutionLog[],
 }));
 
 import { useWorkflowStore } from '../workflowStore';
 
-// ─── Tests ─────────────────────────────────────────────────────────
+const testStep: WorkflowStep = {
+  id: 'step-1',
+  name: 'Get users',
+  method: 'GET',
+  path: 'https://api.example.test/users',
+  icon: 'user',
+  tone: 'green',
+  variableName: 'userId',
+  variablePath: '$.data.id',
+  expectedStatus: 200,
+  assertion: '$.data',
+};
 
 describe('workflowStore', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockLsGet.mockReturnValue(null);
-    mockLsGetJSON.mockReturnValue([]);
-
     useWorkflowStore.setState({
       activeWorkflowId: null,
+      activeWorkflow: null,
+      activeVersionId: null,
+      versions: [],
       steps: [],
       selectedId: '',
       logs: [],
@@ -107,144 +58,200 @@ describe('workflowStore', () => {
       currentRunId: null,
       cpWorkflows: [],
       loading: false,
+      saving: false,
+      publishing: false,
       error: null,
-    } as any);
-
+    } as never);
     useWorkflowStore.getState().runningRef.current = false;
   });
 
-  describe('setActiveWorkflowId', () => {
-    test('sets and clears active workflow ID', () => {
-      useWorkflowStore.getState().setActiveWorkflowId('wf-123');
-      expect(useWorkflowStore.getState().activeWorkflowId).toBe('wf-123');
+  test('loads the workflow and immutable version from Control Plane', async () => {
+    mockGetWorkflow.mockResolvedValue({ workflow: { id: 'wf-1', name: 'Checkout' } });
+    mockListWorkflowVersions.mockResolvedValue({
+      versions: [
+        {
+          id: 'wv-1',
+          workflowId: 'wf-1',
+          version: 1,
+          definition: {
+            name: 'Checkout',
+            steps: [{ id: 'step-1', name: 'Get users', method: 'GET', url: testStep.path }],
+          },
+          compiledPlan: null,
+          publishedAt: '2026-01-01T00:00:00Z',
+        },
+      ],
+    });
 
-      useWorkflowStore.getState().setActiveWorkflowId(null);
-      expect(useWorkflowStore.getState().activeWorkflowId).toBeNull();
+    await useWorkflowStore.getState().openWorkflow('wf-1');
+
+    expect(useWorkflowStore.getState().activeWorkflowId).toBe('wf-1');
+    expect(useWorkflowStore.getState().steps).toMatchObject([{ path: testStep.path }]);
+    expect(mockGetWorkflow).toHaveBeenCalledWith('wf-1');
+  });
+
+  test('saves a draft version to Control Plane instead of local storage', async () => {
+    useWorkflowStore.setState({
+      activeWorkflowId: 'wf-1',
+      activeWorkflow: { id: 'wf-1', name: 'Checkout' },
+      steps: [testStep],
+    } as never);
+    mockSaveWorkflowDraft.mockResolvedValue({
+      version: {
+        id: 'wv-1',
+        workflowId: 'wf-1',
+        version: 1,
+        definition: {},
+        compiledPlan: null,
+        publishedAt: '2026-01-01T00:00:00Z',
+      },
+    });
+
+    await useWorkflowStore.getState().saveDraft();
+
+    expect(mockSaveWorkflowDraft).toHaveBeenCalledWith(
+      'wf-1',
+      expect.objectContaining({ name: 'Checkout' }),
+    );
+    expect(useWorkflowStore.getState().activeVersionId).toBe('wv-1');
+  });
+
+  test('runs only a published workflow version and maps real events to logs', async () => {
+    useWorkflowStore.setState({
+      activeVersionId: 'wv-1',
+      versions: [{ id: 'wv-1', compiledPlan: {} }],
+      steps: [testStep],
+      logs: [
+        {
+          id: 'log-step-1',
+          stepId: 'step-1',
+          name: testStep.name,
+          method: 'GET',
+          path: testStep.path,
+          status: 'queued',
+        },
+      ],
+    } as never);
+    mockCreateRunFromWorkflow.mockResolvedValue({ runId: 'run-1' });
+    mockGetRun.mockResolvedValue({
+      run: { id: 'run-1', status: 'passed' },
+      steps: [
+        {
+          stepIndex: 0,
+          eventType: 'response.received',
+          payload: { statusCode: 200 },
+          createdAt: '2026-01-01T00:00:01Z',
+        },
+        {
+          stepIndex: 0,
+          eventType: 'step.finished',
+          payload: { status: 'passed', totalDurationMs: 24 },
+          createdAt: '2026-01-01T00:00:02Z',
+        },
+      ],
+    });
+
+    await useWorkflowStore.getState().runWorkflow();
+
+    expect(mockCreateRunFromWorkflow).toHaveBeenCalledWith('wv-1');
+    expect(useWorkflowStore.getState().runState).toBe('passed');
+    expect(useWorkflowStore.getState().logs[0]).toMatchObject({
+      status: 'passed',
+      code: 200,
+      duration: 24,
     });
   });
 
-  describe('setSteps', () => {
-    test('replaces steps with array', () => {
-      useWorkflowStore.getState().setSteps([testStep]);
-      expect(useWorkflowStore.getState().steps).toHaveLength(1);
-    });
+  test('rejects runs for an unpublished version', async () => {
+    useWorkflowStore.setState({
+      activeVersionId: 'wv-1',
+      versions: [{ id: 'wv-1', compiledPlan: null }],
+    } as never);
 
-    test('supports updater function', () => {
-      useWorkflowStore.setState({ steps: [testStep] } as any);
-      useWorkflowStore.getState().setSteps((prev) => [...prev, testStep2]);
-      expect(useWorkflowStore.getState().steps).toHaveLength(2);
-    });
+    await useWorkflowStore.getState().runWorkflow();
+
+    expect(mockCreateRunFromWorkflow).not.toHaveBeenCalled();
+    expect(useWorkflowStore.getState().error).toContain('尚未发布');
   });
 
-  describe('setSelectedId', () => {
-    test('sets selected step ID', () => {
-      useWorkflowStore.getState().setSelectedId('step-2');
-      expect(useWorkflowStore.getState().selectedId).toBe('step-2');
-    });
+  test('lists workflows from the authenticated workspace', async () => {
+    mockListWorkflows.mockResolvedValue({ workflows: [{ id: 'wf-1', name: 'Checkout' }] });
+
+    await useWorkflowStore.getState().fetchWorkflowsFromServer('ws-1');
+
+    expect(mockListWorkflows).toHaveBeenCalledWith('ws-1');
+    expect(useWorkflowStore.getState().cpWorkflows).toHaveLength(1);
   });
+});
 
-  describe('setRunState', () => {
-    test('sets run state', () => {
-      for (const state of ['idle', 'running', 'passed', 'failed'] as const) {
-        useWorkflowStore.getState().setRunState(state);
-        expect(useWorkflowStore.getState().runState).toBe(state);
-      }
-    });
+test('preserves imported contract fields on save and only changes edited request fields', async () => {
+  const definition = {
+    schemaVersion: 'sketch-test.workflow/v1',
+    name: 'Imported',
+    description: 'Keep me',
+    source: { uri: 'real.arazzo.yml' },
+    teardown: {
+      strategy: 'always',
+      steps: [
+        {
+          id: 'cleanup',
+          useTest: { kind: 'inline', method: 'GET', url: 'https://example.test/cleanup' },
+        },
+      ],
+    },
+    steps: [
+      {
+        id: 'get',
+        name: 'Fetch',
+        useTest: {
+          kind: 'inline',
+          method: 'GET',
+          url: 'https://api.github.com/repos/nodejs/node',
+          headers: { Accept: 'application/json' },
+        },
+        retry: { maxRetries: 2 },
+        onFailure: 'teardown-and-stop',
+        extract: [
+          { name: 'owner', expression: '$.owner', source: 'body', scope: 'workflow' },
+          { name: 'name', expression: '$.name', source: 'body' },
+        ],
+        assertions: [
+          { id: 'ok', target: 'status', operator: 'equals', expected: 200 },
+          {
+            id: 'full',
+            target: 'jsonPath',
+            path: '$.full_name',
+            operator: 'equals',
+            expected: 'nodejs/node',
+          },
+        ],
+      },
+    ],
+  };
+  mockGetWorkflow.mockResolvedValue({ workflow: { id: 'wf-imported', name: 'Imported' } });
+  mockListWorkflowVersions.mockResolvedValue({ versions: [{ id: 'v1', definition }] });
+  mockSaveWorkflowDraft.mockImplementation(async (_id, definition) => ({
+    version: { id: 'v2', definition },
+  }));
+  await useWorkflowStore.getState().openWorkflow('wf-imported');
+  expect(useWorkflowStore.getState().steps[0]?.path).toBe(definition.steps[0]?.useTest.url);
+  await useWorkflowStore.getState().saveDraft();
+  expect(mockSaveWorkflowDraft).toHaveBeenLastCalledWith('wf-imported', definition);
+  useWorkflowStore.getState().setSteps((steps) =>
+    steps.map((step) => ({
+      ...step,
+      path: 'https://api.github.com/repos/nodejs/node/commits',
+      headers: [{ name: 'Accept', value: 'application/vnd.github+json' }],
+    })),
+  );
+  await useWorkflowStore.getState().saveDraft();
+  const saved = mockSaveWorkflowDraft.mock.calls.at(-1)?.[1];
+  expect(saved.teardown).toEqual(definition.teardown);
+  expect(saved.steps[0].assertions).toEqual(definition.steps[0]?.assertions);
+  expect(saved.steps[0].extract).toEqual(definition.steps[0]?.extract);
+  expect(saved.steps[0].useTest).toMatchObject({
+    url: 'https://api.github.com/repos/nodejs/node/commits',
+    headers: { Accept: 'application/vnd.github+json' },
   });
-
-  describe('openWorkflow', () => {
-    test('opens a workflow by ID', () => {
-      useWorkflowStore.getState().openWorkflow('wf-default');
-      const state = useWorkflowStore.getState();
-      expect(state.activeWorkflowId).toBe('wf-default');
-      expect(state.steps.length).toBeGreaterThan(0);
-      expect(state.runState).toBe('idle');
-    });
-  });
-
-  describe('backToList', () => {
-    test('clears active workflow and resets run state', () => {
-      useWorkflowStore.setState({ activeWorkflowId: 'wf-1', runState: 'failed' } as any);
-      useWorkflowStore.getState().backToList();
-      expect(useWorkflowStore.getState().activeWorkflowId).toBeNull();
-      expect(useWorkflowStore.getState().runState).toBe('idle');
-    });
-  });
-
-  describe('saveDraft', () => {
-    test('persists to storage', () => {
-      useWorkflowStore.setState({
-        activeWorkflowId: 'wf-x',
-        steps: [testStep],
-      } as any);
-
-      useWorkflowStore.getState().saveDraft();
-      expect(mockLsSetJSON).toHaveBeenCalled();
-    });
-  });
-
-  describe('runWorkflow', () => {
-    test('creates a run and resolves as passed', async () => {
-      useWorkflowStore.setState({ steps: [testStep] } as any);
-
-      mockCreateCustomRun.mockResolvedValue({ runId: 'run-001' });
-      mockGetRun.mockResolvedValue({
-        run: { id: 'run-001', status: 'passed' },
-        steps: [{ stepIndex: 0, eventType: 'step.finished', payload: { status: 'passed' } }],
-      });
-
-      await useWorkflowStore.getState().runWorkflow();
-
-      expect(useWorkflowStore.getState().runState).toBe('passed');
-      expect(useWorkflowStore.getState().currentRunId).toBe('run-001');
-    });
-
-    test('resolves as failed when run status is failed', async () => {
-      useWorkflowStore.setState({ steps: [testStep] } as any);
-
-      mockCreateCustomRun.mockResolvedValue({ runId: 'run-001' });
-      mockGetRun.mockResolvedValue({
-        run: { id: 'run-001', status: 'failed' },
-        steps: [],
-      });
-
-      await useWorkflowStore.getState().runWorkflow();
-
-      expect(useWorkflowStore.getState().runState).toBe('failed');
-    });
-
-    test('handles createCustomRun error gracefully', async () => {
-      useWorkflowStore.setState({ steps: [testStep] } as any);
-      mockCreateCustomRun.mockRejectedValue(new Error('Network error'));
-
-      await useWorkflowStore.getState().runWorkflow();
-      expect(useWorkflowStore.getState().runState).toBe('failed');
-    });
-
-    test('prevents concurrent runs', async () => {
-      useWorkflowStore.getState().runningRef.current = true;
-      await useWorkflowStore.getState().runWorkflow();
-      expect(mockCreateCustomRun).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('fetchWorkflowsFromServer', () => {
-    test('fetches workflows from CP', async () => {
-      mockListWorkflows.mockResolvedValue({ workflows: [{ id: 'cp-wf-1', name: 'CP Workflow' }] });
-
-      await useWorkflowStore.getState().fetchWorkflowsFromServer('ws-001');
-
-      const state = useWorkflowStore.getState();
-      expect(state.cpWorkflows).toHaveLength(1);
-      expect(state.loading).toBe(false);
-    });
-
-    test('sets error on failure', async () => {
-      mockListWorkflows.mockRejectedValue(new Error('API down'));
-
-      await useWorkflowStore.getState().fetchWorkflowsFromServer('ws-001');
-
-      expect(useWorkflowStore.getState().error).toContain('API down');
-    });
-  });
+  expect(definition.steps[0]?.useTest.url).toBe('https://api.github.com/repos/nodejs/node');
 });

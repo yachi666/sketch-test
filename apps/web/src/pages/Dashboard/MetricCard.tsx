@@ -1,4 +1,4 @@
-import { type ElementType } from 'react';
+import type { ElementType } from 'react';
 
 export function MetricCard({
   icon: Icon,
@@ -14,13 +14,13 @@ export function MetricCard({
   tone: string;
 }) {
   return (
-    <button className={`metric-card tone-${tone}`} type="button">
+    <div className={`metric-card tone-${tone}`}>
       <span>
         <Icon size={23} weight="duotone" />
       </span>
       <small>{label}</small>
       <strong>{value}</strong>
       <em>{delta}</em>
-    </button>
+    </div>
   );
 }

@@ -1,0 +1,1315 @@
+{
+  "drafts": [
+    {
+      "id": "draft_8ffbb471",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.989Z",
+      "sourceInfo": {
+        "path": "/api/auth/login",
+        "rule": "status-code:200",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_0601f3f5960a860ab7fa",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: POST /api/auth/login",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_6e2c87f1",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.990Z",
+      "sourceInfo": {
+        "path": "/api/auth/activate",
+        "rule": "status-code:200",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_7e219907b3a48e805645",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: POST /api/auth/activate",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_b7ee0d5e",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.990Z",
+      "sourceInfo": {
+        "path": "/api/auth/logout",
+        "rule": "status-code:204",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_887c845aa5fb1a3f2e94",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 204: POST /api/auth/logout",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_4531a16e",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.991Z",
+      "sourceInfo": {
+        "path": "/api/auth/me",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_406629bb093dcd7a89ac",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/auth/me",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_73a47e60",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.991Z",
+      "sourceInfo": {
+        "path": "/api/auth/change-password",
+        "rule": "status-code:204",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_ae02d3e33d9139d96339",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 204: POST /api/auth/change-password",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_06fdee56",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.991Z",
+      "sourceInfo": {
+        "path": "/api/contact-information",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_3f5d166331766e7ff93b",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/contact-information",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_7d80c7f7",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.992Z",
+      "sourceInfo": {
+        "path": "/api/contact-information",
+        "rule": "status-code:200",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_3f5d166331766e7ff93b",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: POST /api/contact-information",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_9bfa9380",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.992Z",
+      "sourceInfo": {
+        "path": "/api/shift-codes",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_de27bbf132e6cd99d12d",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/shift-codes",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_75ded606",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.993Z",
+      "sourceInfo": {
+        "path": "/api/shifts",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_361a64a6da54d6bb347e",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/shifts",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_e603f9ef",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.993Z",
+      "sourceInfo": {
+        "path": "/api/shifts/{id}",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_0ac42c77547599a47ea2",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/shifts/{id}",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_8021aac0",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.993Z",
+      "sourceInfo": {
+        "path": "/api/staff",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_7f60bf577a02b8b2f127",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/staff",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_c5405f6d",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.994Z",
+      "sourceInfo": {
+        "path": "/api/staff/{id}",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_7fb5a5a4912e31120269",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/staff/{id}",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_cad9f327",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.994Z",
+      "sourceInfo": {
+        "path": "/api/teams",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_7f6a34778ff18e9b6e3a",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/teams",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_cf9b1ed4",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.995Z",
+      "sourceInfo": {
+        "path": "/api/workspace/access-policy",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_47587ecc8b8af9b71391",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/workspace/access-policy",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_a7cb8141",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.995Z",
+      "sourceInfo": {
+        "path": "/api/workspace/access-policy",
+        "rule": "status-code:200",
+        "method": "PUT",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_PUT_47587ecc8b8af9b71391",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: PUT /api/workspace/access-policy",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_4d08e0ca",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.995Z",
+      "sourceInfo": {
+        "path": "/api/workspace/accounts",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_4926701e751b29548052",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/workspace/accounts",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_91a49768",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.996Z",
+      "sourceInfo": {
+        "path": "/api/workspace/accounts/{id}",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_de3e008cd3ee36924a04",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/workspace/accounts/{id}",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_6042fe06",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.996Z",
+      "sourceInfo": {
+        "path": "/api/workspace/accounts",
+        "rule": "status-code:200",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_4926701e751b29548052",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: POST /api/workspace/accounts",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_1e58b694",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.996Z",
+      "sourceInfo": {
+        "path": "/api/workspace/accounts/{id}",
+        "rule": "status-code:200",
+        "method": "PUT",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_PUT_de3e008cd3ee36924a04",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: PUT /api/workspace/accounts/{id}",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_ce666309",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.997Z",
+      "sourceInfo": {
+        "path": "/api/workspace/accounts/{id}/reset-password",
+        "rule": "status-code:204",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_01f2702aa473a945411a",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 204: POST /api/workspace/accounts/{id}/reset-password",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_61c036c6",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.997Z",
+      "sourceInfo": {
+        "path": "/api/workspace/accounts/{id}/enable",
+        "rule": "status-code:204",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_eb023aa80fd4da6fce95",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 204: POST /api/workspace/accounts/{id}/enable",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_2feef070",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.997Z",
+      "sourceInfo": {
+        "path": "/api/workspace/accounts/{id}/disable",
+        "rule": "status-code:204",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_013cac1eaa6a94dfa79c",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 204: POST /api/workspace/accounts/{id}/disable",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_2add365e",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.997Z",
+      "sourceInfo": {
+        "path": "/api/workspace/accounts/{id}",
+        "rule": "status-code:204",
+        "method": "DELETE",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_DELETE_de3e008cd3ee36924a04",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 204: DELETE /api/workspace/accounts/{id}",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_0dcb9670",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.998Z",
+      "sourceInfo": {
+        "path": "/api/workspace/import-export/save",
+        "rule": "status-code:200",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_b311a0b56f2a99daae7b",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: POST /api/workspace/import-export/save",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_228d52d3",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.998Z",
+      "sourceInfo": {
+        "path": "/api/workspace/linux-passwords",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_30bbf8b028aec00e9eac",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/workspace/linux-passwords",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_cd24c5d0",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.998Z",
+      "sourceInfo": {
+        "path": "/api/workspace/linux-passwords/{id}",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_3f1e63db3a0d360a3aaa",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/workspace/linux-passwords/{id}",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_3622b65b",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.999Z",
+      "sourceInfo": {
+        "path": "/api/workspace/linux-passwords/access-audits",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_e8d4b7ec7a8d5ca7d284",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/workspace/linux-passwords/access-audits",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_c7a9048a",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.999Z",
+      "sourceInfo": {
+        "path": "/api/workspace/linux-passwords/credentials/{credentialId}/secret",
+        "rule": "status-code:200",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_a7f324c3b6dfe165c102",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: POST /api/workspace/linux-passwords/credentials/{credentialId}/secret",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_539fe385",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:58.999Z",
+      "sourceInfo": {
+        "path": "/api/workspace/linux-passwords",
+        "rule": "status-code:200",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_30bbf8b028aec00e9eac",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: POST /api/workspace/linux-passwords",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_69d538ea",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.000Z",
+      "sourceInfo": {
+        "path": "/api/workspace/linux-passwords/{id}",
+        "rule": "status-code:200",
+        "method": "PUT",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_PUT_3f1e63db3a0d360a3aaa",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: PUT /api/workspace/linux-passwords/{id}",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_1ef2e68d",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.000Z",
+      "sourceInfo": {
+        "path": "/api/workspace/linux-passwords/{id}",
+        "rule": "status-code:204",
+        "method": "DELETE",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_DELETE_3f1e63db3a0d360a3aaa",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 204: DELETE /api/workspace/linux-passwords/{id}",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_9a1abe20",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.001Z",
+      "sourceInfo": {
+        "path": "/api/workspace/linux-password-directories",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_5ef6da4eca9a74768f79",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/workspace/linux-password-directories",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_ba76b2d9",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.001Z",
+      "sourceInfo": {
+        "path": "/api/workspace/overview",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_ea9dfd725f7a4f28b415",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/workspace/overview",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_a87c70b3",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.001Z",
+      "sourceInfo": {
+        "path": "/api/workspace/roster",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_dba7384870d95bf681ee",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/workspace/roster",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_e9a8e0d0",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.002Z",
+      "sourceInfo": {
+        "path": "/api/workspace/roster/save",
+        "rule": "status-code:200",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_51a3bb228768dd5d036b",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: POST /api/workspace/roster/save",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_95f518aa",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.002Z",
+      "sourceInfo": {
+        "path": "/api/workspace/shift-definitions",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_b6dacbdde53abe089c2c",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/workspace/shift-definitions",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_c9c25bcb",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.002Z",
+      "sourceInfo": {
+        "path": "/api/workspace/shift-definitions/{id}",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_4185f93770b29d68d59f",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/workspace/shift-definitions/{id}",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_69a58c67",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.003Z",
+      "sourceInfo": {
+        "path": "/api/workspace/shift-definitions",
+        "rule": "status-code:200",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_b6dacbdde53abe089c2c",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: POST /api/workspace/shift-definitions",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_9d946fec",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.003Z",
+      "sourceInfo": {
+        "path": "/api/workspace/shift-definitions/{id}",
+        "rule": "status-code:200",
+        "method": "PUT",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_PUT_4185f93770b29d68d59f",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: PUT /api/workspace/shift-definitions/{id}",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_0fc1057f",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.003Z",
+      "sourceInfo": {
+        "path": "/api/workspace/shift-definitions/reorder",
+        "rule": "status-code:204",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_20bd1f2c60d646f55c6d",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 204: POST /api/workspace/shift-definitions/reorder",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_24eceadb",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.004Z",
+      "sourceInfo": {
+        "path": "/api/workspace/shift-definitions/{id}",
+        "rule": "status-code:204",
+        "method": "DELETE",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_DELETE_4185f93770b29d68d59f",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 204: DELETE /api/workspace/shift-definitions/{id}",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_d8ffa65c",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.004Z",
+      "sourceInfo": {
+        "path": "/api/workspace/staff",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_2057687c9c240ecfa3e1",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/workspace/staff",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_df59c69a",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.005Z",
+      "sourceInfo": {
+        "path": "/api/workspace/staff/{id}",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_de539c682b80b52a5e9f",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/workspace/staff/{id}",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_54eb8e36",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.005Z",
+      "sourceInfo": {
+        "path": "/api/workspace/staff",
+        "rule": "status-code:200",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_2057687c9c240ecfa3e1",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: POST /api/workspace/staff",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_82c44fe7",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.005Z",
+      "sourceInfo": {
+        "path": "/api/workspace/staff/batch",
+        "rule": "status-code:200",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_e691e35905f9fcd81223",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: POST /api/workspace/staff/batch",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_7e3d555f",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.007Z",
+      "sourceInfo": {
+        "path": "/api/workspace/staff/{id}",
+        "rule": "status-code:200",
+        "method": "PUT",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_PUT_de539c682b80b52a5e9f",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: PUT /api/workspace/staff/{id}",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_43a392d4",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.008Z",
+      "sourceInfo": {
+        "path": "/api/workspace/staff/{id}",
+        "rule": "status-code:204",
+        "method": "DELETE",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_DELETE_de539c682b80b52a5e9f",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 204: DELETE /api/workspace/staff/{id}",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_5b28c2fb",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.008Z",
+      "sourceInfo": {
+        "path": "/api/workspace/teams",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_7c135cc2f26540e64fa6",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/workspace/teams",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_9e476189",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.008Z",
+      "sourceInfo": {
+        "path": "/api/workspace/teams/{id}",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_c9535614fca9b326929c",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/workspace/teams/{id}",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_7a4c542b",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.008Z",
+      "sourceInfo": {
+        "path": "/api/workspace/teams",
+        "rule": "status-code:200",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_7c135cc2f26540e64fa6",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: POST /api/workspace/teams",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_9b96b978",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.009Z",
+      "sourceInfo": {
+        "path": "/api/workspace/teams/{id}",
+        "rule": "status-code:200",
+        "method": "PUT",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_PUT_c9535614fca9b326929c",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: PUT /api/workspace/teams/{id}",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_fa021e43",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.009Z",
+      "sourceInfo": {
+        "path": "/api/workspace/teams/reorder",
+        "rule": "status-code:200",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_3748e1b04b5dabec1845",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: POST /api/workspace/teams/reorder",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_85f647a9",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.009Z",
+      "sourceInfo": {
+        "path": "/api/workspace/teams/{id}",
+        "rule": "status-code:204",
+        "method": "DELETE",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_DELETE_c9535614fca9b326929c",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 204: DELETE /api/workspace/teams/{id}",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_f64fc586",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.009Z",
+      "sourceInfo": {
+        "path": "/api/workspace/validation",
+        "rule": "status-code:200",
+        "method": "GET",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_GET_1014ff50c7e81610644c",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: GET /api/workspace/validation",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_255ca0b6",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.010Z",
+      "sourceInfo": {
+        "path": "/api/workspace/validation/resolve",
+        "rule": "status-code:200",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_261a05f378592a12f38f",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: POST /api/workspace/validation/resolve",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_96c7a8f8",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.010Z",
+      "sourceInfo": {
+        "path": "/api/workspace/validation/{id}/preview-remediation",
+        "rule": "status-code:200",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_f97728b549be3ebafa05",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: POST /api/workspace/validation/{id}/preview-remediation",
+        "sideEffect": "read-only"
+      }
+    },
+    {
+      "id": "draft_9af41739",
+      "jobId": "gj_13e027f6",
+      "testCaseId": null,
+      "confidence": 0.5,
+      "status": "pending",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "createdAt": "2026-10-08T15:09:59.010Z",
+      "sourceInfo": {
+        "path": "/api/workspace/validation/{id}/apply-remediation",
+        "rule": "status-code:200",
+        "method": "POST",
+        "strategy": "status-codes",
+        "confidence": 0.5,
+        "endpointId": "code_POST_7433b83f220c3573384b",
+        "apiVersionId": "av_ea093aaa"
+      },
+      "definitionSummary": {
+        "name": "Status 200: POST /api/workspace/validation/{id}/apply-remediation",
+        "sideEffect": "read-only"
+      }
+    }
+  ]
+}

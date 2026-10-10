@@ -1,30 +1,59 @@
+import type { PlanAsset, PlanProposal } from '@sketch-test/generation-protocol';
+
+export type { PlanAsset, PlanProposal } from '@sketch-test/generation-protocol';
+
 /**
  * Control Plane API client — connects Web UI to the Control Plane REST API.
  *
- * Covers M0–M2 endpoints: import, runs, IAM, environments, secrets,
+ * Covers product endpoints: import, runs, IAM, environments, secrets,
  * test cases, generation, workflows, datasets, test suites, policies.
  *
- * Uses localStorage as fallback when CP is unreachable (offline dev mode).
+ * Network and server failures are surfaced to callers. Production views must
+ * never replace Control Plane data with browser-local sample records.
  */
+
+import { clearAuthSession, notifyUnauthorized, storedAccessToken } from './auth-session';
 
 const CP_BASE = import.meta.env['VITE_CP_BASE'] ?? 'http://localhost:3802';
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+export function getControlPlaneBaseUrl(): string {
+  return CP_BASE;
+}
+
+interface RequestOptions extends RequestInit {
+  auth?: boolean;
+}
+
+async function request<T>(path: string, options?: RequestOptions): Promise<T> {
+  const token = options?.auth === false ? null : storedAccessToken();
+  const { auth: _auth, ...fetchOptions } = options ?? {};
   const response = await fetch(`${CP_BASE}${path}`, {
-    ...options,
+    ...fetchOptions,
     headers: {
       'Content-Type': 'application/json',
-      ...options?.headers,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...fetchOptions.headers,
     },
   });
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: response.statusText }));
+    if (response.status === 401 && options?.auth !== false) {
+      clearAuthSession();
+      notifyUnauthorized();
+    }
     throw new Error(error.message ?? `HTTP ${response.status}`);
   }
+  if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;
 }
 
 // ── Shared Types ──
+
+export interface RepositoryAnalysis extends ImportResult {
+  repositoryUrl: string;
+  commit: string;
+  scannedFiles: number;
+}
 
 export interface ImportResult {
   apiVersionId: string;
@@ -32,9 +61,54 @@ export interface ImportResult {
   diagnostics: Array<{ level: string; message: string }>;
 }
 
-export interface RunSummary {
+export interface ApiVersionSummary {
   id: string;
-  apiVersionId: string;
+  sourceType: string;
+  sourceLocation: string;
+  contentHash: string;
+  createdAt: string;
+  label?: string;
+  endpointCount: number;
+  diagnosticCount: number;
+}
+
+export interface EndpointOpenApiDefinition {
+  yaml: string;
+  origin: 'derived-openapi' | 'derived-postman' | 'derived-canonical';
+  sourceLabel: string;
+  fileName: string;
+}
+
+export interface RunCounts {
+  total: number;
+  passed: number;
+  failed: number;
+  active: number;
+  unresolved: number;
+  cancelled: number;
+  other: number;
+}
+export interface RunQuery {
+  q?: string;
+  status?: string;
+  days?: number;
+  page?: number;
+  pageSize?: number;
+}
+export interface RunListResult {
+  runs: RunSummary[];
+  total: number;
+  page: number;
+  pageSize: number;
+  summary: RunCounts;
+}
+export interface RunSummary {
+  sourceName?: string;
+  id: string;
+  apiVersionId: string | null;
+  workflowVersionId?: string | null;
+  testCaseVersionId?: string | null;
+  environmentVersionId?: string | null;
   status: string;
   runnerId: string | null;
   claimedAt: string | null;
@@ -56,7 +130,22 @@ export interface RunReport {
   run: RunSummary;
   steps: Array<{
     stepIndex: number;
-    status: 'passed' | 'failed' | 'error' | 'unknown';
+    name?: string;
+    phase?: 'main' | 'teardown';
+    method?: string;
+    url?: string;
+    assertions?: Array<{
+      assertionId?: string;
+      description?: string;
+      passed?: boolean;
+      expected?: string;
+      actual?: string;
+      severity?: string;
+      schemaDiff?: string;
+      attempt?: number;
+    }>;
+    error?: { type: string; message: string };
+    status: 'passed' | 'failed' | 'error' | 'skipped' | 'not_run' | 'unknown';
     durationMs?: number;
     events: Array<{ eventType: string; payload: unknown; timestamp: string }>;
   }>;
@@ -139,7 +228,12 @@ export interface GenerationJob {
   id: string;
   apiVersionId: string;
   strategy: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  config?: { objective?: string; provider?: string; model?: string; endpointIds?: string[] };
+  draftCount?: number;
+  coveredEndpointCount?: number;
+  attempt?: number;
+  errorCode?: string | null;
   createdAt: string;
   completedAt: string | null;
 }
@@ -147,9 +241,10 @@ export interface GenerationJob {
 export interface Draft {
   id: string;
   jobId: string;
-  definition: Record<string, unknown>;
+  definition?: Record<string, unknown>;
+  definitionSummary?: { name: string; sideEffect: string };
   sourceInfo: Record<string, unknown>;
-  confidence: number;
+  confidence: number | null;
   status: 'pending' | 'accepted' | 'rejected' | 'modified';
 }
 
@@ -160,6 +255,7 @@ export interface Workflow {
   workspaceId: string;
   createdAt: string;
   updatedAt: string;
+  latestVersion?: WorkflowVersion | null;
 }
 
 export interface WorkflowVersion {
@@ -171,11 +267,64 @@ export interface WorkflowVersion {
   publishedAt: string;
 }
 
+export interface PublishedWorkflow {
+  published: boolean;
+  version: { id: string; workflowId: string; version: number; publishedAt: string };
+  plan: { planHash: string; steps: unknown[] };
+  diagnostics: Array<{ severity: string; message: string }>;
+}
+
 export interface TestSuite {
   id: string;
   name: string;
   description: string;
   workspaceId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TestSuiteMember {
+  type: 'test' | 'workflow';
+  id: string;
+}
+
+export interface QualityGateConfig {
+  requiredWorkflows?: string[];
+  noNewFailures?: boolean;
+  maxFlakyRetries?: number;
+  minEndpointCoverage?: number;
+  requiredTags?: string[];
+  blockOnInfraError?: boolean;
+}
+
+export interface TestSuiteVersion {
+  id: string;
+  testSuiteId: string;
+  version: number;
+  members: TestSuiteMember[];
+  qualityGate: QualityGateConfig;
+  createdAt: string;
+}
+
+export interface TestSuiteDetail {
+  testSuite: TestSuite;
+  latestVersion: TestSuiteVersion | null;
+}
+
+export interface Schedule {
+  id: string;
+  workspaceId: string;
+  testSuiteId: string;
+  cronExpression: string;
+  environmentId: string | null;
+  enabled: boolean;
+  createdAt: string;
+}
+
+export interface QualityGateResult {
+  result: 'PASSED' | 'FAILED' | 'BLOCKED' | 'INCONCLUSIVE' | 'CANCELLED';
+  reason?: string;
+  details?: Record<string, unknown>;
 }
 
 export interface Dataset {
@@ -190,29 +339,30 @@ export interface Dataset {
 export const cpClient = {
   // ── Auth ──
 
-  login(
-    email: string,
-    password: string,
-    workspaceId?: string,
-  ): Promise<{ user: User; token: string }> {
-    return request('/api/auth/login', {
+  getGuestSession(): Promise<{ enabled: true; user: User; token: string } | { enabled: false }> {
+    return request('/api/auth/guest', {
       method: 'POST',
-      body: JSON.stringify({ email, password, workspaceId }),
+      auth: false,
+      body: JSON.stringify({}),
     });
   },
 
-  getMe(token: string): Promise<User> {
-    return request('/api/auth/me', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  getMe(_token?: string): Promise<{ user: User }> {
+    return request('/api/auth/me');
   },
 
   // ── Workspaces ──
 
-  createWorkspace(name: string, description?: string) {
-    return request<{ workspace: Workspace; admin: User }>('/api/workspaces', {
+  createWorkspace(
+    name: string,
+    ownerEmail: string,
+    ownerPassword: string,
+    description?: string,
+    ownerDisplayName?: string,
+  ) {
+    return request<{ workspace: Workspace; adminUser: User }>('/api/workspaces', {
       method: 'POST',
-      body: JSON.stringify({ name, description }),
+      body: JSON.stringify({ name, description, ownerEmail, ownerPassword, ownerDisplayName }),
     });
   },
 
@@ -245,7 +395,7 @@ export const cpClient = {
 
   // ── API Import ──
 
-  importSpec(sourceType: 'file' | 'url', sourceLocation: string, workspaceId?: string) {
+  importSpec(sourceType: 'url', sourceLocation: string, workspaceId?: string) {
     return request<ImportResult>('/api/import', {
       method: 'POST',
       body: JSON.stringify({ sourceType, sourceLocation, workspaceId }),
@@ -253,7 +403,14 @@ export const cpClient = {
   },
 
   listApiVersions() {
-    return request<{ apiVersions: unknown[] }>('/api/api-versions');
+    return request<{ apiVersions: ApiVersionSummary[] }>('/api/api-versions');
+  },
+
+  analyzeRepository(input: { repositoryUrl: string; ref?: string; directory?: string }) {
+    return request<RepositoryAnalysis>('/api/import/repository', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
   },
 
   getApiVersion(id: string) {
@@ -263,6 +420,7 @@ export const cpClient = {
       sourceLocation: string;
       contentHash: string;
       createdAt: string;
+      metadata?: { extra?: { repositoryUrl?: string; commit?: string; files?: unknown[] } };
       endpoints: unknown[];
       schemas: unknown;
       diagnostics: unknown[];
@@ -270,17 +428,17 @@ export const cpClient = {
     }>(`/api/api-versions/${id}`);
   },
 
+  getEndpointOpenApiDefinition(apiVersionId: string, endpointId: string) {
+    return request<EndpointOpenApiDefinition>(
+      `/api/api-versions/${encodeURIComponent(apiVersionId)}/endpoints/${encodeURIComponent(endpointId)}/openapi`,
+    );
+  },
+
   diffApiVersions(baseId: string, targetId: string) {
     return request<{ changes: unknown[] }>(`/api/api-versions/${targetId}/diff?baseId=${baseId}`);
   },
 
   // ── Runs ──
-
-  createRun(apiVersionId: string) {
-    return request<{ runId: string; plan: unknown }>(
-      `/api/api-versions/${apiVersionId}/execution-plan`,
-    );
-  },
 
   createCustomRun(
     steps: Array<{
@@ -311,17 +469,21 @@ export const cpClient = {
     });
   },
 
-  listRuns(status?: string) {
-    const qs = status ? `?status=${status}` : '';
-    return request<{ runs: RunSummary[] }>(`/api/runs${qs}`);
+  listRuns(query: RunQuery | string = {}, signal?: AbortSignal) {
+    const filters = typeof query === 'string' ? { status: query } : query;
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(filters)) {
+      if (value !== undefined && value !== '') params.set(key, String(value));
+    }
+    return request<RunListResult>(`/api/runs?${params}`, { signal });
   },
 
   getRun(runId: string) {
     return request<RunDetail>(`/api/runs/${runId}`);
   },
 
-  getReport(runId: string) {
-    return request<RunReport>(`/api/runs/${runId}/report`);
+  getReport(runId: string, signal?: AbortSignal) {
+    return request<RunReport>(`/api/runs/${runId}/report`, { signal });
   },
 
   cancelRun(runId: string) {
@@ -453,6 +615,13 @@ export const cpClient = {
     return request<TestCaseVersion>(`/api/test-case-versions/${versionId}`);
   },
 
+  runPublishedTest(versionId: string, environmentVersionId: string, confirmSideEffects = false) {
+    return request<{ runId: string }>(`/api/test-case-versions/${versionId}/run`, {
+      method: 'POST',
+      body: JSON.stringify({ environmentVersionId, confirmSideEffects }),
+    });
+  },
+
   publishVersion(versionId: string, publishedBy?: string) {
     return request<TestCaseVersion>(`/api/test-case-versions/${versionId}/publish`, {
       method: 'POST',
@@ -473,10 +642,26 @@ export const cpClient = {
     apiVersionId: string,
     strategy: string,
     endpointIds?: string[],
+    objective?: string,
   ) {
     return request<GenerationJob>('/api/generation-jobs', {
       method: 'POST',
-      body: JSON.stringify({ workspaceId, apiVersionId, strategy, endpointIds }),
+      body: JSON.stringify({ workspaceId, apiVersionId, strategy, endpointIds, objective }),
+    });
+  },
+
+  aiCapabilities() {
+    return request<{
+      configured: boolean;
+      available: boolean;
+      workers: Array<{ workerId: string; provider: string; model: string; harnessVersion: string }>;
+    }>('/api/ai/capabilities');
+  },
+
+  changeGeneration(jobId: string, action: 'cancel' | 'retry') {
+    return request<{ ok: true }>(`/api/generation-jobs/${jobId}/${action}`, {
+      method: 'POST',
+      body: '{}',
     });
   },
 
@@ -498,7 +683,12 @@ export const cpClient = {
   },
 
   acceptDraft(draftId: string, reviewedBy?: string, modifications?: Record<string, unknown>) {
-    return request<{ testCaseVersion: TestCaseVersion }>(`/api/drafts/${draftId}/accept`, {
+    return request<{
+      testCaseId: string;
+      versionId: string;
+      version: number;
+      draft: { id: string; status: string };
+    }>(`/api/drafts/${draftId}/accept`, {
       method: 'POST',
       body: JSON.stringify({ reviewedBy, modifications }),
     });
@@ -536,7 +726,7 @@ export const cpClient = {
   // ── Workflows ──
 
   createWorkflow(workspaceId: string, name: string, description?: string) {
-    return request<Workflow>('/api/workflows', {
+    return request<{ workflow: Workflow }>('/api/workflows', {
       method: 'POST',
       body: JSON.stringify({ workspaceId, name, description }),
     });
@@ -548,7 +738,14 @@ export const cpClient = {
   },
 
   getWorkflow(id: string) {
-    return request<Workflow>(`/api/workflows/${id}`);
+    return request<{ workflow: Workflow }>(`/api/workflows/${id}`);
+  },
+
+  updateWorkflow(id: string, data: { name?: string; description?: string }) {
+    return request<{ workflow: Workflow }>(`/api/workflows/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
   },
 
   deleteWorkflow(id: string) {
@@ -556,7 +753,7 @@ export const cpClient = {
   },
 
   saveWorkflowDraft(workflowId: string, definition: Record<string, unknown>) {
-    return request<WorkflowVersion>(`/api/workflows/${workflowId}/versions`, {
+    return request<{ version: WorkflowVersion }>(`/api/workflows/${workflowId}/versions`, {
       method: 'POST',
       body: JSON.stringify({ definition }),
     });
@@ -567,15 +764,23 @@ export const cpClient = {
   },
 
   publishWorkflowVersion(versionId: string) {
-    return request<WorkflowVersion>(`/api/workflow-versions/${versionId}/publish`, {
+    return request<PublishedWorkflow>(`/api/workflow-versions/${versionId}/publish`, {
       method: 'POST',
+      body: JSON.stringify({ publishedBy: 'web' }),
     });
+  },
+
+  createRunFromWorkflow(workflowVersionId: string) {
+    return request<{ runId: string; workflowVersionId: string; plan: unknown }>(
+      '/api/runs/from-workflow',
+      { method: 'POST', body: JSON.stringify({ workflowVersionId }) },
+    );
   },
 
   // ── Test Suites ──
 
   createTestSuite(workspaceId: string, name: string, description?: string) {
-    return request<TestSuite>('/api/test-suites', {
+    return request<{ testSuite: TestSuite }>('/api/test-suites', {
       method: 'POST',
       body: JSON.stringify({ workspaceId, name, description }),
     });
@@ -586,15 +791,84 @@ export const cpClient = {
     return request<{ testSuites: TestSuite[] }>(`/api/test-suites${qs}`);
   },
 
+  getTestSuite(testSuiteId: string) {
+    return request<TestSuiteDetail>(`/api/test-suites/${testSuiteId}`);
+  },
+
+  deleteTestSuite(testSuiteId: string) {
+    return request<void>(`/api/test-suites/${testSuiteId}`, { method: 'DELETE' });
+  },
+
   createTestSuiteVersion(
     testSuiteId: string,
-    members: string[],
-    qualityGate: Record<string, unknown>,
+    members: TestSuiteMember[],
+    qualityGate: QualityGateConfig,
   ) {
-    return request<{ id: string; version: number }>(`/api/test-suites/${testSuiteId}/versions`, {
+    return request<{ version: TestSuiteVersion }>(`/api/test-suites/${testSuiteId}/versions`, {
       method: 'POST',
       body: JSON.stringify({ members, qualityGate }),
     });
+  },
+
+  listTestSuiteVersions(testSuiteId: string) {
+    return request<{ versions: TestSuiteVersion[] }>(`/api/test-suites/${testSuiteId}/versions`);
+  },
+
+  getTestSuiteVersion(versionId: string) {
+    return request<{ version: TestSuiteVersion }>(`/api/test-suite-versions/${versionId}`);
+  },
+
+  evaluateQualityGate(versionId: string, runId: string) {
+    return request<QualityGateResult>(`/api/test-suite-versions/${versionId}/evaluate`, {
+      method: 'POST',
+      body: JSON.stringify({ runId }),
+    });
+  },
+
+  // ── Schedules ──
+
+  createSchedule(
+    workspaceId: string,
+    testSuiteId: string,
+    cronExpression: string,
+    enabled = true,
+    environmentId?: string,
+  ) {
+    return request<Schedule>('/api/schedules', {
+      method: 'POST',
+      body: JSON.stringify({
+        workspaceId,
+        testSuiteId,
+        cronExpression,
+        enabled,
+        environmentId,
+      }),
+    });
+  },
+
+  listSchedules() {
+    return request<{ schedules: Schedule[] }>('/api/schedules');
+  },
+
+  updateSchedule(
+    scheduleId: string,
+    updates: { cronExpression?: string; environmentId?: string | null; enabled?: boolean },
+  ) {
+    return request<Schedule>(`/api/schedules/${scheduleId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(updates),
+    });
+  },
+
+  deleteSchedule(scheduleId: string) {
+    return request<void>(`/api/schedules/${scheduleId}`, { method: 'DELETE' });
+  },
+
+  triggerSchedule(scheduleId: string) {
+    return request<{ runId: string; runIds: string[]; testSuiteVersionId: string }>(
+      `/api/schedules/${scheduleId}/trigger-now`,
+      { method: 'POST' },
+    );
   },
 
   // ── Datasets ──
@@ -611,6 +885,18 @@ export const cpClient = {
     return request<{ datasets: Dataset[] }>(`/api/datasets${qs}`);
   },
 
+  listDatasetVersions(id: string) {
+    return request<{
+      versions: Array<{
+        id: string;
+        version: number;
+        createdAt: string;
+        rows: Record<string, unknown>[];
+        sensitiveFields: string[];
+      }>;
+    }>(`/api/datasets/${id}/versions`);
+  },
+
   // ── Policies ──
 
   createPolicy(workspaceId: string, name: string, rules: unknown[], priority?: number) {
@@ -624,4 +910,50 @@ export const cpClient = {
     const qs = workspaceId ? `?workspaceId=${workspaceId}` : '';
     return request<{ policies: unknown[] }>(`/api/policies${qs}`);
   },
+};
+
+export interface PlanSuggestion {
+  id: string;
+  status: string;
+  trigger: string;
+  parentId: string | null;
+  objective: string;
+  assets: PlanAsset[];
+  proposal: PlanProposal | null;
+  revision: number;
+  savedAt: string | null;
+  suiteId: string | null;
+  errorCode: string | null;
+  createdAt: string;
+  sourceHash: string;
+  model: { provider: string; model: string };
+}
+export const planClient = {
+  list: () =>
+    request<{ jobs: PlanSuggestion[]; settings: { enabled: boolean } }>('/api/plan-suggestions'),
+  settings: (enabled: boolean) =>
+    request<{ enabled: boolean }>('/api/plan-suggestions/settings', {
+      method: 'PUT',
+      body: JSON.stringify({ enabled }),
+    }),
+  generate: (objective: string, parentId?: string, revision?: number) =>
+    request<{ job: PlanSuggestion }>('/api/plan-suggestions', {
+      method: 'POST',
+      body: JSON.stringify({ objective, parentId, revision }),
+    }),
+  save: (id: string, revision: number, proposal: PlanProposal) =>
+    request<{ job: PlanSuggestion }>(`/api/plan-suggestions/${encodeURIComponent(id)}/save`, {
+      method: 'POST',
+      body: JSON.stringify({ revision, proposal }),
+    }),
+  publish: (id: string, revision: number) =>
+    request<{ suiteId: string }>(`/api/plan-suggestions/${encodeURIComponent(id)}/publish`, {
+      method: 'POST',
+      body: JSON.stringify({ revision }),
+    }),
+  cancel: (id: string, revision: number) =>
+    request(`/api/plan-suggestions/${encodeURIComponent(id)}/cancel`, {
+      method: 'POST',
+      body: JSON.stringify({ revision }),
+    }),
 };

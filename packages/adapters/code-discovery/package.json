@@ -1,0 +1,29 @@
+{
+  "name": "@sketch-test/adapter-code-discovery",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --noEmit false --allowImportingTsExtensions false --incremental false",
+    "check": "tsc --noEmit",
+    "lint": "biome check",
+    "test": "vitest run --exclude '**/dist/**'",
+    "clean": "rm -rf dist/ tsconfig.tsbuildinfo"
+  },
+  "dependencies": {
+    "@sketch-test/canonical-api-model": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "@types/node": "catalog:"
+  }
+}

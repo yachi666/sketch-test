@@ -1,0 +1,31 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generation protocol v1 > freezes the normalized job shape and bounded defaults 1`] = `
+{
+  "apiVersionId": "api-1",
+  "endpoints": [
+    {
+      "contractNotes": "",
+      "id": "health",
+      "method": "GET",
+      "path": "/health",
+      "responseStatusCodes": [
+        200,
+      ],
+      "sideEffect": "read-only",
+      "summary": "Health",
+    },
+  ],
+  "jobId": "job-1",
+  "limits": {
+    "maxDrafts": 5,
+    "maxOutputTokens": 4096,
+    "maxTurns": 6,
+    "timeoutMs": 60000,
+  },
+  "objective": "Verify health",
+  "schemaVersion": "sketch-test.generation/v1",
+  "sourceHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "workspaceId": "ws-1",
+}
+`;

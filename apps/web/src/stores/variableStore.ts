@@ -1,8 +1,7 @@
 import { create } from 'zustand';
-import { lsGetJSON, lsSetJSON, LS_VARIABLES_KEY } from '../lib/storage';
-import { initialVariables } from '../data';
-import type { Variable } from '../types';
 import { cpClient, type Secret } from '../lib/cp-client';
+import { LS_VARIABLES_KEY, lsGetJSON, lsSetJSON } from '../lib/storage';
+import type { Variable } from '../types';
 
 interface VariableState {
   variables: Variable[];
@@ -21,7 +20,7 @@ interface VariableState {
 }
 
 export const useVariableStore = create<VariableState>((set) => ({
-  variables: lsGetJSON<Variable[]>(LS_VARIABLES_KEY, initialVariables, (parsed) => {
+  variables: lsGetJSON<Variable[]>(LS_VARIABLES_KEY, [], (parsed) => {
     if (Array.isArray(parsed) && parsed.length > 0) {
       const first = parsed[0] as Record<string, unknown>;
       if ('value' in first && !('defaultValue' in first)) {

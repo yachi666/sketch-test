@@ -9,6 +9,7 @@
  */
 
 import type { ExecutionPlan } from '@sketch-test/runner-protocol';
+import type { WorkflowDefinition } from '@sketch-test/workflow-dsl';
 import { pool } from '../../db/db.js';
 import { workflowId, workflowVersionId } from '../../shared/id.js';
 import { type CompileResult, compileWorkflow, type WorkflowDefInput } from './workflow-compiler.js';
@@ -29,7 +30,7 @@ export interface WorkflowVersion {
   id: string;
   workflowId: string;
   version: number;
-  definition: WorkflowDefInput;
+  definition: WorkflowDefInput | WorkflowDefinition;
   compiledPlan: ExecutionPlan | null;
   publishedBy: string | null;
   publishedAt: string;
@@ -53,7 +54,7 @@ function rowToVersion(row: Record<string, unknown>): WorkflowVersion {
     id: row['id'] as string,
     workflowId: row['workflow_id'] as string,
     version: row['version'] as number,
-    definition: row['definition'] as WorkflowDefInput,
+    definition: row['definition'] as WorkflowDefInput | WorkflowDefinition,
     compiledPlan: (row['compiled_plan'] as ExecutionPlan) ?? null,
     publishedBy: (row['published_by'] as string) ?? null,
     publishedAt: row['published_at'] as string,
@@ -92,9 +93,10 @@ export async function getWorkflow(
   id: string,
 ): Promise<(Workflow & { latestVersion: WorkflowVersion | null }) | null> {
   const result = await pool.query(`SELECT * FROM workflows WHERE id = $1`, [id]);
-  if (result.rows.length === 0) return null;
+  const [workflowRow] = result.rows;
+  if (!workflowRow) return null;
 
-  const workflow = rowToWorkflow(result.rows[0]!);
+  const workflow = rowToWorkflow(workflowRow);
 
   // Fetch latest version
   const versionResult = await pool.query(
@@ -105,21 +107,32 @@ export async function getWorkflow(
     [id],
   );
 
-  const latestVersion = versionResult.rows.length > 0 ? rowToVersion(versionResult.rows[0]!) : null;
+  const [latestVersionRow] = versionResult.rows;
+  const latestVersion = latestVersionRow ? rowToVersion(latestVersionRow) : null;
 
   return { ...workflow, latestVersion };
 }
 
-/** List all workflows in a workspace. */
+/** List workflows with their latest version for catalog and variable-source projections. */
 export async function listWorkflows(workspaceId: string): Promise<Workflow[]> {
   const result = await pool.query(
-    `SELECT * FROM workflows
-     WHERE workspace_id = $1
-     ORDER BY updated_at DESC
+    `SELECT w.*, to_jsonb(latest) AS latest_version
+     FROM workflows w
+     LEFT JOIN LATERAL (
+       SELECT v.* FROM workflow_versions v
+       WHERE v.workflow_id = w.id
+       ORDER BY v.version DESC
+       LIMIT 1
+     ) latest ON true
+     WHERE w.workspace_id = $1
+     ORDER BY w.updated_at DESC, w.id DESC
      LIMIT 100`,
     [workspaceId],
   );
-  return result.rows.map(rowToWorkflow);
+  return result.rows.map((row) => ({
+    ...rowToWorkflow(row),
+    latestVersion: row['latest_version'] ? rowToVersion(row['latest_version']) : null,
+  }));
 }
 
 /** Update a workflow's name and/or description. */
@@ -151,8 +164,8 @@ export async function updateWorkflow(
     values,
   );
 
-  if (result.rows.length === 0) return null;
-  return rowToWorkflow(result.rows[0]!);
+  const [updatedWorkflow] = result.rows;
+  return updatedWorkflow ? rowToWorkflow(updatedWorkflow) : null;
 }
 
 /** Delete a workflow and all its versions. */
@@ -168,7 +181,7 @@ export async function deleteWorkflow(id: string): Promise<void> {
 /** Save a new draft version for a workflow. Auto-increments the version number. */
 export async function saveDraft(
   workflowId: string,
-  definition: WorkflowDefInput,
+  definition: WorkflowDefInput | WorkflowDefinition,
 ): Promise<WorkflowVersion> {
   // Get the current max version
   const maxResult = await pool.query(
@@ -177,7 +190,8 @@ export async function saveDraft(
      WHERE workflow_id = $1`,
     [workflowId],
   );
-  const nextVersion = (maxResult.rows[0]! as { max_version: number }).max_version + 1;
+  const maxVersionRow = maxResult.rows[0] as { max_version: number } | undefined;
+  const nextVersion = (maxVersionRow?.max_version ?? 0) + 1;
 
   const id = workflowVersionId();
   const now = new Date().toISOString();
@@ -205,44 +219,24 @@ export async function publishVersion(
   publishedBy?: string,
 ): Promise<{ version: WorkflowVersion; compileResult: CompileResult }> {
   // Fetch the version
-  const result = await pool.query(`SELECT * FROM workflow_versions WHERE id = $1`, [versionId]);
-  if (result.rows.length === 0) {
+  const result = await pool.query(
+    `SELECT v.*, w.workspace_id
+     FROM workflow_versions v
+     JOIN workflows w ON w.id = v.workflow_id
+     WHERE v.id = $1`,
+    [versionId],
+  );
+  const [row] = result.rows;
+  if (!row) {
     throw new Error(`Workflow version ${versionId} not found`);
   }
 
-  const row = result.rows[0]!;
-  const definition = row.definition as WorkflowDefInput;
+  const definition = row.definition as WorkflowDefInput | WorkflowDefinition;
+  const workspaceId = row.workspace_id as string;
 
   // Compile the definition
   const compileResult = await compileWorkflow(definition, {
-    resolveTest: async (testVersionId: string) => {
-      const testResult = await pool.query(
-        `SELECT definition FROM test_case_versions WHERE id = $1`,
-        [testVersionId],
-      );
-      if (testResult.rows.length === 0) return null;
-      const testDef = testResult.rows[0]!['definition'] as Record<string, unknown>;
-      const request = testDef['request'] as Record<string, unknown> | undefined;
-      return {
-        method: (request?.['method'] as string) ?? 'GET',
-        url: (request?.['url'] as string) ?? '',
-        headers: request?.['headers'] as Record<string, string> | undefined,
-        body: request?.['body'] as unknown,
-        assertions: ((testDef['assertions'] as Array<Record<string, unknown>>) ?? []).map((a) => ({
-          target: (a['target'] as string) ?? 'status',
-          operator: (a['operator'] as string) ?? 'equals',
-          expected: a['expected'],
-          description: a['description'] as string | undefined,
-        })),
-        extract: ((testDef['extract'] as Array<Record<string, unknown>>) ?? []).map((e) => ({
-          name: e['name'] as string,
-          source: (e['source'] as string) ?? 'body',
-          expression: e['expression'] as string,
-          scope: e['scope'] as string | undefined,
-        })),
-        sideEffect: (testDef['sideEffect'] as string) ?? 'read-only',
-      };
-    },
+    resolveTest: (testVersionId: string) => resolveTestVersion(testVersionId, workspaceId),
   });
 
   if (!compileResult.success || !compileResult.plan) {
@@ -250,6 +244,7 @@ export async function publishVersion(
   }
 
   // Set the workflow version ID on the plan
+  delete compileResult.plan.adHocRunId;
   compileResult.plan.workflowVersionId = versionId;
 
   const now = new Date().toISOString();
@@ -280,8 +275,8 @@ export async function publishVersion(
 /** Get a workflow version by ID. */
 export async function getWorkflowVersion(versionId: string): Promise<WorkflowVersion | null> {
   const result = await pool.query(`SELECT * FROM workflow_versions WHERE id = $1`, [versionId]);
-  if (result.rows.length === 0) return null;
-  return rowToVersion(result.rows[0]!);
+  const [version] = result.rows;
+  return version ? rowToVersion(version) : null;
 }
 
 /** List all versions for a workflow, newest first. */
@@ -307,40 +302,50 @@ export async function getLatestPublishedVersion(
      LIMIT 1`,
     [workflowId],
   );
-  if (result.rows.length === 0) return null;
-  return rowToVersion(result.rows[0]!);
+  const [version] = result.rows;
+  return version ? rowToVersion(version) : null;
 }
 
 /** Compile a workflow definition and return diagnostics (preview, no persistence). */
-export async function compileWorkflowPreview(definition: WorkflowDefInput): Promise<CompileResult> {
+export async function compileWorkflowPreview(
+  definition: WorkflowDefInput | WorkflowDefinition,
+  workspaceId: string,
+): Promise<CompileResult> {
   return compileWorkflow(definition, {
-    resolveTest: async (testVersionId: string) => {
-      const testResult = await pool.query(
-        `SELECT definition FROM test_case_versions WHERE id = $1`,
-        [testVersionId],
-      );
-      if (testResult.rows.length === 0) return null;
-      const testDef = testResult.rows[0]!['definition'] as Record<string, unknown>;
-      const request = testDef['request'] as Record<string, unknown> | undefined;
-      return {
-        method: (request?.['method'] as string) ?? 'GET',
-        url: (request?.['url'] as string) ?? '',
-        headers: request?.['headers'] as Record<string, string> | undefined,
-        body: request?.['body'] as unknown,
-        assertions: ((testDef['assertions'] as Array<Record<string, unknown>>) ?? []).map((a) => ({
-          target: (a['target'] as string) ?? 'status',
-          operator: (a['operator'] as string) ?? 'equals',
-          expected: a['expected'],
-          description: a['description'] as string | undefined,
-        })),
-        extract: ((testDef['extract'] as Array<Record<string, unknown>>) ?? []).map((e) => ({
-          name: e['name'] as string,
-          source: (e['source'] as string) ?? 'body',
-          expression: e['expression'] as string,
-          scope: e['scope'] as string | undefined,
-        })),
-        sideEffect: (testDef['sideEffect'] as string) ?? 'read-only',
-      };
-    },
+    resolveTest: (testVersionId: string) => resolveTestVersion(testVersionId, workspaceId),
   });
+}
+
+async function resolveTestVersion(testVersionId: string, workspaceId: string) {
+  const testResult = await pool.query(
+    `SELECT v.definition
+     FROM test_case_versions v
+     JOIN test_cases t ON t.id = v.test_case_id
+     WHERE v.id = $1 AND t.workspace_id = $2`,
+    [testVersionId, workspaceId],
+  );
+  const [testVersion] = testResult.rows;
+  if (!testVersion) return null;
+  const testDef = testVersion['definition'] as Record<string, unknown>;
+  const request = testDef['request'] as Record<string, unknown> | undefined;
+  return {
+    method: (request?.['method'] as string) ?? 'GET',
+    url: (request?.['url'] as string) ?? '',
+    headers: request?.['headers'] as Record<string, string> | undefined,
+    body: request?.['body'] as unknown,
+    assertions: ((testDef['assertions'] as Array<Record<string, unknown>>) ?? []).map((a) => ({
+      target: (a['target'] as string) ?? 'status',
+      path: a['path'] as string | undefined,
+      operator: (a['operator'] as string) ?? 'equals',
+      expected: a['expected'],
+      description: a['description'] as string | undefined,
+    })),
+    extract: ((testDef['extract'] as Array<Record<string, unknown>>) ?? []).map((e) => ({
+      name: e['name'] as string,
+      source: (e['source'] as string) ?? 'body',
+      expression: e['expression'] as string,
+      scope: e['scope'] as string | undefined,
+    })),
+    sideEffect: (testDef['sideEffect'] as string) ?? 'read-only',
+  };
 }

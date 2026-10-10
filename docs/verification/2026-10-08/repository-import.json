@@ -1,0 +1,3695 @@
+{
+  "apiVersionId": "av_ea093aaa",
+  "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+  "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+  "scannedFiles": 86,
+  "endpointCount": 59,
+  "diagnostics": [
+    {
+      "level": "warning",
+      "message": "DTO AuthCurrentUserDto.permissions 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO AuthCurrentUserDto.editableTeamIds 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO AuthCurrentUserDto.editableTeams 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO AuthLoginResponse.currentUser 的 AuthCurrentUserDto 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO ShiftDto.start 的 OffsetDateTime 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO ShiftDto.end 的 OffsetDateTime 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO ShiftDto.contact 的 ContactDto 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO ShiftDto.backup 的 BackupDto 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO StaffDto.roleGroups 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceAccessPolicyResponse.pages 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceAccessPolicyUpdateRequest.pages 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceAccountDto.editableTeamIds 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceAccountDto.editableTeams 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceAccountUpsertRequest.editableTeamIds 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceImportPreviewGroupDto.staff 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceImportPreviewPersonDto.schedule 的 Map 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceImportPreviewResponse.groups 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceImportPreviewResponse.shiftCodeOptions 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceImportPreviewResponse.shiftCodeOptionsByTeam 的 Map 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceImportPreviewResponse.shiftCodeColorMap 的 Map 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceImportPreviewResponse.shiftDetailsByTeam 的 Map 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceImportPreviewResponse.issues 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceImportPreviewResponse.newStaffIds 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceImportPreviewResponse.newTeamNames 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceImportPreviewSaveRequest.rows 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceImportPreviewSaveRowRequest.schedule 的 Map 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceLinuxPasswordAccessAuditListResponse.items 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceLinuxPasswordDto.credentials 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceLinuxPasswordDto.businessUnits 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceLinuxPasswordListResponse.items 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceLinuxPasswordListResponse.businessUnits 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceLinuxPasswordUpsertRequest.credentials 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceLinuxPasswordUpsertRequest.businessUnits 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceMonthlyRosterResponse.groups 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceMonthlyRosterResponse.shiftCodeOptions 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceMonthlyRosterResponse.shiftCodeOptionsByTeam 的 Map 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceMonthlyRosterResponse.shiftCodeColorMap 的 Map 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceMonthlyRosterResponse.shiftDetailsByTeam 的 Map 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceOverviewResponse.stats 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceOverviewResponse.activity 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceOverviewResponse.quickActions 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceRosterGroupDto.staff 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceRosterPersonDto.schedule 的 Map 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceRosterSaveRequest.updates 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceRosterShiftDetailDto.startTime 的 LocalTime 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceRosterShiftDetailDto.endTime 的 LocalTime 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceShiftDefinitionDto.startTime 的 LocalTime 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceShiftDefinitionDto.endTime 的 LocalTime 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceShiftDefinitionDto.teams 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceShiftDefinitionReorderRequest.shiftDefinitionIds 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceShiftDefinitionUpsertRequest.teamIds 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceShiftDefinitionUpsertRequest.startTime 的 LocalTime 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceStaffBatchCreateRequest.staffIds 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceStaffDto.rosterTags 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceTeamReorderRequest.teamIds 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceValidationIssueDto.remediation 的 WorkspaceValidationRemediationDto 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceValidationRemediationApplyResponse.affectedRecordIds 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceValidationRemediationApplyResponse.validation 的 WorkspaceValidationResponse 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceValidationRemediationPreviewResponse.recordIds 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceValidationRemediationPreviewResponse.records 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceValidationResolveRequest.issueIds 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceValidationResolveResponse.resolvedIssueIds 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceValidationResolveResponse.skippedIssueIds 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceValidationResolveResponse.validation 的 WorkspaceValidationResponse 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceValidationResponse.summary 的 WorkspaceValidationSummaryDto 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceValidationResponse.issues 的 List 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "DTO WorkspaceValidationResponse.topIssue 的 WorkspaceValidationIssueDto 类型未展开，请补充嵌套结构。"
+    },
+    {
+      "level": "warning",
+      "message": "请求体 ContactInformationCreateRequest 未解析；生成前需补充结构。"
+    },
+    {
+      "level": "warning",
+      "message": "动态路径、未限定方法或带条件的映射未展开，请查看源码。"
+    },
+    {
+      "level": "warning",
+      "message": "未发现显式 HTTP 状态，端点仍显示但不可直接交给 AI 生成。"
+    },
+    {
+      "level": "warning",
+      "message": "未发现显式 HTTP 状态，端点仍显示但不可直接交给 AI 生成。"
+    },
+    {
+      "level": "warning",
+      "message": "静态发现仅覆盖 Spring REST Controller 的字面量映射、简单 DTO 与显式响应状态；鉴权拦截器、异常映射、服务层逻辑、嵌套泛型与动态路由未验证。生成结果需要人工审阅。"
+    }
+  ],
+  "endpoints": [
+    {
+      "id": "code_POST_0601f3f5960a860ab7fa",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "summary": "login",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/AuthLoginRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "f35a1c6f89b2ffe9059d313cbfe2a57664880415d674186490b0ec66ec314214",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java#L29",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "f35a1c6f89b2ffe9059d313cbfe2a57664880415d674186490b0ec66ec314214",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java#L28",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_7e219907b3a48e805645",
+      "method": "POST",
+      "path": "/api/auth/activate",
+      "summary": "activate",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/AuthActivateRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "f35a1c6f89b2ffe9059d313cbfe2a57664880415d674186490b0ec66ec314214",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java#L34",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "f35a1c6f89b2ffe9059d313cbfe2a57664880415d674186490b0ec66ec314214",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java#L33",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_887c845aa5fb1a3f2e94",
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "summary": "logout",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_204",
+          "statusCode": 204,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "f35a1c6f89b2ffe9059d313cbfe2a57664880415d674186490b0ec66ec314214",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java#L38",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_406629bb093dcd7a89ac",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "summary": "currentUser",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "f35a1c6f89b2ffe9059d313cbfe2a57664880415d674186490b0ec66ec314214",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java#L44",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_ae02d3e33d9139d96339",
+      "method": "POST",
+      "path": "/api/auth/change-password",
+      "summary": "changePassword",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/AuthChangePasswordRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "f35a1c6f89b2ffe9059d313cbfe2a57664880415d674186490b0ec66ec314214",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java#L50",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_204",
+          "statusCode": 204,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "f35a1c6f89b2ffe9059d313cbfe2a57664880415d674186490b0ec66ec314214",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java#L49",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_3f5d166331766e7ff93b",
+      "method": "GET",
+      "path": "/api/contact-information",
+      "summary": "listContacts",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "keyword",
+          "name": "keyword",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/ContactInformationController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "895ec65531bab76635f6bfcaa6d6c2aa451d7671d13c06e06a81f019ed67fae5",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/ContactInformationController.java#L28",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "page",
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/ContactInformationController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "895ec65531bab76635f6bfcaa6d6c2aa451d7671d13c06e06a81f019ed67fae5",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/ContactInformationController.java#L29",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "pageSize",
+          "name": "pageSize",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/ContactInformationController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "895ec65531bab76635f6bfcaa6d6c2aa451d7671d13c06e06a81f019ed67fae5",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/ContactInformationController.java#L30",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/ContactInformationController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "895ec65531bab76635f6bfcaa6d6c2aa451d7671d13c06e06a81f019ed67fae5",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/ContactInformationController.java#L26",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_3f5d166331766e7ff93b",
+      "method": "POST",
+      "path": "/api/contact-information",
+      "summary": "createContact",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/ContactInformationController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "895ec65531bab76635f6bfcaa6d6c2aa451d7671d13c06e06a81f019ed67fae5",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/ContactInformationController.java#L34",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_de27bbf132e6cd99d12d",
+      "method": "GET",
+      "path": "/api/shift-codes",
+      "summary": "getAllShiftCodes",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/ShiftCodeController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "7d36e730423f5b2ccd8ac58e228a538936493db80fffb2b3fa96962bb6694af4",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/ShiftCodeController.java#L22",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_361a64a6da54d6bb347e",
+      "method": "GET",
+      "path": "/api/shifts",
+      "summary": "getShiftsByDate",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "teamId",
+          "name": "teamId",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/ShiftController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "466d398b6ddb2a5112349d2f0a57e1d8c33f09a70ffc853bd58af7a473a49d04",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/ShiftController.java#L29",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "timezone",
+          "name": "timezone",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/ShiftController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "466d398b6ddb2a5112349d2f0a57e1d8c33f09a70ffc853bd58af7a473a49d04",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/ShiftController.java#L30",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/ShiftController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "466d398b6ddb2a5112349d2f0a57e1d8c33f09a70ffc853bd58af7a473a49d04",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/ShiftController.java#L26",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_0ac42c77547599a47ea2",
+      "method": "GET",
+      "path": "/api/shifts/{id}",
+      "summary": "getShiftById",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/ShiftController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "466d398b6ddb2a5112349d2f0a57e1d8c33f09a70ffc853bd58af7a473a49d04",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/ShiftController.java#L35",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/ShiftController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "466d398b6ddb2a5112349d2f0a57e1d8c33f09a70ffc853bd58af7a473a49d04",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/ShiftController.java#L34",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_7f60bf577a02b8b2f127",
+      "method": "GET",
+      "path": "/api/staff",
+      "summary": "getAllStaff",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/StaffController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "f8660909082b4aff0c07c03a8b884824e76201843b1fac2ca428907ee0d942b9",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/StaffController.java#L24",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_7fb5a5a4912e31120269",
+      "method": "GET",
+      "path": "/api/staff/{id}",
+      "summary": "getStaffById",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/StaffController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "f8660909082b4aff0c07c03a8b884824e76201843b1fac2ca428907ee0d942b9",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/StaffController.java#L30",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/StaffController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "f8660909082b4aff0c07c03a8b884824e76201843b1fac2ca428907ee0d942b9",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/StaffController.java#L29",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_7f6a34778ff18e9b6e3a",
+      "method": "GET",
+      "path": "/api/teams",
+      "summary": "getAllTeams",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/TeamController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "da8ef2f0e91aa76a8b0b68a8462802de1145fd403dbe5b1e1fee369fbd1ea234",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/TeamController.java#L22",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_47587ecc8b8af9b71391",
+      "method": "GET",
+      "path": "/api/workspace/access-policy",
+      "summary": "getAccessPolicy",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccessPolicyController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "4fb3661ab4d8f286bc45e83666a5cf9ef75637946da636b77c0654000321baff",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccessPolicyController.java#L24",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_PUT_47587ecc8b8af9b71391",
+      "method": "PUT",
+      "path": "/api/workspace/access-policy",
+      "summary": "updateAccessPolicy",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceAccessPolicyUpdateRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccessPolicyController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "4fb3661ab4d8f286bc45e83666a5cf9ef75637946da636b77c0654000321baff",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccessPolicyController.java#L31",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccessPolicyController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "4fb3661ab4d8f286bc45e83666a5cf9ef75637946da636b77c0654000321baff",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccessPolicyController.java#L29",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_4926701e751b29548052",
+      "method": "GET",
+      "path": "/api/workspace/accounts",
+      "summary": "listAccounts",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "keyword",
+          "name": "keyword",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d4240caf4dc19e33ea43216a970596378b2f8fc9f8a15471c5ffc55a675489ef",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java#L31",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d4240caf4dc19e33ea43216a970596378b2f8fc9f8a15471c5ffc55a675489ef",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java#L30",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_de3e008cd3ee36924a04",
+      "method": "GET",
+      "path": "/api/workspace/accounts/{id}",
+      "summary": "getAccount",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d4240caf4dc19e33ea43216a970596378b2f8fc9f8a15471c5ffc55a675489ef",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java#L36",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d4240caf4dc19e33ea43216a970596378b2f8fc9f8a15471c5ffc55a675489ef",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java#L35",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_4926701e751b29548052",
+      "method": "POST",
+      "path": "/api/workspace/accounts",
+      "summary": "createAccount",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceAccountUpsertRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d4240caf4dc19e33ea43216a970596378b2f8fc9f8a15471c5ffc55a675489ef",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java#L41",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d4240caf4dc19e33ea43216a970596378b2f8fc9f8a15471c5ffc55a675489ef",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java#L40",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_PUT_de3e008cd3ee36924a04",
+      "method": "PUT",
+      "path": "/api/workspace/accounts/{id}",
+      "summary": "updateAccount",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d4240caf4dc19e33ea43216a970596378b2f8fc9f8a15471c5ffc55a675489ef",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java#L46",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceAccountUpsertRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d4240caf4dc19e33ea43216a970596378b2f8fc9f8a15471c5ffc55a675489ef",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java#L46",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d4240caf4dc19e33ea43216a970596378b2f8fc9f8a15471c5ffc55a675489ef",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java#L45",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_01f2702aa473a945411a",
+      "method": "POST",
+      "path": "/api/workspace/accounts/{id}/reset-password",
+      "summary": "resetPassword",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d4240caf4dc19e33ea43216a970596378b2f8fc9f8a15471c5ffc55a675489ef",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java#L51",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_204",
+          "statusCode": 204,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d4240caf4dc19e33ea43216a970596378b2f8fc9f8a15471c5ffc55a675489ef",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java#L50",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_eb023aa80fd4da6fce95",
+      "method": "POST",
+      "path": "/api/workspace/accounts/{id}/enable",
+      "summary": "enableAccount",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d4240caf4dc19e33ea43216a970596378b2f8fc9f8a15471c5ffc55a675489ef",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java#L57",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_204",
+          "statusCode": 204,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d4240caf4dc19e33ea43216a970596378b2f8fc9f8a15471c5ffc55a675489ef",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java#L56",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_013cac1eaa6a94dfa79c",
+      "method": "POST",
+      "path": "/api/workspace/accounts/{id}/disable",
+      "summary": "disableAccount",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d4240caf4dc19e33ea43216a970596378b2f8fc9f8a15471c5ffc55a675489ef",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java#L63",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_204",
+          "statusCode": 204,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d4240caf4dc19e33ea43216a970596378b2f8fc9f8a15471c5ffc55a675489ef",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java#L62",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_DELETE_de3e008cd3ee36924a04",
+      "method": "DELETE",
+      "path": "/api/workspace/accounts/{id}",
+      "summary": "deleteAccount",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d4240caf4dc19e33ea43216a970596378b2f8fc9f8a15471c5ffc55a675489ef",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java#L69",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_204",
+          "statusCode": 204,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d4240caf4dc19e33ea43216a970596378b2f8fc9f8a15471c5ffc55a675489ef",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceAccountController.java#L68",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_b311a0b56f2a99daae7b",
+      "method": "POST",
+      "path": "/api/workspace/import-export/save",
+      "summary": "savePreview",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceImportPreviewSaveRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceImportExportController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "7967537cd799e1c19adf40dc81053fde08d203526d0161d074eaef87559bdd6f",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceImportExportController.java#L39",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceImportExportController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "7967537cd799e1c19adf40dc81053fde08d203526d0161d074eaef87559bdd6f",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceImportExportController.java#L38",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_42664f2bc6ebe6a4f976",
+      "method": "GET",
+      "path": "/api/workspace/import-export/export",
+      "summary": "exportRoster",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "year",
+          "name": "year",
+          "in": "query",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceImportExportController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "7967537cd799e1c19adf40dc81053fde08d203526d0161d074eaef87559bdd6f",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceImportExportController.java#L45",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "month",
+          "name": "month",
+          "in": "query",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceImportExportController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "7967537cd799e1c19adf40dc81053fde08d203526d0161d074eaef87559bdd6f",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceImportExportController.java#L46",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceImportExportController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "7967537cd799e1c19adf40dc81053fde08d203526d0161d074eaef87559bdd6f",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceImportExportController.java#L43",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_5bad0c6564f5cb1fd75a",
+      "method": "GET",
+      "path": "/api/workspace/import-export/template",
+      "summary": "downloadTemplate",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [],
+      "responses": [],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceImportExportController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "7967537cd799e1c19adf40dc81053fde08d203526d0161d074eaef87559bdd6f",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceImportExportController.java#L50",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_30bbf8b028aec00e9eac",
+      "method": "GET",
+      "path": "/api/workspace/linux-passwords",
+      "summary": "listServers",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "search",
+          "name": "search",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L37",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "businessUnit",
+          "name": "businessUnit",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L38",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L35",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_3f1e63db3a0d360a3aaa",
+      "method": "GET",
+      "path": "/api/workspace/linux-passwords/{id}",
+      "summary": "getServer",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L43",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L42",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_e8d4b7ec7a8d5ca7d284",
+      "method": "GET",
+      "path": "/api/workspace/linux-passwords/access-audits",
+      "summary": "listAccessAudits",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "keyword",
+          "name": "keyword",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L49",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "staffId",
+          "name": "staffId",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L50",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "staffName",
+          "name": "staffName",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L51",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "hostname",
+          "name": "hostname",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L52",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "ip",
+          "name": "ip",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L53",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "username",
+          "name": "username",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L54",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "action",
+          "name": "action",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L55",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "result",
+          "name": "result",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L56",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "from",
+          "name": "from",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L57",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "to",
+          "name": "to",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L58",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "page",
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L59",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "pageSize",
+          "name": "pageSize",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L60",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L47",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_a7f324c3b6dfe165c102",
+      "method": "POST",
+      "path": "/api/workspace/linux-passwords/credentials/{credentialId}/secret",
+      "summary": "revealCredentialSecret",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "credentialId",
+          "name": "credentialId",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L79",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceLinuxPasswordSecretRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L80",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L77",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_30bbf8b028aec00e9eac",
+      "method": "POST",
+      "path": "/api/workspace/linux-passwords",
+      "summary": "createServer",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceLinuxPasswordUpsertRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L91",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L90",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_PUT_3f1e63db3a0d360a3aaa",
+      "method": "PUT",
+      "path": "/api/workspace/linux-passwords/{id}",
+      "summary": "updateServer",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L96",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceLinuxPasswordUpsertRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L96",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L95",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_DELETE_3f1e63db3a0d360a3aaa",
+      "method": "DELETE",
+      "path": "/api/workspace/linux-passwords/{id}",
+      "summary": "deleteServer",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L101",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_204",
+          "statusCode": 204,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "8438b38f5d7d6be0c48bcd98df4f4f29553cc3204d92411c2300ea14818e9360",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordController.java#L100",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_5ef6da4eca9a74768f79",
+      "method": "GET",
+      "path": "/api/workspace/linux-password-directories",
+      "summary": "listDirectories",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordDirectoryController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "3c7504d83284c51e11f140680c3d12af9731b80065f0c166441d9e3e3c68f143",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceLinuxPasswordDirectoryController.java#L21",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_ea9dfd725f7a4f28b415",
+      "method": "GET",
+      "path": "/api/workspace/overview",
+      "summary": "getOverview",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "year",
+          "name": "year",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceOverviewController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "e179fba68be4a0b47a2fcb4cfa3bd129c9b38586cdaa4a838d1e4ce461107e49",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceOverviewController.java#L23",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "month",
+          "name": "month",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceOverviewController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "e179fba68be4a0b47a2fcb4cfa3bd129c9b38586cdaa4a838d1e4ce461107e49",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceOverviewController.java#L24",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceOverviewController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "e179fba68be4a0b47a2fcb4cfa3bd129c9b38586cdaa4a838d1e4ce461107e49",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceOverviewController.java#L21",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_dba7384870d95bf681ee",
+      "method": "GET",
+      "path": "/api/workspace/roster",
+      "summary": "getMonthlyRoster",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "year",
+          "name": "year",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceRosterController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "1038e42ed0d5003946cd021aadebf697cedecd642dbcd2293e3905fb001be563",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceRosterController.java#L28",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "month",
+          "name": "month",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceRosterController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "1038e42ed0d5003946cd021aadebf697cedecd642dbcd2293e3905fb001be563",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceRosterController.java#L29",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceRosterController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "1038e42ed0d5003946cd021aadebf697cedecd642dbcd2293e3905fb001be563",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceRosterController.java#L26",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_51a3bb228768dd5d036b",
+      "method": "POST",
+      "path": "/api/workspace/roster/save",
+      "summary": "saveMonthlyRoster",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceRosterSaveRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceRosterController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "1038e42ed0d5003946cd021aadebf697cedecd642dbcd2293e3905fb001be563",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceRosterController.java#L34",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceRosterController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "1038e42ed0d5003946cd021aadebf697cedecd642dbcd2293e3905fb001be563",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceRosterController.java#L33",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_b6dacbdde53abe089c2c",
+      "method": "GET",
+      "path": "/api/workspace/shift-definitions",
+      "summary": "listShiftDefinitions",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "keyword",
+          "name": "keyword",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d36f679520dd9b7a9f53e3886d332fe97525ec24bd32d829e95fb326208a6009",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java#L33",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d36f679520dd9b7a9f53e3886d332fe97525ec24bd32d829e95fb326208a6009",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java#L32",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_4185f93770b29d68d59f",
+      "method": "GET",
+      "path": "/api/workspace/shift-definitions/{id}",
+      "summary": "getShiftDefinition",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d36f679520dd9b7a9f53e3886d332fe97525ec24bd32d829e95fb326208a6009",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java#L38",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d36f679520dd9b7a9f53e3886d332fe97525ec24bd32d829e95fb326208a6009",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java#L37",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_b6dacbdde53abe089c2c",
+      "method": "POST",
+      "path": "/api/workspace/shift-definitions",
+      "summary": "createShiftDefinition",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceShiftDefinitionUpsertRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d36f679520dd9b7a9f53e3886d332fe97525ec24bd32d829e95fb326208a6009",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java#L43",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d36f679520dd9b7a9f53e3886d332fe97525ec24bd32d829e95fb326208a6009",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java#L42",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_PUT_4185f93770b29d68d59f",
+      "method": "PUT",
+      "path": "/api/workspace/shift-definitions/{id}",
+      "summary": "updateShiftDefinition",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d36f679520dd9b7a9f53e3886d332fe97525ec24bd32d829e95fb326208a6009",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java#L48",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceShiftDefinitionUpsertRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d36f679520dd9b7a9f53e3886d332fe97525ec24bd32d829e95fb326208a6009",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java#L48",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d36f679520dd9b7a9f53e3886d332fe97525ec24bd32d829e95fb326208a6009",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java#L47",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_20bd1f2c60d646f55c6d",
+      "method": "POST",
+      "path": "/api/workspace/shift-definitions/reorder",
+      "summary": "reorderShiftDefinitions",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceShiftDefinitionReorderRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d36f679520dd9b7a9f53e3886d332fe97525ec24bd32d829e95fb326208a6009",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java#L53",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_204",
+          "statusCode": 204,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d36f679520dd9b7a9f53e3886d332fe97525ec24bd32d829e95fb326208a6009",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java#L52",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_DELETE_4185f93770b29d68d59f",
+      "method": "DELETE",
+      "path": "/api/workspace/shift-definitions/{id}",
+      "summary": "deleteShiftDefinition",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d36f679520dd9b7a9f53e3886d332fe97525ec24bd32d829e95fb326208a6009",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java#L59",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_204",
+          "statusCode": 204,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d36f679520dd9b7a9f53e3886d332fe97525ec24bd32d829e95fb326208a6009",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceShiftDefinitionController.java#L58",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_2057687c9c240ecfa3e1",
+      "method": "GET",
+      "path": "/api/workspace/staff",
+      "summary": "listStaff",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "keyword",
+          "name": "keyword",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_string"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d2c3abb4e272eaa51eab0f7fd71f74647cb92c8030aeb8a91556696a9212aa16",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java#L33",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d2c3abb4e272eaa51eab0f7fd71f74647cb92c8030aeb8a91556696a9212aa16",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java#L32",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_de539c682b80b52a5e9f",
+      "method": "GET",
+      "path": "/api/workspace/staff/{id}",
+      "summary": "getStaff",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d2c3abb4e272eaa51eab0f7fd71f74647cb92c8030aeb8a91556696a9212aa16",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java#L38",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d2c3abb4e272eaa51eab0f7fd71f74647cb92c8030aeb8a91556696a9212aa16",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java#L37",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_2057687c9c240ecfa3e1",
+      "method": "POST",
+      "path": "/api/workspace/staff",
+      "summary": "createStaff",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceStaffUpsertRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d2c3abb4e272eaa51eab0f7fd71f74647cb92c8030aeb8a91556696a9212aa16",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java#L43",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d2c3abb4e272eaa51eab0f7fd71f74647cb92c8030aeb8a91556696a9212aa16",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java#L42",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_e691e35905f9fcd81223",
+      "method": "POST",
+      "path": "/api/workspace/staff/batch",
+      "summary": "createStaffBatch",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceStaffBatchCreateRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d2c3abb4e272eaa51eab0f7fd71f74647cb92c8030aeb8a91556696a9212aa16",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java#L48",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d2c3abb4e272eaa51eab0f7fd71f74647cb92c8030aeb8a91556696a9212aa16",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java#L47",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_PUT_de539c682b80b52a5e9f",
+      "method": "PUT",
+      "path": "/api/workspace/staff/{id}",
+      "summary": "updateStaff",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d2c3abb4e272eaa51eab0f7fd71f74647cb92c8030aeb8a91556696a9212aa16",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java#L53",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceStaffUpsertRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d2c3abb4e272eaa51eab0f7fd71f74647cb92c8030aeb8a91556696a9212aa16",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java#L53",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d2c3abb4e272eaa51eab0f7fd71f74647cb92c8030aeb8a91556696a9212aa16",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java#L52",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_DELETE_de539c682b80b52a5e9f",
+      "method": "DELETE",
+      "path": "/api/workspace/staff/{id}",
+      "summary": "deleteStaff",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "d2c3abb4e272eaa51eab0f7fd71f74647cb92c8030aeb8a91556696a9212aa16",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java#L58",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_204",
+          "statusCode": 204,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "d2c3abb4e272eaa51eab0f7fd71f74647cb92c8030aeb8a91556696a9212aa16",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java#L57",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_7c135cc2f26540e64fa6",
+      "method": "GET",
+      "path": "/api/workspace/teams",
+      "summary": "listTeams",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "c6f0fe82e63c67e37a4e598b90061c2555d349244f72518f103b2ce848f3c1ba",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java#L31",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_c9535614fca9b326929c",
+      "method": "GET",
+      "path": "/api/workspace/teams/{id}",
+      "summary": "getTeam",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "c6f0fe82e63c67e37a4e598b90061c2555d349244f72518f103b2ce848f3c1ba",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java#L37",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "c6f0fe82e63c67e37a4e598b90061c2555d349244f72518f103b2ce848f3c1ba",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java#L36",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_7c135cc2f26540e64fa6",
+      "method": "POST",
+      "path": "/api/workspace/teams",
+      "summary": "createTeam",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceTeamUpsertRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "c6f0fe82e63c67e37a4e598b90061c2555d349244f72518f103b2ce848f3c1ba",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java#L42",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "c6f0fe82e63c67e37a4e598b90061c2555d349244f72518f103b2ce848f3c1ba",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java#L41",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_PUT_c9535614fca9b326929c",
+      "method": "PUT",
+      "path": "/api/workspace/teams/{id}",
+      "summary": "updateTeam",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "c6f0fe82e63c67e37a4e598b90061c2555d349244f72518f103b2ce848f3c1ba",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java#L47",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceTeamUpsertRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "c6f0fe82e63c67e37a4e598b90061c2555d349244f72518f103b2ce848f3c1ba",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java#L47",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "c6f0fe82e63c67e37a4e598b90061c2555d349244f72518f103b2ce848f3c1ba",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java#L46",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_3748e1b04b5dabec1845",
+      "method": "POST",
+      "path": "/api/workspace/teams/reorder",
+      "summary": "reorderTeams",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceTeamReorderRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "c6f0fe82e63c67e37a4e598b90061c2555d349244f72518f103b2ce848f3c1ba",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java#L52",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "c6f0fe82e63c67e37a4e598b90061c2555d349244f72518f103b2ce848f3c1ba",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java#L51",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_DELETE_c9535614fca9b326929c",
+      "method": "DELETE",
+      "path": "/api/workspace/teams/{id}",
+      "summary": "deleteTeam",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "c6f0fe82e63c67e37a4e598b90061c2555d349244f72518f103b2ce848f3c1ba",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java#L57",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_204",
+          "statusCode": 204,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "c6f0fe82e63c67e37a4e598b90061c2555d349244f72518f103b2ce848f3c1ba",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceTeamController.java#L56",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_GET_1014ff50c7e81610644c",
+      "method": "GET",
+      "path": "/api/workspace/validation",
+      "summary": "getValidation",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "year",
+          "name": "year",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "afa0a0bcf9068b0ccb6317eae1ef7a9e14b3865105ca046a146c5bccbd2cbdd9",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java#L33",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "month",
+          "name": "month",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "afa0a0bcf9068b0ccb6317eae1ef7a9e14b3865105ca046a146c5bccbd2cbdd9",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java#L34",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        },
+        {
+          "id": "summaryOnly",
+          "name": "summaryOnly",
+          "in": "query",
+          "required": false,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_boolean"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "afa0a0bcf9068b0ccb6317eae1ef7a9e14b3865105ca046a146c5bccbd2cbdd9",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java#L35",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "afa0a0bcf9068b0ccb6317eae1ef7a9e14b3865105ca046a146c5bccbd2cbdd9",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java#L31",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_261a05f378592a12f38f",
+      "method": "POST",
+      "path": "/api/workspace/validation/resolve",
+      "summary": "resolveIssues",
+      "deprecated": false,
+      "parameters": [],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceValidationResolveRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "afa0a0bcf9068b0ccb6317eae1ef7a9e14b3865105ca046a146c5bccbd2cbdd9",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java#L41",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "afa0a0bcf9068b0ccb6317eae1ef7a9e14b3865105ca046a146c5bccbd2cbdd9",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java#L39",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_f97728b549be3ebafa05",
+      "method": "POST",
+      "path": "/api/workspace/validation/{id}/preview-remediation",
+      "summary": "previewRemediation",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "afa0a0bcf9068b0ccb6317eae1ef7a9e14b3865105ca046a146c5bccbd2cbdd9",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java#L47",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceValidationRemediationRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "afa0a0bcf9068b0ccb6317eae1ef7a9e14b3865105ca046a146c5bccbd2cbdd9",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java#L48",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "afa0a0bcf9068b0ccb6317eae1ef7a9e14b3865105ca046a146c5bccbd2cbdd9",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java#L45",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    },
+    {
+      "id": "code_POST_7433b83f220c3573384b",
+      "method": "POST",
+      "path": "/api/workspace/validation/{id}/apply-remediation",
+      "summary": "applyRemediation",
+      "deprecated": false,
+      "parameters": [
+        {
+          "id": "id",
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "deprecated": false,
+          "allowEmptyValue": false,
+          "schema": {
+            "ref": "/schemas/parameter_integer"
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "afa0a0bcf9068b0ccb6317eae1ef7a9e14b3865105ca046a146c5bccbd2cbdd9",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java#L54",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "requestBodies": [
+        {
+          "id": "body",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "ref": "/schemas/WorkspaceValidationRemediationRequest"
+              }
+            }
+          },
+          "sourceLocation": {
+            "sourceId": "code_c9d94c6bbbfdc8df0f27",
+            "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java",
+            "sourceVersion": "0.1.0",
+            "sourceHash": "afa0a0bcf9068b0ccb6317eae1ef7a9e14b3865105ca046a146c5bccbd2cbdd9",
+            "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java#L55",
+            "ingestedAt": "2026-10-08T15:09:56.063Z"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "id": "status_200",
+          "statusCode": 200,
+          "description": "Controller 显式返回状态；异常、鉴权与业务分支需另行核验。"
+        }
+      ],
+      "sourceLocations": [
+        {
+          "sourceId": "code_c9d94c6bbbfdc8df0f27",
+          "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java",
+          "sourceVersion": "0.1.0",
+          "sourceHash": "afa0a0bcf9068b0ccb6317eae1ef7a9e14b3865105ca046a146c5bccbd2cbdd9",
+          "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceValidationController.java#L52",
+          "ingestedAt": "2026-10-08T15:09:56.063Z"
+        }
+      ],
+      "extra": {
+        "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+        "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+        "framework": "Spring MVC",
+        "reviewRequired": true
+      }
+    }
+  ]
+}

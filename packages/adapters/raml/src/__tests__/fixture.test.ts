@@ -7,7 +7,7 @@
  */
 import { CanonicalApiModelSchema } from '@sketch-test/canonical-api-model';
 import { describe, expect, test } from 'vitest';
-import { importRaml, type ImportResult } from '../index';
+import { type ImportResult, importRaml } from '../index';
 
 // ─── RAML 1.0 Fixture ─────────────────────────────────────────────
 

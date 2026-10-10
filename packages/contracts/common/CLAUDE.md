@@ -14,7 +14,7 @@ Shared Zod schema primitives used by every other sketch-test contract package. T
 | `DiagnosticSchema` | Parse/lint diagnostic (severity, code, message, path) |
 | `SideEffectLevelSchema` | `read-only` / `cleanup-required` / `irreversible` / `high-risk` |
 | `ConfidenceLevelSchema` | AI confidence: `certain` / `high` / `medium` / `low` / `inferred` |
-| `HttpMethodSchema` | GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS |
+| `HttpMethodSchema` | GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, QUERY |
 | `HttpStatusCodeSchema` | Known status codes (200-503) + catch-all |
 | `MediaTypeSchema` | MIME type string |
 | `ImmutableVersionMetaSchema` | Base fields for all published versions (id, version number, publishedAt, contentHash) |

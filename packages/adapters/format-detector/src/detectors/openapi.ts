@@ -43,7 +43,7 @@ function countPaths(paths: unknown): number | undefined {
     if (!pathItem || typeof pathItem !== 'object') continue;
     for (const [key, val] of Object.entries(pathItem as Record<string, unknown>)) {
       if (
-        ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'].includes(key) &&
+        ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'query'].includes(key) &&
         val &&
         typeof val === 'object'
       ) {

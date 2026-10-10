@@ -1,0 +1,135 @@
+{
+  "status": "passed",
+  "versions": [
+    {
+      "id": "wfv_0e809a96",
+      "workflowId": "wf_5b2bc9b1",
+      "version": 2,
+      "definition": {
+        "id": "wf_5b2bc9b1",
+        "name": "修复复测：GitHub 流程编辑保存",
+        "tags": [
+          "arazzo-1.1"
+        ],
+        "steps": [
+          {
+            "id": "metadata",
+            "name": "metadata",
+            "enabled": true,
+            "extract": [],
+            "useTest": {
+              "url": "https://api.github.com/repos/nodejs/node",
+              "kind": "inline",
+              "method": "GET"
+            },
+            "onFailure": "stop",
+            "assertions": [
+              {
+                "target": "status",
+                "expected": 200,
+                "operator": "equals"
+              }
+            ],
+            "sideEffect": "read-only"
+          },
+          {
+            "id": "commits",
+            "name": "commits",
+            "enabled": true,
+            "extract": [],
+            "useTest": {
+              "url": "https://api.github.com/repos/nodejs/node/commits?per_page=30",
+              "kind": "inline",
+              "method": "GET"
+            },
+            "onFailure": "stop",
+            "assertions": [
+              {
+                "target": "status",
+                "expected": 200,
+                "operator": "equals"
+              }
+            ],
+            "sideEffect": "read-only"
+          }
+        ],
+        "source": {
+          "type": "arazzo",
+          "contentHash": "0b7aa29ae499aad9c76143dafbf7e22e1f69248caba41e5ef0c95cdaa3eed66a",
+          "sourceLabel": "http://sketchtest-verification-sources/github-real.arazzo.yml",
+          "sourceObjectKey": "workflow-sources/sha256/0b7aa29ae499aad9c76143dafbf7e22e1f69248caba41e5ef0c95cdaa3eed66a.arazzo",
+          "specificationVersion": "1.1.0"
+        },
+        "schemaVersion": "sketch-test.workflow/v1"
+      },
+      "compiledPlan": null,
+      "publishedBy": null,
+      "publishedAt": "2026-10-08T16:06:22.244Z"
+    },
+    {
+      "id": "wfv_fc12f685",
+      "workflowId": "wf_5b2bc9b1",
+      "version": 1,
+      "definition": {
+        "id": "wf_5b2bc9b1",
+        "name": "修复复测：GitHub 流程编辑保存",
+        "tags": [
+          "arazzo-1.1"
+        ],
+        "steps": [
+          {
+            "id": "metadata",
+            "name": "metadata",
+            "enabled": true,
+            "extract": [],
+            "useTest": {
+              "url": "https://api.github.com/repos/nodejs/node",
+              "kind": "inline",
+              "method": "GET"
+            },
+            "onFailure": "stop",
+            "assertions": [
+              {
+                "target": "status",
+                "expected": 200,
+                "operator": "equals"
+              }
+            ],
+            "sideEffect": "read-only"
+          },
+          {
+            "id": "commits",
+            "name": "commits",
+            "enabled": true,
+            "extract": [],
+            "useTest": {
+              "url": "https://api.github.com/repos/nodejs/node/commits?per_page=30",
+              "kind": "inline",
+              "method": "GET"
+            },
+            "onFailure": "stop",
+            "assertions": [
+              {
+                "target": "status",
+                "expected": 200,
+                "operator": "equals"
+              }
+            ],
+            "sideEffect": "read-only"
+          }
+        ],
+        "source": {
+          "type": "arazzo",
+          "contentHash": "0b7aa29ae499aad9c76143dafbf7e22e1f69248caba41e5ef0c95cdaa3eed66a",
+          "sourceLabel": "http://sketchtest-verification-sources/github-real.arazzo.yml",
+          "sourceObjectKey": "workflow-sources/sha256/0b7aa29ae499aad9c76143dafbf7e22e1f69248caba41e5ef0c95cdaa3eed66a.arazzo",
+          "specificationVersion": "1.1.0"
+        },
+        "schemaVersion": "sketch-test.workflow/v1"
+      },
+      "compiledPlan": null,
+      "publishedBy": null,
+      "publishedAt": "2026-10-08T15:57:39.166Z"
+    }
+  ]
+}

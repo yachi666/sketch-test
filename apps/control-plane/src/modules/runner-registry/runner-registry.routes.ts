@@ -5,16 +5,17 @@
  * The heartbeat endpoint authenticates via the X-Runner-Token header.
  */
 
+import { timingSafeEqual } from 'node:crypto';
 import type { FastifyInstance } from 'fastify';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { sendError } from '../../shared/errors.js';
 import {
-  registerRunner,
+  deleteRunner,
   getRunner,
   listRunners,
   recordHeartbeat,
+  registerRunner,
   updateRunnerStatus,
-  deleteRunner,
   verifyRunnerToken,
 } from './runner-registry.service.js';
 
@@ -33,9 +34,19 @@ const HeartbeatBodySchema = z.object({
   capacity: z.record(z.unknown()).optional(),
 });
 
+function registrationAuthorized(header: string | undefined): boolean {
+  const expected = process.env['RUNNER_REGISTRATION_TOKEN'];
+  if (!header || !expected || header.length !== expected.length) return false;
+  return timingSafeEqual(Buffer.from(header), Buffer.from(expected));
+}
+
 export async function runnerRegistryRoutes(app: FastifyInstance): Promise<void> {
   /** Register a new runner. Returns an ID and token. */
   app.post('/api/runners/register', async (request, reply) => {
+    const registrationToken = request.headers['x-runner-registration-token'] as string | undefined;
+    if (!registrationAuthorized(registrationToken)) {
+      return sendError(reply, 401, 'UNAUTHORIZED', 'Invalid or missing runner registration token');
+    }
     const parsed = RegisterBodySchema.safeParse(request.body);
     if (!parsed.success) {
       return sendError(reply, 400, 'INVALID_INPUT', 'Invalid registration payload', [

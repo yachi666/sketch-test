@@ -19,6 +19,9 @@ function getJwtSecret(): Buffer {
 
   const raw = process.env['JWT_SECRET'];
   if (!raw) {
+    if (process.env['NODE_ENV'] === 'production') {
+      throw new Error('JWT_SECRET must be set in production');
+    }
     const generated = crypto.randomBytes(32).toString('hex');
     console.warn(
       '[jwt] JWT_SECRET not set — generated ephemeral key for this session. ' +
@@ -28,14 +31,14 @@ function getJwtSecret(): Buffer {
     return _cachedSecret;
   }
   if (raw.length < 16) {
+    if (process.env['NODE_ENV'] === 'production') {
+      throw new Error('JWT_SECRET must be at least 32 characters in production');
+    }
     console.warn(
       '[jwt] JWT_SECRET is shorter than 16 chars — consider using a stronger key (32+ chars).',
     );
   }
-  let key = raw;
-  if (key.length < 32) key = key.padEnd(32, '0');
-  if (key.length > 32) key = key.slice(0, 32);
-  _cachedSecret = Buffer.from(key, 'utf8');
+  _cachedSecret = Buffer.from(raw, 'utf8');
   return _cachedSecret;
 }
 
@@ -60,6 +63,8 @@ export interface JwtPayload {
   iat: number; // issued at (unix seconds)
   exp: number; // expiration (unix seconds)
 }
+
+const JWT_ROLES = new Set(['owner', 'maintainer', 'editor', 'viewer']);
 
 /** Default token lifetime: 24 hours. */
 const DEFAULT_TTL_SECONDS = 24 * 60 * 60;
@@ -103,6 +108,13 @@ export function verifyJwt(token: string): JwtPayload | null {
   const [headerB64, payloadB64, signatureB64] = parts;
   if (!headerB64 || !payloadB64 || !signatureB64) return null;
 
+  try {
+    const header = JSON.parse(base64urlDecode(headerB64)) as Record<string, unknown>;
+    if (header['alg'] !== 'HS256' || header['typ'] !== 'JWT') return null;
+  } catch {
+    return null;
+  }
+
   // Verify signature
   const signingInput = `${headerB64}.${payloadB64}`;
   const secret = getJwtSecret();
@@ -112,22 +124,39 @@ export function verifyJwt(token: string): JwtPayload | null {
     .digest('base64url')
     .replace(/=+$/, '');
 
-  if (signatureB64 !== expectedSig) return null;
+  const suppliedSignature = Buffer.from(signatureB64);
+  const expectedSignature = Buffer.from(expectedSig);
+  if (
+    suppliedSignature.length !== expectedSignature.length ||
+    !crypto.timingSafeEqual(suppliedSignature, expectedSignature)
+  ) {
+    return null;
+  }
 
   // Decode payload
-  let payload: JwtPayload;
+  let decoded: unknown;
   try {
-    payload = JSON.parse(base64urlDecode(payloadB64));
+    decoded = JSON.parse(base64urlDecode(payloadB64));
   } catch {
     return null;
   }
 
+  if (!decoded || typeof decoded !== 'object' || Array.isArray(decoded)) return null;
+  const payload = decoded as Record<string, unknown>;
+
   // Check expiration
   const now = Math.floor(Date.now() / 1000);
-  if (payload.exp < now) return null;
+  if (typeof payload['exp'] !== 'number' || !Number.isFinite(payload['exp'])) return null;
+  if (typeof payload['iat'] !== 'number' || !Number.isFinite(payload['iat'])) return null;
+  if (payload['exp'] <= now || payload['iat'] > now + 60) return null;
 
   // Validate required fields
-  if (!payload.sub || !payload.role || !payload.workspaceId) return null;
+  if (typeof payload['sub'] !== 'string' || payload['sub'].length === 0) return null;
+  if (typeof payload['email'] !== 'string' || payload['email'].length === 0) return null;
+  if (typeof payload['displayName'] !== 'string') return null;
+  if (typeof payload['role'] !== 'string' || !JWT_ROLES.has(payload['role'])) return null;
+  if (typeof payload['workspaceId'] !== 'string' || payload['workspaceId'].length === 0)
+    return null;
 
-  return payload;
+  return payload as unknown as JwtPayload;
 }

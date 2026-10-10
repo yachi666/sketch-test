@@ -4,6 +4,7 @@ import {
   CaretUpDown,
   CheckSquare,
   MagnifyingGlass,
+  PaperPlaneTilt,
   PencilSimple,
   Square,
   Trash,
@@ -25,7 +26,9 @@ interface ApiTableProps {
   endpoints: ApiEndpoint[];
   activeVersion: ApiVersionInfo | null;
   onViewDetail: (endpointId: string) => void;
-  onEdit: (endpointId: string) => void;
+  onSend: (endpointId: string) => void;
+  /** Omitted for immutable Control Plane API versions. */
+  onEdit?: (endpointId: string) => void;
   onDelete?: (endpointId: string) => void;
 }
 
@@ -38,7 +41,8 @@ function methodSortIndex(m: string): number {
   return i === -1 ? METHOD_ORDER.length : i;
 }
 
-function coverageLevel(pct: number): 'high' | 'medium' | 'low' {
+function coverageLevel(pct: number | null): 'high' | 'medium' | 'low' {
+  if (pct === null) return 'medium';
   if (pct >= 90) return 'high';
   if (pct >= 60) return 'medium';
   return 'low';
@@ -76,6 +80,7 @@ export function ApiTable({
   endpoints,
   activeVersion,
   onViewDetail,
+  onSend,
   onEdit,
   onDelete,
 }: ApiTableProps) {
@@ -115,6 +120,7 @@ export function ApiTable({
     let medium = 0;
     let low = 0;
     for (const ep of endpoints) {
+      if (ep.coverage === null) continue;
       const level = coverageLevel(ep.coverage);
       if (level === 'high') high++;
       else if (level === 'medium') medium++;
@@ -128,7 +134,12 @@ export function ApiTable({
     let result = endpoints.filter((ep) => {
       if (activeMethod && ep.method !== activeMethod) return false;
       if (activeTag && !ep.tags.includes(activeTag)) return false;
-      if (ep.coverage < coverageRange[0] || ep.coverage > coverageRange[1]) return false;
+      if (
+        ep.coverage === null
+          ? coverageRange[0] > 0 || coverageRange[1] < 100
+          : ep.coverage < coverageRange[0] || ep.coverage > coverageRange[1]
+      )
+        return false;
       const q = query.toLowerCase();
       if (
         q &&
@@ -149,9 +160,13 @@ export function ApiTable({
           cmp = a.path.localeCompare(b.path);
           break;
         case 'coverage':
+          if (a.coverage === null || b.coverage === null)
+            return a.coverage === b.coverage ? 0 : a.coverage === null ? 1 : -1;
           cmp = a.coverage - b.coverage;
           break;
         case 'cases':
+          if (a.cases === null || b.cases === null)
+            return a.cases === b.cases ? 0 : a.cases === null ? 1 : -1;
           cmp = a.cases - b.cases;
           break;
         case 'updatedAt':
@@ -166,10 +181,10 @@ export function ApiTable({
 
   // ── Stats ──
   const totalEndpoints = endpoints.length;
-  const avgCoverage =
-    totalEndpoints > 0
-      ? Math.round(endpoints.reduce((sum, ep) => sum + ep.coverage, 0) / totalEndpoints)
-      : 0;
+  const measured = endpoints.filter((ep) => ep.coverage !== null);
+  const avgCoverage = measured.length
+    ? Math.round(measured.reduce((sum, ep) => sum + (ep.coverage ?? 0), 0) / measured.length)
+    : null;
 
   const hasActiveFilters =
     activeMethod !== null || activeTag !== null || coverageRange[0] > 0 || coverageRange[1] < 100;
@@ -239,9 +254,10 @@ export function ApiTable({
             setActiveTag(null);
             setCoverageRange([90, 100]);
           }}
-          title="筛选高覆盖率接口 (≥90%)"
+          disabled={avgCoverage === null}
+          title={avgCoverage === null ? '尚未计算契约与断言覆盖率' : '筛选高覆盖率接口 (≥90%)'}
         >
-          <strong>{avgCoverage}%</strong>
+          <strong>{avgCoverage === null ? '未统计' : `${avgCoverage}%`}</strong>
           <span>平均覆盖率</span>
         </button>
 
@@ -491,8 +507,12 @@ export function ApiTable({
           {filtered.length === 0 ? (
             <div className="ac2-empty">
               <MagnifyingGlass size={32} weight="light" />
-              <p>未找到匹配的接口</p>
-              <span>尝试调整搜索条件或筛选器</span>
+              <p>{endpoints.length ? '未找到匹配的接口' : '还没有 API 资产'}</p>
+              <span>
+                {endpoints.length
+                  ? '尝试调整搜索条件或筛选器'
+                  : '导入 OpenAPI 或 Postman 文件，开始建立回归测试。'}
+              </span>
               {hasActiveFilters && (
                 <button
                   type="button"
@@ -589,18 +609,27 @@ export function ApiTable({
 
                   {/* Coverage bar */}
                   <span className="ac2-col-coverage">
-                    <span className={`ac2-coverage-bar ac2-coverage--${level}`}>
-                      <span className="ac2-coverage-fill" style={{ width: `${api.coverage}%` }} />
-                    </span>
+                    {api.coverage !== null ? (
+                      <span className={`ac2-coverage-bar ac2-coverage--${level}`}>
+                        <span
+                          className="ac2-coverage-fill"
+                          style={{
+                            width: `${api.coverage === null ? '未统计' : `${api.coverage}%`}`,
+                          }}
+                        />
+                      </span>
+                    ) : null}
                     <span className={`ac2-coverage-pct${level === 'low' ? ' low' : ''}`}>
-                      {api.coverage}%
+                      {api.coverage === null ? '未统计' : `${api.coverage}%`}
                     </span>
-                    {api.cases > 0 && <span className="ac2-coverage-cases">{api.cases} 用例</span>}
+                    {(api.cases ?? 0) > 0 && (
+                      <span className="ac2-coverage-cases">{api.cases} 用例</span>
+                    )}
                   </span>
 
                   {/* Test cases count */}
                   <span className="ac2-col-cases">
-                    {api.cases > 0 ? (
+                    {(api.cases ?? 0) > 0 ? (
                       <strong>{api.cases}</strong>
                     ) : (
                       <span className="ac2-muted">—</span>
@@ -621,19 +650,33 @@ export function ApiTable({
                   {/* Actions — visible on row hover */}
                   <span className="ac2-col-actions">
                     <button
-                      className="ac2-action-btn"
+                      className="ac2-action-btn ac2-send-btn"
                       type="button"
-                      aria-label={`编辑 ${api.path}`}
+                      aria-label={`发送 ${api.method} ${api.path}`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        onEdit(api.id);
+                        onSend(api.id);
                       }}
                     >
-                      <PencilSimple size={15} />
+                      <PaperPlaneTilt size={14} />
+                      发送
                     </button>
+                    {onEdit ? (
+                      <button
+                        className="ac2-action-btn ac2-action-btn--secondary"
+                        type="button"
+                        aria-label={`编辑 ${api.path}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit(api.id);
+                        }}
+                      >
+                        <PencilSimple size={15} />
+                      </button>
+                    ) : null}
                     {onDelete && (
                       <button
-                        className="ac2-action-btn ac2-action-btn--danger"
+                        className="ac2-action-btn ac2-action-btn--danger ac2-action-btn--secondary"
                         type="button"
                         aria-label={`删除 ${api.path}`}
                         onClick={(e) => {

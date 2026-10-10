@@ -1,0 +1,165 @@
+{
+  "versions": [
+    {
+      "id": "wfv_c289c262",
+      "workflowId": "wf_64af47d8",
+      "version": 2,
+      "definition": {
+        "name": "GitHub 真实元数据和提交历史回归",
+        "steps": [
+          {
+            "id": "metadata",
+            "url": "",
+            "name": "metadata",
+            "method": "GET",
+            "assertions": [
+              {
+                "target": "status",
+                "expected": 200,
+                "operator": "equals"
+              }
+            ]
+          },
+          {
+            "id": "commits",
+            "url": "",
+            "name": "commits",
+            "method": "GET",
+            "assertions": [
+              {
+                "target": "status",
+                "expected": 200,
+                "operator": "equals"
+              }
+            ]
+          }
+        ],
+        "schemaVersion": "sketch-test.workflow/v1"
+      },
+      "compiledPlan": null,
+      "publishedBy": null,
+      "publishedAt": "2026-10-08T15:25:14.101Z"
+    },
+    {
+      "id": "wfv_0f2d735b",
+      "workflowId": "wf_64af47d8",
+      "version": 1,
+      "definition": {
+        "id": "wf_64af47d8",
+        "name": "GitHub 真实元数据和提交历史回归",
+        "tags": [
+          "arazzo-1.1"
+        ],
+        "steps": [
+          {
+            "id": "metadata",
+            "name": "metadata",
+            "enabled": true,
+            "extract": [],
+            "useTest": {
+              "url": "https://api.github.com/repos/nodejs/node",
+              "kind": "inline",
+              "method": "GET"
+            },
+            "onFailure": "stop",
+            "assertions": [
+              {
+                "target": "status",
+                "expected": 200,
+                "operator": "equals"
+              }
+            ],
+            "sideEffect": "read-only"
+          },
+          {
+            "id": "commits",
+            "name": "commits",
+            "enabled": true,
+            "extract": [],
+            "useTest": {
+              "url": "https://api.github.com/repos/nodejs/node/commits?per_page=30",
+              "kind": "inline",
+              "method": "GET"
+            },
+            "onFailure": "stop",
+            "assertions": [
+              {
+                "target": "status",
+                "expected": 200,
+                "operator": "equals"
+              }
+            ],
+            "sideEffect": "read-only"
+          }
+        ],
+        "source": {
+          "type": "arazzo",
+          "contentHash": "3876e5b9dc2c7c5db76102a1a70982ac8a79e888a23a6a620aaec99c72b45cae",
+          "sourceLabel": "http://sketchtest-verification-sources/github-real.arazzo.yml",
+          "sourceObjectKey": "workflow-sources/sha256/3876e5b9dc2c7c5db76102a1a70982ac8a79e888a23a6a620aaec99c72b45cae.arazzo",
+          "specificationVersion": "1.1.0"
+        },
+        "schemaVersion": "sketch-test.workflow/v1"
+      },
+      "compiledPlan": {
+        "steps": [
+          {
+            "method": "GET",
+            "stepId": "metadata",
+            "enabled": true,
+            "sequence": 0,
+            "onFailure": "stop",
+            "timeoutMs": 30000,
+            "assertions": [
+              {
+                "id": "assert-0-0",
+                "target": "status",
+                "expected": 200,
+                "operator": "equals",
+                "severity": "block"
+              }
+            ],
+            "maxRetries": 0,
+            "sideEffect": "read-only",
+            "extractions": [],
+            "urlTemplate": "https://api.github.com/repos/nodejs/node",
+            "retryBaseDelayMs": 1000,
+            "retryOnNetworkError": true,
+            "retryBackoffMultiplier": 2
+          },
+          {
+            "method": "GET",
+            "stepId": "commits",
+            "enabled": true,
+            "sequence": 1,
+            "onFailure": "stop",
+            "timeoutMs": 30000,
+            "assertions": [
+              {
+                "id": "assert-1-0",
+                "target": "status",
+                "expected": 200,
+                "operator": "equals",
+                "severity": "block"
+              }
+            ],
+            "maxRetries": 0,
+            "sideEffect": "read-only",
+            "extractions": [],
+            "urlTemplate": "https://api.github.com/repos/nodejs/node/commits?per_page=30",
+            "retryBaseDelayMs": 1000,
+            "retryOnNetworkError": true,
+            "retryBackoffMultiplier": 2
+          }
+        ],
+        "planId": "plan_fa8c0576",
+        "planHash": "c55ac3d6f99ed4adf6a6d3bab7952056370448ae36be48c2215d76056fc0f2bd",
+        "compiledAt": "2026-10-08T15:19:23.872Z",
+        "schemaVersion": "sketch-test.runner-protocol/v1",
+        "workflowVersionId": "wfv_0f2d735b"
+      },
+      "publishedBy": null,
+      "publishedAt": "2026-10-08T15:19:23.872Z"
+    }
+  ]
+}

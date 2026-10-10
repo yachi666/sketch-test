@@ -1,0 +1,11 @@
+{
+  "apiVersionId": "av_d26bc0a0",
+  "endpointCount": 1,
+  "diagnostics": [
+    {
+      "level": "info",
+      "message": "Source version \"1.0\" is represented as \"1.0.0\"; the original label and source bytes are retained."
+    }
+  ],
+  "sourceObjectKey": "api-sources/sha256/512e29bca2afb06a088cc27fae5c6793a05e272c6404a67e3632cecb87f8516f.source"
+}

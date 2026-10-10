@@ -1,0 +1,43 @@
+# HELP sketchtest_process_uptime_seconds Process uptime in seconds.
+# TYPE sketchtest_process_uptime_seconds gauge
+sketchtest_process_uptime_seconds 56.776
+# HELP sketchtest_http_requests_total HTTP responses by method, route, and status.
+# TYPE sketchtest_http_requests_total counter
+# HELP sketchtest_http_request_duration_seconds_sum Cumulative HTTP response duration.
+# TYPE sketchtest_http_request_duration_seconds_sum counter
+sketchtest_http_requests_total{method="GET",route="/api/api-versions",status="200"} 1
+sketchtest_http_request_duration_seconds_sum{method="GET",route="/api/api-versions",status="200"} 0.006572124999947846
+sketchtest_http_requests_total{method="GET",route="/api/datasets",status="200"} 1
+sketchtest_http_request_duration_seconds_sum{method="GET",route="/api/datasets",status="200"} 0.0012206670001614838
+sketchtest_http_requests_total{method="GET",route="/api/environments",status="200"} 1
+sketchtest_http_request_duration_seconds_sum{method="GET",route="/api/environments",status="200"} 0.0012560410001315177
+sketchtest_http_requests_total{method="GET",route="/api/generation-jobs",status="200"} 1
+sketchtest_http_request_duration_seconds_sum{method="GET",route="/api/generation-jobs",status="200"} 0.0027198749999515714
+sketchtest_http_requests_total{method="GET",route="/api/plan-suggestions",status="200"} 1
+sketchtest_http_request_duration_seconds_sum{method="GET",route="/api/plan-suggestions",status="200"} 0.0016530410000123084
+sketchtest_http_requests_total{method="GET",route="/api/runners",status="200"} 1
+sketchtest_http_request_duration_seconds_sum{method="GET",route="/api/runners",status="200"} 0.0010047079999931157
+sketchtest_http_requests_total{method="GET",route="/api/runs",status="200"} 1
+sketchtest_http_request_duration_seconds_sum{method="GET",route="/api/runs",status="200"} 0.006058749999850988
+sketchtest_http_requests_total{method="GET",route="/api/runs/next",status="204"} 1
+sketchtest_http_request_duration_seconds_sum{method="GET",route="/api/runs/next",status="204"} 30.214845722000113
+sketchtest_http_requests_total{method="GET",route="/api/schedules",status="200"} 1
+sketchtest_http_request_duration_seconds_sum{method="GET",route="/api/schedules",status="200"} 0.0014884169998113067
+sketchtest_http_requests_total{method="GET",route="/api/test-cases",status="200"} 1
+sketchtest_http_request_duration_seconds_sum{method="GET",route="/api/test-cases",status="200"} 0.0022799159998539834
+sketchtest_http_requests_total{method="GET",route="/api/test-suites",status="200"} 1
+sketchtest_http_request_duration_seconds_sum{method="GET",route="/api/test-suites",status="200"} 0.0013502500001341105
+sketchtest_http_requests_total{method="GET",route="/api/workflows",status="200"} 1
+sketchtest_http_request_duration_seconds_sum{method="GET",route="/api/workflows",status="200"} 0.002662000000011176
+sketchtest_http_requests_total{method="GET",route="/ready",status="200"} 5
+sketchtest_http_request_duration_seconds_sum{method="GET",route="/ready",status="200"} 0.022303542000008746
+sketchtest_http_requests_total{method="POST",route="/api/ai-worker/claim",status="200"} 29
+sketchtest_http_request_duration_seconds_sum{method="POST",route="/api/ai-worker/claim",status="200"} 0.04910820899996906
+sketchtest_http_requests_total{method="POST",route="/api/ai-worker/heartbeat",status="200"} 58
+sketchtest_http_request_duration_seconds_sum{method="POST",route="/api/ai-worker/heartbeat",status="200"} 0.08170308599923737
+sketchtest_http_requests_total{method="POST",route="/api/ai-worker/plans/claim",status="200"} 29
+sketchtest_http_request_duration_seconds_sum{method="POST",route="/api/ai-worker/plans/claim",status="200"} 0.0580991660009604
+sketchtest_http_requests_total{method="POST",route="/api/runners/:id/heartbeat",status="200"} 3
+sketchtest_http_request_duration_seconds_sum{method="POST",route="/api/runners/:id/heartbeat",status="200"} 0.007741166000021621
+sketchtest_http_requests_total{method="POST",route="/api/runners/register",status="201"} 1
+sketchtest_http_request_duration_seconds_sum{method="POST",route="/api/runners/register",status="201"} 0.0019481659999582917

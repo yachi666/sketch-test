@@ -1,0 +1,201 @@
+{
+  "run": {
+    "id": "run_697cf472",
+    "sourceName": "Node.js 公开仓库真实响应 · 单用例",
+    "apiVersionId": null,
+    "workflowVersionId": null,
+    "testCaseVersionId": "tcv_ee267af2",
+    "environmentVersionId": "envv_a2179b45",
+    "status": "passed",
+    "runnerId": "rnr_53c757d8",
+    "claimedAt": "2026-10-08T15:14:47.068Z",
+    "createdAt": "2026-10-08T15:14:46.261Z",
+    "finishedAt": "2026-10-08T15:14:47.794Z"
+  },
+  "steps": [
+    {
+      "stepIndex": 0,
+      "phase": "main",
+      "name": "步骤 1",
+      "method": "GET",
+      "url": "https://api.github.com/repos/nodejs/node",
+      "events": [
+        {
+          "stepIndex": 0,
+          "eventType": "step.started",
+          "payload": {
+            "runId": "run_697cf472",
+            "stepId": "tcv_ee267af2-step",
+            "attempt": 1,
+            "traceId": "8694b0b9ee49302acf20a45b561e0e85",
+            "sequence": 2,
+            "eventType": "step.started",
+            "timestamp": "2026-10-08T15:14:47.069Z",
+            "resolvedUrl": "https://api.github.com/repos/nodejs/node"
+          },
+          "timestamp": "2026-10-08T15:14:47.779Z"
+        },
+        {
+          "stepIndex": 0,
+          "eventType": "request.prepared",
+          "payload": {
+            "url": "https://api.github.com/repos/nodejs/node",
+            "runId": "run_697cf472",
+            "method": "GET",
+            "stepId": "tcv_ee267af2-step",
+            "attempt": 1,
+            "headers": {
+              "Accept": "application/vnd.github+json",
+              "traceparent": "00-8694b0b9ee49302acf20a45b561e0e85-b396db77ffe584cd-01"
+            },
+            "traceId": "8694b0b9ee49302acf20a45b561e0e85",
+            "sequence": 3,
+            "eventType": "request.prepared",
+            "timestamp": "2026-10-08T15:14:47.069Z"
+          },
+          "timestamp": "2026-10-08T15:14:47.780Z"
+        },
+        {
+          "stepIndex": 0,
+          "eventType": "request.sent",
+          "payload": {
+            "runId": "run_697cf472",
+            "sentAt": "2026-10-08T15:14:47.069Z",
+            "stepId": "tcv_ee267af2-step",
+            "attempt": 1,
+            "traceId": "8694b0b9ee49302acf20a45b561e0e85",
+            "sequence": 4,
+            "eventType": "request.sent",
+            "timestamp": "2026-10-08T15:14:47.069Z"
+          },
+          "timestamp": "2026-10-08T15:14:47.781Z"
+        },
+        {
+          "stepIndex": 0,
+          "eventType": "response.received",
+          "payload": {
+            "runId": "run_697cf472",
+            "stepId": "tcv_ee267af2-step",
+            "attempt": 1,
+            "headers": {
+              "date": "Thu, 08 Oct 2026 15:14:47 GMT",
+              "etag": "W/\"165674d1dec9abc85ec0d8f09d5a2c8c44670db31510fd39f54a31948095bb15\"",
+              "vary": "Accept,Accept-Encoding, Accept, X-Requested-With",
+              "server": "github.com",
+              "content-type": "application/json; charset=utf-8",
+              "accept-ranges": "bytes",
+              "cache-control": "public, max-age=60, s-maxage=60",
+              "last-modified": "Thu, 08 Oct 2026 14:10:48 GMT",
+              "content-length": "1488",
+              "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+              "x-frame-options": "deny",
+              "content-encoding": "gzip",
+              "x-ratelimit-used": "14",
+              "x-xss-protection": "0",
+              "x-ratelimit-limit": "60",
+              "x-ratelimit-reset": "1791473403",
+              "x-github-media-type": "github.v3; format=json",
+              "x-github-request-id": "4F31:1DEEE8:4A7DA8:79F076:6AC7B367",
+              "x-github-edge-region": "southeastasia",
+              "x-ratelimit-resource": "core",
+              "x-ratelimit-remaining": "46",
+              "x-content-type-options": "nosniff",
+              "content-security-policy": "default-src 'none'",
+              "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+              "access-control-allow-origin": "*",
+              "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset, Warning",
+              "x-github-api-version-selected": "2022-11-28"
+            },
+            "traceId": "8694b0b9ee49302acf20a45b561e0e85",
+            "sequence": 5,
+            "eventType": "response.received",
+            "timestamp": "2026-10-08T15:14:47.777Z",
+            "durationMs": 707,
+            "statusCode": 200,
+            "bodyPreview": "{\"id\":27193779,\"node_id\":\"MDEwOlJlcG9zaXRvcnkyNzE5Mzc3OQ==\",\"name\":\"node\",\"full_name\":\"nodejs/node\",\"private\":false,\"owner\":{\"login\":\"nodejs\",\"id\":9950313,\"node_id\":\"MDEyOk9yZ2FuaXphdGlvbjk5NTAzMTM=\",\"avatar_url\":\"https://avatars.githubusercontent.com/u/9950313?v=4\",\"gravatar_id\":\"\",\"url\":\"https://api.github.com/users/nodejs\",\"html_url\":\"https://github.com/nodejs\",\"followers_url\":\"https://api.github.com/users/nodejs/followers\",\"following_url\":\"https://api.github.com/users/nodejs/following{/other_user}\",\"gists_url\":\"https://api.github.com/users/nodejs/gists{/gist_id}\",\"starred_url\":\"https://api.github.com/users/nodejs/starred{/owner}{/repo}\",\"subscriptions_url\":\"https://api.github.com/users/nodejs/subscriptions\",\"organizations_url\":\"https://api.github.com/users/nodejs/orgs\",\"repos_url\":\"https://api.github.com/users/nodejs/repos\",\"events_url\":\"https://api.github.com/users/nodejs/events{/privacy}\",\"received_events_url\":\"https://api.github.com/users/nodejs/received_events\",\"type\":\"Organization\",\"user_view_type\":\"public\",\"site_admin\":false},\"html_url\":\"https://github.com/nodejs/node\",\"description\":\"Node.js JavaScript runtime ✨🐢🚀✨\",\"fork\":false,\"url\":\"https://api.github.com/repos/nodejs/node\",\"forks_url\":\"https://api.github.com/repos/nodejs/node/forks\",\"keys_url\":\"https://api.github.com/repos/nodejs/node/keys{/key_id}\",\"collaborators_url\":\"https://api.github.com/repos/nodejs/node/collaborators{/collaborator}\",\"teams_url\":\"https://api.github.com/repos/nodejs/node/teams\",\"hooks_url\":\"https://api.github.com/repos/nodejs/node/hooks\",\"issue_events_url\":\"https://api.github.com/repos/nodejs/node/issues/events{/number}\",\"events_url\":\"https://api.github.com/repos/nodejs/node/events\",\"assignees_url\":\"https://api.github.com/repos/nodejs/node/assignees{/user}\",\"branches_url\":\"https://api.github.com/repos/nodejs/node/branches{/branch}\",\"tags_url\":\"https://api.github.com/repos/nodejs/node/tags\",\"blobs_url\":\"https://api.github.com/repos/nodejs/node/git/blobs{/sha}\",\"git_tags_url\":\"https://api.github.com/repos/nodejs/node/git/tags{/sha}\",\"git_refs_url\":\"https://api.github.com/repos/nodejs/node/git/refs{/sha}\",\"trees_url\":\"https://api.github.com/repos/nodejs/node/git/trees{/sha}\",\"statuses_url\":\"https://api.github.com/repos/nodejs/node/statuses/{sha}\",\"languages_url\":\"https://api.github.com/repos/nodejs/node/languages\",\"stargazers_url\":\"https://api.github.com/repos/nodejs/node/stargazers\",\"contributors_url\":\"https://api.github.com/repos/nodejs/node/contributors\",\"subscribers_url\":\"https://api.github.com/repos/nodejs/node/subscribers\",\"subscription_url\":\"https://api.github.com/repos/nodejs/node/subscription\",\"commits_url\":\"https://api.github.com/repos/nodejs/node/commits{/sha}\",\"git_commits_url\":\"https://api.github.com/repos/nodejs/node/git/commits{/sha}\",\"comments_url\":\"https://api.github.com/repos/nodejs/node/comments{/number}\",\"issue_comment_url\":\"https://api.github.com/repos/nodejs/node/issues/comments{/number}\",\"contents_url\":\"https://api.github.com/repos/nodejs/node/contents/{+path}\",\"compare_url\":\"https://api.github.com/repos/nodejs/node/compare/{base}...{head}\",\"merges_url\":\"https://api.github.com/repos/nodejs/node/merges\",\"archive_url\":\"https://api.github.com/repos/nodejs/node/{archive_format}{/ref}\",\"downloads_url\":\"https://api.github.com/repos/nodejs/node/downloads\",\"issues_url\":\"https://api.github.com/repos/nodejs/node/issues{/number}\",\"pulls_url\":\"https://api.github.com/repos/nodejs/node/pulls{/number}\",\"milestones_url\":\"https://api.github.com/repos/nodejs/node/milestones{/number}\",\"notifications_url\":\"https://api.github.com/repos/nodejs/node/notifications{?since,all,participating}\",\"labels_url\":\"https://api.github.com/repos/nodejs/node/labels{/name}\",\"releases_url\":\"https://api.github.com/repos/nodejs/node/releases{/id}\",\"deployments_url\":\"https://api.github.com/repos/nodejs/node/deployments\",\"created_at\":\"2014-11-26T19:57:11Z\",\"updated_at\":\"2026-10-08T14:10:48Z\",\"pushed_at\":\"2026-10-08T13:36:20Z\",\"git_url\":\"git://github.com/nodejs/node.git\",\"ssh_url\":\"git@github.com:nodejs/node.git\",\"clone_url\":\"https://github.com/nodejs/node.g",
+            "bodySizeBytes": 5953
+          },
+          "timestamp": "2026-10-08T15:14:47.782Z"
+        },
+        {
+          "stepIndex": 0,
+          "eventType": "assertion.evaluated",
+          "payload": {
+            "runId": "run_697cf472",
+            "actual": "200",
+            "passed": true,
+            "stepId": "tcv_ee267af2-step",
+            "attempt": 1,
+            "traceId": "8694b0b9ee49302acf20a45b561e0e85",
+            "expected": "200",
+            "sequence": 6,
+            "severity": "block",
+            "eventType": "assertion.evaluated",
+            "timestamp": "2026-10-08T15:14:47.777Z",
+            "assertionId": "status"
+          },
+          "timestamp": "2026-10-08T15:14:47.782Z"
+        },
+        {
+          "stepIndex": 0,
+          "eventType": "assertion.evaluated",
+          "payload": {
+            "runId": "run_697cf472",
+            "actual": "\"nodejs/node\"",
+            "passed": true,
+            "stepId": "tcv_ee267af2-step",
+            "attempt": 1,
+            "traceId": "8694b0b9ee49302acf20a45b561e0e85",
+            "expected": "\"nodejs/node\"",
+            "sequence": 7,
+            "severity": "block",
+            "eventType": "assertion.evaluated",
+            "timestamp": "2026-10-08T15:14:47.777Z",
+            "assertionId": "repo"
+          },
+          "timestamp": "2026-10-08T15:14:47.783Z"
+        },
+        {
+          "stepIndex": 0,
+          "eventType": "step.finished",
+          "payload": {
+            "runId": "run_697cf472",
+            "status": "passed",
+            "stepId": "tcv_ee267af2-step",
+            "attempt": 1,
+            "retries": 0,
+            "traceId": "8694b0b9ee49302acf20a45b561e0e85",
+            "sequence": 8,
+            "eventType": "step.finished",
+            "timestamp": "2026-10-08T15:14:47.777Z",
+            "totalDurationMs": 707,
+            "assertionsFailed": 0,
+            "assertionsPassed": 2
+          },
+          "timestamp": "2026-10-08T15:14:47.783Z"
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "status",
+          "passed": true,
+          "expected": "200",
+          "actual": "200",
+          "severity": "block",
+          "attempt": 1
+        },
+        {
+          "assertionId": "repo",
+          "passed": true,
+          "expected": "\"nodejs/node\"",
+          "actual": "\"nodejs/node\"",
+          "severity": "block",
+          "attempt": 1
+        }
+      ],
+      "status": "passed",
+      "durationMs": 707
+    }
+  ],
+  "runEvents": []
+}

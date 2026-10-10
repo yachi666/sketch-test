@@ -2,34 +2,38 @@
  * IAM Routes — Fastify route definitions for workspaces, users, auth, and service accounts.
  *
  * All request bodies are validated with Zod. Errors use the shared sendError helper.
- * Auth endpoints use the requireAuth preHandler from auth.middleware.
+ * User-facing endpoints are protected by the Control Plane's global
+ * authorization boundary.
  */
 
 import type { FastifyInstance } from 'fastify';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { sendError } from '../../shared/errors.js';
-import {
-  createWorkspace,
-  getWorkspace,
-  listWorkspaces,
-  createUser,
-  getUserByEmail,
-  findUserByEmail,
-  verifyPassword,
-  listUsers,
-  updateUserRole,
-  createServiceAccount,
-  listServiceAccounts,
-  revokeServiceAccount,
-} from './iam.service.js';
-import { requireAuth, createSession } from './auth.middleware.js';
 import { signJwt } from '../../shared/jwt.js';
+import { authenticatedUser } from './auth.middleware.js';
+import {
+  createServiceAccount,
+  createUser,
+  createWorkspace,
+  getUser,
+  getUserByEmail,
+  getWorkspace,
+  listServiceAccounts,
+  listUsers,
+  revokeServiceAccount,
+  updateUserRole,
+  upgradePasswordHash,
+  verifyPassword,
+} from './iam.service.js';
 
 // ── Zod schemas ────────────────────────────────────────────────────────────────
 
 const CreateWorkspaceSchema = z.object({
   name: z.string().min(1).max(255),
   description: z.string().max(2000).optional(),
+  ownerEmail: z.string().email().max(255),
+  ownerPassword: z.string().min(12).max(255),
+  ownerDisplayName: z.string().min(1).max(255).optional(),
 });
 
 const CreateUserSchema = z.object({
@@ -40,7 +44,7 @@ const CreateUserSchema = z.object({
 });
 
 const LoginSchema = z.object({
-  workspaceId: z.string().optional(),
+  workspaceId: z.string().min(1).max(256),
   email: z.string().email(),
   password: z.string().min(1),
 });
@@ -59,7 +63,7 @@ export async function iamRoutes(app: FastifyInstance): Promise<void> {
   // Workspaces
   // ═══════════════════════════════════════════════════════════════════════════
 
-  /** POST /api/workspaces — Create a workspace. Returns workspace + default admin user. */
+  /** POST /api/workspaces — Create a workspace and its explicitly provisioned owner. */
   app.post('/api/workspaces', async (request, reply) => {
     const parsed = CreateWorkspaceSchema.safeParse(request.body);
     if (!parsed.success) {
@@ -69,12 +73,23 @@ export async function iamRoutes(app: FastifyInstance): Promise<void> {
     }
 
     try {
-      const result = await createWorkspace(parsed.data.name, parsed.data.description);
+      const result = await createWorkspace(
+        parsed.data.name,
+        parsed.data.ownerEmail,
+        parsed.data.ownerPassword,
+        parsed.data.description,
+        parsed.data.ownerDisplayName,
+        !request.user,
+      );
       reply.status(201).send(result);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       // Postgres unique violation
-      if (message.includes('duplicate key') || message.includes('UNIQUE')) {
+      if (
+        message.includes('duplicate key') ||
+        message.includes('UNIQUE') ||
+        message.includes('bootstrap already completed')
+      ) {
         return sendError(reply, 409, 'CONFLICT', `Workspace "${parsed.data.name}" already exists`);
       }
       request.log.error({ err }, 'Failed to create workspace');
@@ -82,14 +97,14 @@ export async function iamRoutes(app: FastifyInstance): Promise<void> {
     }
   });
 
-  /** GET /api/workspaces — List all workspaces. */
-  app.get('/api/workspaces', async (_request, reply) => {
+  /** GET /api/workspaces — Return the caller's workspace. */
+  app.get('/api/workspaces', async (request, reply) => {
     try {
-      const workspaces = await listWorkspaces();
-      reply.send({ workspaces });
+      const workspace = await getWorkspace(authenticatedUser(request).workspaceId);
+      reply.send({ workspaces: workspace ? [workspace] : [] });
     } catch (err) {
-      _request.log.error({ err }, 'Failed to list workspaces');
-      return sendError(reply, 500, 'INTERNAL_ERROR', 'Failed to list workspaces');
+      request.log.error({ err }, 'Failed to get caller workspace');
+      return sendError(reply, 500, 'INTERNAL_ERROR', 'Failed to get workspace');
     }
   });
 
@@ -190,11 +205,59 @@ export async function iamRoutes(app: FastifyInstance): Promise<void> {
   // ═══════════════════════════════════════════════════════════════════════════
 
   /**
+   * POST /api/auth/guest — Provision the explicitly configured guest identity.
+   *
+   * This endpoint is disabled by default and intended for login-free demo/QA
+   * deployments. It still issues a signed, workspace-bound JWT so every
+   * downstream authorization and ownership check remains active.
+   */
+  app.post('/api/auth/guest', async (request, reply) => {
+    if (process.env['GUEST_ACCESS_ENABLED'] !== 'true') {
+      return reply.header('cache-control', 'no-store').send({ enabled: false });
+    }
+
+    const userId = process.env['GUEST_USER_ID'];
+    const workspaceId = process.env['GUEST_WORKSPACE_ID'];
+    if (!userId || !workspaceId) {
+      return sendError(reply, 503, 'NOT_CONFIGURED', 'Guest access is not configured');
+    }
+
+    try {
+      const user = await getUser(userId);
+      if (!user || user.workspaceId !== workspaceId) {
+        return sendError(reply, 503, 'NOT_CONFIGURED', 'Guest identity is not available');
+      }
+
+      const token = signJwt({
+        sub: user.id,
+        email: user.email,
+        displayName: user.displayName,
+        role: user.role,
+        workspaceId: user.workspaceId,
+      });
+
+      reply.header('cache-control', 'no-store').send({
+        enabled: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          displayName: user.displayName,
+          role: user.role,
+          workspaceId: user.workspaceId,
+        },
+        token,
+      });
+    } catch (err) {
+      request.log.error({ err }, 'Failed to provision guest session');
+      return sendError(reply, 500, 'INTERNAL_ERROR', 'Guest session provisioning failed');
+    }
+  });
+
+  /**
    * POST /api/auth/login — Authenticate with email and password.
    *
-   * If workspaceId is provided, search within that workspace. Otherwise,
-   * search all workspaces and return the first match.
-   * Returns the user profile and a session token.
+   * workspaceId is mandatory so duplicate email addresses in separate tenants
+   * can never authenticate ambiguously. Returns the user profile and a JWT.
    */
   app.post('/api/auth/login', async (request, reply) => {
     const parsed = LoginSchema.safeParse(request.body);
@@ -207,19 +270,16 @@ export async function iamRoutes(app: FastifyInstance): Promise<void> {
     const { workspaceId, email, password } = parsed.data;
 
     try {
-      // When workspaceId is provided, look up within that workspace.
-      // Otherwise search across all workspaces by email.
-      const userWithHash = workspaceId
-        ? await getUserByEmail(workspaceId, email)
-        : await findUserByEmail(email);
+      const userWithHash = await getUserByEmail(workspaceId, email);
 
       if (!userWithHash) {
         return sendError(reply, 401, 'INVALID_CREDENTIALS', 'Invalid email or password');
       }
 
-      if (!verifyPassword(userWithHash, password)) {
+      if (!(await verifyPassword(userWithHash, password))) {
         return sendError(reply, 401, 'INVALID_CREDENTIALS', 'Invalid email or password');
       }
+      await upgradePasswordHash(userWithHash, password);
 
       const authUser = {
         id: userWithHash.id,
@@ -257,13 +317,8 @@ export async function iamRoutes(app: FastifyInstance): Promise<void> {
    * GET /api/auth/me — Return the current authenticated user.
    * Requires a valid Bearer token in the Authorization header.
    */
-  app.get('/api/auth/me', { preHandler: requireAuth() }, async (request, reply) => {
-    const user = (
-      request as unknown as {
-        user: { id: string; email: string; displayName: string; role: string; workspaceId: string };
-      }
-    ).user;
-    reply.send({ user });
+  app.get('/api/auth/me', async (request, reply) => {
+    reply.send({ user: authenticatedUser(request) });
   });
 
   // ═══════════════════════════════════════════════════════════════════════════

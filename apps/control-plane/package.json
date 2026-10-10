@@ -2,29 +2,37 @@
   "name": "@sketch-test/control-plane",
   "version": "0.0.0",
   "private": true,
-  "description": "SketchTest Control Plane — Fastify API server (M0 skeleton)",
+  "description": "SketchTest Control Plane \u2014 production Fastify API server",
   "type": "module",
-  "main": "./src/main.ts",
+  "main": "./dist/main.js",
   "scripts": {
+    "build": "tsc --noEmit false --allowImportingTsExtensions false --incremental false",
     "dev": "tsx --watch src/main.ts",
-    "start": "tsx src/main.ts",
+    "start": "node dist/main.js",
     "check": "tsc --noEmit",
     "lint": "biome check",
-    "test": "vitest run",
-    "clean": "rm -rf dist/"
+    "test": "vitest run --exclude '**/dist/**'",
+    "clean": "rm -rf dist/ tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@sketch-test/contracts-common": "workspace:*",
+    "@aws-sdk/client-s3": "^3.1149.0",
+    "@fastify/cors": "^11.3.1",
+    "@sketch-test/adapter-arazzo": "workspace:*",
+    "@sketch-test/adapter-openapi": "workspace:*",
+    "@sketch-test/adapter-postman": "workspace:*",
     "@sketch-test/canonical-api-model": "workspace:*",
     "@sketch-test/runner-protocol": "workspace:*",
     "@sketch-test/test-dsl": "workspace:*",
-    "@sketch-test/adapter-openapi": "workspace:*",
-    "fastify": "^5.0.0",
-    "pg": "^8.13.0",
-    "zod": "catalog:"
+    "@sketch-test/workflow-dsl": "workspace:*",
+    "fastify": "^5.12.5",
+    "pg": "^8.23.1",
+    "yaml": "^2.9.1",
+    "zod": "catalog:",
+    "@sketch-test/generation-protocol": "workspace:*",
+    "@sketch-test/adapter-code-discovery": "workspace:*"
   },
   "devDependencies": {
-    "@types/pg": "^8.11.0",
+    "@types/pg": "^8.23.1",
     "tsx": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"

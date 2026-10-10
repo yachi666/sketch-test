@@ -21,15 +21,14 @@ vi.mock('../../../shared/id.js', () => ({
 }));
 
 import {
-  registerRunner,
+  deleteRunner,
   getRunner,
+  getRunnersByLabel,
   listRunners,
   recordHeartbeat,
+  registerRunner,
   updateRunnerStatus,
-  deleteRunner,
   verifyRunnerToken,
-  getRunnersByLabel,
-  runnerTokens,
 } from '../runner-registry.service';
 
 // ─── Helpers ───────────────────────────────────────────────────────
@@ -53,7 +52,6 @@ function makeRunnerRow(overrides: Record<string, unknown> = {}) {
 describe('registerRunner', () => {
   afterEach(() => {
     mockQuery.mockReset();
-    runnerTokens.clear();
   });
 
   test('registers a runner and returns id + token', async () => {
@@ -68,14 +66,14 @@ describe('registerRunner', () => {
     expect(result.token).toMatch(/^sk-[0-9a-f]{48}$/);
   });
 
-  test('stores token hash both in DB and in-memory legacy store', async () => {
+  test('stores only the token hash in the database', async () => {
     mockQuery.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [] });
 
     const result = await registerRunner('ws-001', 'my-runner');
 
-    // Check legacy memory store
-    expect(runnerTokens.has(result.token)).toBe(true);
-    expect(runnerTokens.get(result.token)!.runnerId).toBe(result.id);
+    const tokenInsert = mockQuery.mock.calls[1];
+    expect(tokenInsert?.[0]).toContain('INSERT INTO runner_tokens');
+    expect(tokenInsert?.[1]?.[0]).not.toBe(result.token);
   });
 
   test('each registration generates unique tokens', async () => {
@@ -209,7 +207,6 @@ describe('updateRunnerStatus', () => {
 describe('deleteRunner', () => {
   afterEach(() => {
     mockQuery.mockReset();
-    runnerTokens.clear();
   });
 
   test('deletes runner tokens, heartbeats, and runner record', async () => {
@@ -222,32 +219,14 @@ describe('deleteRunner', () => {
 
     expect(mockQuery).toHaveBeenCalledTimes(3);
   });
-
-  test('cleans up legacy in-memory tokens for the runner', async () => {
-    // Pre-populate legacy tokens
-    runnerTokens.set('sk-legacy-token', { runnerId: 'rnr-001', workspaceId: 'ws-001' });
-    runnerTokens.set('sk-other-token', { runnerId: 'rnr-002', workspaceId: 'ws-001' });
-
-    mockQuery
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] });
-
-    await deleteRunner('rnr-001');
-
-    expect(runnerTokens.has('sk-legacy-token')).toBe(false);
-    expect(runnerTokens.has('sk-other-token')).toBe(true);
-  });
 });
 
 describe('verifyRunnerToken', () => {
   afterEach(() => {
     mockQuery.mockReset();
-    runnerTokens.clear();
   });
 
   test('verifies a valid token via DB', async () => {
-    const expectedTokenHash = expect.any(String);
     mockQuery.mockResolvedValueOnce({
       rows: [{ runner_id: 'rnr-001', workspace_id: 'ws-001' }],
     });
@@ -266,16 +245,7 @@ describe('verifyRunnerToken', () => {
     expect(result).toBeNull();
   });
 
-  test('falls back to legacy in-memory store when DB has no match', async () => {
-    runnerTokens.set('sk-legacy-token', { runnerId: 'rnr-legacy', workspaceId: 'ws-legacy' });
-    mockQuery.mockResolvedValueOnce({ rows: [] });
-
-    const result = await verifyRunnerToken('sk-legacy-token');
-    expect(result).not.toBeNull();
-    expect(result!.runnerId).toBe('rnr-legacy');
-  });
-
-  test('returns null when neither DB nor memory has the token', async () => {
+  test('returns null when the database has no matching token', async () => {
     mockQuery.mockResolvedValueOnce({ rows: [] });
 
     const result = await verifyRunnerToken('sk-nonexistent');

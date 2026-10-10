@@ -10,19 +10,11 @@
  * Versioned localStorage keys.
  * Bump the :vN suffix when the persisted schema changes.
  */
-export const LS_ENVIRONMENTS_KEY = 'sketchtest.environments:v1';
-export const LS_ACTIVE_ENV_KEY = 'sketchtest.activeEnvironmentId:v1';
 export const LS_VARIABLES_KEY = 'sketchtest.variables:v1';
-export const LS_WORKFLOW_KEY = 'sketchtest.workflow:v1';
-export const LS_ACTIVE_WORKFLOW_KEY = 'sketchtest.activeWorkflow:v1';
 
 /** Map from versioned key → old (unversioned) key, for one-time migration. */
 const LS_MIGRATION_MAP: Record<string, string> = {
-  [LS_ENVIRONMENTS_KEY]: 'sketchtest.environments',
-  [LS_ACTIVE_ENV_KEY]: 'sketchtest.activeEnvironmentId',
   [LS_VARIABLES_KEY]: 'sketchtest.variables',
-  [LS_WORKFLOW_KEY]: 'sketchtest.workflow',
-  [LS_ACTIVE_WORKFLOW_KEY]: 'sketchtest.activeWorkflow',
 };
 
 /**
@@ -105,17 +97,6 @@ import type { CanonicalApiModel } from '@sketch-test/canonical-api-model';
 
 const API_VERSIONS_KEY = 'sketchtest.api-versions:v1';
 const API_ENDPOINTS_KEY = 'sketchtest.api-endpoints:v1';
-const API_SOURCES_KEY = 'sketchtest.api-sources:v1';
-
-export interface StoredApiSource {
-  id: string;
-  name: string;
-  description?: string;
-  sourceLabel: string;
-  sourceType: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
 export interface StoredApiVersion {
   id: string;
@@ -185,42 +166,6 @@ export function saveApiImport(
   saveAllEndpoints(storedEndpoints);
 
   return { versionId, endpointCount: model.endpoints.length };
-}
-
-export function loadApiSources(): StoredApiSource[] {
-  try {
-    const raw = localStorage.getItem(API_SOURCES_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) return parsed as StoredApiSource[];
-    return [];
-  } catch {
-    return [];
-  }
-}
-
-function saveApiSources(sources: StoredApiSource[]): void {
-  try {
-    localStorage.setItem(API_SOURCES_KEY, JSON.stringify(sources));
-  } catch {
-    // Storage full — silently ignore
-  }
-}
-
-export function upsertApiSource(source: StoredApiSource): void {
-  const sources = loadApiSources();
-  const idx = sources.findIndex((s) => s.id === source.id);
-  if (idx >= 0) {
-    sources[idx] = source;
-  } else {
-    sources.push(source);
-  }
-  saveApiSources(sources);
-}
-
-export function deleteApiSource(sourceId: string): void {
-  const sources = loadApiSources().filter((s) => s.id !== sourceId);
-  saveApiSources(sources);
 }
 
 export function loadApiVersions(): StoredApiVersion[] {

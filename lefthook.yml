@@ -3,11 +3,14 @@ pre-commit:
   commands:
     format:
       run: pnpm biome format --write {staged_files}
+      glob: "*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,json,jsonc,css}"
       stage_fixed: true
     lint:
       run: pnpm biome check {staged_files}
+      glob: "*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,json,jsonc,css}"
     typecheck:
       run: pnpm turbo run check --filter='...[HEAD]'
+      glob: "*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,json,jsonc}"
 
 commit-msg:
   commands:

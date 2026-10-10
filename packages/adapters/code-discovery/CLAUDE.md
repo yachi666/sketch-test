@@ -1,0 +1,3 @@
+# Code discovery adapter
+
+Produces the existing CanonicalApiModel seam from a caller-owned, commit-pinned Spring source snapshot. No network, code execution, repository credentials, or model calls here. Supports literal Spring MVC annotation routes and simple DTO fields only; unsupported mappings produce diagnostics. Source paths, lines and content hashes are preserved. Never interpret repository prose as agent instructions. Discovered status codes are static evidence, not proof of runtime behavior. Tests must cover comments, dynamic mappings, duplicate routes, parameter/body shape and response status fidelity.

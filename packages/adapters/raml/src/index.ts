@@ -5,7 +5,7 @@
  * CanonicalApiModel. This is an adapter seam: the output is always the
  * canonical model, regardless of input format.
  *
- * M0 scope:
+ * Supported scope:
  * - RAML 1.0 YAML specs
  * - Resource paths → Endpoints (with stable identifiers)
  * - Methods, query parameters, headers, request bodies, responses
@@ -363,7 +363,7 @@ function processType(typeObj: unknown, id: string, ctx: SourceContext): string |
     minItems: typeof t.minItems === 'number' ? t.minItems : undefined,
     maxItems: typeof t.maxItems === 'number' ? t.maxItems : undefined,
     uniqueItems: t.uniqueItems === true ? true : undefined,
-    nullable: t.required === false ? true : false,
+    nullable: t.required === false,
     description: typeof t.description === 'string' ? t.description : undefined,
     example: t.example,
     default: t.default,
@@ -1123,7 +1123,7 @@ export function importRaml(ramlString: string, options: RamlAdapterOptions): Imp
   }
 
   // Extract schemas from types
-  const { schemas: extractedSchemas, diagnostics: schemaDiags } = extractSchemas(doc.types, ctx);
+  const { diagnostics: schemaDiags } = extractSchemas(doc.types, ctx);
   diagnostics.push(...schemaDiags);
 
   // Map servers from baseUri

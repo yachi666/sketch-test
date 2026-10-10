@@ -4,16 +4,14 @@
  * Tests core state transitions without network dependencies.
  * Uses vi.mock to isolate stores from their API clients.
  */
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // ─── Mock cpClient before importing stores ─────────────────────────
 
-const mockLogin = vi.fn();
 const mockGetMe = vi.fn();
 
 vi.mock('../../lib/cp-client', () => ({
   cpClient: {
-    login: (...args: unknown[]) => mockLogin(...args),
     getMe: (...args: unknown[]) => mockGetMe(...args),
   },
 }));
@@ -44,7 +42,6 @@ import { useAuthStore } from '../authStore';
 describe('authStore', () => {
   beforeEach(() => {
     localStorageMock.clear();
-    mockLogin.mockReset();
     mockGetMe.mockReset();
     useAuthStore.setState({ user: null, token: null, loading: false, error: null });
   });
@@ -85,44 +82,6 @@ describe('authStore', () => {
     expect(localStorageMock.removeItem).toHaveBeenCalled();
   });
 
-  test('login sets loading=true during request', async () => {
-    mockLogin.mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 100)));
-    const loginPromise = useAuthStore.getState().login('a@b.com', 'pw');
-    expect(useAuthStore.getState().loading).toBe(true);
-    expect(useAuthStore.getState().error).toBeNull();
-  });
-
-  test('login on success sets user and token', async () => {
-    const mockUser = { id: 'u1', name: 'Alice', email: 'alice@test.com', role: 'editor' as const };
-    mockLogin.mockResolvedValue({ user: mockUser, token: 'tok-success' });
-
-    await useAuthStore.getState().login('alice@test.com', 'password');
-
-    const state = useAuthStore.getState();
-    expect(state.user).toEqual(mockUser);
-    expect(state.token).toBe('tok-success');
-    expect(state.loading).toBe(false);
-    expect(state.error).toBeNull();
-    expect(localStorageMock.setItem).toHaveBeenCalledWith(
-      expect.stringContaining('auth-token'),
-      'tok-success',
-    );
-  });
-
-  test('login on failure sets error and re-throws', async () => {
-    mockLogin.mockRejectedValue(new Error('Invalid credentials'));
-
-    await expect(useAuthStore.getState().login('bad@test.com', 'wrong')).rejects.toThrow(
-      'Invalid credentials',
-    );
-
-    const state = useAuthStore.getState();
-    expect(state.error).toBe('Error: Invalid credentials');
-    expect(state.user).toBeNull();
-    expect(state.token).toBeNull();
-    expect(state.loading).toBe(false);
-  });
-
   test('restoreSession with valid token fetches user', async () => {
     useAuthStore.setState({ token: 'stored-token' });
     const mockUser = { id: 'u2', name: 'Bob', email: 'bob@test.com', role: 'viewer' as const };
@@ -159,8 +118,8 @@ describe('authStore', () => {
 
 // ─── Variable Store ──────────────────────────────────────────────────
 
-import { useVariableStore } from '../variableStore';
 import type { Variable } from '../../types';
+import { useVariableStore } from '../variableStore';
 
 function makeVar(overrides: Partial<Variable> = {}): Variable {
   return {
@@ -232,81 +191,10 @@ describe('variableStore', () => {
   });
 });
 
-// ─── Environment Store ───────────────────────────────────────────────
-
-import { useEnvironmentStore } from '../environmentStore';
-import type { Environment } from '../../types';
-
-function makeEnv(overrides: Partial<Environment> = {}): Environment {
-  return {
-    id: 'env-001',
-    name: 'Default',
-    description: '',
-    tags: [],
-    isProduction: false,
-    updatedAt: new Date().toISOString(),
-    updatedBy: 'test',
-    ...overrides,
-  };
-}
-
-describe('environmentStore', () => {
-  beforeEach(() => {
-    localStorageMock.clear();
-    localStorageMock.getItem.mockReturnValue(null as any);
-    useEnvironmentStore.setState({
-      environments: [],
-      activeEnvironmentId: '',
-      loading: false,
-      error: null,
-    });
-  });
-
-  test('createEnvironment creates new environment', () => {
-    useEnvironmentStore
-      .getState()
-      .createEnvironment(makeEnv({ name: 'Staging', description: 'Staging env' }));
-    const envs = useEnvironmentStore.getState().environments;
-    expect(envs).toHaveLength(1);
-    expect(envs[0]!.name).toBe('Staging');
-  });
-
-  test('updateEnvironment modifies existing environment', () => {
-    useEnvironmentStore.getState().createEnvironment(makeEnv({ id: 'env-1', name: 'Dev' }));
-    useEnvironmentStore.getState().updateEnvironment(makeEnv({ id: 'env-1', name: 'Development' }));
-
-    const updated = useEnvironmentStore.getState().environments[0]!;
-    expect(updated.name).toBe('Development');
-  });
-
-  test('deleteEnvironment removes environment', () => {
-    useEnvironmentStore.getState().createEnvironment(makeEnv({ id: 'temp' }));
-    useEnvironmentStore.getState().deleteEnvironment('temp');
-    expect(useEnvironmentStore.getState().environments).toHaveLength(0);
-  });
-
-  test('setActiveEnvironmentId changes active environment', () => {
-    useEnvironmentStore.getState().setActiveEnvironmentId('env-prod');
-    expect(useEnvironmentStore.getState().activeEnvironmentId).toBe('env-prod');
-  });
-
-  test('multiple environments can coexist', () => {
-    useEnvironmentStore.getState().createEnvironment(makeEnv({ id: 'a', name: 'A' }));
-    useEnvironmentStore.getState().createEnvironment(makeEnv({ id: 'b', name: 'B' }));
-    useEnvironmentStore.getState().createEnvironment(makeEnv({ id: 'c', name: 'C' }));
-    expect(useEnvironmentStore.getState().environments).toHaveLength(3);
-  });
-
-  test('isProduction flag is preserved', () => {
-    useEnvironmentStore.getState().createEnvironment(makeEnv({ id: 'prod', isProduction: true }));
-    expect(useEnvironmentStore.getState().environments[0]!.isProduction).toBe(true);
-  });
-});
-
 // ─── Workflow Store ──────────────────────────────────────────────────
 
-import { useWorkflowStore } from '../workflowStore';
 import type { WorkflowStep } from '../../types';
+import { useWorkflowStore } from '../workflowStore';
 
 function makeWfStep(overrides: any = {}): any {
   return {

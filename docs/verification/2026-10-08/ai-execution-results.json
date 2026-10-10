@@ -1,0 +1,36 @@
+{
+  "draftId": "draft_f592aeaa",
+  "originalUrl": "${env.baseUrl}/repos/:owner/:repo",
+  "reviewCorrection": {
+    "code": "GENERATION_ERROR",
+    "message": "Review cannot change the source endpoint or downgrade its risk",
+    "correlationId": "5824ba05-46ee-425d-9069-9b24f1975cc6"
+  },
+  "unmodified": {
+    "accepted": {
+      "testCaseId": "tc_6846e19d",
+      "versionId": "tcv_087f8817",
+      "version": 1,
+      "draft": {
+        "id": "draft_f592aeaa",
+        "status": "accepted"
+      }
+    },
+    "run": {
+      "runId": "run_1be0d384",
+      "environmentVersionId": "envv_a2179b45",
+      "testCaseVersionId": "tcv_087f8817"
+    },
+    "status": "failed",
+    "request": "https://api.github.com/repos/:owner/:repo"
+  },
+  "manuallyCorrected": {
+    "versionId": "tcv_3ec1a7d0",
+    "run": {
+      "runId": "run_a170cee5",
+      "environmentVersionId": "envv_a2179b45",
+      "testCaseVersionId": "tcv_3ec1a7d0"
+    },
+    "status": "passed"
+  }
+}

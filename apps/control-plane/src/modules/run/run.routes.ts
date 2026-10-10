@@ -1,21 +1,23 @@
 import type { FastifyInstance } from 'fastify';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { pool } from '../../db/db.js';
 import { sendError } from '../../shared/errors.js';
+import { GenerationError } from '../generation/generation.service.js';
+import { authenticatedUser } from '../iam/auth.middleware.js';
+import { runPublishedTest } from './published-test-run.service.js';
 import {
-  createFixtureRun,
-  createRunFromSteps,
+  createPersistedRunFromSteps,
   createRunFromWorkflow,
   getApiVersion,
   getRun,
-  listRuns,
 } from './run.service.js';
+import { queryRuns, RunQuerySchema } from './run-query.service.js';
 
 const CustomRunBodySchema = z.object({
   steps: z
     .array(
       z.object({
-        method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']),
+        method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'QUERY']),
         url: z.string().min(1).max(4096),
         headers: z.record(z.string(), z.string()).optional(),
         body: z.unknown().optional(),
@@ -58,16 +60,57 @@ const CustomRunBodySchema = z.object({
 });
 
 export async function runRoutes(app: FastifyInstance): Promise<void> {
+  app.post('/api/test-case-versions/:id/run', async (request, reply) => {
+    const parsed = z
+      .object({
+        environmentVersionId: z.string().min(1),
+        confirmSideEffects: z.boolean().default(false),
+      })
+      .strict()
+      .safeParse(request.body);
+    if (!parsed.success)
+      return sendError(reply, 400, 'INVALID_INPUT', 'Select an environment version');
+    try {
+      return reply
+        .status(201)
+        .send(
+          await runPublishedTest(
+            authenticatedUser(request).workspaceId,
+            (request.params as { id: string }).id,
+            parsed.data.environmentVersionId,
+            parsed.data.confirmSideEffects,
+          ),
+        );
+    } catch (error) {
+      if (error instanceof GenerationError)
+        return sendError(reply, error.statusCode, 'RUN_ERROR', error.message);
+      throw error;
+    }
+  });
   /** List all imported API versions. */
-  app.get('/api/api-versions', async (_request, reply) => {
+  app.get('/api/api-versions', async (request, reply) => {
     const result = await pool.query(
       `SELECT id, source_type, source_location, content_hash, created_at,
               spec_json->'metadata'->>'sourceLabel' as label,
               jsonb_array_length(spec_json->'endpoints') as endpoint_count,
               jsonb_array_length(spec_json->'diagnostics') as diagnostic_count
-       FROM api_versions ORDER BY created_at DESC LIMIT 50`,
+       FROM api_versions
+       WHERE workspace_id = $1
+       ORDER BY created_at DESC LIMIT 50`,
+      [authenticatedUser(request).workspaceId],
     );
-    reply.send({ apiVersions: result.rows });
+    reply.send({
+      apiVersions: result.rows.map((row) => ({
+        id: row.id,
+        sourceType: row.source_type,
+        sourceLocation: row.source_location,
+        contentHash: row.content_hash,
+        createdAt: row.created_at,
+        label: row.label,
+        endpointCount: row.endpoint_count,
+        diagnosticCount: row.diagnostic_count,
+      })),
+    });
   });
 
   /** Get a single API version with its endpoints. */
@@ -85,23 +128,12 @@ export async function runRoutes(app: FastifyInstance): Promise<void> {
       sourceLocation: apiVersion.source_location,
       contentHash: apiVersion.content_hash,
       createdAt: apiVersion.created_at,
+      metadata: spec.metadata,
       endpoints: spec.endpoints ?? [],
       schemas: spec.schemas ?? {},
       diagnostics: spec.diagnostics ?? [],
       servers: spec.servers ?? [],
     });
-  });
-
-  /** Generate ExecutionPlan from an API version and create a Run. */
-  app.get('/api/api-versions/:id/execution-plan', async (request, reply) => {
-    const { id } = request.params as { id: string };
-    const apiVersion = await getApiVersion(id);
-    if (!apiVersion) {
-      return sendError(reply, 404, 'NOT_FOUND', `API version ${id} not found`);
-    }
-
-    const { runId, plan } = await createFixtureRun(id);
-    reply.send({ runId, plan });
   });
 
   /** Create a Run from custom steps. */
@@ -113,7 +145,10 @@ export async function runRoutes(app: FastifyInstance): Promise<void> {
       ]);
     }
 
-    const { runId, plan } = createRunFromSteps(parsed.data.steps);
+    const { runId, plan } = await createPersistedRunFromSteps(
+      authenticatedUser(request).workspaceId,
+      parsed.data.steps,
+    );
     reply.status(201).send({ runId, plan });
   });
 
@@ -132,7 +167,10 @@ export async function runRoutes(app: FastifyInstance): Promise<void> {
     }
 
     try {
-      const result = await createRunFromWorkflow(parsed.data.workflowVersionId);
+      const result = await createRunFromWorkflow(
+        parsed.data.workflowVersionId,
+        authenticatedUser(request).workspaceId,
+      );
       reply.status(201).send({
         runId: result.runId,
         workflowVersionId: result.workflowVersionId,
@@ -150,9 +188,10 @@ export async function runRoutes(app: FastifyInstance): Promise<void> {
   });
 
   /** List all runs. */
-  app.get('/api/runs', async (_request, reply) => {
-    const runs = await listRuns();
-    reply.send({ runs });
+  app.get('/api/runs', async (request, reply) => {
+    const parsed = RunQuerySchema.safeParse(request.query);
+    if (!parsed.success) return sendError(reply, 400, 'INVALID_INPUT', 'Invalid run filters');
+    reply.send(await queryRuns(authenticatedUser(request).workspaceId, parsed.data));
   });
 
   /** Get a single run with its step events. */

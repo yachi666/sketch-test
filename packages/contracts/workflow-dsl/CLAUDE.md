@@ -12,15 +12,18 @@ Defines the structure of a **multi-step API workflow** — the human-editable fo
 The editor document. The **Workflow Compiler** transforms this into an `ExecutionPlan` (from `@sketch-test/runner-protocol`) at publish time.
 - `steps`: Sequential WorkflowStep array (1–50, V1 hard limit)
 - `teardown`: Optional teardown phase with configurable strategy
+- `source`: Optional immutable Arazzo source provenance for imported workflows
 
 ### WorkflowStep
 Each step either references a published `TestCaseVersion` or defines an inline request.
 - `useTest`: Discriminated union — `{kind: 'test-version', testVersionId}` or `{kind: 'inline', method, url, ...}`
 - `inputs`: Variable mappings from previous steps or environment
+- `assertions` / `extract`: Executable checks and named values compiled into the Runner plan
 - `condition`: Execution condition with onFalse behavior (skip/fail)
 - `retry`: Max retries, backoff, status-based retry triggers
 - `poll`: Repeated execution until condition or timeout (interval, maxDuration, maxAttempts, untilExpression)
 - `onFailure`: stop / skip / goto / teardown-and-stop
+- `timeoutMs` / `sideEffect`: Bounded request deadline and safety classification
 
 ### Teardown
 Simplified steps that run after the main workflow:

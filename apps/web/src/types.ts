@@ -4,7 +4,6 @@ import type { EntityId, HttpMethod, VariableScope } from '@sketch-test/contracts
 
 export type ViewId =
   | 'overview'
-  | 'projects'
   | 'workflows'
   | 'apis'
   | 'cases'
@@ -12,9 +11,7 @@ export type ViewId =
   | 'environments'
   | 'variables'
   | 'reports'
-  | 'agent'
-  | 'team'
-  | 'trash';
+  | 'agent';
 
 // ─── UI-specific display types ──────────────────────────────────
 
@@ -53,6 +50,8 @@ export interface WorkflowStep {
   name: string;
   method: HttpMethod;
   path: string;
+  headers?: Array<{ name: string; value: string }>;
+  requestReference?: string;
   /** UI display: which icon to show. */
   icon: 'user' | 'lock' | 'cart' | 'card' | 'verify';
   /** UI display: color tone for the card. */
@@ -82,6 +81,8 @@ export interface ExecutionLog {
   duration?: number;
   timestamp?: string;
   message?: string;
+  /** Immutable events emitted by the Runner for this step's current execution. */
+  events?: Array<{ eventType: string; payload: unknown; timestamp: string }>;
 }
 
 // ─── API Endpoint (UI model — aligns with CanonicalApiModel) ────
@@ -93,8 +94,8 @@ export interface ApiEndpoint {
   summary: string;
   /** Longer description from the spec. */
   description?: string;
-  coverage: number;
-  cases: number;
+  coverage: number | null;
+  cases: number | null;
   /** Tags from the OpenAPI spec, e.g. ["用户", "认证"]. */
   tags: string[];
   /** Whether this endpoint is marked deprecated in the spec. */
@@ -373,6 +374,33 @@ export interface TestPlan {
 /** Supported variable types for the UI. */
 export type VariableType = 'plain' | 'secret' | 'dataset';
 
+/** A Runner-executed request recipe that produces the variable's value. */
+export interface VariableEndpointSource {
+  kind: 'endpoint';
+  endpointId: EntityId;
+  /** Host-tagged variable used as the request origin. */
+  hostVariableId?: EntityId;
+  /** Editable request inputs; Secret references stay as templates for the Runner. */
+  headers?: Record<string, string>;
+  body?: string;
+  extraction: {
+    source: 'body' | 'header' | 'cookie' | 'status';
+    expression: string;
+  };
+  /** Manual refresh is available now; automatic policies require Control Plane compilation. */
+  refreshPolicy: 'manual' | 'before-run' | 'scheduled';
+  /** Interval policy for an environment-scoped source. The Control Plane owns dispatch. */
+  schedule?: {
+    intervalMinutes: number;
+    /** Default is to block consumers rather than silently use a stale value. */
+    onFailure: 'block' | 'use-last-value';
+    maxStalenessMinutes?: number;
+  };
+  lastRunId?: string;
+  lastRefreshedAt?: string;
+  lastStatus?: 'passed' | 'failed';
+}
+
 /** A managed variable in the platform. */
 export interface Variable {
   id: EntityId;
@@ -400,6 +428,8 @@ export interface Variable {
   updatedBy: string;
   /** Which workflows reference this variable. */
   usedIn: string[];
+  /** Optional executable source that obtains the value from an API response. */
+  endpointSource?: VariableEndpointSource;
 }
 
 // ─── Environment (UI model — aligns with EnvironmentSchema) ──────

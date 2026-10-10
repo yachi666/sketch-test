@@ -1,0 +1,20 @@
+{
+  "verifiedAt": "2026-10-08T15:23:15.804Z",
+  "readiness": {
+    "status": "ready",
+    "db": "connected",
+    "objectStore": "connected",
+    "timestamp": "2026-10-08T15:23:15.806Z"
+  },
+  "runId": "run_84626abc",
+  "reportIdentical": true,
+  "runCount": 64,
+  "manifestIdentical": true,
+  "integrity": {
+    "valid": false,
+    "storedHash": "44268d69e2dad526c0907caf47c9e487ebc18c028733d8f0f6e9a0a7160595c4",
+    "computedHash": "8a74f2fed923c1cf8573a671afc72ad477f9c72fb8359e6a4e2098c1e8c97209",
+    "eventCount": 7
+  },
+  "limitation": "Byte-preserving backup/restore succeeds; existing inline event integrity defect is reproduced after restoration."
+}

@@ -9,9 +9,11 @@
  * values, and ranges (N-M).
  */
 
+import { type ExecutionPlan, ExecutionPlanSchema } from '@sketch-test/runner-protocol';
 import { pool } from '../../db/db.js';
-import { generateId } from '../../shared/id.js';
-import { runId } from '../../shared/id.js';
+import { executionPlanContentHash } from '../../shared/execution-plan-hash.js';
+import { generateId, runId } from '../../shared/id.js';
+import { compileTestCaseVersionPlan, TestPlanCompileError } from './test-plan-compiler.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -51,6 +53,18 @@ export interface ScheduleUpdateInput {
   enabled?: boolean;
 }
 
+export interface ScheduleTriggerResult {
+  testSuiteVersionId: string;
+  runIds: string[];
+}
+
+export class ScheduleTriggerError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ScheduleTriggerError';
+  }
+}
+
 // ---------------------------------------------------------------------------
 // ID generation
 // ---------------------------------------------------------------------------
@@ -85,7 +99,15 @@ export async function createSchedule(input: ScheduleCreateInput): Promise<Schedu
 
   const result = await pool.query<ScheduleRow>(
     `INSERT INTO schedule_configs (id, workspace_id, test_suite_id, cron_expression, environment_id, enabled)
-     VALUES ($1, $2, $3, $4, $5, $6)
+     SELECT $1, $2, suite.id, $4, $5, $6
+     FROM test_suites suite
+     WHERE suite.id = $3 AND suite.workspace_id = $2
+       AND (
+         $5::text IS NULL OR EXISTS (
+           SELECT 1 FROM environments environment
+           WHERE environment.id = $5 AND environment.workspace_id = $2
+         )
+       )
      RETURNING *`,
     [
       id,
@@ -97,22 +119,22 @@ export async function createSchedule(input: ScheduleCreateInput): Promise<Schedu
     ],
   );
 
-  return toSchedule(result.rows[0]!);
-}
-
-/** List schedules, optionally filtered by workspace. */
-export async function listSchedules(workspaceId?: string): Promise<Schedule[]> {
-  let query = 'SELECT * FROM schedule_configs';
-  const params: string[] = [];
-
-  if (workspaceId) {
-    query += ' WHERE workspace_id = $1';
-    params.push(workspaceId);
+  const [createdSchedule] = result.rows;
+  if (!createdSchedule) {
+    throw new ScheduleTriggerError('Test suite or environment not found in workspace');
   }
 
-  query += ' ORDER BY created_at DESC LIMIT 100';
+  return toSchedule(createdSchedule);
+}
 
-  const result = await pool.query<ScheduleRow>(query, params);
+/** List schedules in one workspace. */
+export async function listSchedules(workspaceId: string): Promise<Schedule[]> {
+  const result = await pool.query<ScheduleRow>(
+    `SELECT * FROM schedule_configs
+     WHERE workspace_id = $1
+     ORDER BY created_at DESC LIMIT 100`,
+    [workspaceId],
+  );
   return result.rows.map(toSchedule);
 }
 
@@ -147,8 +169,8 @@ export async function updateSchedule(
   const query = `UPDATE schedule_configs SET ${sets.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
 
   const result = await pool.query<ScheduleRow>(query, params);
-  if (result.rows.length === 0) return null;
-  return toSchedule(result.rows[0]!);
+  const [updatedSchedule] = result.rows;
+  return updatedSchedule ? toSchedule(updatedSchedule) : null;
 }
 
 /** Delete a schedule. Returns true if deleted, false if not found. */
@@ -162,8 +184,8 @@ export async function getSchedule(id: string): Promise<Schedule | null> {
   const result = await pool.query<ScheduleRow>('SELECT * FROM schedule_configs WHERE id = $1', [
     id,
   ]);
-  if (result.rows.length === 0) return null;
-  return toSchedule(result.rows[0]!);
+  const [schedule] = result.rows;
+  return schedule ? toSchedule(schedule) : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -188,7 +210,7 @@ function cronFieldMatches(field: string, value: number): boolean {
     // */N format: every N steps
     if (trimmed.startsWith('*/')) {
       const interval = parseInt(trimmed.slice(2), 10);
-      if (!isNaN(interval) && interval > 0 && value % interval === 0) {
+      if (!Number.isNaN(interval) && interval > 0 && value % interval === 0) {
         return true;
       }
       continue;
@@ -201,7 +223,7 @@ function cronFieldMatches(field: string, value: number): boolean {
       const endStr = trimmed.slice(dashIdx + 1);
       const start = parseInt(startStr, 10);
       const end = parseInt(endStr, 10);
-      if (!isNaN(start) && !isNaN(end) && value >= start && value <= end) {
+      if (!Number.isNaN(start) && !Number.isNaN(end) && value >= start && value <= end) {
         return true;
       }
       continue;
@@ -212,7 +234,7 @@ function cronFieldMatches(field: string, value: number): boolean {
 
     // Exact number
     const num = parseInt(trimmed, 10);
-    if (!isNaN(num) && num === value) return true;
+    if (!Number.isNaN(num) && num === value) return true;
   }
 
   return false;
@@ -261,9 +283,9 @@ export function isValidCronExpression(expression: string): boolean {
     { min: 0, max: 6 }, // day of week
   ];
 
-  for (let i = 0; i < 5; i++) {
-    const field = fields[i]!;
-    const range = validators[i]!;
+  for (const [index, field] of fields.entries()) {
+    const range = validators[index];
+    if (!range) return false;
 
     const parts = field.split(',');
     for (const part of parts) {
@@ -273,7 +295,7 @@ export function isValidCronExpression(expression: string): boolean {
 
       if (trimmed.startsWith('*/')) {
         const interval = parseInt(trimmed.slice(2), 10);
-        if (isNaN(interval) || interval <= 0) return false;
+        if (Number.isNaN(interval) || interval <= 0) return false;
         continue;
       }
 
@@ -281,14 +303,20 @@ export function isValidCronExpression(expression: string): boolean {
         const dashIdx = trimmed.indexOf('-');
         const start = parseInt(trimmed.slice(0, dashIdx), 10);
         const end = parseInt(trimmed.slice(dashIdx + 1), 10);
-        if (isNaN(start) || isNaN(end) || start < range.min || end > range.max || start > end) {
+        if (
+          Number.isNaN(start) ||
+          Number.isNaN(end) ||
+          start < range.min ||
+          end > range.max ||
+          start > end
+        ) {
           return false;
         }
         continue;
       }
 
       const num = parseInt(trimmed, 10);
-      if (isNaN(num) || num < range.min || num > range.max) return false;
+      if (Number.isNaN(num) || num < range.min || num > range.max) return false;
     }
   }
 
@@ -301,43 +329,200 @@ export function isValidCronExpression(expression: string): boolean {
 
 /**
  * Manually trigger a scheduled run immediately.
- * Creates a new run from the schedule's test suite and returns the run ID.
+ * Creates one immutable Run for every member in the latest TestSuiteVersion.
  */
-export async function triggerSchedule(id: string): Promise<string | null> {
+export async function triggerSchedule(
+  id: string,
+  scheduledAt?: Date,
+): Promise<ScheduleTriggerResult | null> {
   const schedule = await getSchedule(id);
   if (!schedule) return null;
 
-  const newRunId = runId();
-  const now = new Date().toISOString();
-
-  // Build a minimal plan referencing the test suite
-  const plan = {
-    schemaVersion: 'sketch-test.runner-protocol/v1',
-    planId: newRunId,
-    planHash: '0'.repeat(64),
-    workflowVersionId: schedule.testSuiteId,
-    compiledAt: now,
-    steps: [] as Array<Record<string, unknown>>,
-  };
-
-  await pool.query(
-    `INSERT INTO runs (id, api_version_id, status, plan_json, created_at)
-     VALUES ($1, NULL, 'pending', $2, $3)`,
-    [newRunId, JSON.stringify(plan), now],
+  const versionResult = await pool.query<{
+    id: string;
+    members_json: Array<{ type: 'test' | 'workflow'; id: string }>;
+  }>(
+    `SELECT id, members_json
+     FROM test_suite_versions
+     WHERE test_suite_id = $1
+     ORDER BY version DESC
+     LIMIT 1`,
+    [schedule.testSuiteId],
   );
 
-  return newRunId;
+  const suiteVersion = versionResult.rows[0];
+  if (!suiteVersion) {
+    throw new ScheduleTriggerError(
+      `Test suite ${schedule.testSuiteId} has no version and cannot be scheduled`,
+    );
+  }
+
+  const members = suiteVersion.members_json ?? [];
+  if (members.length === 0) {
+    throw new ScheduleTriggerError(`Test suite version ${suiteVersion.id} has no members`);
+  }
+
+  const plans: ExecutionPlan[] = [];
+  for (const member of members) {
+    if (member.type === 'test') {
+      const testResult = await pool.query<{ id: string; definition: unknown }>(
+        `SELECT id, definition
+         FROM test_case_versions
+         WHERE test_case_id = $1 AND published_by IS NOT NULL
+         ORDER BY version DESC
+         LIMIT 1`,
+        [member.id],
+      );
+      const testVersion = testResult.rows[0];
+      if (!testVersion) {
+        throw new ScheduleTriggerError(`TestCase ${member.id} has no published TestCaseVersion`);
+      }
+      try {
+        plans.push(compileTestCaseVersionPlan(testVersion.id, testVersion.definition));
+      } catch (error) {
+        if (error instanceof TestPlanCompileError) {
+          throw new ScheduleTriggerError(error.message);
+        }
+        throw error;
+      }
+      continue;
+    }
+
+    const planResult = await pool.query<{ compiled_plan: unknown }>(
+      `SELECT compiled_plan
+       FROM workflow_versions
+       WHERE workflow_id = $1 AND compiled_plan IS NOT NULL
+       ORDER BY version DESC
+       LIMIT 1`,
+      [member.id],
+    );
+    const storedPlan = planResult.rows[0]?.compiled_plan;
+    const parsed = ExecutionPlanSchema.safeParse(storedPlan);
+    if (!parsed.success) {
+      throw new ScheduleTriggerError(`Workflow ${member.id} has no valid published ExecutionPlan`);
+    }
+
+    // Verify the exact stored representation. Zod applies protocol defaults
+    // while parsing; hashing the parsed value would incorrectly reject older
+    // valid plans that omit optional fields with defaults.
+    const storedContent = storedPlan as ExecutionPlan;
+    const expectedHash = executionPlanContentHash(
+      storedContent.steps,
+      storedContent.teardown?.steps,
+    );
+    if (parsed.data.planHash !== expectedHash) {
+      throw new ScheduleTriggerError(
+        `Workflow ${member.id} has an ExecutionPlan with an invalid content hash`,
+      );
+    }
+    // Preserve the immutable published representation. Normalizing defaults
+    // here would change executable content without updating its content hash.
+    plans.push(storedContent);
+  }
+
+  if (schedule.environmentId) {
+    const result = await pool.query(
+      `SELECT v.* FROM environment_versions v JOIN environments e ON e.id=v.environment_id WHERE e.id=$1 AND e.workspace_id=$2 ORDER BY v.version DESC LIMIT 1`,
+      [schedule.environmentId, schedule.workspaceId],
+    );
+    const environment = result.rows[0];
+    if (!environment) throw new ScheduleTriggerError('Schedule environment version not found');
+    if (environment.require_approval || environment.runner_labels?.length)
+      throw new ScheduleTriggerError(
+        'Scheduled environment requires approval or Runner constraints that cannot be enforced',
+      );
+    const variables = {
+      ...environment.variables,
+      baseUrl: environment.base_url.replace(/\/$/, ''),
+    } as Record<string, string>;
+    function bind(value: unknown): unknown {
+      if (typeof value === 'string')
+        return value.replace(/\$\{env\.([^}]+)\}/g, (_match, key: string) => {
+          if (!Object.hasOwn(variables, key))
+            throw new ScheduleTriggerError(`Environment variable ${key} is required`);
+          return variables[key] as string;
+        });
+      if (Array.isArray(value)) return value.map(bind);
+      if (value && typeof value === 'object')
+        return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, bind(item)]));
+      return value;
+    }
+    for (const plan of plans) {
+      plan.steps = bind(plan.steps) as ExecutionPlan['steps'];
+      if (plan.teardown)
+        plan.teardown = bind(plan.teardown) as NonNullable<ExecutionPlan['teardown']>;
+      plan.environmentVersionId = environment.id;
+      plan.planHash = executionPlanContentHash(plan.steps, plan.teardown?.steps);
+    }
+  }
+  if (plans.some((plan) => /\$\{env\.[^}]+\}/.test(JSON.stringify([plan.steps, plan.teardown]))))
+    throw new ScheduleTriggerError('Select an environment to resolve scheduled request inputs');
+  const client = await pool.connect();
+  const runIds: string[] = [];
+  try {
+    await client.query('BEGIN');
+    if (scheduledAt) {
+      // Serialize schedule edits with dispatch; the unique minute claim and Runs commit together.
+      const locked = await client.query<ScheduleRow>(
+        'SELECT * FROM schedule_configs WHERE id=$1 FOR UPDATE',
+        [id],
+      );
+      const current = locked.rows[0];
+      if (
+        !current?.enabled ||
+        !cronMatches(current.cron_expression, scheduledAt) ||
+        current.test_suite_id !== schedule.testSuiteId ||
+        current.environment_id !== schedule.environmentId
+      ) {
+        await client.query('ROLLBACK');
+        return null;
+      }
+      const claim = await client.query(
+        'INSERT INTO schedule_dispatches(schedule_id, scheduled_at) VALUES($1, $2) ON CONFLICT DO NOTHING',
+        [id, scheduledAt.toISOString()],
+      );
+      if (!claim.rowCount) {
+        await client.query('ROLLBACK');
+        return null;
+      }
+    }
+    for (const plan of plans) {
+      const newRunId = runId();
+      runIds.push(newRunId);
+      await client.query(
+        `INSERT INTO runs
+          (id, workspace_id, workflow_version_id, test_case_version_id, status, plan_json)
+         VALUES ($1, $2, $3, $4, 'pending', $5)`,
+        [
+          newRunId,
+          schedule.workspaceId,
+          plan.workflowVersionId ?? null,
+          plan.testCaseVersionId ?? null,
+          JSON.stringify(plan),
+        ],
+      );
+    }
+    if (scheduledAt)
+      await client.query(
+        'UPDATE schedule_dispatches SET run_ids=$3 WHERE schedule_id=$1 AND scheduled_at=$2',
+        [id, scheduledAt.toISOString(), JSON.stringify(runIds)],
+      );
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+
+  return { testSuiteVersionId: suiteVersion.id, runIds };
 }
 
 /**
  * Find all enabled schedules whose cron expression matches the current time
  * (within a 1-minute window).
  */
-export async function getDueSchedules(): Promise<Schedule[]> {
-  const now = new Date();
-  const oneMinuteAgo = new Date(now.getTime() - 60_000);
-  const oneMinuteAhead = new Date(now.getTime() + 60_000);
-
+export async function getDueSchedules(now = new Date()): Promise<Schedule[]> {
   const result = await pool.query<ScheduleRow>(
     `SELECT * FROM schedule_configs WHERE enabled = true ORDER BY created_at`,
   );
@@ -346,10 +531,8 @@ export async function getDueSchedules(): Promise<Schedule[]> {
   const due: Schedule[] = [];
   for (const row of result.rows) {
     const schedule = toSchedule(row);
-    // Check current minute and the minute before (to handle edge cases)
+    // Dispatch only the current UTC minute. No implicit catch-up after downtime.
     if (cronMatches(schedule.cronExpression, now)) {
-      due.push(schedule);
-    } else if (cronMatches(schedule.cronExpression, oneMinuteAgo)) {
       due.push(schedule);
     }
   }

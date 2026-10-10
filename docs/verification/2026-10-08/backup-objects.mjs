@@ -1,0 +1,10 @@
+import {S3Client,ListObjectsV2Command,GetObjectCommand,PutObjectCommand,CreateBucketCommand} from '@aws-sdk/client-s3';
+import {mkdir,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+const env=process.env;const client=new S3Client({endpoint:env.S3_ENDPOINT,region:env.S3_REGION,forcePathStyle:true,credentials:{accessKeyId:env.S3_ACCESS_KEY,secretAccessKey:env.S3_SECRET_KEY}});
+const bucket=env.S3_BUCKET,restoredBucket=bucket+'-restored';
+await client.send(new CreateBucketCommand({Bucket:restoredBucket}));
+await mkdir('/tmp/verification-object-backup',{recursive:true});
+let cursor;const objects=[];
+do{const list=await client.send(new ListObjectsV2Command({Bucket:bucket,ContinuationToken:cursor}));for(const entry of list.Contents??[]){const obj=await client.send(new GetObjectCommand({Bucket:bucket,Key:entry.Key}));const bytes=await obj.Body.transformToByteArray();const hash=createHash('sha256').update(bytes).digest('hex');await writeFile('/tmp/verification-object-backup/'+hash,bytes);await client.send(new PutObjectCommand({Bucket:restoredBucket,Key:entry.Key,Body:bytes,ContentType:obj.ContentType}));const restored=await client.send(new GetObjectCommand({Bucket:restoredBucket,Key:entry.Key}));const restoredHash=createHash('sha256').update(await restored.Body.transformToByteArray()).digest('hex');if(hash!==restoredHash)throw Error('Recovery hash mismatch');objects.push({key:entry.Key,sha256:hash,bytes:bytes.length,restoredHash});}cursor=list.NextContinuationToken}while(cursor);
+const result={bucket,restoredBucket,objectCount:objects.length,objects,verifiedAt:new Date().toISOString()};await writeFile('/tmp/verification-object-backup/manifest.json',JSON.stringify(result,null,2));console.log(JSON.stringify({objectCount:objects.length,allHashesMatch:true,restoredBucket}));

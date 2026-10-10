@@ -1,0 +1,29 @@
+{
+  "ok": true,
+  "apiVersionId": "av_1a090d08",
+  "endpointCount": 9,
+  "workflowVersionId": "wfv_e9b70be9",
+  "planHash": "c8f81d94f747db67542db975f59830470fade9c00e02be103c6427e354cebc2e",
+  "runId": "run_772a9648",
+  "eventCount": 6,
+  "externalizedEventCount": 6,
+  "manifestHash": "113433d1c45761ed288f6c0bb7045be81d0b897c8dc82ad8170d5a313c800388",
+  "traceId": "0045c66fb9083b7c22cad93662ad4d07",
+  "auditEventId": "audit_4b17d86e",
+  "recovery": {
+    "databaseRunStatus": "passed",
+    "migrationCount": 2,
+    "objectCount": 9
+  },
+  "objectKeys": [
+    "api-sources/sha256/b172e4d2d840f7bc24e77e7f8962bc7f6c6c3c7fe645a449edd0b43bf9a5448f.source",
+    "runs/run_772a9648/events/run_772a9648-evt-2/cc30f27b45c4503915cbb866f1c702519c9c16c3aa0ca1cb614d8c79a1be8ad1.json",
+    "runs/run_772a9648/events/run_772a9648-evt-3/0e6184b174939f49c78eaf02c5fa5f4d6ca2876e352c02f820ecbc8c6ffd0f65.json",
+    "runs/run_772a9648/events/run_772a9648-evt-4/cb9412f2f374b0391445406bee8c641279ebd7c0ffd8e8a2787003a938f35704.json",
+    "runs/run_772a9648/events/run_772a9648-evt-5/e3114c24c0c84bd0ab20de9ff5a9cf489cb58381829ea908a35c57d66893a58c.json",
+    "runs/run_772a9648/events/run_772a9648-evt-6/ce80e91d61f51fdbd30acff75988b87e4db41b5c3b24f21c760caece5f6170d2.json",
+    "runs/run_772a9648/events/run_772a9648-evt-7/929b2306db3088ef52482f314627699f7e48d7d9d3f026461a2c409da7c146c3.json",
+    "runs/run_772a9648/manifests/113433d1c45761ed288f6c0bb7045be81d0b897c8dc82ad8170d5a313c800388.json",
+    "workflow-sources/sha256/31df0ea5ef4b46f667860c291cd576bc3b6e35a04f9d52038e12924f83ceabde.arazzo"
+  ]
+}

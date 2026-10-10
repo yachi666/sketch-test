@@ -2,23 +2,24 @@
   "name": "@sketch-test/runner",
   "version": "0.0.0",
   "private": true,
-  "description": "SketchTest Runner — executes HTTP tests in isolated process",
+  "description": "SketchTest Runner \u2014 executes HTTP tests in isolated process",
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
   "scripts": {
+    "build": "tsc --noEmit false --allowImportingTsExtensions false --incremental false",
     "dev": "tsx --watch src/index.ts",
     "dev:daemon": "tsx --watch src/daemon.ts",
+    "start": "node dist/daemon.js",
     "check": "tsc --noEmit",
     "lint": "biome check",
-    "test": "vitest run",
-    "clean": "rm -rf dist/"
+    "test": "vitest run --exclude '**/dist/**'",
+    "clean": "rm -rf dist/ tsconfig.tsbuildinfo"
   },
   "dependencies": {
+    "ajv": "catalog:",
+    "ajv-formats": "catalog:",
     "@sketch-test/contracts-common": "workspace:*",
-    "@sketch-test/canonical-api-model": "workspace:*",
-    "@sketch-test/test-dsl": "workspace:*",
-    "@sketch-test/runner-protocol": "workspace:*",
-    "zod": "catalog:"
+    "@sketch-test/runner-protocol": "workspace:*"
   },
   "devDependencies": {
     "tsx": "catalog:",

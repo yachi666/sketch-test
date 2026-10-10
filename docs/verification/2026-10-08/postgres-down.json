@@ -1,0 +1,12 @@
+{
+  "ready": {
+    "status": 0,
+    "error": "fetch failed",
+    "elapsedMs": 4
+  },
+  "live": {
+    "status": 0,
+    "error": "fetch failed",
+    "elapsedMs": 2
+  }
+}

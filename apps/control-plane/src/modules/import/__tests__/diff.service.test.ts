@@ -4,9 +4,10 @@
  * Tests pure logic: API version diffing and breaking change detection.
  * No database dependency.
  */
-import { describe, expect, test } from 'vitest';
+
 import type { CanonicalApiModel, Endpoint } from '@sketch-test/canonical-api-model';
-import { computeDiff, isSchemaBreakingChange, type DiffEntry } from '../diff.service';
+import { describe, expect, test } from 'vitest';
+import { computeDiff, type DiffEntry, isSchemaBreakingChange } from '../diff.service';
 
 // ─── Helpers ────────────────────────────────────────────────────────
 

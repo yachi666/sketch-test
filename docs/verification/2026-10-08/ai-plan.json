@@ -1,0 +1,548 @@
+{
+  "id": "ap_d678738278464dba",
+  "status": "completed",
+  "trigger": "手动生成",
+  "parentId": null,
+  "objective": "只选择名为 GitHub 公开仓库 · 真实响应回归 的已发布业务流程，生成一份 Node.js 公开 API 只读回归计划。不要选择故意失败验收流程或本地分页验收流程，不包含仓库源代码发现的业务接口。启用无新增失败和基础设施错误阻断门禁。",
+  "assets": [
+    {
+      "id": "tc_ef021a34",
+      "key": "tc_ef021a34",
+      "name": "Status 200: POST /api/auth/login",
+      "type": "test",
+      "route": "POST /api/auth/login",
+      "version": 1,
+      "versionId": "tcv_e4127cb2",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "wf_5f60effa",
+      "key": "wf_5f60effa",
+      "name": "公开仓库 · 失败定位验收",
+      "type": "workflow",
+      "route": "业务流程",
+      "version": 1,
+      "versionId": "wfv_05daf19e",
+      "sideEffect": "unknown"
+    },
+    {
+      "id": "wf_d56a636c",
+      "key": "wf_d56a636c",
+      "name": "公开仓库 · 元数据回归",
+      "type": "workflow",
+      "route": "业务流程",
+      "version": 1,
+      "versionId": "wfv_2c50e75e",
+      "sideEffect": "unknown"
+    },
+    {
+      "id": "wf_e0e13c81",
+      "key": "wf_e0e13c81",
+      "name": "历史分页验收 2026-10-08T15:10:25.602Z",
+      "type": "workflow",
+      "route": "业务流程",
+      "version": 1,
+      "versionId": "wfv_1f87f538",
+      "sideEffect": "unknown"
+    },
+    {
+      "id": "wf_efc03873",
+      "key": "wf_efc03873",
+      "name": "GitHub 公开仓库 · 真实响应回归",
+      "type": "workflow",
+      "route": "业务流程",
+      "version": 1,
+      "versionId": "wfv_f85319f4",
+      "sideEffect": "unknown"
+    },
+    {
+      "id": "draft_06fdee56",
+      "key": "draft_06fdee56",
+      "name": "Status 200: GET /api/contact-information",
+      "type": "draft",
+      "route": "GET /api/contact-information",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_0dcb9670",
+      "key": "draft_0dcb9670",
+      "name": "Status 200: POST /api/workspace/import-export/save",
+      "type": "draft",
+      "route": "POST /api/workspace/import-export/save",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_0fc1057f",
+      "key": "draft_0fc1057f",
+      "name": "Status 204: POST /api/workspace/shift-definitions/reorder",
+      "type": "draft",
+      "route": "POST /api/workspace/shift-definitions/reorder",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_1e58b694",
+      "key": "draft_1e58b694",
+      "name": "Status 200: PUT /api/workspace/accounts/{id}",
+      "type": "draft",
+      "route": "PUT /api/workspace/accounts/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_1ef2e68d",
+      "key": "draft_1ef2e68d",
+      "name": "Status 204: DELETE /api/workspace/linux-passwords/{id}",
+      "type": "draft",
+      "route": "DELETE /api/workspace/linux-passwords/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_228d52d3",
+      "key": "draft_228d52d3",
+      "name": "Status 200: GET /api/workspace/linux-passwords",
+      "type": "draft",
+      "route": "GET /api/workspace/linux-passwords",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_24eceadb",
+      "key": "draft_24eceadb",
+      "name": "Status 204: DELETE /api/workspace/shift-definitions/{id}",
+      "type": "draft",
+      "route": "DELETE /api/workspace/shift-definitions/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_255ca0b6",
+      "key": "draft_255ca0b6",
+      "name": "Status 200: POST /api/workspace/validation/resolve",
+      "type": "draft",
+      "route": "POST /api/workspace/validation/resolve",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_2add365e",
+      "key": "draft_2add365e",
+      "name": "Status 204: DELETE /api/workspace/accounts/{id}",
+      "type": "draft",
+      "route": "DELETE /api/workspace/accounts/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_2feef070",
+      "key": "draft_2feef070",
+      "name": "Status 204: POST /api/workspace/accounts/{id}/disable",
+      "type": "draft",
+      "route": "POST /api/workspace/accounts/{id}/disable",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_3622b65b",
+      "key": "draft_3622b65b",
+      "name": "Status 200: GET /api/workspace/linux-passwords/access-audits",
+      "type": "draft",
+      "route": "GET /api/workspace/linux-passwords/access-audits",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_43a392d4",
+      "key": "draft_43a392d4",
+      "name": "Status 204: DELETE /api/workspace/staff/{id}",
+      "type": "draft",
+      "route": "DELETE /api/workspace/staff/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_4531a16e",
+      "key": "draft_4531a16e",
+      "name": "Status 200: GET /api/auth/me",
+      "type": "draft",
+      "route": "GET /api/auth/me",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_4d08e0ca",
+      "key": "draft_4d08e0ca",
+      "name": "Status 200: GET /api/workspace/accounts",
+      "type": "draft",
+      "route": "GET /api/workspace/accounts",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_539fe385",
+      "key": "draft_539fe385",
+      "name": "Status 200: POST /api/workspace/linux-passwords",
+      "type": "draft",
+      "route": "POST /api/workspace/linux-passwords",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_54eb8e36",
+      "key": "draft_54eb8e36",
+      "name": "Status 200: POST /api/workspace/staff",
+      "type": "draft",
+      "route": "POST /api/workspace/staff",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_5b28c2fb",
+      "key": "draft_5b28c2fb",
+      "name": "Status 200: GET /api/workspace/teams",
+      "type": "draft",
+      "route": "GET /api/workspace/teams",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_6042fe06",
+      "key": "draft_6042fe06",
+      "name": "Status 200: POST /api/workspace/accounts",
+      "type": "draft",
+      "route": "POST /api/workspace/accounts",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_61c036c6",
+      "key": "draft_61c036c6",
+      "name": "Status 204: POST /api/workspace/accounts/{id}/enable",
+      "type": "draft",
+      "route": "POST /api/workspace/accounts/{id}/enable",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_69a58c67",
+      "key": "draft_69a58c67",
+      "name": "Status 200: POST /api/workspace/shift-definitions",
+      "type": "draft",
+      "route": "POST /api/workspace/shift-definitions",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_69d538ea",
+      "key": "draft_69d538ea",
+      "name": "Status 200: PUT /api/workspace/linux-passwords/{id}",
+      "type": "draft",
+      "route": "PUT /api/workspace/linux-passwords/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_6e2c87f1",
+      "key": "draft_6e2c87f1",
+      "name": "Status 200: POST /api/auth/activate",
+      "type": "draft",
+      "route": "POST /api/auth/activate",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_73a47e60",
+      "key": "draft_73a47e60",
+      "name": "Status 204: POST /api/auth/change-password",
+      "type": "draft",
+      "route": "POST /api/auth/change-password",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_75ded606",
+      "key": "draft_75ded606",
+      "name": "Status 200: GET /api/shifts",
+      "type": "draft",
+      "route": "GET /api/shifts",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_7a4c542b",
+      "key": "draft_7a4c542b",
+      "name": "Status 200: POST /api/workspace/teams",
+      "type": "draft",
+      "route": "POST /api/workspace/teams",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_7d80c7f7",
+      "key": "draft_7d80c7f7",
+      "name": "Status 200: POST /api/contact-information",
+      "type": "draft",
+      "route": "POST /api/contact-information",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_7e3d555f",
+      "key": "draft_7e3d555f",
+      "name": "Status 200: PUT /api/workspace/staff/{id}",
+      "type": "draft",
+      "route": "PUT /api/workspace/staff/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_8021aac0",
+      "key": "draft_8021aac0",
+      "name": "Status 200: GET /api/staff",
+      "type": "draft",
+      "route": "GET /api/staff",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_82c44fe7",
+      "key": "draft_82c44fe7",
+      "name": "Status 200: POST /api/workspace/staff/batch",
+      "type": "draft",
+      "route": "POST /api/workspace/staff/batch",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_85f647a9",
+      "key": "draft_85f647a9",
+      "name": "Status 204: DELETE /api/workspace/teams/{id}",
+      "type": "draft",
+      "route": "DELETE /api/workspace/teams/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_91a49768",
+      "key": "draft_91a49768",
+      "name": "Status 200: GET /api/workspace/accounts/{id}",
+      "type": "draft",
+      "route": "GET /api/workspace/accounts/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_95f518aa",
+      "key": "draft_95f518aa",
+      "name": "Status 200: GET /api/workspace/shift-definitions",
+      "type": "draft",
+      "route": "GET /api/workspace/shift-definitions",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_96c7a8f8",
+      "key": "draft_96c7a8f8",
+      "name": "Status 200: POST /api/workspace/validation/{id}/preview-remediation",
+      "type": "draft",
+      "route": "POST /api/workspace/validation/{id}/preview-remediation",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_9a1abe20",
+      "key": "draft_9a1abe20",
+      "name": "Status 200: GET /api/workspace/linux-password-directories",
+      "type": "draft",
+      "route": "GET /api/workspace/linux-password-directories",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_9af41739",
+      "key": "draft_9af41739",
+      "name": "Status 200: POST /api/workspace/validation/{id}/apply-remediation",
+      "type": "draft",
+      "route": "POST /api/workspace/validation/{id}/apply-remediation",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_9b96b978",
+      "key": "draft_9b96b978",
+      "name": "Status 200: PUT /api/workspace/teams/{id}",
+      "type": "draft",
+      "route": "PUT /api/workspace/teams/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_9bfa9380",
+      "key": "draft_9bfa9380",
+      "name": "Status 200: GET /api/shift-codes",
+      "type": "draft",
+      "route": "GET /api/shift-codes",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_9d946fec",
+      "key": "draft_9d946fec",
+      "name": "Status 200: PUT /api/workspace/shift-definitions/{id}",
+      "type": "draft",
+      "route": "PUT /api/workspace/shift-definitions/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_9e476189",
+      "key": "draft_9e476189",
+      "name": "Status 200: GET /api/workspace/teams/{id}",
+      "type": "draft",
+      "route": "GET /api/workspace/teams/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_a7cb8141",
+      "key": "draft_a7cb8141",
+      "name": "Status 200: PUT /api/workspace/access-policy",
+      "type": "draft",
+      "route": "PUT /api/workspace/access-policy",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_a87c70b3",
+      "key": "draft_a87c70b3",
+      "name": "Status 200: GET /api/workspace/roster",
+      "type": "draft",
+      "route": "GET /api/workspace/roster",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_b7ee0d5e",
+      "key": "draft_b7ee0d5e",
+      "name": "Status 204: POST /api/auth/logout",
+      "type": "draft",
+      "route": "POST /api/auth/logout",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_ba76b2d9",
+      "key": "draft_ba76b2d9",
+      "name": "Status 200: GET /api/workspace/overview",
+      "type": "draft",
+      "route": "GET /api/workspace/overview",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_c5405f6d",
+      "key": "draft_c5405f6d",
+      "name": "Status 200: GET /api/staff/{id}",
+      "type": "draft",
+      "route": "GET /api/staff/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_c7a9048a",
+      "key": "draft_c7a9048a",
+      "name": "Status 200: POST /api/workspace/linux-passwords/credentials/{credentialId}/secret",
+      "type": "draft",
+      "route": "POST /api/workspace/linux-passwords/credentials/{credentialId}/secret",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_c9c25bcb",
+      "key": "draft_c9c25bcb",
+      "name": "Status 200: GET /api/workspace/shift-definitions/{id}",
+      "type": "draft",
+      "route": "GET /api/workspace/shift-definitions/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_ca876713",
+      "key": "draft_ca876713",
+      "name": "GET /api/auth/me 读取当前登录用户（只读正向）",
+      "type": "draft",
+      "route": "GET /api/auth/me",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_cad9f327",
+      "key": "draft_cad9f327",
+      "name": "Status 200: GET /api/teams",
+      "type": "draft",
+      "route": "GET /api/teams",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_cd24c5d0",
+      "key": "draft_cd24c5d0",
+      "name": "Status 200: GET /api/workspace/linux-passwords/{id}",
+      "type": "draft",
+      "route": "GET /api/workspace/linux-passwords/{id}",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    },
+    {
+      "id": "draft_ce666309",
+      "key": "draft_ce666309",
+      "name": "Status 204: POST /api/workspace/accounts/{id}/reset-password",
+      "type": "draft",
+      "route": "POST /api/workspace/accounts/{id}/reset-password",
+      "sideEffect": "read-only",
+      "apiVersionId": "av_ea093aaa"
+    }
+  ],
+  "proposal": {
+    "gaps": [
+      {
+        "key": "draft_4531a16e",
+        "reason": "GET /api/auth/me 为只读草稿，可作为该工作流内只读接口补充方向，但草稿不可作为成员，需先固化版本。"
+      },
+      {
+        "key": "draft_ca876713",
+        "reason": "与上者同路由的只读正向草稿，说明只读接口覆盖仅存在于草稿层，为待固化缺口。"
+      }
+    ],
+    "name": "GitHub 公开仓库只读回归",
+    "members": [
+      {
+        "key": "wf_efc03873",
+        "reason": "名称与用户指定完全一致，为唯一命中的已发布业务流程，作为本次只读回归的唯一步骤容器。"
+      }
+    ],
+    "objective": "仅以已发布业务流程「GitHub 公开仓库 · 真实响应回归」为成员，生成 Node.js 公开 API 只读回归计划，启用无新增失败与基础设施错误阻断门禁。",
+    "explanation": "依据用户指定的名称精确匹配，唯一命中的已发布业务流程为 wf_efc03873（GitHub 公开仓库 · 真实响应回归），故以其作为唯一成员；用户明确排除故意失败验收流程与本地分页验收流程，故 wf_5f60effa 与 wf_e0e13c81 不选，wf_d56a636c（元数据回归）名称不符且不在范围内，亦不选。用户要求不含仓库源代码发现的业务接口，且未提供任何该工作流内具体接口清单，因此不额外挂接任何接口草稿，接口层信息不足，仅列为缺口说明；全部 draft_* 均为草稿不可作为成员，且用户要求只读范围，故本次不引入其中任何接口。",
+    "precautions": [
+      "仅执行只读校验，禁止任何写操作与状态变更。",
+      "成员仅限该已发布业务流程版本，版本不可变，勿改动线上版本。",
+      "基础设施错误即阻断并停止后续步骤，不重试掩盖。"
+    ],
+    "noNewFailures": true,
+    "blockOnInfraError": true
+  },
+  "revision": 1,
+  "savedAt": null,
+  "suiteId": null,
+  "errorCode": null,
+  "createdAt": "2026-10-08T15:12:23.893Z",
+  "model": {
+    "model": "deepseek-v4-flash",
+    "provider": "deepseek"
+  },
+  "sourceHash": "a30cb17f24bb36406e4adc0abffb86530798979ae5191df56f3e32cfadc90df1"
+}

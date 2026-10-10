@@ -5,7 +5,7 @@
  * diagnostics, and security classifications. Every contract package builds
  * on these primitives.
  */
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 // ─── Identifiers ───────────────────────────────────────────────
 
@@ -109,6 +109,7 @@ export const HttpMethodSchema = z.enum([
   'DELETE',
   'HEAD',
   'OPTIONS',
+  'QUERY',
 ]);
 export type HttpMethod = z.infer<typeof HttpMethodSchema>;
 

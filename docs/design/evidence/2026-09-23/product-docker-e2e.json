@@ -1,0 +1,38 @@
+{
+  "date": "2026-09-23",
+  "command": "E2E_MANAGED_POSTGRES=1 pnpm e2e:product",
+  "browser": {
+    "ok": true,
+    "reportEvidenceFlow": true,
+    "consoleErrors": 0
+  },
+  "result": {
+    "ok": true,
+    "apiVersionId": "av_b4d3ff1a",
+    "endpointCount": 9,
+    "workflowVersionId": "wfv_397978cf",
+    "planHash": "636ef4650fc497c9ef362988a5c4a8ee446b32394de74cfcbec6654a37689acb",
+    "runId": "run_2fa9527d",
+    "eventCount": 6,
+    "externalizedEventCount": 6,
+    "manifestHash": "39b44222f80f6e040da7dade032730f258070699a75178def5ce11175098c2bd",
+    "traceId": "6faa0e0f87b489c171dbdffa2817d4d7",
+    "auditEventId": "audit_48ffddf7",
+    "recovery": {
+      "databaseRunStatus": "passed",
+      "migrationCount": 2,
+      "objectCount": 9
+    },
+    "objectKeys": [
+      "api-sources/sha256/808823f56466e996f8d686155057cd079c79f5c31a418729500f82c59ab335a3.source",
+      "runs/run_2fa9527d/events/run_2fa9527d-evt-2/5277870ce5036523d32943f1309ae8e43e4228ec3232debcfdfc38f897331156.json",
+      "runs/run_2fa9527d/events/run_2fa9527d-evt-3/ba953950922198e0d00e3fe1e009e1c5379d659c914b4836a2b3ef86e627cbd4.json",
+      "runs/run_2fa9527d/events/run_2fa9527d-evt-4/b817854a277536c6f798ac31fb8c28376f1543fbefc925f4fc77b3fcf2075707.json",
+      "runs/run_2fa9527d/events/run_2fa9527d-evt-5/ae5809b28b9f7efaa73a278fb6d736c0c4fe2797c65ef0fc7f6a421fca214828.json",
+      "runs/run_2fa9527d/events/run_2fa9527d-evt-6/b2ca21bcf1c2eee9f99a5117fa7b9ff13011e0f50ee6b98dd63eee1e2f36778b.json",
+      "runs/run_2fa9527d/events/run_2fa9527d-evt-7/d6c2c9cd7382aa02026ae9f527087e054fd1c80198cff7a73ea54193711ec284.json",
+      "runs/run_2fa9527d/manifests/39b44222f80f6e040da7dade032730f258070699a75178def5ce11175098c2bd.json",
+      "workflow-sources/sha256/115cf667521f14855112b56e262c0a504e898e7a1f20c78a7ba37c473a6ef6da.arazzo"
+    ]
+  }
+}

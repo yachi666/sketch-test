@@ -1,0 +1,21 @@
+name: sketchtest-dev-services
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sketchtest}
+      POSTGRES_USER: ${POSTGRES_USER:-sketchtest}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sketchtest}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - sketchtest-dev-postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  sketchtest-dev-postgres-data:

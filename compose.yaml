@@ -1,0 +1,154 @@
+name: sketchtest
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: sketchtest
+      POSTGRES_USER: sketchtest
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sketchtest -d sketchtest"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  minio:
+    build:
+      context: ops/minio
+      target: server
+    image: sketchtest/minio:RELEASE.2025-09-07T16-13-09Z
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:?set S3_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:?set S3_SECRET_KEY}
+    volumes:
+      - object-data:/data
+    ports:
+      - "127.0.0.1:${MINIO_CONSOLE_PORT:-9001}:9001"
+    restart: unless-stopped
+
+  minio-init:
+    build:
+      context: ops/minio
+      target: client
+    image: sketchtest/mc:RELEASE.2025-08-13T08-35-41Z
+    depends_on:
+      - minio
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - >-
+        until mc alias set local http://minio:9000 "$${S3_ACCESS_KEY}" "$${S3_SECRET_KEY}"; do sleep 2; done;
+        mc mb --ignore-existing "local/$${S3_BUCKET}";
+    environment:
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:?set S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:?set S3_SECRET_KEY}
+      S3_BUCKET: ${S3_BUCKET:-sketchtest-artifacts}
+    restart: "no"
+
+  control-plane:
+    build:
+      context: .
+      dockerfile: apps/control-plane/Dockerfile
+    image: sketchtest/control-plane:${SKETCHTEST_VERSION:-local}
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://sketchtest:${POSTGRES_PASSWORD}@postgres:5432/sketchtest
+      CP_HOST: 0.0.0.0
+      CP_PORT: 3802
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      WEB_ORIGINS: ${WEB_ORIGINS:-http://localhost:8080}
+      IMPORT_ALLOWED_HOSTS: ${IMPORT_ALLOWED_HOSTS:?set IMPORT_ALLOWED_HOSTS}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY}
+      RUNNER_REGISTRATION_TOKEN: ${RUNNER_REGISTRATION_TOKEN:?set RUNNER_REGISTRATION_TOKEN}
+      AI_WORKER_TOKEN: ${AI_WORKER_TOKEN:-}
+      AI_WORKER_WORKSPACE_ID: ${AI_WORKER_WORKSPACE_ID:-}
+      GUEST_ACCESS_ENABLED: ${GUEST_ACCESS_ENABLED:-false}
+      GUEST_USER_ID: ${GUEST_USER_ID:-}
+      GUEST_WORKSPACE_ID: ${GUEST_WORKSPACE_ID:-}
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:?set S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:?set S3_SECRET_KEY}
+      S3_BUCKET: ${S3_BUCKET:-sketchtest-artifacts}
+    ports:
+      - "127.0.0.1:${CP_PORT:-3802}:3802"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3802/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_CP_BASE: ${PUBLIC_CONTROL_PLANE_URL:-http://localhost:3802}
+    image: sketchtest/web:${SKETCHTEST_VERSION:-local}
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8080}:8080"
+    depends_on:
+      control-plane:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health/live"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  runner:
+    profiles: ["runner"]
+    build:
+      context: .
+      dockerfile: apps/runner/Dockerfile
+    image: sketchtest/runner:${SKETCHTEST_VERSION:-local}
+    environment:
+      NODE_ENV: production
+      CP_URL: http://control-plane:3802
+      WORKSPACE_ID: ${WORKSPACE_ID:-workspace-not-configured}
+      RUNNER_NAME: ${RUNNER_NAME:-runner-compose}
+      RUNNER_VERSION: ${SKETCHTEST_VERSION:-local}
+      RUNNER_LABELS: ${RUNNER_LABELS:-docker}
+      RUNNER_ID: ${RUNNER_ID:-}
+      RUNNER_TOKEN: ${RUNNER_TOKEN:-}
+      RUNNER_REGISTRATION_TOKEN: ${RUNNER_REGISTRATION_TOKEN:-}
+    depends_on:
+      control-plane:
+        condition: service_healthy
+    restart: unless-stopped
+
+  ai-worker:
+    profiles: ["ai"]
+    build:
+      context: .
+      dockerfile: apps/ai-worker/Dockerfile
+    image: sketchtest/ai-worker:${SKETCHTEST_VERSION:-local}
+    environment:
+      CP_URL: http://control-plane:3802
+      AI_WORKER_TOKEN: ${AI_WORKER_TOKEN:-}
+      AI_PROVIDER: ${AI_PROVIDER:-}
+      AI_MODEL: ${AI_MODEL:-}
+      AI_API_KEY: ${AI_API_KEY:-}
+    depends_on:
+      control-plane:
+        condition: service_healthy
+    read_only: true
+    tmpfs: ["/tmp"]
+    mem_limit: 1g
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  object-data:

@@ -6,8 +6,8 @@
  * retries, conditions, and redaction.
  */
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
-import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import type { ExecutionPlan, FrozenStep } from '@sketch-test/runner-protocol';
+import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import { executePlan } from '../index';
 
 // ─── Test HTTP Server ────────────────────────────────────────────────
@@ -37,15 +37,24 @@ beforeAll(async () => {
       return json(res, 200, { message: 'Hello, world!', status: 'ok' });
     }
 
+    if (method === 'GET' && url.pathname === '/api/trace') {
+      return json(res, 200, { traceparent: req.headers['traceparent'] });
+    }
+
     if (method === 'POST' && url.pathname === '/api/echo') {
       const body = await readBody(req);
       const parsed = body ? JSON.parse(body) : {};
       return json(res, 201, { received: parsed, echo: true });
     }
 
+    if (method === 'QUERY' && url.pathname === '/api/search') {
+      const body = await readBody(req);
+      return json(res, 200, { method, query: body ? JSON.parse(body) : null });
+    }
+
     if (method === 'GET' && url.pathname === '/api/users/me') {
       const auth = req.headers['authorization'];
-      if (!auth || !auth.startsWith('Bearer ')) {
+      if (!auth?.startsWith('Bearer ')) {
         return json(res, 401, { error: 'Unauthorized' });
       }
       return json(res, 200, { id: 'usr-1', name: 'Test User', token: auth.slice(7) });
@@ -169,6 +178,36 @@ describe('executePlan: basic HTTP', () => {
     expect(result.stepsPassed).toBe(1);
   });
 
+  test('executes an OpenAPI 3.2 QUERY request with a body', async () => {
+    const step = makeStep({
+      method: 'QUERY',
+      urlTemplate: `${serverUrl}/api/search`,
+      body: { term: 'book' },
+      headers: { 'Content-Type': 'application/json' },
+      assertions: [
+        {
+          id: 'query-status',
+          target: 'status',
+          operator: 'equals',
+          expected: 200,
+          severity: 'block',
+        },
+        {
+          id: 'query-method',
+          target: 'jsonPath',
+          path: '$.method',
+          operator: 'equals',
+          expected: 'QUERY',
+          severity: 'block',
+        },
+      ],
+    });
+    const result = await executePlan(makePlan([step]), { runId: 'run-query' });
+
+    expect(result.status).toBe('passed');
+    expect(result.stepsPassed).toBe(1);
+  });
+
   test('handles 401 response correctly', async () => {
     const step = makeStep({
       urlTemplate: `${serverUrl}/api/users/me`,
@@ -227,6 +266,22 @@ describe('executePlan: basic HTTP', () => {
 
     expect(result.status).toBe('passed');
     expect(result.stepsPassed).toBe(1);
+  });
+});
+
+describe('executePlan: trace correlation', () => {
+  test('injects W3C traceparent and carries the trace ID through every event', async () => {
+    const traceId = '0123456789abcdef0123456789abcdef';
+    const plan = makePlan([makeStep({ urlTemplate: `${serverUrl}/api/trace` })]);
+    const result = await executePlan(plan, { runId: 'run-trace', traceId });
+
+    expect(result.events.every((event) => event.traceId === traceId)).toBe(true);
+    const prepared = result.events.find((event) => event.eventType === 'request.prepared');
+    expect(prepared && 'headers' in prepared ? prepared.headers['traceparent'] : undefined).toMatch(
+      /^00-0123456789abcdef0123456789abcdef-[a-f0-9]{16}-01$/,
+    );
+    const received = result.events.find((event) => event.eventType === 'response.received');
+    expect(received && 'bodyPreview' in received ? received.bodyPreview : '').toContain(traceId);
   });
 });
 
@@ -327,6 +382,38 @@ describe('executePlan: assertions', () => {
     const result = await executePlan(plan, { runId: 'run-010' });
 
     expect(result.status).toBe('passed');
+  });
+
+  test('schema assertion failure blocks the step and emits diagnostics', async () => {
+    const step = makeStep({
+      urlTemplate: `${serverUrl}/api/hello`,
+      assertions: [
+        {
+          id: 'schema-a-1',
+          target: 'schema',
+          operator: 'schema',
+          expected: {
+            type: 'object',
+            required: ['message'],
+            properties: { message: { type: 'integer' } },
+          },
+          severity: 'block',
+        },
+      ],
+    });
+    const plan = makePlan([step]);
+    const result = await executePlan(plan, { runId: 'run-schema-failure' });
+
+    expect(result.status).toBe('failed');
+    expect(result.stepsFailed).toBe(1);
+
+    const assertionEvent = result.events.find((event) => event.eventType === 'assertion.evaluated');
+    expect(assertionEvent?.eventType).toBe('assertion.evaluated');
+    if (assertionEvent?.eventType !== 'assertion.evaluated') {
+      throw new Error('Expected assertion.evaluated event');
+    }
+    expect(assertionEvent.passed).toBe(false);
+    expect(assertionEvent.schemaDiff).toContain('must be integer');
   });
 });
 

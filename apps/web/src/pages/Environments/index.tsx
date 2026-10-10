@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import { CaretDown, Check, PencilSimple, TrashSimple, Plus, Stack } from '@phosphor-icons/react';
-import type { Environment, Variable } from '../../types';
+import { Check, PencilSimple, Plus, Stack, TrashSimple } from '@phosphor-icons/react';
+import { useEffect, useState } from 'react';
+import { ErrorCallout } from '../../components/shared/ErrorCallout';
+import { useAuthStore } from '../../stores/authStore';
 import { useEnvironmentStore } from '../../stores/environmentStore';
-import { useVariableStore } from '../../stores/variableStore';
 import { useUIStore } from '../../stores/uiStore';
-import { EnvironmentDialog } from './EnvironmentDialog';
+import type { Environment } from '../../types';
 import { DeleteEnvironmentDialog } from './DeleteEnvironmentDialog';
+import { EnvironmentDialog } from './EnvironmentDialog';
 
 function toneForEnv(env: Environment): 'brown' | 'amber' | 'green' {
   if (env.tags?.includes('生产')) return 'brown';
@@ -15,25 +16,27 @@ function toneForEnv(env: Environment): 'brown' | 'amber' | 'green' {
 
 export default function EnvironmentView() {
   const { environments, activeEnvironmentId, setActiveEnvironmentId } = useEnvironmentStore();
-  const variables = useVariableStore((s) => s.variables);
+  const versions = useEnvironmentStore((s) => s.versions);
   const notify = useUIStore((s) => s.notify);
+  const workspaceId = useAuthStore((s) => s.user?.workspaceId);
+  const fetchFromServer = useEnvironmentStore((s) => s.fetchFromServer);
+  const loading = useEnvironmentStore((s) => s.loading);
+  const error = useEnvironmentStore((s) => s.error);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
   const [editingEnv, setEditingEnv] = useState<Environment | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Environment | null>(null);
 
-  const envVarCount = (envId: string) => variables.filter((v) => v.overrides?.[envId]).length;
-  const activeEnv = environments.find((e) => e.id === activeEnvironmentId);
+  const envVarCount = (envId: string) => Object.keys(versions[envId]?.[0]?.variables ?? {}).length;
+  const _activeEnv = environments.find((e) => e.id === activeEnvironmentId);
+  useEffect(() => {
+    if (workspaceId) void fetchFromServer(workspaceId);
+  }, [fetchFromServer, workspaceId]);
 
   return (
     <main className="page-view">
-      <div className="page-intro">
-        <div>
-          <span className="eyebrow">ENVIRONMENTS</span>
-          <h2>环境管理</h2>
-          <p>管理测试、预发和生产环境，隔离不同的 Base URL 和变量覆盖值。</p>
-        </div>
+      <div className="page-actions-row">
         <button
           className="button button--primary"
           type="button"
@@ -48,6 +51,36 @@ export default function EnvironmentView() {
         </button>
       </div>
 
+      {error ? (
+        <ErrorCallout
+          title="环境数据暂不可用"
+          message={error}
+          onRetry={() => (workspaceId ? fetchFromServer(workspaceId) : undefined)}
+        />
+      ) : null}
+
+      {loading && environments.length === 0 ? (
+        <p className="page-loading-note">正在同步环境…</p>
+      ) : null}
+
+      {!loading && !error && environments.length === 0 ? (
+        <section className="paper-panel empty-module">
+          <Stack size={40} weight="duotone" />
+          <h3>还没有执行环境</h3>
+          <p>添加测试服务的基础地址和运行参数。每次执行会固定环境版本，便于复现。</p>
+          <button
+            className="button button--primary"
+            type="button"
+            onClick={() => {
+              setDialogMode('create');
+              setEditingEnv(null);
+              setDialogOpen(true);
+            }}
+          >
+            创建第一个环境
+          </button>
+        </section>
+      ) : null}
       <section className="env-grid">
         {environments.map((env) => {
           const tone = toneForEnv(env);
@@ -67,7 +100,7 @@ export default function EnvironmentView() {
                 </div>
               </div>
               <div className="env-card-body">
-                <span>{envVarCount(env.id)} 个变量覆盖</span>
+                <span>{envVarCount(env.id)} 个运行变量</span>
                 {(env.tags || []).map((tag) => (
                   <span className="env-tag" key={tag}>
                     {tag}

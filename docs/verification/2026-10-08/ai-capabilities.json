@@ -1,0 +1,15 @@
+{
+  "configured": true,
+  "available": true,
+  "workers": [
+    {
+      "model": "deepseek-v4-flash",
+      "provider": "deepseek",
+      "workerId": "ai_1972a40b-1226-475a-bf08-6c772731de83",
+      "capabilities": [
+        "plan"
+      ],
+      "harnessVersion": "0.85.1"
+    }
+  ]
+}

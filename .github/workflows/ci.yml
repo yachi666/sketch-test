@@ -20,13 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - uses: actions/cache@v5
-        with:
-          path: .turbo
-          key: turbo-${{ runner.os }}-lint-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            turbo-${{ runner.os }}-lint-
-      - run: pnpm turbo run lint
+      - run: pnpm turbo run lint --force
 
   typecheck:
     timeout-minutes: 5
@@ -34,13 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - uses: actions/cache@v5
-        with:
-          path: .turbo
-          key: turbo-${{ runner.os }}-typecheck-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            turbo-${{ runner.os }}-typecheck-
-      - run: pnpm turbo run check
+      - run: pnpm turbo run check --force
 
   test:
     timeout-minutes: 10
@@ -53,17 +41,33 @@ jobs:
       - uses: ./.github/actions/setup
         with:
           node-version: ${{ matrix.node-version }}
-      - uses: actions/cache@v5
-        with:
-          path: .turbo
-          key: turbo-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            turbo-${{ runner.os }}-${{ matrix.node-version }}-
-      - run: pnpm turbo run build test
+      - run: pnpm turbo run build test --force
+
+  product-e2e:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Install Chromium
+        run: pnpm --filter web exec playwright install --with-deps chromium
+      - name: Run product, browser, migration, and recovery E2E
+        run: pnpm e2e:product
+        env:
+          E2E_MANAGED_POSTGRES: '1'
+
+  compose-smoke:
+    timeout-minutes: 25
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Run isolated clean-install smoke
+        run: pnpm e2e:compose
 
   release:
     if: github.ref == 'refs/heads/master'
-    needs: [lint, typecheck, test]
+    needs: [lint, typecheck, test, product-e2e, compose-smoke]
     timeout-minutes: 10
     runs-on: ubuntu-latest
     permissions:

@@ -315,8 +315,13 @@ function parseCsv(input: string): CsvParseResult {
     return { headers: [], rows: [] };
   }
 
-  const headers = parseCsvLine(lines[0]!);
-  const rows = lines.slice(1).map((line) => parseCsvLine(line));
+  const [headerLine, ...rowLines] = lines;
+  if (!headerLine) {
+    return { headers: [], rows: [] };
+  }
+
+  const headers = parseCsvLine(headerLine);
+  const rows = rowLines.map((line) => parseCsvLine(line));
 
   return { headers, rows };
 }

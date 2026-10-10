@@ -1,0 +1,10 @@
+{
+  "published": false,
+  "diagnostics": [
+    {
+      "severity": "error",
+      "message": "Step \"empty\" requires a non-empty URL",
+      "stepId": "empty"
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "ok": true,
+  "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+  "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+  "apiVersionId": "av_48848ec3",
+  "sourceHash": "c9d94c6bbbfdc8df0f2797b0f64a789756539cd9cea77d26169c871b4a7113f0",
+  "scannedFiles": 86,
+  "endpointCount": 59,
+  "jobs": [
+    {
+      "id": "gj_18f9a532",
+      "status": "completed",
+      "selectedEndpoints": 3,
+      "draftCount": 1,
+      "coveredEndpoints": 1,
+      "drafts": [
+        {
+          "id": "draft_43b982e4",
+          "name": "员工列表查询返回 200",
+          "method": "GET",
+          "path": "/api/workspace/staff",
+          "model": "deepseek-v4-flash",
+          "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+          "sourceLocations": [
+            "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java#L32"
+          ],
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "gj_b7d0237b",
+      "status": "completed",
+      "selectedEndpoints": 1,
+      "draftCount": 1,
+      "coveredEndpoints": 1,
+      "drafts": [
+        {
+          "id": "draft_25dcc40f",
+          "name": "POST /api/workspace/staff 使用最小必填字段创建员工（回归草稿）",
+          "method": "POST",
+          "path": "/api/workspace/staff",
+          "model": "deepseek-v4-flash",
+          "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+          "sourceLocations": [
+            "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java#L42"
+          ],
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "gj_2bdfaea5",
+      "status": "completed",
+      "selectedEndpoints": 1,
+      "draftCount": 1,
+      "coveredEndpoints": 1,
+      "drafts": [
+        {
+          "id": "draft_a0b3b949",
+          "name": "删除工作区员工（路径 id）应返回 204",
+          "method": "DELETE",
+          "path": "/api/workspace/staff/{id}",
+          "model": "deepseek-v4-flash",
+          "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+          "sourceLocations": [
+            "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/workspace/WorkspaceStaffController.java#L57"
+          ],
+          "status": "pending"
+        }
+      ]
+    }
+  ],
+  "anonymousStatus": 401,
+  "unsafeUrlStatus": 400,
+  "targetApiExecuted": false
+}

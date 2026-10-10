@@ -1,0 +1,30 @@
+{
+  "command": "pnpm turbo run lint check test build --force",
+  "successfulTasks": 76,
+  "totalTasks": 76,
+  "cachedTasks": 0,
+  "passedTests": 1029,
+  "perPackageTestCounts": [
+    3,
+    16,
+    3,
+    29,
+    19,
+    6,
+    26,
+    22,
+    20,
+    21,
+    7,
+    20,
+    10,
+    125,
+    40,
+    80,
+    20,
+    442,
+    120
+  ],
+  "sourceRevision": "832799cc17a833cd6a92a3e89c1adb28fe9be83c",
+  "scope": "current dirty working tree; no product-source changes made by this verification"
+}

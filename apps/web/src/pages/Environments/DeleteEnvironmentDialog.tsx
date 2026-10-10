@@ -1,7 +1,7 @@
-import { useRef, useEffect } from 'react';
-import type { Environment } from '../../types';
+import { useEffect, useRef } from 'react';
 import { useEnvironmentStore } from '../../stores/environmentStore';
 import { useUIStore } from '../../stores/uiStore';
+import type { Environment } from '../../types';
 
 export function DeleteEnvironmentDialog({
   open,
@@ -22,8 +22,8 @@ export function DeleteEnvironmentDialog({
 
   if (!open || !environment) return null;
 
-  const handleConfirm = () => {
-    deleteEnvironment(environment.id);
+  const handleConfirm = async () => {
+    if (!(await deleteEnvironment(environment.id))) return;
     notify(`环境 "${environment.name}" 已删除`);
     onClose();
   };
@@ -59,7 +59,11 @@ export function DeleteEnvironmentDialog({
           <button ref={cancelRef} className="button button--ghost" type="button" onClick={onClose}>
             取消
           </button>
-          <button className="button button--danger" type="button" onClick={handleConfirm}>
+          <button
+            className="button button--danger"
+            type="button"
+            onClick={() => void handleConfirm()}
+          >
             确认删除
           </button>
         </div>

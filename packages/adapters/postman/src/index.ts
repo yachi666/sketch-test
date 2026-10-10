@@ -35,6 +35,7 @@ import type {
   Instant,
   SemanticVersion,
 } from '@sketch-test/contracts-common';
+import { buildV2ExecutionModel, type PostmanExecutionModel } from './execution-model.js';
 import { extractAssertions } from './mapper/assertions.js';
 import { mapAuth } from './mapper/auth.js';
 import { flattenItems, mapToEndpoint } from './mapper/endpoints.js';
@@ -43,6 +44,7 @@ import type { SourceContext } from './mapper/shared.js';
 import { expandTemplate, resolveVariables } from './mapper/variables.js';
 import { parseCollection } from './parser/collection.js';
 import { parseEnvironment } from './parser/environment.js';
+import { type PostmanV3Bundle, parsePostmanV3Bundle } from './parser/v3.js';
 
 // ─── Configuration ────────────────────────────────────────────────
 
@@ -77,6 +79,11 @@ export interface ImportResult {
   success: boolean;
   /** All diagnostics from the import. */
   diagnostics: Diagnostic[];
+  /**
+   * Full source execution semantics retained separately from the canonical API
+   * projection. Callers persist this manifest and its resources verbatim.
+   */
+  executionModel?: PostmanExecutionModel;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────
@@ -127,6 +134,11 @@ export function importPostmanCollection(
   if (!collection) {
     return { model: null, success: false, diagnostics };
   }
+
+  // Capture the unmodified document before the canonical projection resolves
+  // variables. This is what makes a later Postman-compatible migration
+  // possible without re-reading or reconstructing source semantics.
+  const executionModel = buildV2ExecutionModel(structuredClone(collection));
 
   // 2. Build source context
   const ctx = makeSourceContext(options, collection.info.version);
@@ -246,6 +258,7 @@ export function importPostmanCollection(
       variableScope: Object.fromEntries(scope.variables),
       dynamicVariables: scope.dynamicVariables.length > 0 ? scope.dynamicVariables : undefined,
       unresolvedVariables: scope.unresolved.length > 0 ? scope.unresolved : undefined,
+      postmanExecution: executionModel,
     },
   };
 
@@ -272,10 +285,54 @@ export function importPostmanCollection(
       code: 'VALIDATION_ERROR',
       message: `CanonicalApiModel validation failed: ${parsed.error.message}`,
     });
-    return { model: null, success: false, diagnostics };
+    return { model: null, success: false, diagnostics, executionModel };
   }
 
-  return { model: parsed.data, success: !hasErrors, diagnostics };
+  return { model: parsed.data, success: !hasErrors, diagnostics, executionModel };
+}
+
+/**
+ * Import a Postman Collection v3 directory bundle.
+ *
+ * The v3 source format is intentionally file-based. Every supplied file,
+ * including scripts and future extension resources, is preserved in the
+ * returned execution model. The canonical model is only the safe HTTP
+ * projection; non-equivalent runtime behavior remains visible for review.
+ */
+export function importPostmanCollectionV3(
+  bundle: PostmanV3Bundle,
+  options: Omit<PostmanAdapterOptions, 'environment'>,
+): ImportResult {
+  const parsed = parsePostmanV3Bundle(bundle);
+  if (!parsed.collection || !parsed.executionModel) {
+    return {
+      model: null,
+      success: false,
+      diagnostics: parsed.diagnostics,
+      executionModel: parsed.executionModel ?? undefined,
+    };
+  }
+
+  const result = importPostmanCollection(parsed.collection, options);
+  const diagnostics = [...parsed.diagnostics, ...result.diagnostics];
+  const model = result.model
+    ? {
+        ...result.model,
+        metadata: {
+          ...result.model.metadata,
+          extra: {
+            ...result.model.metadata.extra,
+            postmanExecution: parsed.executionModel,
+          },
+        },
+      }
+    : null;
+  return {
+    model,
+    success: result.success && !diagnostics.some((diagnostic) => diagnostic.severity === 'error'),
+    diagnostics,
+    executionModel: parsed.executionModel,
+  };
 }
 
 /**
@@ -359,6 +416,8 @@ export function importPostmanEnvironment(
   return { model: parsed.data, success: !hasErrors, diagnostics };
 }
 
+export { POSTMAN_EXECUTION_MODEL_VERSION, type PostmanExecutionModel } from './execution-model.js';
 // ─── Re-exports ───────────────────────────────────────────────────
 export { parseCollection } from './parser/collection.js';
 export { parseEnvironment } from './parser/environment.js';
+export { type PostmanV3Bundle, parsePostmanV3Bundle } from './parser/v3.js';

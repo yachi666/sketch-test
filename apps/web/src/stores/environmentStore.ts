@@ -1,143 +1,132 @@
 import { create } from 'zustand';
-import {
-  lsGet,
-  lsGetJSON,
-  lsSet,
-  lsSetJSON,
-  LS_ACTIVE_ENV_KEY,
-  LS_ENVIRONMENTS_KEY,
-} from '../lib/storage';
-import { initialEnvironments } from '../data';
-import type { Environment } from '../types';
 import { cpClient, type EnvironmentVersion } from '../lib/cp-client';
-import { useVariableStore } from './variableStore';
+import type { Environment } from '../types';
 
 interface EnvironmentState {
   environments: Environment[];
   activeEnvironmentId: string;
-  /** Latest environment versions fetched from CP, keyed by environmentId. */
   versions: Record<string, EnvironmentVersion[]>;
   loading: boolean;
   error: string | null;
-
   setActiveEnvironmentId: (id: string) => void;
-  createEnvironment: (env: Environment) => void;
-  updateEnvironment: (env: Environment) => void;
-  deleteEnvironment: (envId: string) => void;
+  createEnvironment: (
+    workspaceId: string,
+    name?: string,
+    description?: string,
+  ) => Promise<Environment | null>;
+  updateEnvironment: (
+    id: string,
+    name?: string,
+    description?: string,
+  ) => Promise<Environment | null>;
+  deleteEnvironment: (id: string) => Promise<boolean>;
+  fetchFromServer: (workspaceId: string) => Promise<void>;
+}
 
-  /** Fetch environments + versions from CP. Falls back to localStorage on error. */
-  fetchFromServer: (workspaceId?: string) => Promise<void>;
+function asUiEnvironment(item: {
+  id: string;
+  name: string;
+  description: string;
+  createdAt: string;
+}): Environment {
+  return {
+    id: item.id,
+    name: item.name,
+    description: item.description ?? '',
+    tags: [],
+    isProduction: false,
+    updatedAt: item.createdAt,
+    updatedBy: 'Control Plane',
+  };
 }
 
 export const useEnvironmentStore = create<EnvironmentState>((set, get) => ({
-  environments: lsGetJSON<Environment[]>(LS_ENVIRONMENTS_KEY, initialEnvironments, (parsed) =>
-    Array.isArray(parsed) &&
-    parsed.every((e) => e && typeof e === 'object' && 'id' in e && 'name' in e)
-      ? (parsed as Environment[])
-      : null,
-  ),
-
-  activeEnvironmentId: (() => {
-    try {
-      const stored = lsGet(LS_ACTIVE_ENV_KEY);
-      if (stored) return stored;
-    } catch {
-      // ignore
-    }
-    return initialEnvironments[0].id;
-  })(),
-
+  environments: [],
+  activeEnvironmentId: '',
   versions: {},
   loading: false,
   error: null,
-
-  setActiveEnvironmentId: (id) => {
-    lsSet(LS_ACTIVE_ENV_KEY, id);
-    set({ activeEnvironmentId: id });
-  },
-
-  createEnvironment: (env) =>
-    set((state) => {
-      const next = [env, ...state.environments];
-      lsSetJSON(LS_ENVIRONMENTS_KEY, next);
-      return { environments: next };
-    }),
-
-  updateEnvironment: (env) =>
-    set((state) => {
-      const next = state.environments.map((x) => (x.id === env.id ? env : x));
-      lsSetJSON(LS_ENVIRONMENTS_KEY, next);
-      return { environments: next };
-    }),
-
-  deleteEnvironment: (envId) =>
-    set((state) => {
-      const next = state.environments.filter((x) => x.id !== envId);
-      lsSetJSON(LS_ENVIRONMENTS_KEY, next);
-
-      const newActiveId =
-        state.activeEnvironmentId === envId && next.length > 0
-          ? next[0].id
-          : state.activeEnvironmentId;
-      if (newActiveId !== state.activeEnvironmentId) {
-        lsSet(LS_ACTIVE_ENV_KEY, newActiveId);
-      }
-
-      const variableStore = useVariableStore.getState();
-      const vars = variableStore.variables;
-      const cleaned = vars.map((v) => {
-        const newOverrides = { ...v.overrides };
-        delete newOverrides[envId];
-        return { ...v, overrides: newOverrides };
-      });
-      variableStore.setVariables(cleaned);
-      lsSetJSON('sketchtest.variables:v1', cleaned);
-
-      return { environments: next, activeEnvironmentId: newActiveId };
-    }),
-
-  fetchFromServer: async (workspaceId?: string) => {
+  setActiveEnvironmentId: (activeEnvironmentId) => set({ activeEnvironmentId }),
+  fetchFromServer: async (workspaceId) => {
     set({ loading: true, error: null });
     try {
       const { environments } = await cpClient.listEnvironments(workspaceId);
-      // Map CP environment shape to local Environment type
-      const mapped = environments.map((e) => ({
-        id: e.id,
-        name: e.name,
-        description: e.description ?? '',
-        baseUrl: '',
-        variables: {},
-        createdAt: e.createdAt,
-        updatedAt: e.createdAt,
+      const versions = Object.fromEntries(
+        await Promise.all(
+          environments.map(
+            async (environment) =>
+              [
+                environment.id,
+                (await cpClient.listEnvironmentVersions(environment.id)).versions,
+              ] as const,
+          ),
+        ),
+      );
+      const mapped = environments.map(asUiEnvironment);
+      set({
+        environments: mapped,
+        versions,
+        activeEnvironmentId: get().activeEnvironmentId || mapped[0]?.id || '',
+        loading: false,
+      });
+    } catch (reason) {
+      set({ loading: false, error: reason instanceof Error ? reason.message : String(reason) });
+    }
+  },
+  createEnvironment: async (workspaceId, name, description) => {
+    if (!name) {
+      set({ error: '环境名称不能为空。' });
+      return null;
+    }
+    try {
+      const created = asUiEnvironment(
+        await cpClient.createEnvironment(workspaceId, name, description),
+      );
+      set((state) => ({
+        environments: [created, ...state.environments],
+        activeEnvironmentId: state.activeEnvironmentId || created.id,
       }));
-
-      // Fetch versions for each environment
-      const versionsMap: Record<string, EnvironmentVersion[]> = {};
-      for (const env of environments) {
-        try {
-          const { versions } = await cpClient.listEnvironmentVersions(env.id);
-          versionsMap[env.id] = versions;
-          // Set baseUrl and variables from latest version
-          const latest = versions[versions.length - 1];
-          if (latest) {
-            const idx = mapped.findIndex((m) => m.id === env.id);
-            if (idx >= 0) {
-              mapped[idx] = {
-                ...mapped[idx],
-                ...(latest as any).baseUrl != null ? {} : {},
-              } as any;
-            }
-          }
-        } catch {
-          // Skip version fetch for this env
-        }
-      }
-
-      set({ environments: mapped as any, versions: versionsMap, loading: false });
-      // Persist to localStorage as cache
-      lsSetJSON(LS_ENVIRONMENTS_KEY, mapped);
-    } catch (err) {
-      set({ error: String(err), loading: false });
+      return created;
+    } catch (reason) {
+      set({ error: reason instanceof Error ? reason.message : String(reason) });
+      return null;
+    }
+  },
+  updateEnvironment: async (id, name, description) => {
+    if (!name) {
+      set({ error: '环境名称不能为空。' });
+      return null;
+    }
+    try {
+      const updated = asUiEnvironment(await cpClient.updateEnvironment(id, { name, description }));
+      set((state) => ({
+        environments: state.environments.map((item) => (item.id === id ? updated : item)),
+      }));
+      return updated;
+    } catch (reason) {
+      set({ error: reason instanceof Error ? reason.message : String(reason) });
+      return null;
+    }
+  },
+  deleteEnvironment: async (id) => {
+    const previous = get().environments;
+    const previousActiveId = get().activeEnvironmentId;
+    const environments = previous.filter((item) => item.id !== id);
+    set({
+      environments,
+      activeEnvironmentId:
+        get().activeEnvironmentId === id ? environments[0]?.id || '' : get().activeEnvironmentId,
+    });
+    try {
+      await cpClient.deleteEnvironment(id);
+      return true;
+    } catch (reason) {
+      set({
+        environments: previous,
+        activeEnvironmentId: previousActiveId,
+        error: reason instanceof Error ? reason.message : String(reason),
+      });
+      return false;
     }
   },
 }));

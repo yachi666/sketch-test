@@ -5,17 +5,19 @@
   "type": "module",
   "main": "./src/index.ts",
   "scripts": {
+    "build": "tsc --noEmit false --allowImportingTsExtensions false --incremental false",
+    "clean": "rm -rf dist/ tsconfig.tsbuildinfo",
     "dev": "tsx --watch src/index.ts",
     "start": "tsx src/index.ts",
     "check": "tsc --noEmit",
-    "lint": "biome check"
+    "lint": "biome check",
+    "test": "vitest run --exclude '**/dist/**'"
   },
-  "dependencies": {
-    "zod": "catalog:"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "catalog:",
     "tsx": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

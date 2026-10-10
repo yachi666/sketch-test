@@ -3,7 +3,7 @@
  *
  * Tests variable CRUD and CP secret fetching.
  */
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // ─── Mock cpClient ─────────────────────────────────────────────────
 
@@ -30,14 +30,8 @@ vi.mock('../../lib/storage', () => ({
   LS_VARIABLES_KEY: 'sketchtest.variables:v1',
 }));
 
-// ─── Mock data ─────────────────────────────────────────────────────
-
-vi.mock('../../data', () => ({
-  initialVariables: [],
-}));
-
-import { useVariableStore } from '../variableStore';
 import type { Variable } from '../../types';
+import { useVariableStore } from '../variableStore';
 
 // ─── Helpers ───────────────────────────────────────────────────────
 
