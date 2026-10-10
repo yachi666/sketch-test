@@ -56,3 +56,16 @@ agent loop and tool validation without outbound network access.
 Temporary test containers, volumes, images and leaked processes from the failed
 attempts were cleaned up. Existing user containers were retained. The local Web
 build was restored without the temporary E2E Control Plane URL.
+
+## 提交与云端冷启动复验
+
+首次 GitHub CI 冷启动发现 Docker Hub 的 `minio/minio`、`minio/mc` 原镜像已无法公开拉取；Quay 的原 client 镜像同样返回未授权。本机之前的镜像缓存没有暴露此问题。
+
+`ops/minio/Dockerfile` 现从官方源码构建相同版本，使用 SHA-256 校验下载的源码归档，并保留上游许可证及来源/提交标签。Compose 与产品 E2E 使用该构建。产品 E2E 的镜像构建在主流程执行，对托管和外部 PostgreSQL 两种模式均生效。
+
+- 本地两个镜像源码构建成功。
+- 本地 Compose 复验：`sketchtest-smoke-27187-1791612610820`，5 个服务运行，Runner `rnr_bf37587b` 心跳通过；临时服务/卷已清理。
+- 本地产品复验：Run `run_2bb7b8d1`，9 个接口、6/6 事件外置、4 个迁移、9/9 对象恢复校验通过；浏览器报告证据链通过，console errors = 0。
+- GitHub 运行 [38029864232](https://github.com/yachi666/sketch-test/actions/runs/38029864232) 的源码镜像 Compose 冷启动已通过。该轮产品脚本的变量作用域问题随后修正，并以上述本地产品复验确认；最终提交仍须以对应 GitHub CI 为准。
+
+上游构建说明：[MinIO source build](https://github.com/minio/minio#build-docker-image)。

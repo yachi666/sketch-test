@@ -76,8 +76,6 @@ function databaseUrl(name) {
 
 async function startManagedPostgres() {
   postgresPort = await freePort();
-  const minioImage = 'sketchtest/minio:RELEASE.2025-09-07T16-13-09Z';
-  command('docker', ['build', '--target', 'server', '-t', minioImage, 'ops/minio']);
   command('docker', [
     'run',
     '-d',
@@ -216,6 +214,8 @@ async function cleanup() {
 }
 
 async function main() {
+  const minioImage = 'sketchtest/minio:RELEASE.2025-09-07T16-13-09Z';
+  command('docker', ['build', '--target', 'server', '-t', minioImage, 'ops/minio']);
   command('docker', ['version'], { capture: true });
   if (managedPostgres) {
     await startManagedPostgres();
