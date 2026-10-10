@@ -16,7 +16,8 @@ The six runtime gates retain their existing names: `lint`, `typecheck`, `test (2
 `test (24)`, `product-e2e`, and `compose-smoke`. `automation` additionally checks
 workflow syntax, embedded shell scripts, entry-point documentation file links, and
 full-SHA Action references. `pages-build` validates the deployment build on PRs.
-All eight are required. Check sources are restricted to the GitHub Actions app.
+`dependency-review` rejects newly introduced high/critical vulnerabilities on PRs
+and version-branch CI dispatches. All nine are required. Check sources are restricted to the GitHub Actions app.
 
 Only one human maintainer currently exists, so required approvals are set to zero.
 [CODEOWNERS](../.github/CODEOWNERS) routes review requests to the maintainer. Raise
@@ -54,7 +55,7 @@ Changesets does not create a local commit.
 
 GitHub's built-in token does not trigger `pull_request` workflows for a PR it
 creates. The job therefore explicitly dispatches `ci.yml` on the version PR's head
-branch. The dispatch runs the same eight required checks; it cannot recursively
+branch. The dispatch runs the same nine required checks; it cannot recursively
 create another version PR because that job requires a `push` to `master`.
 
 Repository Settings → Actions → General allows Actions to create PRs. The same
