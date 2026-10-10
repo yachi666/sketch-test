@@ -1,0 +1,11 @@
+route:
+  receiver: retained-local-notifications
+  group_by: [alertname, job]
+  group_wait: 5s
+  group_interval: 10s
+  repeat_interval: 4h
+receivers:
+  - name: retained-local-notifications
+    webhook_configs:
+      - url: http://alert-receiver:8081/alerts
+        send_resolved: true

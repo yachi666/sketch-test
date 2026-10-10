@@ -22,16 +22,19 @@ vi.mock('../../../shared/id.js', () => ({
 
 import {
   createTestSuite,
-  getTestSuite,
-  listTestSuites,
-  deleteTestSuite,
   createTestSuiteVersion,
-  getTestSuiteVersion,
-  listTestSuiteVersions,
+  deleteTestSuite,
+  EmptyTestSuiteVersionError,
   evaluateQualityGate,
+  getTestSuite,
+  getTestSuiteVersion,
+  listTestSuites,
+  listTestSuiteVersions,
+  RunNotFoundError,
+  TestSuiteGateConfigError,
+  TestSuiteInUseError,
   TestSuiteNotFoundError,
   TestSuiteVersionNotFoundError,
-  RunNotFoundError,
 } from '../test-suite.service';
 
 // ─── Helpers ───────────────────────────────────────────────────────
@@ -139,11 +142,17 @@ describe('deleteTestSuite', () => {
   });
 
   test('deletes test suite and its versions', async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [] }); // DELETE versions
-    mockQuery.mockResolvedValueOnce({ rows: [] }); // DELETE suite
+    mockQuery.mockResolvedValueOnce({ rows: [{ id: 'ts-001' }], rowCount: 1 });
 
-    // Should not throw
     await expect(deleteTestSuite('ts-001')).resolves.not.toThrow();
+    expect(mockQuery).toHaveBeenCalledOnce();
+    expect(mockQuery.mock.calls[0]?.[0]).toContain('WITH deletable');
+  });
+
+  test('does not partially delete a suite referenced by a schedule', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [], rowCount: 0 });
+
+    await expect(deleteTestSuite('ts-001')).rejects.toThrow(TestSuiteInUseError);
   });
 });
 
@@ -156,13 +165,19 @@ describe('createTestSuiteVersion', () => {
 
   test('creates a version with auto-increment', async () => {
     mockQuery.mockResolvedValueOnce({ rows: [makeSuiteRow()] }); // suite exists
+    mockQuery.mockResolvedValueOnce({ rows: [{ test_count: 1, workflow_count: 1 }] });
     mockQuery.mockResolvedValueOnce({ rows: [{ version: 1 }] }); // latest version
     mockQuery.mockResolvedValueOnce({ rows: [] }); // INSERT version
     mockQuery.mockResolvedValueOnce({ rows: [] }); // UPDATE updated_at
 
-    const version = await createTestSuiteVersion('ts-001', [{ type: 'test', id: 'tc-001' }], {
-      requiredWorkflows: ['wf-001'],
-    });
+    const version = await createTestSuiteVersion(
+      'ts-001',
+      [
+        { type: 'test', id: 'tc-001' },
+        { type: 'workflow', id: 'wf-001' },
+      ],
+      { requiredWorkflows: ['wf-001'] },
+    );
     expect(version.version).toBe(2);
   });
 
@@ -172,6 +187,53 @@ describe('createTestSuiteVersion', () => {
     await expect(createTestSuiteVersion('non-existent', [], {})).rejects.toThrow(
       TestSuiteNotFoundError,
     );
+  });
+
+  test('rejects an empty immutable version', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [makeSuiteRow()] });
+
+    await expect(createTestSuiteVersion('ts-001', [], {})).rejects.toThrow(
+      EmptyTestSuiteVersionError,
+    );
+  });
+
+  test('deduplicates identical members before persistence', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [makeSuiteRow()] });
+    mockQuery.mockResolvedValueOnce({ rows: [{ test_count: 1, workflow_count: 0 }] });
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    const version = await createTestSuiteVersion(
+      'ts-001',
+      [
+        { type: 'test', id: 'tc-001' },
+        { type: 'test', id: 'tc-001' },
+      ],
+      {},
+    );
+
+    expect(version.members).toEqual([{ type: 'test', id: 'tc-001' }]);
+    expect(mockQuery.mock.calls[3]?.[1]?.[3]).toBe('[{"type":"test","id":"tc-001"}]');
+  });
+
+  test('rejects a required workflow that is not an execution member', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [makeSuiteRow()] });
+
+    await expect(
+      createTestSuiteVersion('ts-001', [{ type: 'test', id: 'tc-001' }], {
+        requiredWorkflows: ['wf-001'],
+      }),
+    ).rejects.toThrow(TestSuiteGateConfigError);
+  });
+
+  test('rejects members without a published executable version', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [makeSuiteRow()] });
+    mockQuery.mockResolvedValueOnce({ rows: [{ test_count: 0, workflow_count: 0 }] });
+
+    await expect(
+      createTestSuiteVersion('ts-001', [{ type: 'test', id: 'tc-unpublished' }], {}),
+    ).rejects.toThrow(/published version/);
   });
 });
 

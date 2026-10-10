@@ -1,0 +1,59 @@
+{
+  "id": "draft_ca876713",
+  "jobId": "gj_9c6997d5",
+  "testCaseId": null,
+  "definition": {
+    "id": "code_GET_406629bb093dcd7a89ac",
+    "name": "GET /api/auth/me 读取当前登录用户（只读正向）",
+    "request": {
+      "url": "${env.baseUrl}/api/auth/me",
+      "method": "GET",
+      "timeoutMs": 30000,
+      "followRedirects": false
+    },
+    "assertions": [
+      {
+        "id": "status-200",
+        "target": "status",
+        "expected": 200,
+        "operator": "equals",
+        "severity": "block"
+      }
+    ],
+    "sideEffect": "read-only",
+    "schemaVersion": "sketch-test.test/v1"
+  },
+  "sourceInfo": {
+    "path": "/api/auth/me",
+    "model": "deepseek-v4-flash",
+    "commit": "f316473c15d8564fb61eb5fdb4eb8a5c06be4939",
+    "method": "GET",
+    "attempt": 1,
+    "harness": "pi-agent-core",
+    "provider": "deepseek",
+    "strategy": "pi",
+    "inputHash": "bc3b125243a06361ab2898c9afb7dc63276ec4f2bec298acdbd992e5193bd2c9",
+    "rationale": "证据来源：端点 code_GET_406629bb093dcd7a89ac，静态 Spring 源码投影，method=GET，path=/api/auth/me，requestTemplate 与 URL 完全一致；contractNotes 中 responses 仅声明 status 200 且 content 为空，requestBodyRequired=false、parameters 为空，故请求不带 body、不带路径/查询参数。sideEffect 分类为 read-only，与“只读正向测试、不生成写操作”的目标一致，因此仅校验 HTTP 状态码。缺失的业务期望（需人工确认）：1) 未说明是否需要认证凭据（如 Cookie/Authorization 头）才能返回 200，若该接口要求登录，本用例在无凭据环境下可能返回 401，需在测试环境预置已认证会话；2) 响应体字段类型未被投影证明（contractNotes 明确“response bodies are not proved”、content 为空），因此不添加任何 jsonPath 断言，避免凭空编造字段结构；3) 未提供用户信息字段的业务语义与示例值。局限性：全局异常处理、认证拦截器与服务逻辑均未被源码投影覆盖，200 状态是否覆盖所有“已认证”场景无法从证据判定。本项为未评审草稿，不执行任何 HTTP 请求。",
+    "endpointId": "code_GET_406629bb093dcd7a89ac",
+    "sourceHash": "c9d94c6bbbfdc8df0f2797b0f64a789756539cd9cea77d26169c871b4a7113f0",
+    "apiVersionId": "av_ea093aaa",
+    "codeLocations": [
+      {
+        "location": "https://github.com/yachi666/support-roster-server/blob/f316473c15d8564fb61eb5fdb4eb8a5c06be4939/src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java#L44",
+        "sourceId": "code_c9d94c6bbbfdc8df0f27",
+        "ingestedAt": "2026-10-08T15:09:56.063Z",
+        "sourceHash": "f35a1c6f89b2ffe9059d313cbfe2a57664880415d674186490b0ec66ec314214",
+        "sourceLabel": "src/main/java/com/support/server/supportrosterserver/controller/auth/AuthController.java",
+        "sourceVersion": "0.1.0"
+      }
+    ],
+    "promptVersion": "1.1.0",
+    "repositoryUrl": "https://github.com/yachi666/support-roster-server",
+    "harnessVersion": "0.85.1"
+  },
+  "confidence": null,
+  "status": "pending",
+  "reviewedBy": null,
+  "reviewedAt": null,
+  "createdAt": "2026-10-08T15:10:02.952Z"
+}

@@ -1,0 +1,55 @@
+{
+  "id": "draft_f592aeaa",
+  "jobId": "gj_750034c4",
+  "testCaseId": null,
+  "definition": {
+    "id": "get-repo-nodejs-node-success",
+    "name": "读取 nodejs/node 仓库元数据返回 200 且 full_name 正确",
+    "request": {
+      "url": "${env.baseUrl}/repos/:owner/:repo",
+      "method": "GET",
+      "timeoutMs": 30000,
+      "followRedirects": false
+    },
+    "assertions": [
+      {
+        "id": "status-is-200",
+        "target": "status",
+        "expected": 200,
+        "operator": "equals",
+        "severity": "block"
+      },
+      {
+        "id": "full-name-is-nodejs-node",
+        "path": "$.full_name",
+        "target": "jsonPath",
+        "expected": "nodejs/node",
+        "operator": "equals",
+        "severity": "block"
+      }
+    ],
+    "sideEffect": "read-only",
+    "schemaVersion": "sketch-test.test/v1"
+  },
+  "sourceInfo": {
+    "path": "/repos/:owner/:repo",
+    "model": "deepseek-v4-flash",
+    "method": "GET",
+    "attempt": 1,
+    "harness": "pi-agent-core",
+    "provider": "deepseek",
+    "strategy": "pi",
+    "inputHash": "ed9f6de10f39ee7d2aac8088ce17b8034cc3fc48f427a6baeed87894a831a1f8",
+    "rationale": "只读正向用例，覆盖目标中明确要求的 GET /repos/{owner}/{repo}（owner=nodejs，repo=node），未涉及提交历史列表。requestTemplate 为 ${env.baseUrl}/repos/:owner/:repo，URL 与其完全一致；路径参数来自目标中的 owner=nodejs、repo=node，需由环境变量或参数绑定提供（脚本中未显式声明路径参数替换方式，为假设项，需人工确认）。契约仅声明 200，因此状态断言使用 equals 200；响应 schema 声明 full_name 为必填 string，故断言其等于 nodejs/node，证据充分。作为额外可选断言，schema 还声明 id（integer，必填）与 default_branch（string，非必填），可考虑断言 id 为整数类型、default_branch 为字符串，但缺少具体期望值，未加入以避免臆测。sideEffect 为 read-only，不产生副作用。缺失的业务预期：未说明对非存在仓库或错误路径参数的行为（本用例不覆盖）；未说明是否需要鉴权与速率限制容忍策略；默认分支名等具体取值未给出。以上均需人工评审确认。",
+    "endpointId": "GET-/repos/:owner/:repo",
+    "sourceHash": "e6f0db1e7d89d7a5bef33bc5c4ac54ab0ff20f137f0c4c6bacd047d35cee930b",
+    "apiVersionId": "av_fa206a0a",
+    "promptVersion": "1.1.0",
+    "harnessVersion": "0.85.1"
+  },
+  "confidence": null,
+  "status": "pending",
+  "reviewedBy": null,
+  "reviewedAt": null,
+  "createdAt": "2026-10-08T15:19:32.315Z"
+}

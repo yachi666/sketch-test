@@ -5,7 +5,7 @@
  * fault injection, and an OpenAPI endpoint. Used by Runner integration tests
  * and local development.
  *
- * sketch-test-004: M0 feasibility verification.
+ * This server is test infrastructure only and must not be used by production routes.
  *
  * Usage:
  *   npx tsx src/index.ts            # default port 3800
@@ -13,7 +13,8 @@
  *   FAULT_MODE=timeout npx tsx ...  # inject faults
  */
 
-import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
+import { pathToFileURL } from 'node:url';
 
 // ─── Configuration ──────────────────────────────────────────────
 
@@ -107,7 +108,7 @@ function json(res: ServerResponse, status: number, body: unknown): void {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, QUERY',
   });
   res.end(JSON.stringify(body, null, 2));
 }
@@ -161,7 +162,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
     res.writeHead(204, {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, QUERY',
     });
     res.end();
     return;
@@ -187,6 +188,17 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
   // ── Health ──
   if (method === 'GET' && pathname === '/health') {
     return json(res, 200, { status: 'ok', time: FIXED_NOW.toISOString() });
+  }
+
+  // ── OpenAPI 3.2 QUERY: structured search request ──
+  if (method === 'QUERY' && pathname === '/api/search') {
+    const body = await parseBody<{ term?: string }>(req);
+    return json(res, 200, {
+      term: body.term ?? '',
+      matches: [...users.values()].filter((user) =>
+        user.name.toLowerCase().includes((body.term ?? '').toLowerCase()),
+      ).length,
+    });
   }
 
   // ── Reset (admin) ──
@@ -387,7 +399,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
 
 function generateOpenApiSpec(): unknown {
   return {
-    openapi: '3.1.0',
+    openapi: '3.2.0',
     info: {
       title: 'Hermetic Fixture API',
       version: '1.0.0',
@@ -396,6 +408,27 @@ function generateOpenApiSpec(): unknown {
     },
     servers: [{ url: `http://127.0.0.1:${PORT}`, description: 'Fixture Server' }],
     paths: {
+      '/api/search': {
+        query: {
+          operationId: 'searchUsers',
+          summary: '结构化搜索用户',
+          tags: ['Users'],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: { term: { type: 'string' } },
+                },
+              },
+            },
+          },
+          responses: {
+            '200': { description: '搜索成功' },
+          },
+        },
+      },
       '/api/users': {
         post: {
           operationId: 'createUser',
@@ -604,14 +637,35 @@ function generateOpenApiSpec(): unknown {
 
 // ─── Start Server ────────────────────────────────────────────────
 
-const server = createServer(handleRequest);
-server.listen(PORT, () => {
-  console.log(`\n🔬 Hermetic Fixture Server ready at http://127.0.0.1:${PORT}`);
-  console.log(`   OpenAPI spec:    http://127.0.0.1:${PORT}/openapi.json`);
-  console.log(`   Health check:    http://127.0.0.1:${PORT}/health`);
-  console.log(`   Admin reset:     POST http://127.0.0.1:${PORT}/__admin/reset`);
-  if (FAULT_MODE) {
-    console.log(`   ⚠️  Fault injection: ${FAULT_MODE} on "${FAULT_TARGET || '*'}"`);
-  }
-  console.log('');
-});
+export function createFixtureServer(): Server {
+  seed();
+  return createServer(handleRequest);
+}
+
+export function startFixtureServer(port = PORT, log = true): Promise<Server> {
+  const server = createFixtureServer();
+  return new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(port, '127.0.0.1', () => {
+      server.off('error', reject);
+      if (log) {
+        const address = server.address();
+        const actualPort = typeof address === 'object' && address ? address.port : port;
+        console.log(`\n🔬 Hermetic Fixture Server ready at http://127.0.0.1:${actualPort}`);
+        console.log(`   OpenAPI spec:    http://127.0.0.1:${actualPort}/openapi.json`);
+        console.log(`   Health check:    http://127.0.0.1:${actualPort}/health`);
+        console.log(`   Admin reset:     POST http://127.0.0.1:${actualPort}/__admin/reset`);
+        if (FAULT_MODE) {
+          console.log(`   ⚠️  Fault injection: ${FAULT_MODE} on "${FAULT_TARGET || '*'}"`);
+        }
+        console.log('');
+      }
+      resolve(server);
+    });
+  });
+}
+
+const entrypoint = process.argv[1];
+if (entrypoint && import.meta.url === pathToFileURL(entrypoint).href) {
+  await startFixtureServer();
+}

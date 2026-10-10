@@ -1,0 +1,139 @@
+{
+  "version": {
+    "id": "wfv_e9f5f34c",
+    "workflowId": "wf_5b2bc9b1",
+    "version": 3,
+    "definition": {
+      "id": "wf_5b2bc9b1",
+      "name": "修复复测：GitHub 流程编辑保存",
+      "tags": [
+        "arazzo-1.1"
+      ],
+      "steps": [
+        {
+          "id": "metadata",
+          "name": "metadata",
+          "enabled": true,
+          "extract": [],
+          "useTest": {
+            "url": "https://api.github.com/repos/nodejs/node",
+            "kind": "inline",
+            "method": "GET",
+            "headers": {
+              "Accept": "application/vnd.github+json"
+            }
+          },
+          "onFailure": "stop",
+          "assertions": [
+            {
+              "target": "status",
+              "expected": 200,
+              "operator": "equals"
+            }
+          ],
+          "sideEffect": "read-only"
+        },
+        {
+          "id": "commits",
+          "name": "commits",
+          "enabled": true,
+          "extract": [],
+          "useTest": {
+            "url": "https://api.github.com/repos/nodejs/node/commits?per_page=30",
+            "kind": "inline",
+            "method": "GET"
+          },
+          "onFailure": "stop",
+          "assertions": [
+            {
+              "target": "status",
+              "expected": 200,
+              "operator": "equals"
+            }
+          ],
+          "sideEffect": "read-only"
+        }
+      ],
+      "source": {
+        "type": "arazzo",
+        "contentHash": "0b7aa29ae499aad9c76143dafbf7e22e1f69248caba41e5ef0c95cdaa3eed66a",
+        "sourceLabel": "http://sketchtest-verification-sources/github-real.arazzo.yml",
+        "sourceObjectKey": "workflow-sources/sha256/0b7aa29ae499aad9c76143dafbf7e22e1f69248caba41e5ef0c95cdaa3eed66a.arazzo",
+        "specificationVersion": "1.1.0"
+      },
+      "schemaVersion": "sketch-test.workflow/v1"
+    },
+    "compiledPlan": {
+      "steps": [
+        {
+          "method": "GET",
+          "stepId": "metadata",
+          "enabled": true,
+          "headers": {
+            "Accept": "application/vnd.github+json"
+          },
+          "sequence": 0,
+          "onFailure": "stop",
+          "timeoutMs": 30000,
+          "assertions": [
+            {
+              "id": "assert-0-0",
+              "target": "status",
+              "expected": 200,
+              "operator": "equals",
+              "severity": "block"
+            }
+          ],
+          "maxRetries": 0,
+          "sideEffect": "read-only",
+          "extractions": [],
+          "urlTemplate": "https://api.github.com/repos/nodejs/node",
+          "retryBaseDelayMs": 1000,
+          "retryOnNetworkError": true,
+          "retryBackoffMultiplier": 2
+        },
+        {
+          "method": "GET",
+          "stepId": "commits",
+          "enabled": true,
+          "sequence": 1,
+          "onFailure": "stop",
+          "timeoutMs": 30000,
+          "assertions": [
+            {
+              "id": "assert-1-0",
+              "target": "status",
+              "expected": 200,
+              "operator": "equals",
+              "severity": "block"
+            }
+          ],
+          "maxRetries": 0,
+          "sideEffect": "read-only",
+          "extractions": [],
+          "urlTemplate": "https://api.github.com/repos/nodejs/node/commits?per_page=30",
+          "retryBaseDelayMs": 1000,
+          "retryOnNetworkError": true,
+          "retryBackoffMultiplier": 2
+        }
+      ],
+      "planId": "plan_7465b5d2",
+      "planHash": "4709be9b1761e164844288c95b32d76045c4b873a3703435850167b042530066",
+      "compiledAt": "2026-10-08T16:06:39.257Z",
+      "schemaVersion": "sketch-test.runner-protocol/v1",
+      "workflowVersionId": "wfv_e9f5f34c"
+    },
+    "publishedBy": "web",
+    "publishedAt": "2026-10-08T16:06:39.257Z"
+  },
+  "runId": "run_258d976f",
+  "integrity": {
+    "encoding": "per-event",
+    "unverifiableLegacyEventIds": [],
+    "valid": true,
+    "storedHash": "13a7260c052b91e8b5643e91835ca59bb9567b4459295bf20e209083a94b8980",
+    "computedHash": "13a7260c052b91e8b5643e91835ca59bb9567b4459295bf20e209083a94b8980",
+    "eventCount": 12
+  },
+  "status": "passed"
+}

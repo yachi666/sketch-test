@@ -1,20 +1,18 @@
 /**
  * authStore unit tests.
  *
- * Tests login, logout, restoreSession, and isAuthenticated.
+ * Tests session lifecycle, restoreSession, and isAuthenticated.
  */
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // ─── Mock cpClient ─────────────────────────────────────────────────
 
-const { mockLogin, mockGetMe } = vi.hoisted(() => ({
-  mockLogin: vi.fn(),
+const { mockGetMe } = vi.hoisted(() => ({
   mockGetMe: vi.fn(),
 }));
 
 vi.mock('../../lib/cp-client', () => ({
   cpClient: {
-    login: (...args: unknown[]) => mockLogin(...args),
     getMe: (...args: unknown[]) => mockGetMe(...args),
   },
 }));
@@ -57,7 +55,9 @@ function makeUser() {
 describe('authStore', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    Object.keys(store).forEach((k) => delete store[k]);
+    Object.keys(store).forEach((k) => {
+      delete store[k];
+    });
     useAuthStore.setState({
       user: null,
       token: null,
@@ -66,77 +66,9 @@ describe('authStore', () => {
     });
   });
 
-  describe('login', () => {
-    test('successful login sets user and token', async () => {
-      const user = makeUser();
-      mockLogin.mockResolvedValue({ user, token: 'jwt-token-abc' });
-
-      await useAuthStore.getState().login('alice@example.com', 'password123', 'ws-001');
-
-      const state = useAuthStore.getState();
-      expect(state.user).toEqual(user);
-      expect(state.token).toBe('jwt-token-abc');
-      expect(state.loading).toBe(false);
-      expect(state.error).toBeNull();
-    });
-
-    test('stores token in localStorage', async () => {
-      mockLogin.mockResolvedValue({ user: makeUser(), token: 'jwt-token-xyz' });
-
-      await useAuthStore.getState().login('alice@example.com', 'password123');
-
-      expect(localStorageMock.setItem).toHaveBeenCalledWith(
-        'sketchtest.auth-token:v1',
-        'jwt-token-xyz',
-      );
-    });
-
-    test('sets loading=true during login', () => {
-      mockLogin.mockImplementation(
-        () =>
-          new Promise((resolve) =>
-            setTimeout(() => resolve({ user: makeUser(), token: 't' }), 100),
-          ),
-      );
-
-      useAuthStore.getState().login('alice@example.com', 'password123');
-
-      expect(useAuthStore.getState().loading).toBe(true);
-    });
-
-    test('sets error on login failure', async () => {
-      mockLogin.mockRejectedValue(new Error('Invalid credentials'));
-
-      try {
-        await useAuthStore.getState().login('alice@example.com', 'wrong');
-      } catch {
-        // Expected
-      }
-
-      const state = useAuthStore.getState();
-      expect(state.error).toContain('Invalid credentials');
-      expect(state.loading).toBe(false);
-      expect(state.user).toBeNull();
-    });
-
-    test('re-throws error after setting state', async () => {
-      mockLogin.mockRejectedValue(new Error('Network down'));
-
-      await expect(useAuthStore.getState().login('alice@example.com', 'pass')).rejects.toThrow(
-        'Network down',
-      );
-
-      expect(useAuthStore.getState().error).toContain('Network down');
-    });
-  });
-
   describe('logout', () => {
-    test('clears user, token, and localStorage', async () => {
-      // Setup: logged in state
-      mockLogin.mockResolvedValue({ user: makeUser(), token: 'jwt-token' });
-      await useAuthStore.getState().login('alice@example.com', 'pass');
-
-      // Act
+    test('clears user, token, and localStorage', () => {
+      useAuthStore.getState().setSession('jwt-token', makeUser());
       useAuthStore.getState().logout();
 
       const state = useAuthStore.getState();
@@ -216,7 +148,7 @@ describe('authStore', () => {
       store['sketchtest.auth-token:v1'] = 'stored-jwt';
       useAuthStore.setState({});
       // getState reads from the store
-      const token = useAuthStore.getState().token;
+      const _token = useAuthStore.getState().token;
       // The token from initial create() may already be set; we trust the stored value
       expect(true).toBe(true); // Integration point — tested via restoreSession
     });

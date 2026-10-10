@@ -239,8 +239,8 @@ export function ClipboardImportDialog({
 
           {/* Error state */}
           {showError ? (
-            <div className="clipboard-error">
-              <Warning size={16} />
+            <div className="clipboard-error" role="alert">
+              <Warning aria-hidden="true" size={16} />
               <span>无法解析输入内容。请检查格式是否正确。</span>
             </div>
           ) : null}

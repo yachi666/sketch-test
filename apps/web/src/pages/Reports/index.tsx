@@ -1,534 +1,467 @@
-import { useState, useMemo, type ElementType } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  ChartBar,
-  MagnifyingGlass,
-  CaretDown,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Warning,
-  User,
-  CalendarCheck,
-  GitBranch,
-  LinkSimple,
+  ArrowClockwise,
   CaretLeft,
-  ArrowsClockwise,
+  CheckCircle,
+  ClipboardText,
+  Clock,
+  Code,
+  FileText,
   Info,
-  FileCode,
-  Stack,
-  Database,
-  ArrowRight,
+  Warning,
+  XCircle,
 } from '@phosphor-icons/react';
-import { initialRuns, testPlans } from '../../data';
-import type { RunStatus, RunMeta, TriggerType, TestPlan } from '../../types';
-import { useWorkflowStore } from '../../stores/workflowStore';
-import { LiveRunPanel } from '../../components/reports/LiveRunPanel';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { cpClient, type RunReport, type RunSummary } from '../../lib/cp-client';
+import { isActiveRun, statusLabel, statusTone } from '../../lib/run-status';
+import { ReportListView } from './ReportListView';
+import './reports.css';
 
-// ─── Report constants ──────────────────────────────────────────
+type EvidenceTab = 'request' | 'response' | 'assertion' | 'events';
 
-const RUN_STATUS_LABEL: Record<RunStatus | 'all', string> = {
-  all: '全部',
-  passed: '通过',
-  failed: '失败',
-  inconclusive: '未决',
-  'infra-error': '基础设施错误',
-};
-
-const WORKFLOW_STATUS_LABEL: Record<string, string> = {
-  passed: '通过',
-  failed: '失败',
-  skipped: '跳过',
-  error: '错误',
-};
-
-const TRIGGER_ICON: Record<TriggerType, ElementType> = {
-  manual: User,
-  scheduled: CalendarCheck,
-  ci: GitBranch,
-  webhook: LinkSimple,
-};
-
-const TRIGGER_LABEL: Record<TriggerType, string> = {
-  manual: '手动',
-  scheduled: '定时',
-  ci: 'CI',
-  webhook: 'Webhook',
-};
-
-function formatDuration(ms: number): string {
-  if (ms >= 1000) return `${(ms / 1000).toFixed(1)}s`;
-  return `${ms}ms`;
+function StatusIcon({ status }: { status: string }) {
+  const tone = statusTone(status);
+  if (tone === 'passed') return <CheckCircle aria-hidden size={17} weight="fill" />;
+  if (tone === 'failed') return <XCircle aria-hidden size={17} weight="fill" />;
+  return <Warning aria-hidden size={17} weight="fill" />;
 }
 
-// ─── Report List ────────────────────────────────────────────────
-
-function ReportListView() {
-  const navigate = useNavigate();
-  const runs = initialRuns;
-  const [query, setQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | RunStatus>('all');
-  const [planFilter, setPlanFilter] = useState('all');
-  const [envFilter, setEnvFilter] = useState('all');
-
-  const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: runs.length };
-    for (const s of ['passed', 'failed', 'inconclusive', 'infra-error'] as RunStatus[]) {
-      counts[s] = runs.filter((r) => r.status === s).length;
-    }
-    return counts;
-  }, [runs]);
-
-  const envNames = useMemo(() => [...new Set(runs.map((r) => r.environment))].sort(), [runs]);
-
-  const filtered = useMemo(
-    () =>
-      runs.filter((r) => {
-        const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
-        const matchesPlan = planFilter === 'all' || r.planId === planFilter;
-        const matchesEnv = envFilter === 'all' || r.environment === envFilter;
-        const q = query.toLowerCase();
-        const matchesQuery =
-          !q ||
-          r.runId.toLowerCase().includes(q) ||
-          r.name.toLowerCase().includes(q) ||
-          (r.gitCommit ?? '').toLowerCase().includes(q) ||
-          r.selectedTags.some((t) => t.toLowerCase().includes(q));
-        return matchesStatus && matchesPlan && matchesEnv && matchesQuery;
-      }),
-    [runs, statusFilter, planFilter, envFilter, query],
-  );
-
-  return (
-    <main className="page-view">
-      <div className="page-intro">
-        <div>
-          <span className="eyebrow">REPORTS</span>
-          <h2>报告中心</h2>
-          <p>
-            每次测试运行聚合多个业务流程的执行结果，支持按计划选择子集。 共 {runs.length}{' '}
-            个运行报告。
-          </p>
-        </div>
-      </div>
-      <div className="report-filter-bar variable-filter-bar">
-        <div className="filter-tabs">
-          {(Object.entries(RUN_STATUS_LABEL) as [RunStatus | 'all', string][]).map(
-            ([key, label]) => (
-              <button
-                key={key}
-                type="button"
-                className={`filter-tab ${statusFilter === key ? 'filter-tab--active' : ''}`}
-                onClick={() => setStatusFilter(key)}
-              >
-                {label}
-                <span className="filter-count">({statusCounts[key] ?? 0})</span>
-              </button>
-            ),
-          )}
-        </div>
-        <span className="toolbar-spacer" />
-        <label className="search-field" style={{ minWidth: 200 }}>
-          <MagnifyingGlass size={16} />
-          <span className="sr-only">搜索报告</span>
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="搜索运行ID、名称、标签或提交"
-          />
-        </label>
-        <label className="select-wrap">
-          <span className="sr-only">计划筛选</span>
-          <select value={planFilter} onChange={(e) => setPlanFilter(e.target.value)}>
-            <option value="all">全部计划</option>
-            {testPlans.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-          <CaretDown size={15} aria-hidden />
-        </label>
-        <label className="select-wrap">
-          <span className="sr-only">环境筛选</span>
-          <select value={envFilter} onChange={(e) => setEnvFilter(e.target.value)}>
-            <option value="all">全部环境</option>
-            {envNames.map((name) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
-          <CaretDown size={15} aria-hidden />
-        </label>
-      </div>
-      <section className="table-panel">
-        <div className="data-table reports-table">
-          <div className="data-row data-row--head">
-            <span>运行 ID</span>
-            <span>执行批次</span>
-            <span>流程结果</span>
-            <span>持续时间</span>
-            <span>触发方式</span>
-            <span>时间</span>
-          </div>
-          {filtered.length === 0 ? (
-            <div className="empty-module" style={{ border: 'none', minHeight: 240 }}>
-              <ChartBar size={42} weight="duotone" />
-              <h3>
-                {query || statusFilter !== 'all' || planFilter !== 'all' || envFilter !== 'all'
-                  ? '没有匹配的报告'
-                  : '暂无运行报告'}
-              </h3>
-              <p>
-                {query || statusFilter !== 'all' || planFilter !== 'all' || envFilter !== 'all'
-                  ? '试试调整搜索条件或筛选器。'
-                  : '触发一次测试运行后，聚合报告将出现在这里。'}
-              </p>
-            </div>
-          ) : (
-            filtered.map((r) => {
-              const total = r.totalWorkflows;
-              const planName = testPlans.find((p) => p.id === r.planId)?.name;
-              const TrieIcon = TRIGGER_ICON[r.trigger];
-              return (
-                <div
-                  className="data-row"
-                  key={r.id}
-                  role="link"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') navigate(`/reports/${r.id}`);
-                  }}
-                  onClick={() => navigate(`/reports/${r.id}`)}
-                >
-                  <span>
-                    <code className="variable-name-code">{r.runId}</code>
-                    <span className={`report-status-dot report-status-dot--${r.status}`}>
-                      {r.status === 'passed' ? (
-                        <CheckCircle size={14} weight="fill" />
-                      ) : r.status === 'failed' ? (
-                        <XCircle size={14} weight="fill" />
-                      ) : r.status === 'inconclusive' ? (
-                        <Clock size={14} weight="fill" />
-                      ) : (
-                        <Warning size={14} weight="fill" />
-                      )}
-                      {RUN_STATUS_LABEL[r.status]}
-                    </span>
-                  </span>
-                  <span>
-                    <strong>{r.name}</strong>
-                    {planName ? (
-                      <code>
-                        {planName} · {total} 流程
-                      </code>
-                    ) : (
-                      <code>
-                        {r.selectedTags.join(' · ')} · {total} 流程
-                      </code>
-                    )}
-                  </span>
-                  <span>
-                    <span className="report-stats-mini">
-                      <span className="pass-count">{r.workflowsPassed}</span>/
-                      <span className="fail-count">{r.workflowsFailed}</span>/
-                      <span className="skip-count">{r.workflowsSkipped}</span>
-                      <span className="report-stats-bar">
-                        <span
-                          className="bar-pass"
-                          style={{ width: `${total > 0 ? (r.workflowsPassed / total) * 100 : 0}%` }}
-                        />
-                        <span
-                          className="bar-fail"
-                          style={{ width: `${total > 0 ? (r.workflowsFailed / total) * 100 : 0}%` }}
-                        />
-                        <span
-                          className="bar-skip"
-                          style={{
-                            width: `${total > 0 ? (r.workflowsSkipped / total) * 100 : 0}%`,
-                          }}
-                        />
-                      </span>
-                    </span>
-                  </span>
-                  <span className="report-duration">{formatDuration(r.totalDurationMs)}</span>
-                  <span>
-                    <span className="report-trigger-tag">
-                      <TrieIcon size={13} /> {TRIGGER_LABEL[r.trigger]}
-                    </span>
-                  </span>
-                  <span className="variable-time-cell">{r.startedAt}</span>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </section>
-      <LiveRunPanel />
-    </main>
-  );
+function formatDate(value: string | null): string {
+  if (!value) return '—';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : new Intl.DateTimeFormat('zh-CN', {
+        dateStyle: 'medium',
+        timeStyle: 'medium',
+        hour12: false,
+      }).format(date);
 }
 
-// ─── Report Detail ───────────────────────────────────────────────
+function formatDuration(milliseconds?: number): string {
+  if (milliseconds == null) return '—';
+  return milliseconds >= 1000 ? `${(milliseconds / 1000).toFixed(1)}s` : `${milliseconds}ms`;
+}
 
-function ReportsDetailView({ runId }: { runId: string }) {
+function runSource(run: RunSummary): string {
+  if (run.workflowVersionId) return `WorkflowVersion · ${run.workflowVersionId}`;
+  if (run.testCaseVersionId) return `TestCaseVersion · ${run.testCaseVersionId}`;
+  if (run.apiVersionId) return `ApiVersion · ${run.apiVersionId}`;
+  return 'Ad-hoc Run';
+}
+
+function payloadText(payload: unknown): string {
+  if (payload == null) return '—';
+  try {
+    return JSON.stringify(payload, null, 2);
+  } catch {
+    return String(payload);
+  }
+}
+
+function latestPayload(
+  step: RunReport['steps'][number] | undefined,
+  eventTypes: string[],
+): unknown {
+  if (!step) return undefined;
+  return [...step.events].reverse().find((event) => eventTypes.includes(event.eventType))?.payload;
+}
+
+function ReportDetailView({ runId }: { runId: string }) {
   const navigate = useNavigate();
-  const runs = initialRuns;
-  const plans = testPlans;
-  const { runWorkflow } = useWorkflowStore();
-  const run = runs.find((r) => r.id === runId);
+  const [report, setReport] = useState<RunReport | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedStepIndex, setSelectedStepIndex] = useState<number | null>(null);
+  const [tab, setTab] = useState<EvidenceTab>('assertion');
 
-  if (!run) {
+  const [params] = useSearchParams();
+  const [revision, setRevision] = useState(0);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const load = () => setRevision((value) => value + 1);
+  const back = () => navigate(`/reports?${params}`);
+  useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+    setError(null);
+    void cpClient
+      .getReport(runId, controller.signal)
+      .then((next) => {
+        if (controller.signal.aborted) return;
+        setReport(next);
+        setSelectedStepIndex((current) =>
+          current !== null && next.steps.some((step) => step.stepIndex === current)
+            ? current
+            : (next.steps.find((step) => ['failed', 'error'].includes(step.status))?.stepIndex ??
+              next.steps[0]?.stepIndex ??
+              null),
+        );
+      })
+      .catch((reason) => {
+        if (!controller.signal.aborted)
+          setError(reason instanceof Error ? reason.message : '无法读取报告');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [runId, revision]);
+  useEffect(() => {
+    if (!autoRefresh || !report || !isActiveRun(report.run.status)) return;
+    const timer = window.setInterval(() => {
+      if (!document.hidden) setRevision((value) => value + 1);
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [autoRefresh, report]);
+
+  if (loading && !report)
     return (
       <main className="page-view">
-        <button className="report-detail-back" type="button" onClick={() => navigate('/reports')}>
-          <CaretLeft size={16} /> 返回报告列表
-        </button>
-        <div className="empty-module" style={{ minHeight: 240 }}>
-          <Info size={42} weight="duotone" />
-          <h3>未找到报告</h3>
-          <p>找不到运行 ID 为 {runId} 的报告。</p>
+        <div className="empty-module">
+          <Clock aria-hidden size={36} weight="duotone" />
+          <h3>正在加载报告</h3>
         </div>
       </main>
     );
-  }
+  if (error || !report)
+    return (
+      <main className="page-view">
+        <button className="report-detail-back" type="button" onClick={back}>
+          <CaretLeft aria-hidden size={16} /> 返回报告中心
+        </button>
+        <div className="empty-module" role="alert">
+          <Info aria-hidden size={42} weight="duotone" />
+          <h3>无法打开运行报告</h3>
+          <p>{error ?? '该运行不存在，或你没有访问权限。'}</p>
+          <button
+            className="button button--secondary"
+            type="button"
+            disabled={loading}
+            onClick={() => void load()}
+          >
+            重试
+          </button>
+        </div>
+      </main>
+    );
 
-  const planName = plans.find((p) => p.id === run.planId)?.name;
-  const [expandedWf, setExpandedWf] = useState<string | null>(null);
-
-  const toggleWf = (wfId: string) => {
-    setExpandedWf((prev) => (prev === wfId ? null : wfId));
+  const problemSteps = report.steps.filter((step) => ['failed', 'error'].includes(step.status));
+  const selectedStep = report.steps.find((step) => step.stepIndex === selectedStepIndex);
+  const evidence: Record<EvidenceTab, unknown> = {
+    request:
+      latestPayload(selectedStep, ['request.prepared']) ??
+      latestPayload(selectedStep, ['request.sent']),
+    response: latestPayload(selectedStep, ['response.received']),
+    assertion:
+      selectedStep?.events
+        .filter((event) => ['assertion.evaluated', 'assertion.ran'].includes(event.eventType))
+        .map((event) => event.payload) ?? [],
+    events: selectedStep?.events ?? [],
   };
 
   return (
-    <main className="page-view report-view">
-      <button className="report-detail-back" type="button" onClick={() => navigate('/reports')}>
-        <CaretLeft size={16} /> 返回报告列表
+    <main className="page-view scenario-report-detail">
+      <button className="report-detail-back" type="button" onClick={back}>
+        <CaretLeft aria-hidden size={16} /> 返回报告中心
       </button>
-      <div className="page-intro report-intro">
+      <header className="scenario-report-detail__header">
         <div>
-          <span className="eyebrow">RUN {run.runId}</span>
-          <h2>{run.name}</h2>
+          <span className="eyebrow">RUN EVIDENCE</span>
+          <h2>{report.run.sourceName ?? report.run.id}</h2>
+          <code>{report.run.id}</code>
           <p>
-            {planName ? `${planName} · ` : ''}
-            {run.environment} · {TRIGGER_LABEL[run.trigger]}触发
-            {run.selectedTags.length > 0 ? ` · 标签: ${run.selectedTags.join(', ')}` : ''}
+            {runSource(report.run)} · 创建于 {formatDate(report.run.createdAt)}
           </p>
         </div>
-        <div className="report-stats">
-          <span>
-            <CheckCircle size={22} weight="fill" />
-            {run.workflowsPassed}
-            <small>流程通过</small>
-          </span>
-          <span>
-            <XCircle size={22} weight="fill" />
-            {run.workflowsFailed}
-            <small>流程失败</small>
-          </span>
-          {run.workflowsSkipped > 0 ? (
-            <span>
-              <Warning size={22} weight="fill" />
-              {run.workflowsSkipped}
-              <small>跳过</small>
-            </span>
-          ) : null}
-          <span>
-            <Clock size={22} />
-            {formatDuration(run.totalDurationMs)}
-            <small>总耗时</small>
-          </span>
-          <button
-            className="button button--danger"
-            type="button"
-            onClick={() => void runWorkflow()}
-          >
-            <ArrowsClockwise size={18} />
-            重新运行
-          </button>
-        </div>
-      </div>
-      <div className="report-grid">
-        <section className="paper-panel report-timeline">
-          <h3>执行批次 · {run.totalWorkflows} 个业务流程</h3>
-          <div className="data-table" style={{ marginTop: 12 }}>
-            <div className="data-row data-row--head workflow-result-head">
-              <span>BP ID</span>
-              <span>业务流程</span>
-              <span>通过/失败</span>
-              <span>耗时</span>
-              <span>状态</span>
-              <span />
-            </div>
-            {run.workflows.map((wf) => {
-              const isExpanded = expandedWf === wf.workflowId;
-              const wfTotal = wf.stepsPassed + wf.stepsFailed + wf.stepsSkipped;
-              return (
-                <div key={wf.workflowId}>
-                  <div
-                    className={`data-row workflow-result-row workflow-result-row--${wf.status}`}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') toggleWf(wf.workflowId);
-                    }}
-                    onClick={() => toggleWf(wf.workflowId)}
-                  >
-                    <span>
-                      <code className="variable-name-code">{wf.bpId}</code>
-                    </span>
-                    <span>
-                      <strong>{wf.workflowName}</strong>
-                    </span>
-                    <span>
-                      <span className="report-stats-mini">
-                        <span className="pass-count">{wf.stepsPassed}</span>
-                        {wf.stepsFailed > 0 ? (
-                          <>
-                            /<span className="fail-count">{wf.stepsFailed}</span>
-                          </>
-                        ) : null}
-                        {wf.stepsSkipped > 0 ? (
-                          <>
-                            /<span className="skip-count">{wf.stepsSkipped}</span>
-                          </>
-                        ) : null}
-                        <span className="report-stats-bar">
-                          <span
-                            className="bar-pass"
-                            style={{
-                              width: `${wfTotal > 0 ? (wf.stepsPassed / wfTotal) * 100 : 0}%`,
-                            }}
-                          />
-                          <span
-                            className="bar-fail"
-                            style={{
-                              width: `${wfTotal > 0 ? (wf.stepsFailed / wfTotal) * 100 : 0}%`,
-                            }}
-                          />
-                          <span
-                            className="bar-skip"
-                            style={{
-                              width: `${wfTotal > 0 ? (wf.stepsSkipped / wfTotal) * 100 : 0}%`,
-                            }}
-                          />
-                        </span>
-                      </span>
-                    </span>
-                    <span className="report-duration">
-                      {wf.totalDurationMs > 0 ? formatDuration(wf.totalDurationMs) : '—'}
-                    </span>
-                    <span>
-                      <span
-                        className={`status-badge status-badge--${wf.status === 'passed' ? 'passed' : wf.status === 'failed' ? 'failed' : 'warning'}`}
-                      >
-                        {WORKFLOW_STATUS_LABEL[wf.status]}
-                      </span>
-                    </span>
-                    <span className="variable-time-cell">
-                      <CaretDown
-                        size={16}
-                        style={{
-                          transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                          transition: 'transform 160ms ease',
-                        }}
-                      />
-                    </span>
-                  </div>
-                  {isExpanded ? (
-                    <div className="workflow-expand-panel">
-                      {wf.steps.length === 0 ? (
-                        <div className="empty-module" style={{ border: 'none', minHeight: 100 }}>
-                          <Info size={20} weight="duotone" />
-                          <p>该流程没有步骤数据。</p>
-                        </div>
-                      ) : (
-                        wf.steps.map((step, stepIdx) => {
-                          const isLast = stepIdx === wf.steps.length - 1;
-                          return (
-                            <div
-                              className={`timeline-step ${step.status === 'failed' ? 'timeline-step--failed' : ''} ${step.status === 'skipped' ? 'timeline-step--failed' : ''} ${isLast ? 'timeline-step--last' : ''}`}
-                              key={step.id}
-                            >
-                              <span className="timeline-index">{stepIdx + 1}</span>
-                              <span className="timeline-status">
-                                {step.status === 'passed' ? (
-                                  <CheckCircle size={20} weight="fill" />
-                                ) : step.status === 'failed' ? (
-                                  <XCircle size={20} weight="fill" />
-                                ) : (
-                                  <Warning size={20} weight="fill" />
-                                )}
-                              </span>
-                              <div>
-                                <strong>{step.name}</strong>
-                                <code>
-                                  {step.method} {step.path}
-                                </code>
-                                {step.status === 'failed' ? (
-                                  <div className="evidence-grid">
-                                    {step.requestEvidence ? (
-                                      <span>
-                                        <small>请求证据</small>
-                                        <pre>{step.requestEvidence}</pre>
-                                      </span>
-                                    ) : null}
-                                    {step.responseEvidence ? (
-                                      <span>
-                                        <small>响应</small>
-                                        <pre>{step.responseEvidence}</pre>
-                                      </span>
-                                    ) : null}
-                                    {step.assertionFailure ? (
-                                      <span>
-                                        <small>断言失败</small>
-                                        <p>{step.assertionFailure}</p>
-                                      </span>
-                                    ) : null}
-                                  </div>
-                                ) : null}
-                                {step.status === 'skipped' && step.assertionFailure ? (
-                                  <div className="evidence-grid">
-                                    <span>
-                                      <small>跳过原因</small>
-                                      <p>{step.assertionFailure}</p>
-                                    </span>
-                                  </div>
-                                ) : null}
-                              </div>
-                              <time>{step.durationMs > 0 ? `${step.durationMs}ms` : '—'}</time>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-                  ) : null}
-                </div>
-              );
-            })}
+        <button
+          className="button button--secondary"
+          type="button"
+          disabled={loading}
+          onClick={() => void load()}
+        >
+          <ArrowClockwise aria-hidden size={16} /> {loading ? '更新中…' : '刷新证据'}
+        </button>
+      </header>
+      <section className="report-fact" aria-label="运行状态">
+        <div
+          className={`report-fact__assertion report-fact__assertion--${statusTone(report.run.status)}`}
+        >
+          <span className="eyebrow">RUN STATUS</span>
+          <div>
+            <StatusIcon status={report.run.status} />
+            <strong>{statusLabel(report.run.status)}</strong>
           </div>
-        </section>
-        <aside className="trace-card">
-          <span className="eyebrow">TRACEABILITY</span>
-          <h3>可追溯信息</h3>
+          <p>
+            {report.run.status === 'passed'
+              ? '已执行的断言通过；请结合业务覆盖范围判断。'
+              : report.run.status === 'failed'
+                ? '存在阻断失败，检查下方步骤证据。'
+                : isActiveRun(report.run.status)
+                  ? '运行尚未完成，当前证据不代表最终结论。'
+                  : '请结合步骤事件判断原因，不能据此宣称业务通过。'}
+          </p>
+        </div>
+        <div className="report-fact__execution">
+          <span className="eyebrow">EXECUTION</span>
           <dl>
-            <dt>
-              <GitBranch size={16} /> Git 提交
-            </dt>
-            <dd>{run.gitCommit ? `${run.gitSha} · ${run.gitCommit}` : '—'}</dd>
-            <dt>
-              <FileCode size={16} /> OpenAPI 版本
-            </dt>
-            <dd>{run.openapiVersion ?? '—'}</dd>
-            <dt>
-              <Stack size={16} /> 环境
-            </dt>
-            <dd>{run.environment}</dd>
-            <dt>
-              <Database size={16} /> 执行机
-            </dt>
-            <dd>runner-02 · {run.runnerVersion ?? '未知'}</dd>
+            <div>
+              <dt>创建时间</dt>
+              <dd>{formatDate(report.run.createdAt)}</dd>
+            </div>
+            <div>
+              <dt>完成时间</dt>
+              <dd>{formatDate(report.run.finishedAt)}</dd>
+            </div>
+            <div>
+              <dt>Runner</dt>
+              <dd>{report.run.runnerId ?? '—'}</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+      <section className="report-diagnosis" aria-label="回归结论">
+        <div>
+          <span className="eyebrow">NEXT ACTION</span>
+          <h3>
+            {problemSteps.length
+              ? '先看这些失败步骤'
+              : isActiveRun(report.run.status)
+                ? '等待执行完成'
+                : '核对结果与业务预期'}
+          </h3>
+          <p>
+            {report.steps.filter((step) => step.status === 'passed').length} 步通过 ·{' '}
+            {problemSteps.length} 步失败或异常 ·{' '}
+            {report.steps.filter((step) => ['not_run', 'skipped'].includes(step.status)).length}{' '}
+            步未执行或跳过
+          </p>
+        </div>
+        <div className="report-problem-links">
+          {problemSteps.map((step) => (
+            <button
+              key={step.stepIndex}
+              type="button"
+              className="button button--outline"
+              onClick={() => {
+                setSelectedStepIndex(step.stepIndex);
+                setTab(step.status === 'error' ? 'events' : 'assertion');
+                document
+                  .getElementById('step-evidence')
+                  ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+            >
+              {step.name ?? `步骤 ${step.stepIndex + 1}`} · {statusLabel(step.status)}
+            </button>
+          ))}
+        </div>
+        {isActiveRun(report.run.status) ? (
+          <label>
+            <input
+              type="checkbox"
+              checked={autoRefresh}
+              onChange={(event) => setAutoRefresh(event.target.checked)}
+            />
+            每 5 秒更新证据
+          </label>
+        ) : null}
+      </section>
+      <div className="scenario-report-detail__layout">
+        <div>
+          <section className="step-timeline" aria-label="StepRun 执行时间线">
+            <div className="step-timeline__head">
+              <div>
+                <span className="eyebrow">STEPRUN TIMELINE</span>
+                <h3>执行过程</h3>
+              </div>
+              <span>{report.steps.length} 个 StepRun</span>
+            </div>
+            {report.steps.length === 0 ? (
+              <div className="empty-module">
+                <Clock aria-hidden size={32} />
+                <h3>Runner 尚未写入步骤事件</h3>
+                <p>运行开始后，步骤证据会在此按序出现。</p>
+              </div>
+            ) : (
+              report.steps.map((step) => (
+                <button
+                  aria-pressed={selectedStepIndex === step.stepIndex}
+                  className={`step-timeline__row step-timeline__row--${statusTone(step.status)} ${selectedStepIndex === step.stepIndex ? 'is-selected' : ''}`}
+                  key={step.stepIndex}
+                  onClick={() => setSelectedStepIndex(step.stepIndex)}
+                  type="button"
+                >
+                  <span className="step-timeline__index">{step.stepIndex + 1}</span>
+                  <span className="step-timeline__state">
+                    <StatusIcon status={step.status} />
+                  </span>
+                  <span className="step-timeline__name">
+                    <strong>
+                      {step.phase === 'teardown' ? '清理 · ' : ''}
+                      {step.name ?? `步骤 ${step.stepIndex + 1}`}
+                    </strong>
+                    <code>{statusLabel(step.status)}</code>
+                    <small>{step.events.length} 条事件</small>
+                  </span>
+                  <time>{formatDuration(step.durationMs)}</time>
+                </button>
+              ))
+            )}
+          </section>
+          <section id="step-evidence" className="report-evidence" aria-label="步骤证据">
+            <div className="report-evidence__head">
+              <div>
+                <span className="eyebrow">EVIDENCE</span>
+                <h3>{selectedStep?.name ?? '步骤证据'}</h3>
+                <p>
+                  Runner 已脱敏 · {selectedStep?.method} {selectedStep?.url}
+                </p>
+              </div>
+              <ClipboardText aria-hidden size={20} />
+            </div>
+            <div className="report-evidence__tabs" role="tablist" aria-label="证据类型">
+              {(
+                [
+                  ['request', '请求'],
+                  ['response', '响应'],
+                  ['assertion', '断言'],
+                  ['events', '事件'],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  aria-selected={tab === value}
+                  className={tab === value ? 'is-active' : ''}
+                  key={value}
+                  id={`evidence-tab-${value}`}
+                  aria-controls="evidence-panel"
+                  tabIndex={tab === value ? 0 : -1}
+                  onKeyDown={(event) => {
+                    const values: EvidenceTab[] = ['request', 'response', 'assertion', 'events'];
+                    const offset =
+                      event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+                    if (!offset && event.key !== 'Home' && event.key !== 'End') return;
+                    event.preventDefault();
+                    const index =
+                      event.key === 'Home'
+                        ? 0
+                        : event.key === 'End'
+                          ? 3
+                          : (values.indexOf(value) + offset + 4) % 4;
+                    const next = values[index];
+                    if (next) {
+                      setTab(next);
+                      document.getElementById(`evidence-tab-${next}`)?.focus();
+                    }
+                  }}
+                  onClick={() => setTab(value)}
+                  role="tab"
+                  type="button"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {selectedStep?.error ? (
+              <div className="report-step-error" role="status">
+                <strong>执行异常 · {selectedStep.error.type}</strong>
+                <p>{selectedStep.error.message}</p>
+              </div>
+            ) : null}
+            <div
+              id="evidence-panel"
+              role="tabpanel"
+              aria-labelledby={`evidence-tab-${tab}`}
+              aria-label={tab === 'assertion' ? '断言证据' : '步骤原始证据'}
+            >
+              {tab === 'assertion' && selectedStep?.assertions ? (
+                <div className="report-assertions">
+                  {selectedStep.assertions.length === 0 ? (
+                    <p>该步骤尚无断言证据。没有断言记录不代表验证通过。</p>
+                  ) : (
+                    selectedStep.assertions.map((assertion, index) => (
+                      <article
+                        className={`report-assertion report-assertion--${assertion.passed ? 'passed' : 'failed'}`}
+                        key={`${assertion.assertionId}-${index}`}
+                      >
+                        <header>
+                          <strong>
+                            {assertion.description ?? assertion.assertionId ?? '断言'}
+                          </strong>
+                          <span>
+                            {assertion.passed
+                              ? '通过'
+                              : assertion.severity === 'warn'
+                                ? '警告'
+                                : '失败'}{' '}
+                            · 第 {assertion.attempt ?? 1} 次尝试
+                          </span>
+                        </header>
+                        <dl>
+                          <div>
+                            <dt>预期值</dt>
+                            <dd>
+                              <pre>{assertion.expected ?? '未记录'}</pre>
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>实际值</dt>
+                            <dd>
+                              <pre>{assertion.actual ?? '未记录'}</pre>
+                            </dd>
+                          </div>
+                        </dl>
+                        {assertion.schemaDiff ? <pre>{assertion.schemaDiff}</pre> : null}
+                      </article>
+                    ))
+                  )}
+                </div>
+              ) : (
+                <pre>{payloadText(evidence[tab])}</pre>
+              )}
+            </div>
+          </section>
+        </div>
+        <aside className="traceability-panel" aria-label="可追溯信息">
+          <span className="eyebrow">TRACEABILITY</span>
+          <h3>运行快照</h3>
+          <dl>
+            <div>
+              <dt>
+                <FileText aria-hidden size={15} /> Run
+              </dt>
+              <dd>{report.run.id}</dd>
+            </div>
+            <div>
+              <dt>
+                <Code aria-hidden size={15} /> WorkflowVersion
+              </dt>
+              <dd>{report.run.workflowVersionId ?? '—'}</dd>
+            </div>
+            <div>
+              <dt>TestCaseVersion</dt>
+              <dd>{report.run.testCaseVersionId ?? '—'}</dd>
+            </div>
+            <div>
+              <dt>EnvironmentVersion</dt>
+              <dd>{report.run.environmentVersionId ?? '—'}</dd>
+            </div>
+            <div>
+              <dt>ApiVersion</dt>
+              <dd>{report.run.apiVersionId ?? '—'}</dd>
+            </div>
+            <div>
+              <dt>Runner</dt>
+              <dd>{report.run.runnerId ?? '—'}</dd>
+            </div>
+            <div>
+              <dt>
+                <Clock aria-hidden size={15} /> StepRun
+              </dt>
+              <dd>
+                {selectedStep
+                  ? `${selectedStep.stepIndex + 1} · ${statusLabel(selectedStep.status)}`
+                  : '—'}
+              </dd>
+            </div>
           </dl>
         </aside>
       </div>
@@ -536,12 +469,12 @@ function ReportsDetailView({ runId }: { runId: string }) {
   );
 }
 
-// ─── Page Router ─────────────────────────────────────────────────
-
 export function ReportsPage() {
   return <ReportListView />;
 }
 
-export function ReportsDetailWrapper({ runId }: { runId: string }) {
-  return <ReportsDetailView runId={runId} />;
+export function ReportsDetailWrapper() {
+  const { runId } = useParams<{ runId: string }>();
+  if (!runId) return null;
+  return <ReportDetailView key={runId} runId={runId} />;
 }

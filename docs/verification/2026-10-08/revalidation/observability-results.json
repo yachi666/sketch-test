@@ -1,0 +1,3443 @@
+{
+  "startedAt": "2026-10-08T16:05:51.662Z",
+  "targets": {
+    "status": "success",
+    "data": {
+      "activeTargets": [
+        {
+          "discoveredLabels": {
+            "__address__": "control-plane:3802",
+            "__metrics_path__": "/metrics",
+            "__scheme__": "http",
+            "__scrape_interval__": "5s",
+            "__scrape_timeout__": "5s",
+            "job": "sketchtest-control-plane"
+          },
+          "labels": {
+            "instance": "control-plane:3802",
+            "job": "sketchtest-control-plane"
+          },
+          "scrapePool": "sketchtest-control-plane",
+          "scrapeUrl": "http://control-plane:3802/metrics",
+          "globalUrl": "http://control-plane:3802/metrics",
+          "lastError": "",
+          "lastScrape": "2026-10-08T16:05:46.795193719Z",
+          "lastScrapeDuration": 0.007290625,
+          "health": "up",
+          "scrapeInterval": "5s",
+          "scrapeTimeout": "5s"
+        }
+      ],
+      "droppedTargets": [],
+      "droppedTargetCounts": {
+        "sketchtest-control-plane": 0
+      }
+    }
+  },
+  "histogram": [
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.005",
+        "method": "GET",
+        "route": "/metrics",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "8"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.01",
+        "method": "GET",
+        "route": "/metrics",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "15"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.025",
+        "method": "GET",
+        "route": "/metrics",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "16"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.05",
+        "method": "GET",
+        "route": "/metrics",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "17"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.1",
+        "method": "GET",
+        "route": "/metrics",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "17"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.25",
+        "method": "GET",
+        "route": "/metrics",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "17"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.5",
+        "method": "GET",
+        "route": "/metrics",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "17"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "2.5",
+        "method": "GET",
+        "route": "/metrics",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "17"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "+Inf",
+        "method": "GET",
+        "route": "/metrics",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "17"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.005",
+        "method": "GET",
+        "route": "/ready",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "7"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.01",
+        "method": "GET",
+        "route": "/ready",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "9"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.025",
+        "method": "GET",
+        "route": "/ready",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "9"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.05",
+        "method": "GET",
+        "route": "/ready",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "9"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.1",
+        "method": "GET",
+        "route": "/ready",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "9"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.25",
+        "method": "GET",
+        "route": "/ready",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "9"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.5",
+        "method": "GET",
+        "route": "/ready",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "9"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "2.5",
+        "method": "GET",
+        "route": "/ready",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "9"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "+Inf",
+        "method": "GET",
+        "route": "/ready",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "9"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.005",
+        "method": "POST",
+        "route": "/api/ai-worker/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.01",
+        "method": "POST",
+        "route": "/api/ai-worker/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.025",
+        "method": "POST",
+        "route": "/api/ai-worker/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.05",
+        "method": "POST",
+        "route": "/api/ai-worker/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.1",
+        "method": "POST",
+        "route": "/api/ai-worker/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.25",
+        "method": "POST",
+        "route": "/api/ai-worker/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.5",
+        "method": "POST",
+        "route": "/api/ai-worker/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "2.5",
+        "method": "POST",
+        "route": "/api/ai-worker/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "+Inf",
+        "method": "POST",
+        "route": "/api/ai-worker/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.005",
+        "method": "POST",
+        "route": "/api/ai-worker/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "77"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.01",
+        "method": "POST",
+        "route": "/api/ai-worker/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "78"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.025",
+        "method": "POST",
+        "route": "/api/ai-worker/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "78"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.05",
+        "method": "POST",
+        "route": "/api/ai-worker/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "78"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.1",
+        "method": "POST",
+        "route": "/api/ai-worker/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "78"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.25",
+        "method": "POST",
+        "route": "/api/ai-worker/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "78"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.5",
+        "method": "POST",
+        "route": "/api/ai-worker/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "78"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "2.5",
+        "method": "POST",
+        "route": "/api/ai-worker/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "78"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "+Inf",
+        "method": "POST",
+        "route": "/api/ai-worker/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "78"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.005",
+        "method": "POST",
+        "route": "/api/ai-worker/plans/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.01",
+        "method": "POST",
+        "route": "/api/ai-worker/plans/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.025",
+        "method": "POST",
+        "route": "/api/ai-worker/plans/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.05",
+        "method": "POST",
+        "route": "/api/ai-worker/plans/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.1",
+        "method": "POST",
+        "route": "/api/ai-worker/plans/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.25",
+        "method": "POST",
+        "route": "/api/ai-worker/plans/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.5",
+        "method": "POST",
+        "route": "/api/ai-worker/plans/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "2.5",
+        "method": "POST",
+        "route": "/api/ai-worker/plans/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "+Inf",
+        "method": "POST",
+        "route": "/api/ai-worker/plans/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.005",
+        "method": "GET",
+        "route": "/api/runs/:id/evidence-verify",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "0"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.01",
+        "method": "GET",
+        "route": "/api/runs/:id/evidence-verify",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.025",
+        "method": "GET",
+        "route": "/api/runs/:id/evidence-verify",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.05",
+        "method": "GET",
+        "route": "/api/runs/:id/evidence-verify",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.1",
+        "method": "GET",
+        "route": "/api/runs/:id/evidence-verify",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.25",
+        "method": "GET",
+        "route": "/api/runs/:id/evidence-verify",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.5",
+        "method": "GET",
+        "route": "/api/runs/:id/evidence-verify",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "2.5",
+        "method": "GET",
+        "route": "/api/runs/:id/evidence-verify",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "+Inf",
+        "method": "GET",
+        "route": "/api/runs/:id/evidence-verify",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.005",
+        "method": "GET",
+        "route": "/api/workflow-versions/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "2"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.01",
+        "method": "GET",
+        "route": "/api/workflow-versions/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "2"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.025",
+        "method": "GET",
+        "route": "/api/workflow-versions/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "2"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.05",
+        "method": "GET",
+        "route": "/api/workflow-versions/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "2"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.1",
+        "method": "GET",
+        "route": "/api/workflow-versions/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "2"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.25",
+        "method": "GET",
+        "route": "/api/workflow-versions/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "2"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.5",
+        "method": "GET",
+        "route": "/api/workflow-versions/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "2"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "2.5",
+        "method": "GET",
+        "route": "/api/workflow-versions/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "2"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "+Inf",
+        "method": "GET",
+        "route": "/api/workflow-versions/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "2"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.005",
+        "method": "GET",
+        "route": "/api/runs/:id/report",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "5"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.01",
+        "method": "GET",
+        "route": "/api/runs/:id/report",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.025",
+        "method": "GET",
+        "route": "/api/runs/:id/report",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.05",
+        "method": "GET",
+        "route": "/api/runs/:id/report",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.1",
+        "method": "GET",
+        "route": "/api/runs/:id/report",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.25",
+        "method": "GET",
+        "route": "/api/runs/:id/report",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.5",
+        "method": "GET",
+        "route": "/api/runs/:id/report",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "2.5",
+        "method": "GET",
+        "route": "/api/runs/:id/report",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "+Inf",
+        "method": "GET",
+        "route": "/api/runs/:id/report",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.005",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.01",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.025",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.05",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.1",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.25",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.5",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "2.5",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "+Inf",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.005",
+        "method": "PATCH",
+        "route": "/api/runs/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.01",
+        "method": "PATCH",
+        "route": "/api/runs/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.025",
+        "method": "PATCH",
+        "route": "/api/runs/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.05",
+        "method": "PATCH",
+        "route": "/api/runs/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.1",
+        "method": "PATCH",
+        "route": "/api/runs/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.25",
+        "method": "PATCH",
+        "route": "/api/runs/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.5",
+        "method": "PATCH",
+        "route": "/api/runs/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "2.5",
+        "method": "PATCH",
+        "route": "/api/runs/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "+Inf",
+        "method": "PATCH",
+        "route": "/api/runs/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.005",
+        "method": "POST",
+        "route": "/api/runners/:id/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "5"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.01",
+        "method": "POST",
+        "route": "/api/runners/:id/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "5"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.025",
+        "method": "POST",
+        "route": "/api/runners/:id/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.05",
+        "method": "POST",
+        "route": "/api/runners/:id/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.1",
+        "method": "POST",
+        "route": "/api/runners/:id/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.25",
+        "method": "POST",
+        "route": "/api/runners/:id/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.5",
+        "method": "POST",
+        "route": "/api/runners/:id/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "2.5",
+        "method": "POST",
+        "route": "/api/runners/:id/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "+Inf",
+        "method": "POST",
+        "route": "/api/runners/:id/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.005",
+        "method": "POST",
+        "route": "/api/runs/:id/events",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "0"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.01",
+        "method": "POST",
+        "route": "/api/runs/:id/events",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "0"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.025",
+        "method": "POST",
+        "route": "/api/runs/:id/events",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.05",
+        "method": "POST",
+        "route": "/api/runs/:id/events",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.1",
+        "method": "POST",
+        "route": "/api/runs/:id/events",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.25",
+        "method": "POST",
+        "route": "/api/runs/:id/events",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.5",
+        "method": "POST",
+        "route": "/api/runs/:id/events",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "2.5",
+        "method": "POST",
+        "route": "/api/runs/:id/events",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "+Inf",
+        "method": "POST",
+        "route": "/api/runs/:id/events",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.005",
+        "method": "POST",
+        "route": "/api/runs/:id/evidence-manifest",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "0"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.01",
+        "method": "POST",
+        "route": "/api/runs/:id/evidence-manifest",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "0"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.025",
+        "method": "POST",
+        "route": "/api/runs/:id/evidence-manifest",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.05",
+        "method": "POST",
+        "route": "/api/runs/:id/evidence-manifest",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.1",
+        "method": "POST",
+        "route": "/api/runs/:id/evidence-manifest",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.25",
+        "method": "POST",
+        "route": "/api/runs/:id/evidence-manifest",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.5",
+        "method": "POST",
+        "route": "/api/runs/:id/evidence-manifest",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "2.5",
+        "method": "POST",
+        "route": "/api/runs/:id/evidence-manifest",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "+Inf",
+        "method": "POST",
+        "route": "/api/runs/:id/evidence-manifest",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.005",
+        "method": "POST",
+        "route": "/api/runs/from-workflow",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.01",
+        "method": "POST",
+        "route": "/api/runs/from-workflow",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.025",
+        "method": "POST",
+        "route": "/api/runs/from-workflow",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.05",
+        "method": "POST",
+        "route": "/api/runs/from-workflow",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.1",
+        "method": "POST",
+        "route": "/api/runs/from-workflow",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.25",
+        "method": "POST",
+        "route": "/api/runs/from-workflow",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.5",
+        "method": "POST",
+        "route": "/api/runs/from-workflow",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "2.5",
+        "method": "POST",
+        "route": "/api/runs/from-workflow",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "+Inf",
+        "method": "POST",
+        "route": "/api/runs/from-workflow",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.005",
+        "method": "POST",
+        "route": "/api/workflows/:id/versions",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "0"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.01",
+        "method": "POST",
+        "route": "/api/workflows/:id/versions",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.025",
+        "method": "POST",
+        "route": "/api/workflows/:id/versions",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.05",
+        "method": "POST",
+        "route": "/api/workflows/:id/versions",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.1",
+        "method": "POST",
+        "route": "/api/workflows/:id/versions",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.25",
+        "method": "POST",
+        "route": "/api/workflows/:id/versions",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.5",
+        "method": "POST",
+        "route": "/api/workflows/:id/versions",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "2.5",
+        "method": "POST",
+        "route": "/api/workflows/:id/versions",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "+Inf",
+        "method": "POST",
+        "route": "/api/workflows/:id/versions",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.005",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "204"
+      },
+      "value": [
+        1791475551.685,
+        "0"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.01",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "204"
+      },
+      "value": [
+        1791475551.685,
+        "0"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.025",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "204"
+      },
+      "value": [
+        1791475551.685,
+        "0"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.05",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "204"
+      },
+      "value": [
+        1791475551.685,
+        "0"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.1",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "204"
+      },
+      "value": [
+        1791475551.685,
+        "0"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.25",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "204"
+      },
+      "value": [
+        1791475551.685,
+        "0"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.5",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "204"
+      },
+      "value": [
+        1791475551.685,
+        "0"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "2.5",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "204"
+      },
+      "value": [
+        1791475551.685,
+        "0"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "+Inf",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "204"
+      },
+      "value": [
+        1791475551.685,
+        "2"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "1",
+        "method": "GET",
+        "route": "/metrics",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "17"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "5",
+        "method": "GET",
+        "route": "/metrics",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "17"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "10",
+        "method": "GET",
+        "route": "/metrics",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "17"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "1",
+        "method": "POST",
+        "route": "/api/runners/:id/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "5",
+        "method": "POST",
+        "route": "/api/runners/:id/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "10",
+        "method": "POST",
+        "route": "/api/runners/:id/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "1",
+        "method": "GET",
+        "route": "/ready",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "9"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "5",
+        "method": "GET",
+        "route": "/ready",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "9"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "10",
+        "method": "GET",
+        "route": "/ready",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "9"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "1",
+        "method": "POST",
+        "route": "/api/ai-worker/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "5",
+        "method": "POST",
+        "route": "/api/ai-worker/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "10",
+        "method": "POST",
+        "route": "/api/ai-worker/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "1",
+        "method": "POST",
+        "route": "/api/ai-worker/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "78"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "5",
+        "method": "POST",
+        "route": "/api/ai-worker/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "78"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "10",
+        "method": "POST",
+        "route": "/api/ai-worker/heartbeat",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "78"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "1",
+        "method": "POST",
+        "route": "/api/ai-worker/plans/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "5",
+        "method": "POST",
+        "route": "/api/ai-worker/plans/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "10",
+        "method": "POST",
+        "route": "/api/ai-worker/plans/claim",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "39"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "1",
+        "method": "GET",
+        "route": "/api/runs/:id/report",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "5",
+        "method": "GET",
+        "route": "/api/runs/:id/report",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "10",
+        "method": "GET",
+        "route": "/api/runs/:id/report",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "6"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "1",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "204"
+      },
+      "value": [
+        1791475551.685,
+        "0"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "5",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "204"
+      },
+      "value": [
+        1791475551.685,
+        "0"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "10",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "204"
+      },
+      "value": [
+        1791475551.685,
+        "0"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "1",
+        "method": "GET",
+        "route": "/api/workflow-versions/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "2"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "5",
+        "method": "GET",
+        "route": "/api/workflow-versions/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "2"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "10",
+        "method": "GET",
+        "route": "/api/workflow-versions/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "2"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "1",
+        "method": "POST",
+        "route": "/api/runs/from-workflow",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "5",
+        "method": "POST",
+        "route": "/api/runs/from-workflow",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "10",
+        "method": "POST",
+        "route": "/api/runs/from-workflow",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.005",
+        "method": "POST",
+        "route": "/api/workflow-versions/:id/publish",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.01",
+        "method": "POST",
+        "route": "/api/workflow-versions/:id/publish",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.025",
+        "method": "POST",
+        "route": "/api/workflow-versions/:id/publish",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.05",
+        "method": "POST",
+        "route": "/api/workflow-versions/:id/publish",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.1",
+        "method": "POST",
+        "route": "/api/workflow-versions/:id/publish",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.25",
+        "method": "POST",
+        "route": "/api/workflow-versions/:id/publish",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "0.5",
+        "method": "POST",
+        "route": "/api/workflow-versions/:id/publish",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "1",
+        "method": "POST",
+        "route": "/api/workflow-versions/:id/publish",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "2.5",
+        "method": "POST",
+        "route": "/api/workflow-versions/:id/publish",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "5",
+        "method": "POST",
+        "route": "/api/workflow-versions/:id/publish",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "10",
+        "method": "POST",
+        "route": "/api/workflow-versions/:id/publish",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "+Inf",
+        "method": "POST",
+        "route": "/api/workflow-versions/:id/publish",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "1",
+        "method": "POST",
+        "route": "/api/workflows/:id/versions",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "5",
+        "method": "POST",
+        "route": "/api/workflows/:id/versions",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "10",
+        "method": "POST",
+        "route": "/api/workflows/:id/versions",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "1",
+        "method": "GET",
+        "route": "/api/runs/:id/evidence-verify",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "5",
+        "method": "GET",
+        "route": "/api/runs/:id/evidence-verify",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "10",
+        "method": "GET",
+        "route": "/api/runs/:id/evidence-verify",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "1",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "5",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "10",
+        "method": "GET",
+        "route": "/api/runs/next",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "1",
+        "method": "PATCH",
+        "route": "/api/runs/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "5",
+        "method": "PATCH",
+        "route": "/api/runs/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "10",
+        "method": "PATCH",
+        "route": "/api/runs/:id",
+        "status": "200"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "1",
+        "method": "POST",
+        "route": "/api/runs/:id/events",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "5",
+        "method": "POST",
+        "route": "/api/runs/:id/events",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "10",
+        "method": "POST",
+        "route": "/api/runs/:id/events",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "1",
+        "method": "POST",
+        "route": "/api/runs/:id/evidence-manifest",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "5",
+        "method": "POST",
+        "route": "/api/runs/:id/evidence-manifest",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_http_request_duration_seconds_bucket",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "le": "10",
+        "method": "POST",
+        "route": "/api/runs/:id/evidence-manifest",
+        "status": "201"
+      },
+      "value": [
+        1791475551.685,
+        "1"
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "metric": {
+        "__name__": "sketchtest_dependency_up",
+        "dependency": "postgres",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane"
+      },
+      "value": [
+        1791475551.691,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_dependency_up",
+        "dependency": "object-store",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane"
+      },
+      "value": [
+        1791475551.691,
+        "1"
+      ]
+    }
+  ],
+  "dashboard": {
+    "meta": {
+      "type": "db",
+      "canSave": false,
+      "canEdit": false,
+      "canAdmin": false,
+      "canStar": false,
+      "canDelete": false,
+      "slug": "d7415d3",
+      "url": "/d/sketchtest-operations/d7415d3",
+      "expires": "0001-01-01T00:00:00Z",
+      "created": "2026-10-08T15:54:21Z",
+      "updated": "2026-10-08T15:54:21Z",
+      "updatedBy": "Anonymous",
+      "createdBy": "Anonymous",
+      "version": 1,
+      "hasAcl": false,
+      "isFolder": false,
+      "apiVersion": "v0alpha1",
+      "folderId": 0,
+      "folderUid": "",
+      "folderTitle": "General",
+      "folderUrl": "",
+      "provisioned": true,
+      "provisionedExternalId": "sketchtest.json",
+      "annotationsPermissions": {
+        "dashboard": {
+          "canAdd": false,
+          "canEdit": false,
+          "canDelete": false
+        },
+        "organization": {
+          "canAdd": false,
+          "canEdit": false,
+          "canDelete": false
+        }
+      }
+    },
+    "dashboard": {
+      "id": 1,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "sketchtest-prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 1,
+          "targets": [
+            {
+              "expr": "up{job=\"sketchtest-control-plane\"}",
+              "refId": "A"
+            }
+          ],
+          "title": "Control Plane 可达性",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "sketchtest-prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 2,
+          "targets": [
+            {
+              "expr": "sum by (route) (rate(sketchtest_http_requests_total[5m]))",
+              "refId": "A"
+            }
+          ],
+          "title": "请求速率",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "sketchtest-prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 8
+          },
+          "id": 3,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, sum by (le) (rate(sketchtest_http_request_duration_seconds_bucket[5m])))",
+              "refId": "A"
+            }
+          ],
+          "title": "服务端 P95 请求耗时（秒）",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "sketchtest-prometheus"
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 8
+          },
+          "id": 4,
+          "targets": [
+            {
+              "expr": "sum(rate(sketchtest_http_requests_total{status=~\"5..\"}[5m])) / clamp_min(sum(rate(sketchtest_http_requests_total[5m])), 0.001)",
+              "refId": "A"
+            }
+          ],
+          "title": "5xx 错误比例",
+          "type": "timeseries"
+        }
+      ],
+      "refresh": "5s",
+      "schemaVersion": 39,
+      "time": {
+        "from": "now-30m",
+        "to": "now"
+      },
+      "title": "SketchTest 平台运行观测",
+      "uid": "sketchtest-operations",
+      "version": 1
+    }
+  },
+  "firing": [
+    {
+      "metric": {
+        "__name__": "ALERTS",
+        "alertname": "SketchTestDependencyDown",
+        "alertstate": "firing",
+        "dependency": "object-store",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane",
+        "severity": "critical"
+      },
+      "value": [
+        1791475597.007,
+        "1"
+      ]
+    }
+  ],
+  "firingNotifications": [
+    {
+      "receivedAt": "2026-10-08T16:06:41.720Z",
+      "notification": {
+        "receiver": "retained-local-notifications",
+        "status": "firing",
+        "alerts": [
+          {
+            "status": "firing",
+            "labels": {
+              "alertname": "SketchTestDependencyDown",
+              "dependency": "object-store",
+              "instance": "control-plane:3802",
+              "job": "sketchtest-control-plane",
+              "severity": "critical"
+            },
+            "annotations": {
+              "summary": "SketchTest dependency is not ready"
+            },
+            "startsAt": "2026-10-08T16:06:36.683Z",
+            "endsAt": "0001-01-01T00:00:00Z",
+            "generatorURL": "http://5d082bdddedd:9090/graph?g0.expr=sketchtest_dependency_up+%3D%3D+0&g0.tab=1",
+            "fingerprint": "c65c21e68c52f2d7"
+          }
+        ],
+        "groupLabels": {
+          "alertname": "SketchTestDependencyDown",
+          "job": "sketchtest-control-plane"
+        },
+        "commonLabels": {
+          "alertname": "SketchTestDependencyDown",
+          "dependency": "object-store",
+          "instance": "control-plane:3802",
+          "job": "sketchtest-control-plane",
+          "severity": "critical"
+        },
+        "commonAnnotations": {
+          "summary": "SketchTest dependency is not ready"
+        },
+        "externalURL": "http://c9165a173f2f:9093",
+        "version": "4",
+        "groupKey": "{}:{alertname=\"SketchTestDependencyDown\", job=\"sketchtest-control-plane\"}",
+        "truncatedAlerts": 0
+      }
+    }
+  ],
+  "notifications": [
+    {
+      "receivedAt": "2026-10-08T16:06:41.720Z",
+      "notification": {
+        "receiver": "retained-local-notifications",
+        "status": "firing",
+        "alerts": [
+          {
+            "status": "firing",
+            "labels": {
+              "alertname": "SketchTestDependencyDown",
+              "dependency": "object-store",
+              "instance": "control-plane:3802",
+              "job": "sketchtest-control-plane",
+              "severity": "critical"
+            },
+            "annotations": {
+              "summary": "SketchTest dependency is not ready"
+            },
+            "startsAt": "2026-10-08T16:06:36.683Z",
+            "endsAt": "0001-01-01T00:00:00Z",
+            "generatorURL": "http://5d082bdddedd:9090/graph?g0.expr=sketchtest_dependency_up+%3D%3D+0&g0.tab=1",
+            "fingerprint": "c65c21e68c52f2d7"
+          }
+        ],
+        "groupLabels": {
+          "alertname": "SketchTestDependencyDown",
+          "job": "sketchtest-control-plane"
+        },
+        "commonLabels": {
+          "alertname": "SketchTestDependencyDown",
+          "dependency": "object-store",
+          "instance": "control-plane:3802",
+          "job": "sketchtest-control-plane",
+          "severity": "critical"
+        },
+        "commonAnnotations": {
+          "summary": "SketchTest dependency is not ready"
+        },
+        "externalURL": "http://c9165a173f2f:9093",
+        "version": "4",
+        "groupKey": "{}:{alertname=\"SketchTestDependencyDown\", job=\"sketchtest-control-plane\"}",
+        "truncatedAlerts": 0
+      }
+    },
+    {
+      "receivedAt": "2026-10-08T16:06:51.713Z",
+      "notification": {
+        "receiver": "retained-local-notifications",
+        "status": "resolved",
+        "alerts": [
+          {
+            "status": "resolved",
+            "labels": {
+              "alertname": "SketchTestDependencyDown",
+              "dependency": "object-store",
+              "instance": "control-plane:3802",
+              "job": "sketchtest-control-plane",
+              "severity": "critical"
+            },
+            "annotations": {
+              "summary": "SketchTest dependency is not ready"
+            },
+            "startsAt": "2026-10-08T16:06:36.683Z",
+            "endsAt": "2026-10-08T16:06:51.683Z",
+            "generatorURL": "http://5d082bdddedd:9090/graph?g0.expr=sketchtest_dependency_up+%3D%3D+0&g0.tab=1",
+            "fingerprint": "c65c21e68c52f2d7"
+          }
+        ],
+        "groupLabels": {
+          "alertname": "SketchTestDependencyDown",
+          "job": "sketchtest-control-plane"
+        },
+        "commonLabels": {
+          "alertname": "SketchTestDependencyDown",
+          "dependency": "object-store",
+          "instance": "control-plane:3802",
+          "job": "sketchtest-control-plane",
+          "severity": "critical"
+        },
+        "commonAnnotations": {
+          "summary": "SketchTest dependency is not ready"
+        },
+        "externalURL": "http://c9165a173f2f:9093",
+        "version": "4",
+        "groupKey": "{}:{alertname=\"SketchTestDependencyDown\", job=\"sketchtest-control-plane\"}",
+        "truncatedAlerts": 0
+      }
+    }
+  ],
+  "finalDependencies": [
+    {
+      "metric": {
+        "__name__": "sketchtest_dependency_up",
+        "dependency": "postgres",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane"
+      },
+      "value": [
+        1791475612.73,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "sketchtest_dependency_up",
+        "dependency": "object-store",
+        "instance": "control-plane:3802",
+        "job": "sketchtest-control-plane"
+      },
+      "value": [
+        1791475612.73,
+        "1"
+      ]
+    }
+  ],
+  "status": "passed",
+  "completedAt": "2026-10-08T16:06:52.732Z"
+}

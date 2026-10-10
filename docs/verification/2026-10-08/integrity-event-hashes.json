@@ -1,0 +1,48 @@
+{
+  "runId": "run_84626abc",
+  "events": [
+    {
+      "eventId": "run_84626abc-evt-2",
+      "eventType": "step.started",
+      "storedHash": "437382a04cce0c99d798cef0a312ab9792c7c588872e65fed6d98e745d2e4186",
+      "recomputedHash": "3592753b4b01212f0834bc354a65c57b349de2e579b7783665ad0f85a8c1647e"
+    },
+    {
+      "eventId": "run_84626abc-evt-3",
+      "eventType": "request.prepared",
+      "storedHash": "560314a08f0d7cb39de765954ec0199a5a1d77766d6f3cc32386dc272591a715",
+      "recomputedHash": "8ec6a3bff6ed479152729288383d581748a33e85e8a56d5303615c513ec54f5a"
+    },
+    {
+      "eventId": "run_84626abc-evt-4",
+      "eventType": "request.sent",
+      "storedHash": "c97520d437c1123bf79781b4e9aa99b665a7aff6e437c4bc1c022064ec4966f3",
+      "recomputedHash": "f3601c648879ee9a64e62222c3206402b76e6fcf5010ed85b456d597cb06800c"
+    },
+    {
+      "eventId": "run_84626abc-evt-5",
+      "eventType": "response.received",
+      "storedHash": "c570ae6e88ca430a374ab4f418a2364d6766eadd3020ddeacd9f85d171174e20",
+      "recomputedHash": "f2b97fac343a575b04814a477d292324d44ca7f3b5875c26c1733444466ce170"
+    },
+    {
+      "eventId": "run_84626abc-evt-6",
+      "eventType": "assertion.evaluated",
+      "storedHash": "248805bf4d542e9305fed602f4760e4620c4c3016b486da18c5a3e295ecc4272",
+      "recomputedHash": "92f8bc87748183e36dca679d153cbed11a3ce71fdf931e694b7a9b0c8b6ff1c3"
+    },
+    {
+      "eventId": "run_84626abc-evt-7",
+      "eventType": "assertion.evaluated",
+      "storedHash": "3ca12b77bf6a1aa935f39c42bd73b95eaff1a78469705858ec1782b1088bc859",
+      "recomputedHash": "f237bc9b4675ada291e32ed13391cbd975e21b9e302de994eeccdbae6f2911aa"
+    },
+    {
+      "eventId": "run_84626abc-evt-8",
+      "eventType": "step.finished",
+      "storedHash": "dcdb98d606d5f0a4e26c56a216e0810f2e1b6b41c9a1b97984aa22460b4c8c4f",
+      "recomputedHash": "0a894f3f5651eaa45a538394af58a62638c591649de1d37a5590ab41b2434fc1"
+    }
+  ],
+  "note": "Inline payloads round-trip through PostgreSQL JSONB before JSON.stringify; no canonical key ordering is used when originally hashing."
+}

@@ -1,85 +1,63 @@
 import { create } from 'zustand';
+import {
+  type AuthSession,
+  clearAuthSession,
+  readAuthSession,
+  writeAuthSession,
+} from '../lib/auth-session';
 import { cpClient, type User } from '../lib/cp-client';
 
-const AUTH_TOKEN_KEY = 'sketchtest.auth-token:v1';
-
 interface AuthState {
-  user: User | null;
   token: string | null;
+  user: User | null;
+  hydrated: boolean;
   loading: boolean;
   error: string | null;
-
-  /** Login with email/password. Stores token in localStorage. */
-  login: (email: string, password: string, workspaceId?: string) => Promise<void>;
-  /** Logout — clear token and user. */
+  setSession: (token: string, user: User) => void;
+  clearSession: () => void;
+  setHydrated: (hydrated: boolean) => void;
   logout: () => void;
-  /** Restore session from stored token. */
   restoreSession: () => Promise<void>;
-  /** Whether the user is authenticated. */
   isAuthenticated: () => boolean;
 }
 
-function getStoredToken(): string | null {
-  try {
-    return localStorage.getItem(AUTH_TOKEN_KEY);
-  } catch {
-    return null;
-  }
-}
+const stored: AuthSession | null = readAuthSession();
 
-function storeToken(token: string): void {
-  try {
-    localStorage.setItem(AUTH_TOKEN_KEY, token);
-  } catch {
-    // Silently ignore
-  }
-}
+const LEGACY_TOKEN_KEY = 'sketchtest.auth-token:v1';
 
-function clearToken(): void {
-  try {
-    localStorage.removeItem(AUTH_TOKEN_KEY);
-  } catch {
-    // Silently ignore
-  }
+function clearLegacyToken() {
+  if (typeof window !== 'undefined') window.localStorage.removeItem(LEGACY_TOKEN_KEY);
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  user: null,
-  token: getStoredToken(),
+  token: stored?.token ?? null,
+  user: stored?.user ?? null,
+  hydrated: true,
   loading: false,
   error: null,
-
-  login: async (email: string, password: string, workspaceId?: string) => {
-    set({ loading: true, error: null });
-    try {
-      const { user, token } = await cpClient.login(email, password, workspaceId);
-      storeToken(token);
-      set({ user, token, loading: false });
-    } catch (err) {
-      set({ error: String(err), loading: false });
-      throw err;
-    }
+  setSession: (token, user) => {
+    writeAuthSession({ token, user });
+    set({ token, user, hydrated: true, loading: false, error: null });
   },
-
-  logout: () => {
-    clearToken();
-    set({ user: null, token: null });
+  clearSession: () => {
+    clearAuthSession();
+    clearLegacyToken();
+    set({ token: null, user: null, hydrated: true, loading: false });
   },
-
+  setHydrated: (hydrated) => set({ hydrated }),
+  logout: () => get().clearSession(),
   restoreSession: async () => {
     const token = get().token;
     if (!token) return;
-
-    set({ loading: true });
+    set({ loading: true, error: null, hydrated: false });
     try {
-      const user = await cpClient.getMe(token);
-      set({ user, loading: false });
+      const result = await cpClient.getMe(token);
+      const user = 'user' in result ? result.user : (result as unknown as User);
+      writeAuthSession({ token, user });
+      set({ user, loading: false, hydrated: true });
     } catch {
-      // Token expired or invalid
-      clearToken();
-      set({ user: null, token: null, loading: false });
+      get().clearSession();
     }
   },
-
   isAuthenticated: () => get().user !== null && get().token !== null,
 }));

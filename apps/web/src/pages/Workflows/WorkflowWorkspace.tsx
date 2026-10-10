@@ -18,8 +18,9 @@ import {
   XCircle,
 } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { initialSteps, responseFixture, workflows } from '../../data';
-import { useApiStore } from '../../stores/apiStore';
+import { useNavigate } from 'react-router-dom';
+import { ErrorCallout } from '../../components/shared/ErrorCallout';
+import { cpClient } from '../../lib/cp-client';
 import { useWorkflowStore } from '../../stores/workflowStore';
 import type { ApiEndpoint, ExecutionLog, StepTone, WorkflowStep } from '../../types';
 import { WorkflowCard } from './WorkflowListView';
@@ -162,7 +163,7 @@ function EndpointPickerDialog({
                     <span>{ep.summary}</span>
                   </span>
                   <span>
-                    {ep.coverage > 0 ? (
+                    {ep.coverage !== null && ep.coverage > 0 ? (
                       <span className="picker-coverage">
                         <span className="progress">
                           <i style={{ width: `${ep.coverage}%` }} />
@@ -192,21 +193,31 @@ function WorkflowCanvas({
   selectedId,
   logs,
   workflowName,
+  versionLabel,
   runState,
   onSelect,
   onAdd,
   onBack,
   onRun,
+  onSave,
+  onPublish,
+  saving,
+  publishing,
 }: {
   steps: WorkflowStep[];
   selectedId: string;
   logs: ExecutionLog[];
   workflowName: string;
+  versionLabel: string;
   runState: string;
   onSelect: (id: string) => void;
   onAdd: () => void;
   onBack: () => void;
   onRun: () => void;
+  onSave: () => void;
+  onPublish: () => void;
+  saving: boolean;
+  publishing: boolean;
 }) {
   const statusMap = useMemo(() => new Map(logs.map((log) => [log.stepId, log.status])), [logs]);
   return (
@@ -216,12 +227,12 @@ function WorkflowCanvas({
       </button>
       <div className="paper-title">
         <strong>业务流程：{workflowName}</strong>
-        <small>拖动步骤可以重新编排</small>
+        <small>选择步骤查看和编辑请求</small>
       </div>
       <div className="blueprint-stamp" aria-label="流程版本信息">
         <strong>BLUEPRINT LAB</strong>
         <span>PROJECT: {workflowName.replace(/\s/g, '_').toUpperCase()}</span>
-        <span>VERSION: v1.0.0</span>
+        <span>VERSION: {versionLabel}</span>
         <span>DRAWN BY: QA_TEAM</span>
       </div>
       <div className="flow-note">
@@ -286,6 +297,22 @@ function WorkflowCanvas({
           <Lightning size={20} />
           {runState === 'running' ? '执行中...' : '运行'}
         </button>
+        <button
+          className="button button--outline"
+          type="button"
+          onClick={onSave}
+          disabled={saving || publishing}
+        >
+          {saving ? '保存中...' : '保存草稿'}
+        </button>
+        <button
+          className="button button--outline"
+          type="button"
+          onClick={onPublish}
+          disabled={saving || publishing}
+        >
+          {publishing ? '发布中...' : '保存并发布'}
+        </button>
         <button className="add-step-button" type="button" onClick={onAdd}>
           <Plus size={20} /> 添加步骤
         </button>
@@ -296,10 +323,12 @@ function WorkflowCanvas({
 
 function Inspector({
   step,
+  stepIndex,
   onChange,
   onDelete,
 }: {
   step: WorkflowStep;
+  stepIndex: number;
   onChange: (patch: Partial<WorkflowStep>) => void;
   onDelete: () => void;
 }) {
@@ -313,9 +342,7 @@ function Inspector({
         </button>
       </div>
       <div className="selected-step-row">
-        <span className={`step-chip tone-${step.tone}`}>
-          {initialSteps.findIndex((item) => item.id === step.id) + 1 || '+'}
-        </span>
+        <span className={`step-chip tone-${step.tone}`}>{stepIndex + 1}</span>
         <strong>{step.name}</strong>
         <span className="rest-pill">REST</span>
       </div>
@@ -350,6 +377,7 @@ function Inspector({
             请求方法
             <select
               value={step.method}
+              disabled={!!step.requestReference}
               onChange={(event) =>
                 onChange({ method: event.target.value as WorkflowStep['method'] })
               }
@@ -361,27 +389,63 @@ function Inspector({
             </select>
           </label>
           <label>
-            请求地址
+            请求地址或 URL 模板
             <input
-              value={`{{baseUrl}}${step.path}`}
-              onChange={(event) =>
-                onChange({ path: event.target.value.replace('{{baseUrl}}', '') })
-              }
+              value={step.path}
+              disabled={!!step.requestReference}
+              onChange={(event) => onChange({ path: event.target.value })}
+              placeholder="https://api.example.com/orders 或 ${env.baseUrl}/orders"
             />
           </label>
+          {step.requestReference && (
+            <p>请求来自用例版本 {step.requestReference}，请在用例中编辑并发布新版本。</p>
+          )}
           <fieldset>
             <legend>请求头（Headers）</legend>
-            <div className="kv-row">
-              <CheckCircle size={15} weight="fill" />
-              <code>Content-Type</code>
-              <span>application/json</span>
-            </div>
-            <div className="kv-row">
-              <CheckCircle size={15} weight="fill" />
-              <code>Authorization</code>
-              <span>Bearer {'{{accessToken}}'}</span>
-            </div>
-            <button className="text-button" type="button">
+            {(step.headers ?? []).map((header, index) => (
+              <div className="kv-row" key={`${step.id}-header-${index}`}>
+                <input
+                  aria-label={`请求头 ${index + 1} 名称`}
+                  value={header.name}
+                  disabled={!!step.requestReference}
+                  onChange={(event) =>
+                    onChange({
+                      headers: step.headers?.map((item, i) =>
+                        i === index ? { ...item, name: event.target.value } : item,
+                      ),
+                    })
+                  }
+                />
+                <input
+                  aria-label={`请求头 ${index + 1} 值`}
+                  value={header.value}
+                  disabled={!!step.requestReference}
+                  onChange={(event) =>
+                    onChange({
+                      headers: step.headers?.map((item, i) =>
+                        i === index ? { ...item, value: event.target.value } : item,
+                      ),
+                    })
+                  }
+                />
+                <button
+                  type="button"
+                  aria-label={`删除请求头 ${index + 1}`}
+                  disabled={!!step.requestReference}
+                  onClick={() => onChange({ headers: step.headers?.filter((_, i) => i !== index) })}
+                >
+                  删除
+                </button>
+              </div>
+            ))}
+            <button
+              className="text-button"
+              type="button"
+              disabled={!!step.requestReference}
+              onClick={() =>
+                onChange({ headers: [...(step.headers ?? []), { name: '', value: '' }] })
+              }
+            >
               <Plus size={15} /> 添加参数
             </button>
           </fieldset>
@@ -461,6 +525,12 @@ function BottomConsole({
   onSelectLog: (id: string) => void;
 }) {
   const [tab, setTab] = useState<'response' | 'assertion' | 'variables'>('response');
+  const activeLog = logs.find((log) => log.stepId === activeStepId) ?? logs[0];
+  const events = activeLog?.events ?? [];
+  const responseEvent = events.filter((event) => event.eventType === 'response.received').at(-1);
+  const assertions = events.filter((event) => event.eventType === 'assertion.evaluated');
+  const variables = events.filter((event) => event.eventType === 'variable.extracted');
+  const eventJson = JSON.stringify(responseEvent?.payload ?? events, null, 2);
   return (
     <section
       className={`bottom-console ${collapsed ? 'bottom-console--collapsed' : ''}`}
@@ -536,36 +606,55 @@ function BottomConsole({
                   {id === 'response' ? '响应' : id === 'assertion' ? '断言' : '提取变量'}
                 </button>
               ))}
-              <span className="response-meta">200 OK　210 ms　512 B</span>
+              <span className="response-meta">
+                {activeLog?.code ? `${activeLog.code} ` : ''}
+                {activeLog?.duration
+                  ? `${activeLog.duration} ms`
+                  : events.length
+                    ? `${events.length} 个真实事件`
+                    : '尚未执行'}
+              </span>
               <button
                 className="copy-button"
                 type="button"
-                onClick={() => navigator.clipboard?.writeText(responseFixture)}
+                onClick={() => navigator.clipboard?.writeText(eventJson)}
                 aria-label="复制响应"
               >
                 <Copy size={15} />
               </button>
             </div>
             {tab === 'response' ? (
-              <pre>{responseFixture}</pre>
+              <pre>
+                {events.length
+                  ? eventJson
+                  : '运行已发布版本后，这里会显示 Runner 记录的真实响应事件。'}
+              </pre>
             ) : tab === 'assertion' ? (
               <div className="assertion-result">
-                <XCircle size={24} weight="fill" />
+                {assertions.length ? <CheckCircle size={24} weight="fill" /> : <Clock size={24} />}
                 <span>
-                  <strong>1 条断言失败</strong>
-                  <small>$.data.status 期望值"已支付"，实际值"待支付"</small>
+                  <strong>
+                    {assertions.length ? `${assertions.length} 条真实断言事件` : '尚无断言事件'}
+                  </strong>
+                  <small>
+                    {assertions.length
+                      ? JSON.stringify(assertions.map((event) => event.payload))
+                      : '发布并运行后显示 Runner 的断言结果。'}
+                  </small>
                 </span>
               </div>
             ) : (
               <div className="variable-list">
-                <span>
-                  <code>orderId</code>
-                  <strong>123456</strong>
-                </span>
-                <span>
-                  <code>status</code>
-                  <strong>待支付</strong>
-                </span>
+                {variables.length ? (
+                  variables.map((event, index) => (
+                    <span key={`${event.timestamp}-${index}`}>
+                      <code>{event.eventType}</code>
+                      <strong>{JSON.stringify(event.payload)}</strong>
+                    </span>
+                  ))
+                ) : (
+                  <span>尚无变量提取事件</span>
+                )}
               </div>
             )}
           </div>
@@ -576,6 +665,7 @@ function BottomConsole({
 }
 
 export function WorkflowWorkspace() {
+  const navigate = useNavigate();
   const steps = useWorkflowStore((s) => s.steps);
   const setSteps = useWorkflowStore((s) => s.setSteps);
   const selectedId = useWorkflowStore((s) => s.selectedId);
@@ -584,18 +674,73 @@ export function WorkflowWorkspace() {
   const backToList = useWorkflowStore((s) => s.backToList);
   const runState = useWorkflowStore((s) => s.runState);
   const runWorkflow = useWorkflowStore((s) => s.runWorkflow);
-  const activeWorkflowId = useWorkflowStore((s) => s.activeWorkflowId);
-  const apiEndpoints = useApiStore((s) => s.apiEndpoints);
+  const activeWorkflow = useWorkflowStore((s) => s.activeWorkflow);
+  const activeVersionId = useWorkflowStore((s) => s.activeVersionId);
+  const versions = useWorkflowStore((s) => s.versions);
+  const saving = useWorkflowStore((s) => s.saving);
+  const publishing = useWorkflowStore((s) => s.publishing);
+  const error = useWorkflowStore((s) => s.error);
+  const saveDraft = useWorkflowStore((s) => s.saveDraft);
+  const publishDraft = useWorkflowStore((s) => s.publishDraft);
+  const [apiEndpoints, setApiEndpoints] = useState<ApiEndpoint[]>([]);
 
-  const workflowName = workflows.find((wf) => wf.id === activeWorkflowId)?.name ?? '业务流程';
+  useEffect(() => {
+    let disposed = false;
+    void (async () => {
+      try {
+        const { apiVersions } = await cpClient.listApiVersions();
+        const versions = await Promise.all(
+          apiVersions.map((version) => cpClient.getApiVersion(version.id)),
+        );
+        if (disposed) return;
+        setApiEndpoints(
+          versions.flatMap((version) =>
+            Array.isArray(version.endpoints)
+              ? (
+                  version.endpoints as Array<{
+                    id: string;
+                    method: ApiEndpoint['method'];
+                    path: string;
+                    summary?: string;
+                    description?: string;
+                    deprecated?: boolean;
+                    tags?: string[];
+                  }>
+                ).map((endpoint) => ({
+                  id: endpoint.id,
+                  method: endpoint.method,
+                  path: endpoint.path,
+                  summary: endpoint.summary ?? '',
+                  description: endpoint.description,
+                  coverage: 0,
+                  cases: 0,
+                  tags: endpoint.tags ?? [],
+                  deprecated: endpoint.deprecated ?? false,
+                }))
+              : [],
+          ),
+        );
+      } catch {
+        if (!disposed) setApiEndpoints([]);
+      }
+    })();
+    return () => {
+      disposed = true;
+    };
+  }, []);
+
+  const workflowName = activeWorkflow?.name ?? '正在读取流程...';
+  const activeVersion = versions.find((version) => version.id === activeVersionId);
 
   const [collapsed, setCollapsed] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const selectedStep = steps.find((step) => step.id === selectedId) ?? steps[0];
-  const updateSelected = (patch: Partial<WorkflowStep>) =>
+  const updateSelected = (patch: Partial<WorkflowStep>) => {
+    if (!selectedStep) return;
     setSteps((current) =>
       current.map((step) => (step.id === selectedStep.id ? { ...step, ...patch } : step)),
     );
+  };
   const handleEndpointSelect = (ep: ApiEndpoint) => {
     setPickerOpen(false);
     const id = `step-${Date.now()}`;
@@ -605,7 +750,7 @@ export function WorkflowWorkspace() {
         id,
         name: '新建步骤',
         method: 'GET',
-        path: '/api/new-endpoint',
+        path: '',
         icon: 'verify',
         tone: 'brown',
         variableName: 'result',
@@ -635,14 +780,32 @@ export function WorkflowWorkspace() {
     setSelectedId(id);
   };
   const deleteStep = () => {
-    if (steps.length <= 1) return;
+    if (steps.length <= 1 || !selectedStep) return;
     const index = steps.findIndex((step) => step.id === selectedStep.id);
     const next = steps.filter((step) => step.id !== selectedStep.id);
     setSteps(next);
     setSelectedId(next[Math.max(0, index - 1)].id);
   };
+  if (!activeWorkflow) {
+    return (
+      <main className="page-view">
+        <section className="empty-module">
+          <h3>{error ? '无法打开流程' : '正在读取流程...'}</h3>
+          <p>{error ?? '正在从 Control Plane 加载流程与版本。'}</p>
+          <button
+            className="button button--outline"
+            type="button"
+            onClick={() => navigate('/workflows')}
+          >
+            返回流程列表
+          </button>
+        </section>
+      </main>
+    );
+  }
   return (
     <div className="workflow-workspace">
+      {error ? <ErrorCallout title="流程操作未完成" message={error} /> : null}
       <EndpointPickerDialog
         open={pickerOpen}
         endpoints={apiEndpoints}
@@ -655,13 +818,35 @@ export function WorkflowWorkspace() {
           selectedId={selectedId}
           logs={logs}
           workflowName={workflowName}
+          versionLabel={activeVersion ? `v${activeVersion.version}` : '未保存'}
           runState={runState}
           onSelect={setSelectedId}
           onAdd={() => setPickerOpen(true)}
-          onBack={backToList}
+          onBack={() => {
+            backToList();
+            navigate('/workflows');
+          }}
           onRun={runWorkflow}
+          onSave={() => void saveDraft()}
+          onPublish={() => void publishDraft()}
+          saving={saving}
+          publishing={publishing}
         />
-        <Inspector step={selectedStep} onChange={updateSelected} onDelete={deleteStep} />
+        {selectedStep ? (
+          <Inspector
+            step={selectedStep}
+            stepIndex={steps.findIndex((step) => step.id === selectedStep.id)}
+            onChange={updateSelected}
+            onDelete={deleteStep}
+          />
+        ) : (
+          <aside className="inspector">
+            <div className="empty-inspector">
+              <strong>尚无步骤</strong>
+              <p>从接口目录添加一个步骤，或创建一个空白步骤。</p>
+            </div>
+          </aside>
+        )}
       </div>
       <BottomConsole
         logs={logs}

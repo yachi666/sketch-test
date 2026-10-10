@@ -21,12 +21,11 @@ vi.mock('../../../shared/id.js', () => ({
 
 import {
   createPolicy,
+  deletePolicy,
+  evaluatePolicies,
   getPolicy,
   listPolicies,
   updatePolicy,
-  deletePolicy,
-  evaluatePolicies,
-  PolicyNotFoundError,
 } from '../policy.service';
 
 // ─── Helpers ───────────────────────────────────────────────────────

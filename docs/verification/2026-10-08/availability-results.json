@@ -1,0 +1,98 @@
+{
+  "startedAt": "2026-10-08T15:16:02.404Z",
+  "checks": [
+    {
+      "name": "object store outage fails readiness but keeps liveness",
+      "status": "passed",
+      "value": {
+        "down": {
+          "ready": {
+            "status": 503,
+            "body": {
+              "status": "not_ready",
+              "db": "connected",
+              "objectStore": "disconnected",
+              "timestamp": "2026-10-08T15:16:07.716Z"
+            },
+            "elapsedMs": 5123
+          },
+          "live": {
+            "status": 200,
+            "body": {
+              "status": "ok",
+              "timestamp": "2026-10-08T15:16:07.721Z"
+            },
+            "elapsedMs": 2
+          }
+        },
+        "recovered": {
+          "status": 200,
+          "body": {
+            "status": "ready",
+            "db": "connected",
+            "objectStore": "connected",
+            "timestamp": "2026-10-08T15:16:08.879Z"
+          },
+          "elapsedMs": 4
+        }
+      }
+    },
+    {
+      "name": "PostgreSQL outage detection and automatic reconnect",
+      "status": "passed",
+      "value": {
+        "down": {
+          "ready": {
+            "status": 0,
+            "error": "fetch failed",
+            "elapsedMs": 4
+          },
+          "live": {
+            "status": 0,
+            "error": "fetch failed",
+            "elapsedMs": 2
+          }
+        },
+        "recovered": {
+          "status": 200,
+          "body": {
+            "status": "ready",
+            "db": "connected",
+            "objectStore": "connected",
+            "timestamp": "2026-10-08T15:16:10.251Z"
+          },
+          "elapsedMs": 26
+        },
+        "knownRun": "passed"
+      }
+    },
+    {
+      "name": "Runner outage queues work and restart executes it once",
+      "status": "passed",
+      "value": {
+        "runId": "run_c657eafd",
+        "before": "pending",
+        "after": "passed"
+      }
+    },
+    {
+      "name": "100 real authenticated reads at concurrency 5",
+      "status": "passed",
+      "value": {
+        "requests": 100,
+        "concurrency": 5,
+        "p50Ms": 2.09991699999955,
+        "p95Ms": 8.260167000000365,
+        "maxMs": 20.860458000001017,
+        "errors": 0,
+        "scope": "brief local read burst; not a production capacity claim"
+      }
+    },
+    {
+      "name": "cron automatic dispatch observation over minute boundary",
+      "status": "failed",
+      "error": "Enabled cron rule did not dispatch any run in 75 seconds"
+    }
+  ],
+  "completedAt": "2026-10-08T15:17:31.078Z"
+}

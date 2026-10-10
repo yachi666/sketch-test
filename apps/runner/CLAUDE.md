@@ -70,17 +70,15 @@ The `VariableStore` supports dot-notation templates (`${env.baseUrl}`, `${steps.
 | `jsonPath` | exists, notExists, equals, contains, greaterThan, lessThan, matches, type, hasItems, isEmpty |
 | `body` | contains, equals, notContains |
 | `responseTime` | lessThan (max ms) |
-| `schema` | deferred (validator integration pending) |
+| `schema` | JSON Schema draft-07, 2019-09, and 2020-12 via Ajv; invalid or unsupported schemas fail explicitly |
 
 ## JSONPath
 
-Minimal M0 implementation. Supports: `$.field.subfield`, `$[0].field`, `$.data.items[*].name` (wildcard array access).
+Built-in subset supports: `$.field.subfield`, `$[0].field`, and `$.data.items[*].name` (wildcard array access). Unsupported expressions must fail explicitly rather than being interpreted approximately.
 
 ## Dependencies
 
 - `@sketch-test/contracts-common` — EntityId, HTTP types, ContentHash, Instant
-- `@sketch-test/canonical-api-model` — endpoint identifiers
-- `@sketch-test/test-dsl` — assertion operators, extraction sources
 - `@sketch-test/runner-protocol` — ExecutionPlan, FrozenStep, RunEvent union, RunEventSchema
 
 ## When to modify

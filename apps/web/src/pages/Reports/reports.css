@@ -1,0 +1,429 @@
+.report-intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+.report-intro h2 {
+  font-size: 28px;
+  margin: 8px 0;
+  letter-spacing: -0.7px;
+}
+.report-intro p,
+.report-scope {
+  color: var(--ink-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.report-signals {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  background: #fff;
+  border: 1px solid #dbe1e8;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.report-signal {
+  padding: 20px 24px;
+  border-right: 1px solid #e9edf2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 3px solid #8290a2;
+}
+.report-signal:last-child {
+  border-right: 0;
+}
+.report-signal span {
+  font-size: 12px;
+  color: #5c6777;
+}
+.report-signal strong {
+  font-size: 30px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.3;
+}
+.report-signal--passed {
+  border-top-color: #499a7b;
+  color: #287459;
+}
+.report-signal--failed {
+  border-top-color: #d9786a;
+  color: #ab3d36;
+}
+.report-signal--warning {
+  border-top-color: #d3a047;
+  color: #91661c;
+}
+.report-signal--pending {
+  border-top-color: #5287c9;
+  color: #2b609f;
+}
+.report-scope {
+  margin: 12px 0 28px;
+}
+.report-browser {
+  background: white;
+  border: 1px solid #dbe1e8;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.report-filter-row,
+.report-search-row,
+.report-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+}
+.report-filter-row {
+  border-bottom: 1px solid #e9edf2;
+}
+.report-filter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.report-filter-tabs button {
+  padding: 9px 13px;
+  border: 0;
+  background: transparent;
+  color: #5a6677;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.report-filter-tabs button[aria-pressed="true"] {
+  background: #edf4ff;
+  color: #205fc0;
+  font-weight: 650;
+}
+.report-period select {
+  border: 1px solid #dbe1e8;
+  border-radius: 5px;
+  padding: 8px;
+  background: white;
+  font: inherit;
+  font-size: 12px;
+}
+.report-search {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #dbe1e8;
+  padding: 9px 12px;
+  border-radius: 5px;
+  color: #768295;
+}
+.report-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+}
+.report-search:focus-within {
+  outline: 2px solid #568ade;
+  outline-offset: 2px;
+}
+.report-refresh {
+  white-space: nowrap;
+  color: #697487;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.report-table-wrap {
+  overflow-x: auto;
+}
+.regression-run-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+.regression-run-table th {
+  background: #f8fafc;
+  color: #707c8e;
+  font-weight: 500;
+  padding: 12px 20px;
+  white-space: nowrap;
+}
+.regression-run-table td {
+  border-bottom: 1px solid #edf0f4;
+  padding: 18px 20px;
+}
+.regression-run-table td:first-child {
+  min-width: 230px;
+}
+.regression-run-table strong {
+  display: block;
+  color: #26344a;
+  margin-bottom: 5px;
+}
+.regression-run-table code,
+.regression-run-table small {
+  display: block;
+  color: #7b8694;
+  font-size: 11px;
+  margin-top: 6px;
+}
+.regression-run-table time,
+.regression-run-table .text-button {
+  white-space: nowrap;
+}
+.regression-run-table tbody tr:hover {
+  background: #fafcff;
+}
+.report-pagination {
+  font-size: 12px;
+  color: #697487;
+}
+.report-pagination > div {
+  display: flex;
+  gap: 8px;
+}
+.report-empty {
+  padding: 48px 24px;
+  text-align: center;
+  color: #697487;
+}
+.report-empty svg {
+  color: #5287c9;
+}
+.report-empty h3 {
+  color: #26344a;
+}
+.report-empty .button {
+  margin: 14px auto 0;
+}
+.report-list-message {
+  padding: 32px;
+}
+.report-diagnosis {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border: 1px solid #dbe1e8;
+  border-left: 3px solid #568ade;
+  background: #fff;
+  border-radius: 6px;
+  padding: 20px 24px;
+  margin: 22px 0;
+}
+.report-diagnosis h3 {
+  margin: 5px 0;
+}
+.report-diagnosis p {
+  font-size: 13px;
+  color: #697487;
+  margin: 8px 0 0;
+}
+.report-problem-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.scenario-status--warning {
+  background: #fff5df;
+  color: #876018;
+}
+.scenario-status--neutral {
+  background: #eef1f5;
+  color: #697487;
+}
+.step-timeline__row--warning .step-timeline__state {
+  color: #ac7923;
+}
+.step-timeline__row--neutral .step-timeline__state {
+  color: #8290a2;
+}
+.report-fact__assertion--warning {
+  background: #fff8eb;
+  color: #876018;
+}
+.report-fact__assertion--neutral {
+  background: #f4f6f8;
+  color: #697487;
+}
+.report-evidence {
+  background: #fff;
+  scroll-margin-top: 24px;
+}
+.report-evidence__head p {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  color: #697487;
+}
+.report-assertions {
+  padding: 20px;
+  display: grid;
+  gap: 16px;
+}
+.report-assertion {
+  border: 1px solid #e2e8ef;
+  border-left: 3px solid #499a7b;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.report-assertion--failed {
+  border-left-color: #d9786a;
+}
+.report-assertion header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #f8fafc;
+  font-size: 13px;
+}
+.report-assertion header span {
+  font-size: 12px;
+  color: #697487;
+}
+.report-assertion dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 0;
+}
+.report-assertion dl > div {
+  min-width: 0;
+  padding: 14px 16px;
+}
+.report-assertion dt {
+  font-size: 11px;
+  color: #697487;
+  margin-bottom: 8px;
+}
+.report-assertion dd {
+  margin: 0;
+}
+.report-assertion dd pre {
+  margin: 0;
+  padding: 0;
+  background: white;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.report-step-error {
+  margin: 16px;
+  padding: 16px;
+  background: #fff5e9;
+  color: #805e24;
+  border-radius: 5px;
+  overflow-wrap: anywhere;
+}
+.scenario-report-detail__header h2,
+.scenario-report-detail__header code {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 900px) {
+  .report-signals {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .report-signal {
+    padding: 16px;
+  }
+  .report-search-row {
+    flex-wrap: wrap;
+  }
+  .report-refresh {
+    width: 100%;
+  }
+  .report-filter-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 520px) {
+  .report-intro {
+    align-items: flex-start;
+  }
+  .report-intro h2 {
+    font-size: 22px;
+  }
+  .report-signals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .report-signal strong {
+    font-size: 25px;
+  }
+  .report-filter-row,
+  .report-search-row,
+  .report-pagination {
+    padding: 14px;
+    gap: 10px;
+  }
+  .report-pagination {
+    flex-wrap: wrap;
+  }
+  .report-assertion dl {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Existing report styles use tall raw JSON panels; assertion values are compact. */
+.scenario-report-detail .report-assertion dd pre {
+  min-height: 0;
+  max-height: 260px;
+  padding: 0;
+  margin: 0;
+  line-height: 1.7;
+}
+.scenario-report-detail .report-evidence,
+.scenario-report-detail .step-timeline {
+  background: #fff;
+}
+.scenario-report-detail .step-timeline__name small {
+  color: #697487;
+}
+@media (max-width: 720px) {
+  .regression-run-table thead {
+    display: none;
+  }
+  .regression-run-table tbody {
+    display: block;
+  }
+  .regression-run-table tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    padding: 16px;
+    gap: 10px 14px;
+    border-bottom: 1px solid #edf0f4;
+  }
+  .regression-run-table td {
+    display: block;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+  .regression-run-table td:first-child {
+    grid-column: 1 / -1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .regression-run-table td:nth-child(3) {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  .regression-run-table td:nth-child(4) {
+    grid-column: 2;
+    grid-row: 2;
+    color: #697487;
+    font-size: 12px;
+  }
+  .regression-run-table td:last-child {
+    grid-column: 2;
+    grid-row: 3;
+    align-self: center;
+  }
+}

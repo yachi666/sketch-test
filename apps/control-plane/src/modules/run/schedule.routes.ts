@@ -6,16 +6,18 @@
  */
 
 import type { FastifyInstance } from 'fastify';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { sendError } from '../../shared/errors.js';
+import { authenticatedUser } from '../iam/auth.middleware.js';
 import {
   createSchedule,
   deleteSchedule,
   getSchedule,
+  isValidCronExpression,
   listSchedules,
+  ScheduleTriggerError,
   triggerSchedule,
   updateSchedule,
-  isValidCronExpression,
 } from './schedule.service.js';
 
 // ---------------------------------------------------------------------------
@@ -65,21 +67,27 @@ export async function scheduleRoutes(app: FastifyInstance): Promise<void> {
       ]);
     }
 
-    const schedule = await createSchedule({
-      workspaceId: parsed.data.workspaceId,
-      testSuiteId: parsed.data.testSuiteId,
-      cronExpression: parsed.data.cronExpression,
-      environmentId: parsed.data.environmentId,
-      enabled: parsed.data.enabled,
-    });
+    try {
+      const schedule = await createSchedule({
+        workspaceId: parsed.data.workspaceId,
+        testSuiteId: parsed.data.testSuiteId,
+        cronExpression: parsed.data.cronExpression,
+        environmentId: parsed.data.environmentId,
+        enabled: parsed.data.enabled,
+      });
 
-    reply.status(201).send(schedule);
+      reply.status(201).send(schedule);
+    } catch (error) {
+      if (error instanceof ScheduleTriggerError) {
+        return sendError(reply, 404, 'NOT_FOUND', error.message);
+      }
+      throw error;
+    }
   });
 
-  /** List schedules, optionally filtered by workspace. */
+  /** List schedules in the authenticated workspace. */
   app.get('/api/schedules', async (request, reply) => {
-    const query = request.query as { workspaceId?: string };
-    const schedules = await listSchedules(query.workspaceId);
+    const schedules = await listSchedules(authenticatedUser(request).workspaceId);
     reply.send({ schedules });
   });
 
@@ -124,10 +132,22 @@ export async function scheduleRoutes(app: FastifyInstance): Promise<void> {
   /** Manually trigger a scheduled run immediately. */
   app.post('/api/schedules/:id/trigger-now', async (request, reply) => {
     const { id } = request.params as { id: string };
-    const triggeredRunId = await triggerSchedule(id);
-    if (!triggeredRunId) {
-      return sendError(reply, 404, 'NOT_FOUND', `Schedule ${id} not found`);
+    try {
+      const result = await triggerSchedule(id);
+      if (!result) {
+        return sendError(reply, 404, 'NOT_FOUND', `Schedule ${id} not found`);
+      }
+      reply.send({
+        runId: result.runIds[0],
+        runIds: result.runIds,
+        testSuiteVersionId: result.testSuiteVersionId,
+      });
+    } catch (error) {
+      if (error instanceof ScheduleTriggerError) {
+        return sendError(reply, 422, 'INVALID_STATE', error.message);
+      }
+      request.log.error({ error }, 'Failed to trigger schedule');
+      return sendError(reply, 500, 'INTERNAL_ERROR', 'Failed to trigger schedule');
     }
-    reply.send({ runId: triggeredRunId });
   });
 }

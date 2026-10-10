@@ -1,193 +1,308 @@
 import { CaretRight } from '@phosphor-icons/react/CaretRight';
 import { CheckCircle } from '@phosphor-icons/react/CheckCircle';
 import { ClipboardText } from '@phosphor-icons/react/ClipboardText';
-import { DotsThree } from '@phosphor-icons/react/DotsThree';
 import { FileArrowUp } from '@phosphor-icons/react/FileArrowUp';
 import { FlowArrow } from '@phosphor-icons/react/FlowArrow';
 import { PlugsConnected } from '@phosphor-icons/react/PlugsConnected';
 import { XCircle } from '@phosphor-icons/react/XCircle';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { initialRuns, testPlans, workflows } from '../../data';
-import type { WorkflowMeta } from '../../types';
+import { ErrorCallout } from '../../components/shared/ErrorCallout';
+import {
+  type ApiVersionSummary,
+  cpClient,
+  type RunCounts,
+  type RunSummary,
+  type Workflow,
+} from '../../lib/cp-client';
+import { statusLabel, statusTone } from '../../lib/run-status';
+import { useAuthStore } from '../../stores/authStore';
 import { MetricCard } from './MetricCard';
 
-function sideEffectLabel(effect: WorkflowMeta['sideEffect']) {
-  if (effect === 'readonly') return '只读';
-  if (effect === 'cleanable-write') return '可清理写入';
-  return '不可逆';
+function formatTime(value: string): string {
+  return new Intl.DateTimeFormat('zh-CN', { hour: '2-digit', minute: '2-digit' }).format(
+    new Date(value),
+  );
 }
 
 export default function DashboardOverview() {
   const navigate = useNavigate();
-  const topFlows = workflows.slice(0, 4);
+  const workspaceId = useAuthStore((state) => state.user?.workspaceId);
+  const [summary, setSummary] = useState<RunCounts | null>(null);
+  const [attentionRuns, setAttentionRuns] = useState<RunSummary[]>([]);
+  const [runs, setRuns] = useState<RunSummary[]>([]);
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  const [testCaseCount, setTestCaseCount] = useState(0);
+  const [apiVersions, setApiVersions] = useState<ApiVersionSummary[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    if (!workspaceId) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const [runResult, workflowResult, testCaseResult, apiVersionResult, attentionResult] =
+        await Promise.all([
+          cpClient.listRuns({ days: 7, pageSize: 50 }),
+          cpClient.listWorkflows(workspaceId),
+          cpClient.listTestCases(workspaceId),
+          cpClient.listApiVersions(),
+          cpClient.listRuns({ days: 7, status: 'attention', pageSize: 3 }),
+        ]);
+      setRuns(runResult.runs);
+      setAttentionRuns(attentionResult.runs);
+      setSummary(runResult.summary);
+      setWorkflows(workflowResult.workflows);
+      setTestCaseCount(testCaseResult.testCases.length);
+      setApiVersions(apiVersionResult.apiVersions);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : '无法读取仪表盘数据。');
+    } finally {
+      setLoading(false);
+    }
+  }, [workspaceId]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const stats = useMemo(() => {
+    const passed = summary?.passed ?? 0;
+    const failed = summary?.failed ?? 0;
+    const finished = passed + failed;
+    const endpointCount = apiVersions.reduce((total, version) => total + version.endpointCount, 0);
+    return {
+      passed,
+      failed,
+      endpointCount,
+      active: summary?.active ?? 0,
+      unresolved: summary?.unresolved ?? 0,
+      cancelled: summary?.cancelled ?? 0,
+      passRate: finished ? `${((passed / finished) * 100).toFixed(1)}%` : '—',
+    };
+  }, [apiVersions, summary]);
 
   return (
     <main className="page-view overview-view">
-      <div className="page-intro">
-        <div>
-          <span className="eyebrow">SKETCHTEST / PROJECT</span>
-          <h2>早上好，今天的 API 很诚实。</h2>
-          <p>
-            共 {workflows.length} 条业务流程，
-            {workflows.filter((w) => w.status === 'healthy').length} 条健康，仍有 3
-            个失败用例需要关注。
-          </p>
-        </div>
+      <section className="paper-panel regression-start" aria-labelledby="regression-start-title">
+        <span className="eyebrow">可信回归，从一个关键流程开始</span>
+        <h2 id="regression-start-title">
+          {runs.length ? '让每次回归都有可追溯的结论' : '建立第一条业务回归'}
+        </h2>
+        <p>选定一个必须正常工作的业务流程，明确预期结果，再用运行证据验证它。</p>
+        <ol className="regression-steps">
+          <li>
+            <strong>01 · 准备接口</strong>
+            <p>导入接口定义，确认请求与响应约定。</p>
+            <button className="text-button" type="button" onClick={() => navigate('/apis')}>
+              打开接口管理 <CaretRight size={15} />
+            </button>
+          </li>
+          <li>
+            <strong>02 · 编排与审阅</strong>
+            <p>连接业务步骤，检查断言、变量和清理操作。</p>
+            <button className="text-button" type="button" onClick={() => navigate('/workflows')}>
+              打开业务流程 <CaretRight size={15} />
+            </button>
+          </li>
+          <li>
+            <strong>03 · 执行与取证</strong>
+            <p>在流程中发布并运行，再查看失败步骤与证据。</p>
+            <button
+              className="text-button"
+              type="button"
+              onClick={() => navigate(runs.length ? '/reports' : '/workflows')}
+            >
+              {runs.length ? '查看运行证据' : '前往流程执行'} <CaretRight size={15} />
+            </button>
+          </li>
+        </ol>
+      </section>
+      <div className="page-actions-row">
         <button className="button button--primary" type="button" onClick={() => navigate('/apis')}>
           <FileArrowUp size={18} />
           导入 OpenAPI
         </button>
       </div>
-      <section className="metrics-grid" aria-label="质量指标">
-        <MetricCard
-          icon={PlugsConnected}
-          label="API 覆盖率"
-          value="78%"
-          delta="188 / 240"
-          tone="brown"
-        />
-        <MetricCard
-          icon={CheckCircle}
-          label="通过率"
-          value="96.4%"
-          delta="较上周 +2.1%"
-          tone="green"
-        />
-        <MetricCard
-          icon={ClipboardText}
-          label="总用例数"
-          value="612"
-          delta="本周新增 24"
-          tone="amber"
-        />
-        <MetricCard
-          icon={FlowArrow}
-          label="关键流程"
-          value={`${workflows.length}`}
-          delta={`${workflows.filter((w) => w.status === 'healthy').length} 条健康`}
-          tone="violet"
-        />
-        <MetricCard icon={XCircle} label="失败" value="3" delta="需要关注" tone="brick" />
-      </section>
-      <div className="overview-grid">
-        <section className="paper-panel health-panel">
-          <div className="section-heading">
-            <div>
-              <span className="eyebrow">LAST 7 DAYS</span>
-              <h3>运行健康度</h3>
-            </div>
-            <button type="button">
-              <DotsThree size={20} />
-            </button>
-          </div>
-          <div className="bar-chart" aria-label="最近七天运行健康度柱状图">
-            {[64, 68, 72, 70, 82, 78, 91].map((value, index) => (
-              <div key={index}>
-                <span className="bar-success" style={{ height: `${value}%` }} />
-                <span className="bar-failure" style={{ height: `${index === 5 ? 14 : 8}%` }} />
-                <small>06-{15 + index}</small>
+      {error ? <ErrorCallout title="仪表盘数据暂不可用" message={error} onRetry={load} /> : null}
+      {!error ? (
+        <>
+          <section className="metrics-grid" aria-label="质量指标">
+            <MetricCard
+              icon={PlugsConnected}
+              label="端点版本记录"
+              value={String(stats.endpointCount)}
+              delta={`${apiVersions.length} 个 API 版本`}
+              tone="brown"
+            />
+            <MetricCard
+              icon={CheckCircle}
+              label="近 7 天明确结论通过率"
+              value={stats.passRate}
+              delta={`${stats.passed} 次通过 / ${stats.passed + stats.failed} 次有明确结论的运行`}
+              tone="green"
+            />
+            <MetricCard
+              icon={ClipboardText}
+              label="测试用例"
+              value={String(testCaseCount)}
+              delta="已保存用例资产"
+              tone="amber"
+            />
+            <MetricCard
+              icon={FlowArrow}
+              label="业务流程"
+              value={String(workflows.length)}
+              delta="来自当前工作区"
+              tone="violet"
+            />
+            <MetricCard
+              icon={XCircle}
+              label="失败运行"
+              value={String(stats.failed)}
+              delta="可在报告中心查看证据"
+              tone="brick"
+            />
+          </section>
+          <div className="overview-grid">
+            <section className="paper-panel health-panel">
+              <div className="section-heading">
+                <div>
+                  <span className="eyebrow">RUN STATUS</span>
+                  <h3>运行健康度</h3>
+                </div>
               </div>
-            ))}
-          </div>
-          <div className="chart-legend">
-            <span>
-              <i className="dot dot--success" />
-              通过 51
-            </span>
-            <span>
-              <i className="dot dot--failure" />
-              失败 3
-            </span>
-            <span>
-              <i className="dot dot--muted" />
-              跳过 1
-            </span>
-          </div>
-        </section>
-        <section className="paper-panel recent-panel">
-          <div className="section-heading">
-            <div>
-              <span className="eyebrow">RECENT RUNS</span>
-              <h3>最近执行</h3>
-            </div>
-            <button className="text-button" type="button" onClick={() => navigate('/reports')}>
-              查看全部 <CaretRight size={15} />
-            </button>
-          </div>
-          {['每日回归测试', '订单流程验证', '全量回归测试', '新增 API 验证'].map((name, index) => (
-            <button
-              className="recent-row"
-              type="button"
-              key={name}
-              onClick={() => navigate('/reports')}
-            >
-              <time>{index === 0 ? '10:24' : `${8 - index}:15`}</time>
-              <strong>{name}</strong>
-              <span className="env-tag">测试环境</span>
-              <span>{55 - index * 9} 用例</span>
-              <span
-                className={
-                  index === 1
-                    ? 'status-badge status-badge--failed'
-                    : 'status-badge status-badge--passed'
-                }
-              >
-                {index === 1 ? '失败' : '通过'}
-              </span>
-              <CaretRight size={15} />
-            </button>
-          ))}
-        </section>
-        <section className="paper-panel attention-panel">
-          <div className="section-heading">
-            <div>
-              <span className="eyebrow">NEEDS ATTENTION</span>
-              <h3>失败用例</h3>
-            </div>
-            <span className="stamp stamp--danger">失败 3</span>
-          </div>
-          {['POST /v1/orders/create', 'GET /v1/users/{id}', 'PUT /v1/inventory/{id}'].map(
-            (path, index) => (
-              <div className="failure-row" key={path}>
-                <span className="failure-pin" />
-                <code>{path}</code>
-                <span>{['订单创建校验失败', '用户信息查询超时', '库存更新数据不一致'][index]}</span>
-                <time>{['2 小时前', '5 小时前', '1 天前'][index]}</time>
-              </div>
-            ),
-          )}
-        </section>
-        <section className="paper-panel flow-preview">
-          <div className="section-heading">
-            <div>
-              <span className="eyebrow">BUSINESS FLOWS</span>
-              <h3>业务流程速览</h3>
-            </div>
-            <button className="text-button" type="button" onClick={() => navigate('/workflows')}>
-              浏览全部 <CaretRight size={15} />
-            </button>
-          </div>
-          <div className="quick-flows-grid">
-            {topFlows.map((wf) => (
-              <button
-                key={wf.id}
-                type="button"
-                className={`quick-flow-card quick-flow--${wf.status}`}
-                onClick={() => navigate(`/workflows/${wf.id}`)}
-              >
-                <span className={`bp-badge bp-badge--${wf.category}`}>{wf.bpId}</span>
-                <strong>{wf.name}</strong>
-                <small>
-                  {wf.stepCount} 步骤 · {sideEffectLabel(wf.sideEffect)}
-                </small>
-                <span className={`bp-status bp-status--${wf.status}`}>
-                  {wf.status === 'healthy' ? '健康' : wf.status === 'warning' ? '需关注' : '草稿'}
+              <div className="chart-legend">
+                <span>
+                  <i className="dot dot--success" />
+                  通过 {stats.passed}
                 </span>
-              </button>
-            ))}
+                <span>
+                  <i className="dot dot--failure" />
+                  失败 {stats.failed}
+                </span>
+                <span>
+                  <i className="dot dot--muted" />
+                  进行中 {stats.active}
+                </span>
+                <span>无法判断或失联 {stats.unresolved}</span>
+                <span>已取消 {stats.cancelled}</span>
+              </div>
+              <p>
+                {loading
+                  ? '正在读取运行记录...'
+                  : runs.length
+                    ? `近 7 天共 ${summary?.total ?? 0} 条运行记录；下方展示最近记录。`
+                    : '尚无运行记录。发布流程或创建自定义运行后，数据会显示在此。'}
+              </p>
+            </section>
+            <section className="paper-panel recent-panel">
+              <div className="section-heading">
+                <div>
+                  <span className="eyebrow">RECENT RUNS</span>
+                  <h3>最近执行</h3>
+                </div>
+                <button className="text-button" type="button" onClick={() => navigate('/reports')}>
+                  查看全部 <CaretRight size={15} />
+                </button>
+              </div>
+              {runs.slice(0, 5).map((run) => {
+                const status = statusTone(run.status);
+                return (
+                  <button
+                    className="recent-row"
+                    type="button"
+                    key={run.id}
+                    onClick={() => navigate(`/reports/${run.id}`)}
+                  >
+                    <time>{formatTime(run.createdAt)}</time>
+                    <strong>
+                      {run.sourceName ?? (run.workflowVersionId ? '流程运行' : '自定义运行')}
+                    </strong>
+                    <span className="env-tag">{run.id}</span>
+                    <span>{statusLabel(run.status)}</span>
+                    <span
+                      className={`status-badge status-badge--${status === 'passed' ? 'passed' : status === 'failed' ? 'failed' : 'pending'}`}
+                    >
+                      {statusLabel(run.status)}
+                    </span>
+                    <CaretRight size={15} />
+                  </button>
+                );
+              })}
+              {!loading && !runs.length ? <p>尚未执行回归。</p> : null}
+            </section>
+            <section className="paper-panel attention-panel">
+              <div className="section-heading">
+                <div>
+                  <span className="eyebrow">NEEDS ATTENTION</span>
+                  <h3>需要关注</h3>
+                </div>
+                <button
+                  className="text-button"
+                  type="button"
+                  onClick={() => navigate('/reports?status=attention&days=7')}
+                >
+                  查看全部 {stats.failed + stats.unresolved}
+                </button>
+              </div>
+              {attentionRuns.map((run) => (
+                <button
+                  className="failure-row"
+                  type="button"
+                  key={run.id}
+                  onClick={() => navigate(`/reports/${run.id}`)}
+                >
+                  <span className="failure-pin" />
+                  <code>{run.id}</code>
+                  <span>
+                    {run.sourceName ?? '运行'} · {statusLabel(run.status)}
+                  </span>
+                  <time>{formatTime(run.createdAt)}</time>
+                </button>
+              ))}
+              {!loading && !stats.failed && !stats.unresolved ? (
+                <p>近 7 天没有需要关注的运行。</p>
+              ) : null}
+            </section>
+            <section className="paper-panel flow-preview">
+              <div className="section-heading">
+                <div>
+                  <span className="eyebrow">BUSINESS FLOWS</span>
+                  <h3>业务流程速览</h3>
+                </div>
+                <button
+                  className="text-button"
+                  type="button"
+                  onClick={() => navigate('/workflows')}
+                >
+                  浏览全部 <CaretRight size={15} />
+                </button>
+              </div>
+              <div className="quick-flows-grid">
+                {workflows.slice(0, 4).map((workflow) => (
+                  <button
+                    key={workflow.id}
+                    type="button"
+                    className="quick-flow-card"
+                    onClick={() => navigate(`/workflows/${workflow.id}`)}
+                  >
+                    <span className="bp-badge bp-badge--normal">流程</span>
+                    <strong>{workflow.name}</strong>
+                    <small>{workflow.description || '尚无说明'}</small>
+                    <span className="bp-status">查看流程</span>
+                  </button>
+                ))}
+              </div>
+              {!loading && !workflows.length ? <p>暂无流程。创建后会在此显示。</p> : null}
+            </section>
           </div>
-        </section>
-      </div>
+        </>
+      ) : null}
     </main>
   );
 }

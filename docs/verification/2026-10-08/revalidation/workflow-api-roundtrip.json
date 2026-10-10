@@ -1,0 +1,138 @@
+{
+  "originalVersionId": "wfv_0f2d735b",
+  "newVersionId": "wfv_f13180f4",
+  "version": {
+    "id": "wfv_f13180f4",
+    "workflowId": "wf_64af47d8",
+    "version": 3,
+    "definition": {
+      "schemaVersion": "sketch-test.workflow/v1",
+      "id": "wf_64af47d8",
+      "name": "GitHub 真实元数据和提交历史回归",
+      "tags": [
+        "arazzo-1.1"
+      ],
+      "source": {
+        "type": "arazzo",
+        "sourceLabel": "http://sketchtest-verification-sources/github-real.arazzo.yml",
+        "sourceObjectKey": "workflow-sources/sha256/3876e5b9dc2c7c5db76102a1a70982ac8a79e888a23a6a620aaec99c72b45cae.arazzo",
+        "contentHash": "3876e5b9dc2c7c5db76102a1a70982ac8a79e888a23a6a620aaec99c72b45cae",
+        "specificationVersion": "1.1.0"
+      },
+      "steps": [
+        {
+          "id": "metadata",
+          "name": "metadata",
+          "useTest": {
+            "kind": "inline",
+            "method": "GET",
+            "url": "https://api.github.com/repos/nodejs/node"
+          },
+          "assertions": [
+            {
+              "target": "status",
+              "operator": "equals",
+              "expected": 200
+            }
+          ],
+          "extract": [],
+          "onFailure": "stop",
+          "enabled": true,
+          "sideEffect": "read-only"
+        },
+        {
+          "id": "commits",
+          "name": "commits",
+          "useTest": {
+            "kind": "inline",
+            "method": "GET",
+            "url": "https://api.github.com/repos/nodejs/node/commits?per_page=30"
+          },
+          "assertions": [
+            {
+              "target": "status",
+              "operator": "equals",
+              "expected": 200
+            }
+          ],
+          "extract": [],
+          "onFailure": "stop",
+          "enabled": true,
+          "sideEffect": "read-only"
+        }
+      ]
+    },
+    "compiledPlan": null,
+    "publishedBy": null,
+    "publishedAt": "2026-10-08T16:04:49.524Z"
+  },
+  "run": {
+    "runId": "run_72d8544d",
+    "workflowVersionId": "wfv_f13180f4",
+    "plan": {
+      "steps": [
+        {
+          "method": "GET",
+          "stepId": "metadata",
+          "enabled": true,
+          "sequence": 0,
+          "onFailure": "stop",
+          "timeoutMs": 30000,
+          "assertions": [
+            {
+              "id": "assert-0-0",
+              "target": "status",
+              "expected": 200,
+              "operator": "equals",
+              "severity": "block"
+            }
+          ],
+          "maxRetries": 0,
+          "sideEffect": "read-only",
+          "extractions": [],
+          "urlTemplate": "https://api.github.com/repos/nodejs/node",
+          "retryBaseDelayMs": 1000,
+          "retryOnNetworkError": true,
+          "retryBackoffMultiplier": 2
+        },
+        {
+          "method": "GET",
+          "stepId": "commits",
+          "enabled": true,
+          "sequence": 1,
+          "onFailure": "stop",
+          "timeoutMs": 30000,
+          "assertions": [
+            {
+              "id": "assert-1-0",
+              "target": "status",
+              "expected": 200,
+              "operator": "equals",
+              "severity": "block"
+            }
+          ],
+          "maxRetries": 0,
+          "sideEffect": "read-only",
+          "extractions": [],
+          "urlTemplate": "https://api.github.com/repos/nodejs/node/commits?per_page=30",
+          "retryBaseDelayMs": 1000,
+          "retryOnNetworkError": true,
+          "retryBackoffMultiplier": 2
+        }
+      ],
+      "planId": "plan_a3e9c0e0",
+      "planHash": "c55ac3d6f99ed4adf6a6d3bab7952056370448ae36be48c2215d76056fc0f2bd",
+      "compiledAt": "2026-10-08T16:04:49.532Z",
+      "schemaVersion": "sketch-test.runner-protocol/v1",
+      "workflowVersionId": "wfv_f13180f4"
+    }
+  },
+  "integrity": {
+    "encoding": "per-event",
+    "unverifiableLegacyEventIds": [],
+    "valid": true,
+    "storedHash": "dc304fb3f5226135355f291da051df5bc9e8dbe9e9087b4f0f0ce384e48aff51",
+    "computedHash": "dc304fb3f5226135355f291da051df5bc9e8dbe9e9087b4f0f0ce384e48aff51",
+    "eventCount": 12
+  }
+}

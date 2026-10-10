@@ -4,6 +4,8 @@
  * Tests the core invariant: WorkflowDefinition (editor DSL) → ExecutionPlan.
  * Pure memory tests — no database dependency.
  */
+
+import type { WorkflowDefinition } from '@sketch-test/workflow-dsl';
 import { describe, expect, test } from 'vitest';
 import { compileWorkflow, type WorkflowDefInput, type WorkflowStepDef } from '../workflow-compiler';
 
@@ -29,6 +31,43 @@ function makeDef(
 // ─── Basic Structure Validation ─────────────────────────────────────
 
 describe('compileWorkflow: structure validation', () => {
+  test('compiles the versioned WorkflowDefinition contract without an app-local rewrite', async () => {
+    const definition: WorkflowDefinition = {
+      schemaVersion: 'sketch-test.workflow/v1',
+      id: 'wf-contract',
+      name: 'Contract workflow',
+      steps: [
+        {
+          id: 'create-user',
+          name: 'Create user',
+          useTest: {
+            kind: 'inline',
+            method: 'POST',
+            url: '${env.baseUrl}/users',
+            body: { name: 'Ada' },
+          },
+          assertions: [{ target: 'status', operator: 'equals', expected: 201 }],
+          extract: [{ name: 'userId', source: 'body', expression: '$.id', scope: 'workflow' }],
+          onFailure: 'stop',
+          enabled: true,
+          timeoutMs: 12_000,
+          sideEffect: 'cleanup-required',
+        },
+      ],
+    };
+
+    const result = await compileWorkflow(definition);
+    expect(result.success).toBe(true);
+    expect(result.plan?.steps[0]).toMatchObject({
+      method: 'POST',
+      urlTemplate: '${env.baseUrl}/users',
+      timeoutMs: 12_000,
+      sideEffect: 'cleanup-required',
+      assertions: [{ target: 'status', operator: 'equals', expected: 201 }],
+      extractions: [{ name: 'userId', source: 'body', expression: '$.id' }],
+    });
+  });
+
   test('rejects empty steps array', async () => {
     const result = await compileWorkflow(makeDef([]));
     expect(result.success).toBe(false);
@@ -274,8 +313,13 @@ describe('compileWorkflow: cycle detection', () => {
 
 describe('compileWorkflow: compilation output', () => {
   test('produces a valid ExecutionPlan with deterministic hash', async () => {
-    const result1 = await compileWorkflow(makeDef([makeStep()]));
-    const result2 = await compileWorkflow(makeDef([makeStep()]));
+    const definition = makeDef([
+      makeStep({
+        assertions: [{ target: 'status', operator: 'equals', expected: 200 }],
+      }),
+    ]);
+    const result1 = await compileWorkflow(definition);
+    const result2 = await compileWorkflow(definition);
 
     expect(result1.success).toBe(true);
     expect(result2.success).toBe(true);
@@ -581,4 +625,26 @@ describe('compileWorkflow: edge cases', () => {
     const errors = result.diagnostics.filter((d) => d.severity === 'error');
     expect(errors).toHaveLength(0);
   });
+});
+
+test('rejects empty request URLs including teardown before publication', async () => {
+  for (const url of ['', '   ']) {
+    expect(
+      (
+        await compileWorkflow({
+          name: 'Invalid',
+          steps: [{ id: 'one', name: 'Empty', method: 'GET', url }],
+        })
+      ).success,
+    ).toBe(false);
+    expect(
+      (
+        await compileWorkflow({
+          name: 'Invalid cleanup',
+          steps: [{ id: 'one', name: 'OK', method: 'GET', url: 'https://example.test' }],
+          teardown: [{ id: 'cleanup', name: 'Empty', method: 'GET', url }],
+        })
+      ).success,
+    ).toBe(false);
+  }
 });

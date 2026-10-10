@@ -4,7 +4,7 @@
 
 ## Role
 
-Converts RAML 1.0 API definitions into the platform's unified `CanonicalApiModel`. This is an adapter seam — the output is always the canonical model, regardless of input format. Currently in M1 scope with core resource/method mapping; advanced RAML features (traits, resource types, annotations) produce diagnostics.
+Converts RAML 1.0 API definitions into the platform's unified `CanonicalApiModel`. This is an adapter seam — the output is always the canonical model, regardless of input format. Core resource/method mapping is supported; advanced RAML features such as traits, resource types, and annotations produce diagnostics.
 
 ## Scope
 

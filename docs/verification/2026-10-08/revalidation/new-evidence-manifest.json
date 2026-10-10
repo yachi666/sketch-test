@@ -1,0 +1,105 @@
+{
+  "runId": "run_baec5f04",
+  "eventCount": 12,
+  "totalSizeBytes": 14954,
+  "manifestHash": "2220cb10691fc4db23bfcbdbf6d991cba0fa163ae06eb47bcf0b3f5fb73586a2",
+  "events": [
+    {
+      "id": "run_baec5f04-evt-2",
+      "stepIndex": 0,
+      "eventType": "step.started",
+      "contentHash": "8630c6648f5def486459013846f0074ab4110426c58f3af71a7d7e8ac43d0add",
+      "sizeBytes": 237,
+      "createdAt": "2026-10-08T15:57:38.931Z"
+    },
+    {
+      "id": "run_baec5f04-evt-3",
+      "stepIndex": 0,
+      "eventType": "request.prepared",
+      "contentHash": "a0143b2d085307ae6b7e1cf231675af599f2c163c6847ec803c2928b233e338a",
+      "sizeBytes": 332,
+      "createdAt": "2026-10-08T15:57:38.933Z"
+    },
+    {
+      "id": "run_baec5f04-evt-4",
+      "stepIndex": 0,
+      "eventType": "request.sent",
+      "contentHash": "874fda9f8c10b7e5230ed52ac437f29d054900a207ea0a2a941fdc4d535f7a22",
+      "sizeBytes": 216,
+      "createdAt": "2026-10-08T15:57:38.934Z"
+    },
+    {
+      "id": "run_baec5f04-evt-5",
+      "stepIndex": 0,
+      "eventType": "response.received",
+      "contentHash": "539bff154a379ff62a0a0659c7a5aea283f11e8e9e405f6821dbcbe24115a7b8",
+      "sizeBytes": 6038,
+      "createdAt": "2026-10-08T15:57:38.936Z"
+    },
+    {
+      "id": "run_baec5f04-evt-6",
+      "stepIndex": 0,
+      "eventType": "assertion.evaluated",
+      "contentHash": "9c4dd86663a80fdd5b9e7dea884618b503c6ff6d9928d921daae77048dae59a9",
+      "sizeBytes": 279,
+      "createdAt": "2026-10-08T15:57:38.937Z"
+    },
+    {
+      "id": "run_baec5f04-evt-7",
+      "stepIndex": 0,
+      "eventType": "step.finished",
+      "contentHash": "e0169984314f901532d4d508e82c6b70666165638b6bf7f007b3778e54529e6d",
+      "sizeBytes": 275,
+      "createdAt": "2026-10-08T15:57:38.937Z"
+    },
+    {
+      "id": "run_baec5f04-evt-8",
+      "stepIndex": 1,
+      "eventType": "step.started",
+      "contentHash": "f0fe854501b959f9f1b8dab9f33ea2de844103abd3f360b2823065fbb3667d06",
+      "sizeBytes": 256,
+      "createdAt": "2026-10-08T15:57:38.938Z"
+    },
+    {
+      "id": "run_baec5f04-evt-9",
+      "stepIndex": 1,
+      "eventType": "request.prepared",
+      "contentHash": "16a5d949cd41760f7406abe45d860679129b18f88af38b004de58bd07d665fe6",
+      "sizeBytes": 351,
+      "createdAt": "2026-10-08T15:57:38.938Z"
+    },
+    {
+      "id": "run_baec5f04-evt-10",
+      "stepIndex": 1,
+      "eventType": "request.sent",
+      "contentHash": "50ebe68ceabcfbe902e68d1010e9ace2293b281e004357647671f261e94a3af7",
+      "sizeBytes": 216,
+      "createdAt": "2026-10-08T15:57:38.939Z"
+    },
+    {
+      "id": "run_baec5f04-evt-11",
+      "stepIndex": 1,
+      "eventType": "response.received",
+      "contentHash": "45fe729c6db355aff803a02d6e9d24507340b29b2eb7af2057d957791d2e7092",
+      "sizeBytes": 6200,
+      "createdAt": "2026-10-08T15:57:38.940Z"
+    },
+    {
+      "id": "run_baec5f04-evt-12",
+      "stepIndex": 1,
+      "eventType": "assertion.evaluated",
+      "contentHash": "cd87cf4c5ac2c271bdb99cf49e2ff9c63ced66de6d09d0212a5001082f73ebce",
+      "sizeBytes": 279,
+      "createdAt": "2026-10-08T15:57:38.940Z"
+    },
+    {
+      "id": "run_baec5f04-evt-13",
+      "stepIndex": 1,
+      "eventType": "step.finished",
+      "contentHash": "20f590cb6eef3ca0439ece4b5749c16f384a5a6f11c7a88c28887c5a62bb76d6",
+      "sizeBytes": 275,
+      "createdAt": "2026-10-08T15:57:38.941Z"
+    }
+  ],
+  "objectKey": "runs/run_baec5f04/manifests/2220cb10691fc4db23bfcbdbf6d991cba0fa163ae06eb47bcf0b3f5fb73586a2.json"
+}

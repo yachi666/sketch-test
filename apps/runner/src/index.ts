@@ -5,7 +5,7 @@
  * independent process deployed near the system under test. It communicates
  * with the Control Plane via the Runner Protocol.
  *
- * M0 scope:
+ * Supported execution scope:
  * - HTTP request execution (GET, POST, PUT, PATCH, DELETE)
  * - Variable resolution (environment, workflow, step scopes)
  * - Assertion evaluation (status, header, jsonPath, body, responseTime)
@@ -21,12 +21,12 @@
  * - Retries record each attempt independently.
  */
 
+import { createHash } from 'node:crypto';
 import type { EntityId, Instant } from '@sketch-test/contracts-common';
 import type {
   AssertionEvaluatedEvent,
   ExecutionPlan,
   FrozenStep,
-  FrozenTeardownStep,
   ResponseReceivedEvent,
   RunEvent,
   RunFinishedEvent,
@@ -37,6 +37,18 @@ import type {
   VariableExtractedEvent,
 } from '@sketch-test/runner-protocol';
 import { RunEventSchema } from '@sketch-test/runner-protocol';
+import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
+import Ajv2019 from 'ajv/dist/2019.js';
+import Ajv2020 from 'ajv/dist/2020.js';
+import addFormats from 'ajv-formats';
+
+const draft7Validator = new Ajv({ allErrors: true, strict: true });
+const draft2019Validator = new Ajv2019({ allErrors: true, strict: true });
+const draft2020Validator = new Ajv2020({ allErrors: true, strict: true });
+
+addFormats(draft7Validator);
+addFormats(draft2019Validator);
+addFormats(draft2020Validator);
 
 // ─── Variable Store ───────────────────────────────────────────────
 
@@ -206,7 +218,7 @@ function redactObject(obj: unknown): unknown {
 // ─── JSONPath (Simplified) ────────────────────────────────────────
 
 /**
- * Minimal JSONPath implementation for M0. Supports:
+ * Built-in JSONPath subset. Supports:
  * - $.field.subfield
  * - $[0].field
  * - $.data.items[*].name (wildcard in arrays)
@@ -266,6 +278,54 @@ interface AssertionResult {
   severity: 'block' | 'warn';
 }
 
+type JsonSchemaDefinition = boolean | Record<string, unknown>;
+
+interface CompiledSchema {
+  dialect: 'draft-07' | '2019-09' | '2020-12';
+  validate: ValidateFunction;
+}
+
+function isJsonSchemaDefinition(value: unknown): value is JsonSchemaDefinition {
+  return (
+    typeof value === 'boolean' ||
+    (typeof value === 'object' && value !== null && !Array.isArray(value))
+  );
+}
+
+function compileJsonSchema(schema: JsonSchemaDefinition): CompiledSchema {
+  if (typeof schema === 'boolean') {
+    return { dialect: 'draft-07', validate: draft7Validator.compile(schema) };
+  }
+
+  const schemaUri = schema['$schema'];
+  if (schemaUri !== undefined && typeof schemaUri !== 'string') {
+    throw new Error('JSON Schema $schema must be a string');
+  }
+
+  const normalizedUri = schemaUri?.replace(/#$/, '');
+  if (!normalizedUri || /\/draft-0?7\/schema$/.test(normalizedUri)) {
+    return { dialect: 'draft-07', validate: draft7Validator.compile(schema) };
+  }
+  if (/\/draft\/2019-09\/schema$/.test(normalizedUri)) {
+    return { dialect: '2019-09', validate: draft2019Validator.compile(schema) };
+  }
+  if (/\/draft\/2020-12\/schema$/.test(normalizedUri)) {
+    return { dialect: '2020-12', validate: draft2020Validator.compile(schema) };
+  }
+
+  throw new Error(`Unsupported JSON Schema dialect: ${schemaUri}`);
+}
+
+function formatSchemaErrors(errors: ErrorObject[] | null | undefined): string {
+  if (!errors || errors.length === 0) return 'Schema validation failed without diagnostics';
+
+  return errors
+    .slice(0, 10)
+    .map((error) => `${error.instancePath || '/'}: ${error.message ?? error.keyword}`)
+    .join('; ')
+    .slice(0, 1024);
+}
+
 function evaluateAssertions(
   step: FrozenStep,
   response: {
@@ -281,6 +341,7 @@ function evaluateAssertions(
     let passed = false;
     let actual: string | undefined;
     let expected: string | undefined;
+    let schemaDiff: string | undefined;
 
     switch (assertion.target) {
       case 'status': {
@@ -402,9 +463,29 @@ function evaluateAssertions(
       }
 
       case 'schema': {
-        // Schema validation deferred to a dedicated validator
-        passed = true;
-        actual = 'schema validation deferred';
+        if (!isJsonSchemaDefinition(assertion.expected)) {
+          passed = false;
+          expected = 'a JSON Schema object or boolean schema';
+          actual = 'missing or invalid JSON Schema';
+          schemaDiff = 'Schema assertions require the expected field to contain a JSON Schema';
+          break;
+        }
+
+        try {
+          const compiled = compileJsonSchema(assertion.expected);
+          expected = `${compiled.dialect} JSON Schema`;
+          passed = Boolean(compiled.validate(response.body));
+          actual = passed ? 'response body matches schema' : 'response body does not match schema';
+          if (!passed) {
+            schemaDiff = formatSchemaErrors(compiled.validate.errors);
+          }
+        } catch (error) {
+          passed = false;
+          expected = 'a valid supported JSON Schema';
+          actual = 'schema could not be compiled';
+          schemaDiff =
+            error instanceof Error ? error.message.slice(0, 1024) : 'Unknown schema error';
+        }
         break;
       }
     }
@@ -415,6 +496,7 @@ function evaluateAssertions(
       description: assertion.description,
       expected,
       actual,
+      schemaDiff,
       severity: assertion.severity ?? 'block',
     });
   }
@@ -473,6 +555,13 @@ async function executeStep(
     for (const [key, value] of Object.entries(step.headers)) {
       resolvedHeaders[key] = variables.resolve(value);
     }
+  }
+  if (traceId && !Object.keys(resolvedHeaders).some((key) => key.toLowerCase() === 'traceparent')) {
+    const spanId = createHash('sha256')
+      .update(`${traceId}:${stepId}:${attempt}`)
+      .digest('hex')
+      .slice(0, 16);
+    resolvedHeaders['traceparent'] = `00-${traceId}-${spanId}-01`;
   }
 
   // Step started event
@@ -765,9 +854,12 @@ export async function executePlan(
     runnerId?: string;
     runnerVersion?: string;
     environment?: Record<string, string>;
+    traceId?: string;
   },
 ): Promise<RunResult> {
   const runId = options.runId;
+  const traceId =
+    options.traceId ?? createHash('sha256').update(String(runId)).digest('hex').slice(0, 32);
   const runnerId = options.runnerId ?? 'runner-local';
   const runnerVersion = options.runnerVersion ?? '0.1.0';
   const variables = createVariableStore(options.environment);
@@ -786,6 +878,7 @@ export async function executePlan(
     attempt: 1,
     stepId: 'run' as EntityId,
     eventType: 'run.started',
+    traceId,
     runnerId,
     runnerVersion,
   };
@@ -829,7 +922,7 @@ export async function executePlan(
     const maxRetries = step.maxRetries ?? 0;
 
     for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
-      stepResult = await executeStep(step, variables, i, runId, attempt);
+      stepResult = await executeStep(step, variables, i, runId, attempt, traceId);
 
       // Re-sequence events into global ordering
       for (const event of stepResult.events) {
@@ -847,6 +940,7 @@ export async function executePlan(
           attempt,
           stepId: step.stepId,
           eventType: 'step.retried',
+          traceId,
           reason: stepResult.error?.message ?? 'unknown error',
           retryNumber: attempt,
         };
@@ -884,6 +978,7 @@ export async function executePlan(
       attempt: 1,
       stepId: 'teardown' as EntityId,
       eventType: 'step.started',
+      traceId,
       resolvedUrl: '(teardown phase)',
     };
     allEvents.push(tdStartedEvent);
@@ -918,7 +1013,7 @@ export async function executePlan(
       };
 
       for (let attempt = 1; attempt <= tdMaxRetries + 1; attempt++) {
-        tdResult = await executeStep(tdFrozenStep, variables, ti, runId, attempt);
+        tdResult = await executeStep(tdFrozenStep, variables, ti, runId, attempt, traceId);
         for (const event of tdResult.events) {
           allEvents.push({ ...event, sequence: nextSeq() });
         }
@@ -938,6 +1033,7 @@ export async function executePlan(
     attempt: 1,
     stepId: 'run' as EntityId,
     eventType: 'run.finished',
+    traceId,
     terminalState,
     totalSteps: plan.steps.length,
     stepsPassed,

@@ -1,0 +1,19 @@
+{
+  "checks": [
+    {
+      "name": "normalized official weather OpenAPI import",
+      "status": "failed",
+      "error": "POST /api/import: 422 {\"code\":\"IMPORT_FAILED\",\"message\":\"Import failed: Path-level servers at /v1/forecast cannot yet be represented safely.\",\"correlationId\":\"b11aefbc-dd1e-4faf-9e26-d81a8b818efb\"}"
+    },
+    {
+      "name": "policy resource constraints require approval",
+      "status": "passed",
+      "value": {
+        "decision": "require-approval",
+        "matchedRules": [
+          "approval"
+        ]
+      }
+    }
+  ]
+}

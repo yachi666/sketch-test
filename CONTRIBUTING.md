@@ -9,7 +9,7 @@ pnpm install
 pnpm dev          # Start all apps in dev mode
 ```
 
-**Requirements**: Node >= 20.0.0, pnpm >= 11.8.0.
+**Requirements**: Node ^22.22.2, ^24.15.0, or >=26.0.0; pnpm >=12.10.1.
 
 ## Development workflow
 
@@ -43,7 +43,7 @@ pnpm dev          # Start all apps in dev mode
 ## Code conventions
 
 ### Contracts
-- All 5 `packages/contracts/*` packages are **stable seams**. Before modifying a contract, check all downstream consumers.
+- All 6 `packages/contracts/*` packages are **stable seams**. Before modifying a contract, check all downstream consumers.
 - Published versions (ApiVersion, TestCaseVersion, WorkflowVersion, EnvironmentVersion, DatasetVersion) are **immutable**.
 - Add new schemas to `contracts-common` only when needed by 2+ other packages.
 

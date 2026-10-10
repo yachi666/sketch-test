@@ -24,7 +24,7 @@ import {
   SemanticVersionSchema,
   SideEffectLevelSchema,
 } from '@sketch-test/contracts-common';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 // ─── Schema Version ─────────────────────────────────────────────
 
@@ -138,27 +138,48 @@ export type FrozenTeardownStep = z.infer<typeof FrozenTeardownStepSchema>;
  * The ExecutionPlan is the compiled, immutable artifact that the Runner
  * executes. It's created by the Workflow Compiler at publish time.
  */
-export const ExecutionPlanSchema = z.object({
-  /** Protocol version. */
-  schemaVersion: z.literal(RUNNER_PROTOCOL_VERSION),
-  /** Unique plan identifier. */
-  planId: EntityIdSchema,
-  /** Content hash of the entire plan (for integrity checks). */
-  planHash: ContentHashSchema,
-  /** The workflow version this plan was compiled from. */
-  workflowVersionId: EntityIdSchema,
-  /** When this plan was compiled. */
-  compiledAt: InstantSchema,
-  /** Sequential main-workflow steps, in order. */
-  steps: z.array(FrozenStepSchema).min(1).max(50),
-  /** Optional teardown phase. */
-  teardown: z
-    .object({
-      strategy: z.enum(['always', 'on-success', 'on-failure', 'never']).default('always'),
-      steps: z.array(FrozenTeardownStepSchema).max(20),
-    })
-    .optional(),
-});
+export const ExecutionPlanSchema = z
+  .object({
+    /** Protocol version. */
+    schemaVersion: z.literal(RUNNER_PROTOCOL_VERSION),
+    /** Unique plan identifier. */
+    planId: EntityIdSchema,
+    /** Content hash of executable steps and teardown (for integrity checks). */
+    planHash: ContentHashSchema,
+    /** The WorkflowVersion this plan was compiled from. */
+    workflowVersionId: EntityIdSchema.optional(),
+    /** The TestCaseVersion this single-test plan was compiled from. */
+    testCaseVersionId: EntityIdSchema.optional(),
+    /** Environment version whose non-secret variables were frozen into executable steps. */
+    environmentVersionId: EntityIdSchema.optional(),
+    /** The Run that owns this immutable ad-hoc editor plan. */
+    adHocRunId: EntityIdSchema.optional(),
+    /** When this plan was compiled. */
+    compiledAt: InstantSchema,
+    /** Sequential main-workflow steps, in order. */
+    steps: z.array(FrozenStepSchema).min(1).max(50),
+    /** Optional teardown phase. */
+    teardown: z
+      .object({
+        strategy: z.enum(['always', 'on-success', 'on-failure', 'never']).default('always'),
+        steps: z.array(FrozenTeardownStepSchema).max(20),
+      })
+      .optional(),
+  })
+  .superRefine((plan, context) => {
+    const sourceCount =
+      Number(Boolean(plan.workflowVersionId)) +
+      Number(Boolean(plan.testCaseVersionId)) +
+      Number(Boolean(plan.adHocRunId));
+    if (sourceCount !== 1) {
+      context.addIssue({
+        code: 'custom',
+        message:
+          'ExecutionPlan must reference exactly one WorkflowVersion, TestCaseVersion, or owning ad-hoc Run',
+        path: ['workflowVersionId'],
+      });
+    }
+  });
 export type ExecutionPlan = z.infer<typeof ExecutionPlanSchema>;
 
 // ─── Run Snapshot ───────────────────────────────────────────────
@@ -173,6 +194,7 @@ export const RunSnapshotSchema = z.object({
   planHash: ContentHashSchema,
   /** Frozen input versions. */
   apiVersionId: EntityIdSchema.optional(),
+  testCaseVersionId: EntityIdSchema.optional(),
   testSuiteVersionId: EntityIdSchema.optional(),
   environmentVersionId: EntityIdSchema,
   /** Secret references (values are NOT included). */

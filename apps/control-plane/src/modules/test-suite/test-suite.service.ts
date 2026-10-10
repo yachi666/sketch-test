@@ -103,6 +103,36 @@ export class TestSuiteVersionNotFoundError extends Error {
   }
 }
 
+export class TestSuiteMemberNotFoundError extends Error {
+  constructor() {
+    super(
+      'One or more suite members were not found or have no published version in the test suite workspace',
+    );
+    this.name = 'TestSuiteMemberNotFoundError';
+  }
+}
+
+export class TestSuiteGateConfigError extends Error {
+  constructor() {
+    super('Required workflows must also be workflow members of the test suite version');
+    this.name = 'TestSuiteGateConfigError';
+  }
+}
+
+export class EmptyTestSuiteVersionError extends Error {
+  constructor() {
+    super('A test suite version must contain at least one test or workflow');
+    this.name = 'EmptyTestSuiteVersionError';
+  }
+}
+
+export class TestSuiteInUseError extends Error {
+  constructor(id: string) {
+    super(`Test suite ${id} is referenced by one or more schedules`);
+    this.name = 'TestSuiteInUseError';
+  }
+}
+
 export class RunNotFoundError extends Error {
   constructor(id: string) {
     super(`Run ${id} not found`);
@@ -175,11 +205,25 @@ export async function listTestSuites(workspaceId: string): Promise<TestSuite[]> 
   return result.rows.map(rowToTestSuite);
 }
 
-/** Delete a test suite and all its versions. */
+/** Delete a test suite and all its versions atomically when no schedule references it. */
 export async function deleteTestSuite(id: string): Promise<void> {
-  // Delete versions first, then the suite
-  await pool.query('DELETE FROM test_suite_versions WHERE test_suite_id = $1', [id]);
-  await pool.query('DELETE FROM test_suites WHERE id = $1', [id]);
+  const result = await pool.query(
+    `WITH deletable AS (
+       SELECT id FROM test_suites
+       WHERE id = $1
+         AND NOT EXISTS (
+           SELECT 1 FROM schedule_configs WHERE test_suite_id = $1
+         )
+     ), deleted_versions AS (
+       DELETE FROM test_suite_versions
+       WHERE test_suite_id IN (SELECT id FROM deletable)
+     )
+     DELETE FROM test_suites
+     WHERE id IN (SELECT id FROM deletable)
+     RETURNING id`,
+    [id],
+  );
+  if ((result.rowCount ?? 0) === 0) throw new TestSuiteInUseError(id);
 }
 
 // ── Test Suite Version CRUD ────────────────────────────────────────────────────────
@@ -194,6 +238,47 @@ export async function createTestSuiteVersion(
   const suite = await getTestSuite(testSuiteId);
   if (!suite) {
     throw new TestSuiteNotFoundError(testSuiteId);
+  }
+  if (members.length === 0) throw new EmptyTestSuiteVersionError();
+
+  const uniqueMembers = [
+    ...new Map(members.map((member) => [`${member.type}:${member.id}`, member])).values(),
+  ];
+
+  const testIds = [
+    ...new Set(uniqueMembers.filter((member) => member.type === 'test').map((m) => m.id)),
+  ];
+  const workflowIds = [
+    ...new Set(
+      uniqueMembers.filter((member) => member.type === 'workflow').map((member) => member.id),
+    ),
+  ];
+  if ((qualityGate.requiredWorkflows ?? []).some((id) => !workflowIds.includes(id))) {
+    throw new TestSuiteGateConfigError();
+  }
+  if (testIds.length > 0 || workflowIds.length > 0) {
+    const ownership = await pool.query(
+      `SELECT
+         (SELECT COUNT(*)::int FROM test_cases test
+          WHERE test.workspace_id = $1 AND test.id = ANY($2::text[])
+            AND EXISTS (
+              SELECT 1 FROM test_case_versions version
+              WHERE version.test_case_id = test.id AND version.published_by IS NOT NULL
+            )) AS test_count,
+         (SELECT COUNT(*)::int FROM workflows workflow
+          WHERE workflow.workspace_id = $1 AND workflow.id = ANY($3::text[])
+            AND EXISTS (
+              SELECT 1 FROM workflow_versions version
+              WHERE version.workflow_id = workflow.id AND version.compiled_plan IS NOT NULL
+            )) AS workflow_count`,
+      [suite.workspaceId, testIds, workflowIds],
+    );
+    const counts = ownership.rows[0] as
+      | { test_count?: number; workflow_count?: number }
+      | undefined;
+    if (counts?.test_count !== testIds.length || counts.workflow_count !== workflowIds.length) {
+      throw new TestSuiteMemberNotFoundError();
+    }
   }
 
   // Get the latest version number, or 0 if none exist
@@ -214,7 +299,7 @@ export async function createTestSuiteVersion(
     `INSERT INTO test_suite_versions
       (id, test_suite_id, version, members_json, quality_gate_json, created_at)
      VALUES ($1, $2, $3, $4, $5, $6)`,
-    [id, testSuiteId, nextVersion, JSON.stringify(members), JSON.stringify(qualityGate), now],
+    [id, testSuiteId, nextVersion, JSON.stringify(uniqueMembers), JSON.stringify(qualityGate), now],
   );
 
   // Update the test suite's updated_at
@@ -224,7 +309,7 @@ export async function createTestSuiteVersion(
     id,
     testSuiteId,
     version: nextVersion,
-    members,
+    members: uniqueMembers,
     qualityGate,
     createdAt: now,
   };
@@ -275,14 +360,25 @@ export async function evaluateQualityGate(
   testSuiteVersionId: string,
 ): Promise<QualityGateResult> {
   // Get the test suite version with its quality gate config
-  const version = await getTestSuiteVersion(testSuiteVersionId);
-  if (!version) {
+  const versionResult = await pool.query(
+    `SELECT v.*, s.workspace_id
+     FROM test_suite_versions v
+     JOIN test_suites s ON s.id = v.test_suite_id
+     WHERE v.id = $1`,
+    [testSuiteVersionId],
+  );
+  if (versionResult.rows.length === 0) {
     throw new TestSuiteVersionNotFoundError(testSuiteVersionId);
   }
+  const version = rowToTestSuiteVersion(versionResult.rows[0]);
+  const workspaceId = versionResult.rows[0].workspace_id as string;
   const gateConfig = version.qualityGate;
 
   // Get the run
-  const runResult = await pool.query('SELECT * FROM runs WHERE id = $1', [runId]);
+  const runResult = await pool.query('SELECT * FROM runs WHERE id = $1 AND workspace_id = $2', [
+    runId,
+    workspaceId,
+  ]);
   if (runResult.rows.length === 0) {
     throw new RunNotFoundError(runId);
   }

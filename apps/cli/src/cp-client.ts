@@ -11,7 +11,7 @@ interface CpClientOptions {
   token: string;
 }
 
-let clientConfig: CpClientOptions = {
+const clientConfig: CpClientOptions = {
   baseUrl: 'http://localhost:3802',
   token: '',
 };

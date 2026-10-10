@@ -24,7 +24,7 @@ import {
   SemanticVersionSchema,
   SourceLocationSchema,
 } from '@sketch-test/contracts-common';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 // ─── Schema Version ─────────────────────────────────────────────
 
@@ -137,6 +137,7 @@ export const SecuritySchemeSchema = z.object({
       z.string(),
       z.object({
         authorizationUrl: z.string().url().optional(),
+        deviceAuthorizationUrl: z.string().url().optional(),
         tokenUrl: z.string().url().optional(),
         refreshUrl: z.string().url().optional(),
         scopes: z.record(z.string(), z.string()).optional(),
@@ -145,6 +146,10 @@ export const SecuritySchemeSchema = z.object({
     .optional(),
   /** For oidc: the discovery endpoint. */
   openIdConnectUrl: z.string().url().optional(),
+  /** For oauth2: RFC 8414 authorization server metadata endpoint. */
+  oauth2MetadataUrl: z.string().url().optional(),
+  /** Whether the source description marks this scheme as deprecated. */
+  deprecated: z.boolean().optional(),
   sourceLocation: SourceLocationSchema.optional(),
 });
 export type SecurityScheme = z.infer<typeof SecuritySchemeSchema>;

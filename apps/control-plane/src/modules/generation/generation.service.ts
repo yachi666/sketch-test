@@ -1,4 +1,6 @@
+import { TestDefinitionSchema } from '@sketch-test/test-dsl';
 import { pool } from '../../db/db.js';
+import { transaction } from '../../db/transaction.js';
 import { draftId, generationJobId, testCaseId, testCaseVersionId } from '../../shared/id.js';
 
 // ─── Types ─────────────────────────────────────────────────────────
@@ -6,6 +8,10 @@ import { draftId, generationJobId, testCaseId, testCaseVersionId } from '../../s
 export type GenerationStrategy = 'example' | 'schema' | 'status-codes';
 
 export interface GenerationJobRow {
+  draft_count?: number;
+  covered_endpoint_count?: number;
+  attempt?: number;
+  error_code?: string | null;
   id: string;
   workspace_id: string;
   api_version_id: string;
@@ -22,7 +28,7 @@ export interface DraftRow {
   test_case_id: string | null;
   definition: unknown;
   source_info: unknown;
-  confidence: number;
+  confidence: number | null;
   status: string;
   reviewed_by: string | null;
   reviewed_at: string | null;
@@ -363,8 +369,9 @@ function buildUrl(
 /** Build headers from the endpoint definition. */
 function buildHeaders(requestBody: RequestBodyDef | undefined): Record<string, string> {
   const headers: Record<string, string> = {};
-  if (requestBody && Object.keys(requestBody.content).length > 0) {
-    const mediaType = Object.keys(requestBody.content)[0]!;
+  if (requestBody) {
+    const mediaType = Object.keys(requestBody.content).at(0);
+    if (!mediaType) return headers;
     headers['Content-Type'] = mediaType;
   }
   return headers;
@@ -428,7 +435,32 @@ export function buildHappyPathRequest(
 interface DraftInput {
   definition: unknown;
   sourceInfo: Record<string, unknown>;
-  confidence: number;
+  confidence: number | null;
+}
+
+export function endpointSourceInfo(
+  sourceInfo: Record<string, unknown>,
+  endpoint: Pick<EndpointDef, 'method' | 'path'>,
+): Record<string, unknown> {
+  return { ...sourceInfo, method: endpoint.method, path: endpoint.path };
+}
+
+export function testCaseVersionInsertParams(input: {
+  versionId: string;
+  testCaseId: string;
+  version: number;
+  definition: unknown;
+  sideEffect: string;
+  publishedBy: string | null;
+}): unknown[] {
+  return [
+    input.versionId,
+    input.testCaseId,
+    input.version,
+    JSON.stringify(input.definition),
+    input.sideEffect,
+    input.publishedBy,
+  ];
 }
 
 /** Generate the happy-path test for an endpoint. */
@@ -445,7 +477,10 @@ function generateHappyPath(
     schemaVersion: 'sketch-test.test/v1',
     name: `Happy path: ${endpoint.method} ${endpoint.path}`,
     description: endpoint.summary ?? '',
-    sideEffect: endpoint.method === 'GET' ? 'read-only' : 'cleanup-required',
+    sideEffect:
+      endpoint.method === 'GET' || endpoint.method === 'HEAD' || endpoint.method === 'QUERY'
+        ? 'read-only'
+        : 'cleanup-required',
     request: {
       method: req.method,
       url: req.url,
@@ -510,11 +545,11 @@ function generateMissingRequiredTests(
   }
 
   // Required request body fields
-  if (endpoint.requestBodies.length > 0) {
-    const requestBody = endpoint.requestBodies[0]!;
-    const mediaTypes = Object.keys(requestBody.content);
-    if (mediaTypes.length > 0) {
-      const content = requestBody.content[mediaTypes[0]!];
+  const requestBody = endpoint.requestBodies.at(0);
+  if (requestBody) {
+    const mediaType = Object.keys(requestBody.content).at(0);
+    if (mediaType) {
+      const content = requestBody.content[mediaType];
       if (content) {
         const schema = getPropertySchema(content.schema.ref, schemas);
         const required = schema?.required ?? [];
@@ -569,13 +604,13 @@ function generateInvalidTypeTests(
   schemas: Record<string, SchemaNode>,
 ): DraftInput[] {
   const drafts: DraftInput[] = [];
-  if (endpoint.requestBodies.length === 0) return drafts;
+  const requestBody = endpoint.requestBodies.at(0);
+  if (!requestBody) return drafts;
 
-  const requestBody = endpoint.requestBodies[0]!;
-  const mediaTypes = Object.keys(requestBody.content);
-  if (mediaTypes.length === 0) return drafts;
+  const mediaType = Object.keys(requestBody.content).at(0);
+  if (!mediaType) return drafts;
 
-  const content = requestBody.content[mediaTypes[0]!];
+  const content = requestBody.content[mediaType];
   if (!content) return drafts;
 
   const schema = getPropertySchema(content.schema.ref, schemas);
@@ -636,13 +671,13 @@ function generateBoundaryTests(
   schemas: Record<string, SchemaNode>,
 ): DraftInput[] {
   const drafts: DraftInput[] = [];
-  if (endpoint.requestBodies.length === 0) return drafts;
+  const requestBody = endpoint.requestBodies.at(0);
+  if (!requestBody) return drafts;
 
-  const requestBody = endpoint.requestBodies[0]!;
-  const mediaTypes = Object.keys(requestBody.content);
-  if (mediaTypes.length === 0) return drafts;
+  const mediaType = Object.keys(requestBody.content).at(0);
+  if (!mediaType) return drafts;
 
-  const content = requestBody.content[mediaTypes[0]!];
+  const content = requestBody.content[mediaType];
   if (!content) return drafts;
 
   const schema = getPropertySchema(content.schema.ref, schemas);
@@ -716,7 +751,10 @@ function generateExampleBasedTests(
             schemaVersion: 'sketch-test.test/v1',
             name: `Example: ${endpoint.method} ${endpoint.path}`,
             description: endpoint.summary ?? `Example-based test using provided sample`,
-            sideEffect: endpoint.method === 'GET' ? 'read-only' : 'cleanup-required',
+            sideEffect:
+              endpoint.method === 'GET' || endpoint.method === 'HEAD' || endpoint.method === 'QUERY'
+                ? 'read-only'
+                : 'cleanup-required',
             request: {
               method: baseReq.method,
               url: baseReq.url,
@@ -748,7 +786,12 @@ function generateExampleBasedTests(
               schemaVersion: 'sketch-test.test/v1',
               name: `Example "${exampleName}": ${endpoint.method} ${endpoint.path}`,
               description: `Example-based test using named example "${exampleName}"`,
-              sideEffect: endpoint.method === 'GET' ? 'read-only' : 'cleanup-required',
+              sideEffect:
+                endpoint.method === 'GET' ||
+                endpoint.method === 'HEAD' ||
+                endpoint.method === 'QUERY'
+                  ? 'read-only'
+                  : 'cleanup-required',
               request: {
                 method: baseReq.method,
                 url: baseReq.url,
@@ -853,7 +896,7 @@ interface GenerationConfig {
  */
 async function runGeneration(
   jobId: string,
-  _workspaceId: string,
+  workspaceId: string,
   apiVersionId: string,
   strategy: GenerationStrategy,
   config: GenerationConfig,
@@ -863,7 +906,10 @@ async function runGeneration(
     await pool.query(`UPDATE generation_jobs SET status = 'running' WHERE id = $1`, [jobId]);
 
     // Fetch API version
-    const avResult = await pool.query(`SELECT * FROM api_versions WHERE id = $1`, [apiVersionId]);
+    const avResult = await pool.query(
+      `SELECT * FROM api_versions WHERE id = $1 AND workspace_id = $2`,
+      [apiVersionId, workspaceId],
+    );
     if (avResult.rows.length === 0) {
       await pool.query(`UPDATE generation_jobs SET status = 'failed' WHERE id = $1`, [jobId]);
       return;
@@ -915,6 +961,9 @@ async function runGeneration(
     // Insert all drafts
     for (const draft of allDrafts) {
       const id = draftId();
+      const sourceEndpoint = targetEndpoints.find(
+        (endpoint) => endpoint.id === draft.sourceInfo['endpointId'],
+      );
       await pool.query(
         `INSERT INTO generated_drafts (id, job_id, definition, source_info, confidence, status)
          VALUES ($1, $2, $3, $4, $5, 'pending')`,
@@ -922,7 +971,11 @@ async function runGeneration(
           id,
           jobId,
           JSON.stringify(draft.definition),
-          JSON.stringify(draft.sourceInfo),
+          JSON.stringify(
+            sourceEndpoint
+              ? endpointSourceInfo(draft.sourceInfo, sourceEndpoint)
+              : draft.sourceInfo,
+          ),
           draft.confidence,
         ],
       );
@@ -955,10 +1008,15 @@ export async function generateTests(
 
   const result = await pool.query(
     `INSERT INTO generation_jobs (id, workspace_id, api_version_id, strategy, status, config)
-     VALUES ($1, $2, $3, $4, 'pending', $5)
+     SELECT $1, $2, av.id, $4, 'pending', $5
+     FROM api_versions av
+     WHERE av.id = $3 AND av.workspace_id = $2
      RETURNING *`,
     [id, workspaceId, apiVersionId, strategy, JSON.stringify({ endpointIds: endpointIds ?? [] })],
   );
+  if (result.rows.length === 0) {
+    throw new GenerationError(`API version ${apiVersionId} not found`, 404);
+  }
   const job = result.rows[0] as GenerationJobRow;
 
   // Run generation asynchronously (fire and forget)
@@ -973,16 +1031,22 @@ export async function generateTests(
 
 /** Get a generation job by ID. */
 export async function getGenerationJob(jobId: string): Promise<GenerationJobRow | null> {
-  const result = await pool.query(`SELECT * FROM generation_jobs WHERE id = $1`, [jobId]);
+  const result = await pool.query(
+    `SELECT j.*,t.attempt,t.error_code FROM generation_jobs j LEFT JOIN ai_generation_tasks t ON t.job_id=j.id WHERE j.id = $1`,
+    [jobId],
+  );
   return result.rows.length > 0 ? (result.rows[0] as GenerationJobRow) : null;
 }
 
 /** List generation jobs in a workspace. */
 export async function listGenerationJobs(workspaceId: string): Promise<GenerationJobRow[]> {
   const result = await pool.query(
-    `SELECT * FROM generation_jobs
-     WHERE workspace_id = $1
-     ORDER BY created_at DESC LIMIT 50`,
+    `SELECT j.*,t.attempt,t.error_code,
+       (SELECT count(*)::int FROM generated_drafts d WHERE d.job_id=j.id) AS draft_count,
+       (SELECT count(DISTINCT d.source_info->>'endpointId')::int FROM generated_drafts d WHERE d.job_id=j.id) AS covered_endpoint_count
+     FROM generation_jobs j LEFT JOIN ai_generation_tasks t ON t.job_id=j.id
+     WHERE j.workspace_id = $1
+     ORDER BY j.created_at DESC LIMIT 50`,
     [workspaceId],
   );
   return result.rows as GenerationJobRow[];
@@ -1016,119 +1080,107 @@ export async function acceptDraft(
   version: number;
   draft: DraftRow;
 }> {
-  // Get the draft
-  const draftResult = await pool.query(`SELECT * FROM generated_drafts WHERE id = $1`, [draftId]);
-  if (draftResult.rows.length === 0) {
-    throw new GenerationError(`Draft ${draftId} not found`, 404);
-  }
-  const draft = draftResult.rows[0] as DraftRow;
-
-  if (draft.status !== 'pending') {
-    throw new GenerationError(`Draft ${draftId} has already been ${draft.status}`, 409);
-  }
-
-  const definition = modifications ?? draft.definition;
-  const defObj = definition as Record<string, unknown> | null | undefined;
-
-  // Create or reuse a test case
-  let tcId = draft.test_case_id;
-  if (!tcId) {
-    // Get the job to find workspace info
-    const jobResult = await pool.query(`SELECT * FROM generation_jobs WHERE id = $1`, [
+  return transaction(async (client) => {
+    const draftResult = await client.query(
+      'SELECT * FROM generated_drafts WHERE id=$1 FOR UPDATE',
+      [draftId],
+    );
+    const draft = draftResult.rows[0] as DraftRow | undefined;
+    if (!draft) throw new GenerationError('Draft not found', 404);
+    if (draft.status !== 'pending') throw new GenerationError('Draft already reviewed', 409);
+    const raw = structuredClone(modifications ?? draft.definition) as Record<string, unknown>;
+    const source = draft.source_info as Record<string, unknown>;
+    // Compatibility normalization for the older rule generator; Pi and human edits must already use the contract.
+    if (modifications === undefined && source['strategy'] !== 'pi') {
+      raw['id'] ??= `test_${draftId}`;
+      if (Array.isArray(raw['assertions']))
+        raw['assertions'] = raw['assertions'].map((a, i) => ({ id: `assert_${i}`, ...a }));
+      const req = raw['request'] as Record<string, unknown> | undefined;
+      if (req?.['body'] !== undefined)
+        req['body'] = { mediaType: 'application/json', type: 'json', value: req['body'] };
+    }
+    const parsed = TestDefinitionSchema.safeParse(raw);
+    if (!parsed.success || !parsed.data.assertions.length)
+      throw new GenerationError('A valid test definition with assertions is required', 400);
+    const definition = parsed.data;
+    if (source['strategy'] === 'pi') {
+      const original = TestDefinitionSchema.parse(draft.definition);
+      if (
+        definition.sideEffect !== original.sideEffect ||
+        definition.request.method !== original.request.method ||
+        definition.request.url !== original.request.url
+      )
+        throw new GenerationError(
+          'Review cannot change the source endpoint or downgrade its risk',
+          400,
+        );
+      delete definition.generationSource;
+    }
+    const jobResult = await client.query('SELECT * FROM generation_jobs WHERE id=$1', [
       draft.job_id,
     ]);
-    const job = jobResult.rows[0] as GenerationJobRow | undefined;
-
-    tcId = testCaseId();
-    const name = (defObj?.['name'] as string) ?? `Generated test ${draftId}`;
-    const description =
-      (defObj?.['description'] as string) ?? `Auto-generated from job ${draft.job_id}`;
-
-    const tcResult = await pool.query(
-      `INSERT INTO test_cases (id, workspace_id, api_version_id, name, description)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id`,
-      [tcId, job?.workspace_id ?? '', job?.api_version_id ?? null, name, description],
+    const job = jobResult.rows[0] as GenerationJobRow;
+    let tcId = draft.test_case_id;
+    if (!tcId) {
+      tcId = testCaseId();
+      await client.query(
+        'INSERT INTO test_cases (id,workspace_id,api_version_id,name,description) VALUES ($1,$2,$3,$4,$5)',
+        [tcId, job.workspace_id, job.api_version_id, definition.name, definition.description ?? ''],
+      );
+    }
+    await client.query('SELECT id FROM test_cases WHERE id=$1 FOR UPDATE', [tcId]);
+    const versions = await client.query(
+      'SELECT COALESCE(MAX(version),0) AS max_version FROM test_case_versions WHERE test_case_id=$1',
+      [tcId],
     );
-
-    tcId = tcResult.rows[0].id;
-    // Update the draft with the test case ID
-    await pool.query(`UPDATE generated_drafts SET test_case_id = $1 WHERE id = $2`, [
-      tcId,
-      draftId,
-    ]);
-  }
-
-  // Get the max version for optimistic concurrency
-  const maxVersionResult = await pool.query(
-    `SELECT COALESCE(MAX(version), 0) AS max_version
-     FROM test_case_versions WHERE test_case_id = $1`,
-    [tcId],
-  );
-  const nextVersion = (maxVersionResult.rows[0] as { max_version: number }).max_version + 1;
-
-  // Create the test case version
-  const versionId = testCaseVersionId();
-  const sideEffect = (defObj?.['sideEffect'] as string) ?? 'read-only';
-
-  await pool.query(
-    `INSERT INTO test_case_versions (id, test_case_id, version, definition, side_effect, published_by)
-     VALUES ($1, $2, $3, $4, $5, $6)`,
-    [versionId, tcId, JSON.stringify(definition), sideEffect, reviewedBy ?? null],
-  );
-
-  // Update draft status
-  const updateStatus = modifications ? 'modified' : 'accepted';
-  await pool.query(
-    `UPDATE generated_drafts
-     SET status = $2, reviewed_by = $3, reviewed_at = now()
-     WHERE id = $1`,
-    [draftId, updateStatus, reviewedBy ?? null],
-  );
-
-  // Refresh draft
-  const refreshedDraft = await getDraft(draftId);
-  if (!refreshedDraft) {
-    throw new GenerationError('Draft disappeared after acceptance', 500);
-  }
-
-  return {
-    testCaseId: tcId!,
-    versionId,
-    version: nextVersion,
-    draft: refreshedDraft,
-  };
+    const nextVersion = Number(versions.rows[0].max_version) + 1;
+    const versionId = testCaseVersionId();
+    await client.query(
+      'INSERT INTO test_case_versions (id,test_case_id,version,definition,side_effect,published_by) VALUES ($1,$2,$3,$4,$5,NULL)',
+      [versionId, tcId, nextVersion, JSON.stringify(definition), definition.sideEffect],
+    );
+    const updated = await client.query(
+      `UPDATE generated_drafts SET test_case_id=$2,status=$3,reviewed_by=$4,reviewed_at=now(),definition=$5 WHERE id=$1 RETURNING *`,
+      [
+        draftId,
+        tcId,
+        modifications !== undefined ? 'modified' : 'accepted',
+        reviewedBy ?? null,
+        JSON.stringify(definition),
+      ],
+    );
+    return {
+      testCaseId: tcId,
+      versionId,
+      version: nextVersion,
+      draft: updated.rows[0] as DraftRow,
+    };
+  });
 }
 
-/** Reject a draft. */
+/** Atomic rejection shares the row lock with acceptance. */
 export async function rejectDraft(
   draftId: string,
   reviewedBy?: string,
   reason?: string,
 ): Promise<DraftRow | null> {
-  const draftResult = await pool.query(`SELECT * FROM generated_drafts WHERE id = $1`, [draftId]);
-  if (draftResult.rows.length === 0) return null;
-
-  const draft = draftResult.rows[0] as DraftRow;
-  if (draft.status !== 'pending') {
-    throw new GenerationError(`Draft ${draftId} has already been ${draft.status}`, 409);
-  }
-
-  // Store rejection reason in source_info
-  const sourceInfo = (draft.source_info as Record<string, unknown>) ?? {};
-  if (reason) {
-    sourceInfo['rejectionReason'] = reason;
-  }
-
-  await pool.query(
-    `UPDATE generated_drafts
-     SET status = 'rejected', reviewed_by = $2, reviewed_at = now(),
-         source_info = $3
-     WHERE id = $1`,
-    [draftId, reviewedBy ?? null, JSON.stringify(sourceInfo)],
-  );
-
-  return getDraft(draftId);
+  return transaction(async (client) => {
+    const selected = await client.query('SELECT * FROM generated_drafts WHERE id=$1 FOR UPDATE', [
+      draftId,
+    ]);
+    const draft = selected.rows[0] as DraftRow | undefined;
+    if (!draft) return null;
+    if (draft.status !== 'pending') throw new GenerationError('Draft already reviewed', 409);
+    const source = {
+      ...(draft.source_info as Record<string, unknown>),
+      ...(reason ? { rejectionReason: reason } : {}),
+    };
+    const result = await client.query(
+      `UPDATE generated_drafts SET status='rejected',reviewed_by=$2,reviewed_at=now(),source_info=$3 WHERE id=$1 RETURNING *`,
+      [draftId, reviewedBy ?? null, JSON.stringify(source)],
+    );
+    return result.rows[0] as DraftRow;
+  });
 }
 
 // ─── Custom Error ──────────────────────────────────────────────────

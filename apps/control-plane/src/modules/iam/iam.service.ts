@@ -6,8 +6,9 @@
  */
 
 import crypto from 'node:crypto';
+import { promisify } from 'node:util';
 import { pool } from '../../db/db.js';
-import { workspaceId, userId, serviceAccountId } from '../../shared/id.js';
+import { serviceAccountId, userId, workspaceId } from '../../shared/id.js';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -44,18 +45,22 @@ export interface ServiceAccount {
 }
 
 /** Service account row including token hash — only used internally. */
-interface ServiceAccountWithHash extends ServiceAccount {
-  tokenHash: string;
+// ── Password hashing (scrypt with per-password random salt) ───────────────────
+
+const SCRYPT_PREFIX = 'scrypt-v1';
+const SCRYPT_KEYLEN = 64;
+const LEGACY_SCRYPT_SALT = 'sketch-test-salt';
+const PASSWORD_SUFFIX = ':sketch-test-salt';
+const scrypt = promisify(crypto.scrypt);
+
+async function derivePasswordKey(password: string, salt: string): Promise<Buffer> {
+  return (await scrypt(password, salt, SCRYPT_KEYLEN)) as Buffer;
 }
 
-// ── Password hashing (scrypt, dev-salt) ────────────────────────────────────────
-
-const SCRYPT_SALT = 'sketch-test-salt';
-const SCRYPT_KEYLEN = 64;
-const PASSWORD_SUFFIX = ':sketch-test-salt';
-
-function hashPassword(password: string): string {
-  return crypto.scryptSync(password + PASSWORD_SUFFIX, SCRYPT_SALT, SCRYPT_KEYLEN).toString('hex');
+async function hashPassword(password: string): Promise<string> {
+  const salt = crypto.randomBytes(16).toString('base64url');
+  const derived = await derivePasswordKey(password, salt);
+  return `${SCRYPT_PREFIX}$${salt}$${derived.toString('hex')}`;
 }
 
 function timingSafeEqual(a: Buffer, b: Buffer): boolean {
@@ -78,17 +83,31 @@ function hashToken(token: string): string {
 /** Create a workspace with a default owner admin user. */
 export async function createWorkspace(
   name: string,
+  ownerEmail: string,
+  ownerPassword: string,
   description?: string,
+  ownerDisplayName = 'Owner',
+  bootstrapOnly = false,
 ): Promise<{ workspace: Workspace; adminUser: User }> {
   const wsId = workspaceId();
   const adminId = userId();
   const now = new Date().toISOString();
-  const passwordHash = hashPassword('admin');
+  const passwordHash = await hashPassword(ownerPassword);
   const descriptionText = description ?? '';
 
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+
+    if (bootstrapOnly) {
+      await client.query(
+        `SELECT pg_advisory_xact_lock(hashtext('sketchtest-workspace-bootstrap'))`,
+      );
+      const existing = await client.query(`SELECT EXISTS (SELECT 1 FROM workspaces) AS exists`);
+      if (existing.rows[0]?.exists === true) {
+        throw new Error('Workspace bootstrap already completed');
+      }
+    }
 
     await client.query(
       `INSERT INTO workspaces (id, name, description, created_at, updated_at)
@@ -99,7 +118,7 @@ export async function createWorkspace(
     await client.query(
       `INSERT INTO users (id, workspace_id, email, password_hash, display_name, role, created_at)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [adminId, wsId, 'admin@workspace', passwordHash, 'Admin', 'owner', now],
+      [adminId, wsId, ownerEmail, passwordHash, ownerDisplayName, 'owner', now],
     );
 
     await client.query('COMMIT');
@@ -115,8 +134,8 @@ export async function createWorkspace(
       adminUser: {
         id: adminId,
         workspaceId: wsId,
-        email: 'admin@workspace',
-        displayName: 'Admin',
+        email: ownerEmail,
+        displayName: ownerDisplayName,
         role: 'owner',
         createdAt: now,
       },
@@ -186,7 +205,7 @@ export async function createUser(
 ): Promise<User> {
   const id = userId();
   const now = new Date().toISOString();
-  const passwordHash = hashPassword(password);
+  const passwordHash = await hashPassword(password);
   const display = displayName ?? email;
   const userRole = role ?? 'viewer';
 
@@ -247,10 +266,27 @@ export async function findUserByEmail(email: string): Promise<UserWithHash | nul
 }
 
 /** Verify a plaintext password against a user's stored hash. */
-export function verifyPassword(user: UserWithHash, password: string): boolean {
-  const computed = Buffer.from(hashPassword(password), 'hex');
-  const stored = Buffer.from(user.passwordHash, 'hex');
-  return timingSafeEqual(computed, stored);
+export async function verifyPassword(user: UserWithHash, password: string): Promise<boolean> {
+  const [prefix, salt, encodedHash, extra] = user.passwordHash.split('$');
+  if (prefix === SCRYPT_PREFIX && salt && encodedHash && !extra) {
+    const computed = await derivePasswordKey(password, salt);
+    const stored = Buffer.from(encodedHash, 'hex');
+    return timingSafeEqual(computed, stored);
+  }
+
+  // Accept the pre-release fixed-salt representation once so login can migrate it.
+  const legacyComputed = await derivePasswordKey(password + PASSWORD_SUFFIX, LEGACY_SCRYPT_SALT);
+  const legacyStored = Buffer.from(user.passwordHash, 'hex');
+  return timingSafeEqual(legacyComputed, legacyStored);
+}
+
+/** Replace a legacy password hash after successful authentication. */
+export async function upgradePasswordHash(user: UserWithHash, password: string): Promise<void> {
+  if (user.passwordHash.startsWith(`${SCRYPT_PREFIX}$`)) return;
+  await pool.query(`UPDATE users SET password_hash = $2 WHERE id = $1`, [
+    user.id,
+    await hashPassword(password),
+  ]);
 }
 
 /** List all users in a workspace. */
@@ -265,7 +301,6 @@ export async function listUsers(workspaceId: string): Promise<User[]> {
 
 /** Update a user's role. Returns the updated user (without password hash). */
 export async function updateUserRole(id: string, role: User['role']): Promise<User | null> {
-  const now = new Date().toISOString();
   const result = await pool.query(
     `UPDATE users SET role = $2 WHERE id = $1
      RETURNING id, workspace_id, email, display_name, role, created_at`,
@@ -297,13 +332,6 @@ function rowToServiceAccount(row: Record<string, unknown>): ServiceAccount {
         ? revokedAtVal.toISOString()
         : (revokedAtVal as string)
       : null,
-  };
-}
-
-function rowToServiceAccountWithHash(row: Record<string, unknown>): ServiceAccountWithHash {
-  return {
-    ...rowToServiceAccount(row),
-    tokenHash: row['token_hash'] as string,
   };
 }
 

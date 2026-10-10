@@ -1,0 +1,203 @@
+{
+  "startedAt": "2026-10-08T15:57:35.878Z",
+  "checks": [
+    {
+      "name": "history unchanged and legacy integrity explicitly unverifiable",
+      "status": "passed",
+      "value": {
+        "encoding": "per-event",
+        "unverifiableLegacyEventIds": [
+          "run_84626abc-evt-2",
+          "run_84626abc-evt-3",
+          "run_84626abc-evt-4",
+          "run_84626abc-evt-5",
+          "run_84626abc-evt-6",
+          "run_84626abc-evt-7",
+          "run_84626abc-evt-8"
+        ],
+        "valid": false,
+        "storedHash": "44268d69e2dad526c0907caf47c9e487ebc18c028733d8f0f6e9a0a7160595c4",
+        "computedHash": "8a74f2fed923c1cf8573a671afc72ad477f9c72fb8359e6a4e2098c1e8c97209",
+        "eventCount": 7
+      }
+    },
+    {
+      "name": "official unmodified Open-Meteo document imports",
+      "status": "passed",
+      "value": {
+        "apiVersionId": "av_d26bc0a0",
+        "endpointCount": 1,
+        "diagnostics": [
+          {
+            "level": "info",
+            "message": "Source version \"1.0\" is represented as \"1.0.0\"; the original label and source bytes are retained."
+          }
+        ],
+        "sourceObjectKey": "api-sources/sha256/512e29bca2afb06a088cc27fae5c6793a05e272c6404a67e3632cecb87f8516f.source"
+      }
+    },
+    {
+      "name": "published original workflow executes with valid evidence after JSONB roundtrip",
+      "status": "passed",
+      "value": {
+        "run": {
+          "runId": "run_baec5f04",
+          "workflowVersionId": "wfv_0f2d735b",
+          "plan": {
+            "steps": [
+              {
+                "method": "GET",
+                "stepId": "metadata",
+                "enabled": true,
+                "sequence": 0,
+                "onFailure": "stop",
+                "timeoutMs": 30000,
+                "assertions": [
+                  {
+                    "id": "assert-0-0",
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals",
+                    "severity": "block"
+                  }
+                ],
+                "maxRetries": 0,
+                "sideEffect": "read-only",
+                "extractions": [],
+                "urlTemplate": "https://api.github.com/repos/nodejs/node",
+                "retryBaseDelayMs": 1000,
+                "retryOnNetworkError": true,
+                "retryBackoffMultiplier": 2
+              },
+              {
+                "method": "GET",
+                "stepId": "commits",
+                "enabled": true,
+                "sequence": 1,
+                "onFailure": "stop",
+                "timeoutMs": 30000,
+                "assertions": [
+                  {
+                    "id": "assert-1-0",
+                    "target": "status",
+                    "expected": 200,
+                    "operator": "equals",
+                    "severity": "block"
+                  }
+                ],
+                "maxRetries": 0,
+                "sideEffect": "read-only",
+                "extractions": [],
+                "urlTemplate": "https://api.github.com/repos/nodejs/node/commits?per_page=30",
+                "retryBaseDelayMs": 1000,
+                "retryOnNetworkError": true,
+                "retryBackoffMultiplier": 2
+              }
+            ],
+            "planId": "plan_fa8c0576",
+            "planHash": "c55ac3d6f99ed4adf6a6d3bab7952056370448ae36be48c2215d76056fc0f2bd",
+            "compiledAt": "2026-10-08T15:19:23.872Z",
+            "schemaVersion": "sketch-test.runner-protocol/v1",
+            "workflowVersionId": "wfv_0f2d735b"
+          }
+        },
+        "integrity": {
+          "encoding": "per-event",
+          "unverifiableLegacyEventIds": [],
+          "valid": true,
+          "storedHash": "2220cb10691fc4db23bfcbdbf6d991cba0fa163ae06eb47bcf0b3f5fb73586a2",
+          "computedHash": "2220cb10691fc4db23bfcbdbf6d991cba0fa163ae06eb47bcf0b3f5fb73586a2",
+          "eventCount": 12
+        },
+        "externalized": 0
+      }
+    },
+    {
+      "name": "empty workflow URL publication rejected",
+      "status": "failed",
+      "error": "/api/workflow-versions/wfv_26851219/publish: {\"published\":false,\"diagnostics\":[{\"severity\":\"error\",\"message\":\"Step \\\"empty\\\" requires a non-empty URL\",\"stepId\":\"empty\"}]}\n\n422 !== 400\n",
+      "retest": {
+        "status": "passed",
+        "httpStatus": 422,
+        "value": {
+          "published": false,
+          "diagnostics": [
+            {
+              "severity": "error",
+              "message": "Step \"empty\" requires a non-empty URL",
+              "stepId": "empty"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "prepare imported workflow for browser roundtrip",
+      "status": "passed",
+      "value": {
+        "workflows": [
+          {
+            "workflowId": "wf_5b2bc9b1",
+            "workflowVersionId": "wfv_fc12f685",
+            "name": "修复复测：GitHub 流程编辑保存"
+          }
+        ],
+        "diagnostics": [],
+        "sourceObjectKey": "workflow-sources/sha256/0b7aa29ae499aad9c76143dafbf7e22e1f69248caba41e5ef0c95cdaa3eed66a.arazzo",
+        "contentHash": "0b7aa29ae499aad9c76143dafbf7e22e1f69248caba41e5ef0c95cdaa3eed66a"
+      }
+    },
+    {
+      "name": "new real AI draft accepts, publishes and executes without manual URL repair",
+      "status": "passed",
+      "value": {
+        "jobId": "gj_cf91952c",
+        "draftId": "draft_0c4152d3",
+        "accepted": {
+          "testCaseId": "tc_c56b6082",
+          "versionId": "tcv_5dbcca7f",
+          "version": 1,
+          "draft": {
+            "id": "draft_0c4152d3",
+            "status": "accepted"
+          }
+        },
+        "run": {
+          "runId": "run_96cdc835",
+          "environmentVersionId": "envv_a2179b45",
+          "testCaseVersionId": "tcv_5dbcca7f"
+        },
+        "integrity": {
+          "encoding": "per-event",
+          "unverifiableLegacyEventIds": [],
+          "valid": true,
+          "storedHash": "8ba9c6dbd7c1db3a00e458407275083f6b067b39ee001a398489b1ed110333fe",
+          "computedHash": "8ba9c6dbd7c1db3a00e458407275083f6b067b39ee001a398489b1ed110333fe",
+          "eventCount": 7
+        }
+      }
+    }
+  ],
+  "assets": {
+    "weather": {
+      "apiVersionId": "av_d26bc0a0",
+      "endpointCount": 1,
+      "diagnostics": [
+        {
+          "level": "info",
+          "message": "Source version \"1.0\" is represented as \"1.0.0\"; the original label and source bytes are retained."
+        }
+      ],
+      "sourceObjectKey": "api-sources/sha256/512e29bca2afb06a088cc27fae5c6793a05e272c6404a67e3632cecb87f8516f.source"
+    },
+    "validRun": "run_baec5f04",
+    "uiWorkflow": {
+      "workflowId": "wf_5b2bc9b1",
+      "workflowVersionId": "wfv_fc12f685",
+      "name": "修复复测：GitHub 流程编辑保存"
+    },
+    "aiJob": "gj_cf91952c",
+    "aiRun": "run_96cdc835"
+  },
+  "completedAt": "2026-10-08T15:57:50.307Z"
+}

@@ -1,0 +1,80 @@
+{
+  "run": {
+    "id": "run_02ccfe0e",
+    "sourceName": "GitHub 真实元数据和提交历史回归",
+    "apiVersionId": null,
+    "workflowVersionId": "wfv_c289c262",
+    "testCaseVersionId": null,
+    "environmentVersionId": null,
+    "status": "failed",
+    "runnerId": "rnr_8414f10d",
+    "claimedAt": "2026-10-08T15:26:28.127Z",
+    "createdAt": "2026-10-08T15:26:27.652Z",
+    "finishedAt": "2026-10-08T15:26:28.139Z"
+  },
+  "steps": [
+    {
+      "stepIndex": 0,
+      "phase": "main",
+      "name": "metadata",
+      "method": "GET",
+      "events": [
+        {
+          "stepIndex": 0,
+          "eventType": "step.started",
+          "payload": {
+            "runId": "run_02ccfe0e",
+            "stepId": "metadata",
+            "attempt": 1,
+            "traceId": "0bc885000ccf8fee734841f6c3165218",
+            "sequence": 2,
+            "eventType": "step.started",
+            "timestamp": "2026-10-08T15:26:28.129Z",
+            "resolvedUrl": ""
+          },
+          "timestamp": "2026-10-08T15:26:28.131Z"
+        },
+        {
+          "stepIndex": 0,
+          "eventType": "step.finished",
+          "payload": {
+            "error": {
+              "type": "network",
+              "message": "Invalid URL"
+            },
+            "runId": "run_02ccfe0e",
+            "status": "error",
+            "stepId": "metadata",
+            "attempt": 1,
+            "retries": 0,
+            "traceId": "0bc885000ccf8fee734841f6c3165218",
+            "sequence": 3,
+            "eventType": "step.finished",
+            "timestamp": "2026-10-08T15:26:28.129Z",
+            "totalDurationMs": 0,
+            "assertionsFailed": 0,
+            "assertionsPassed": 0
+          },
+          "timestamp": "2026-10-08T15:26:28.132Z"
+        }
+      ],
+      "assertions": [],
+      "error": {
+        "type": "network",
+        "message": "Invalid URL"
+      },
+      "status": "error",
+      "durationMs": 0
+    },
+    {
+      "stepIndex": 1,
+      "phase": "main",
+      "name": "commits",
+      "method": "GET",
+      "events": [],
+      "assertions": [],
+      "status": "not_run"
+    }
+  ],
+  "runEvents": []
+}

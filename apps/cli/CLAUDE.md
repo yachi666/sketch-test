@@ -85,8 +85,7 @@ The CLI uses minimal dependencies — no framework, just Node.js built-in `http`
 
 ## Dependencies
 
-- `@sketch-test/contracts-common` — EntityId, error types
-- `@sketch-test/runner-protocol` — RunEvent types for report formatting
+No runtime package dependencies; the CLI talks to CP over HTTP.
 
 ## When to modify
 

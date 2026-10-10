@@ -1,6 +1,7 @@
 import { CheckCircle, FileArrowUp, GitBranch, Plus } from '@phosphor-icons/react';
 import type { CanonicalApiModel } from '@sketch-test/canonical-api-model';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ApiTable } from '../components/api/ApiTable';
 import {
   type ConflictResolution,
@@ -8,12 +9,21 @@ import {
   type EndpointConflict,
 } from '../components/api/ConflictResolutionDialog';
 import { EndpointDetailPanel, type PanelMode } from '../components/api/EndpointDetailPanel';
+import type { GenerationStrategy } from '../components/api/EndpointDetailPanel/GenerateTestsDialog';
+import {
+  endpointDetailFromCanonical,
+  schemaDisplayNodesFromCanonical,
+} from '../components/api/endpointDetailFromCanonical';
 import { ImportDialog } from '../components/api/ImportDialog';
 import { ImportProgressBar } from '../components/api/ImportProgressBar';
 import { VersionDiffDialog } from '../components/api/VersionDiffDialog';
+import { ErrorCallout } from '../components/shared/ErrorCallout';
 import { SourceSelector } from '../components/source/SourceSelector';
 import { useImportWorker } from '../hooks/useImportWorker';
+import { cpClient } from '../lib/cp-client';
 import { saveApiImport } from '../lib/storage';
+import { useAuthStore } from '../stores/authStore';
+import { useUIStore } from '../stores/uiStore';
 import type {
   ApiEndpoint,
   ApiSource,
@@ -68,6 +78,25 @@ function detailFromEndpoint(
   };
 }
 
+function selectImportedDetails(
+  endpoints: ApiEndpoint[],
+  details: Record<string, EndpointDetail>,
+): Record<string, EndpointDetail> {
+  return endpoints.reduce<Record<string, EndpointDetail>>((selected, endpoint) => {
+    const detail = details[endpoint.id];
+    if (detail) selected[endpoint.id] = detail;
+    return selected;
+  }, {});
+}
+
+export function generationEndpointId(endpoint: Pick<ApiEndpoint, 'id' | 'versionId'>): string {
+  const versionPrefix = endpoint.versionId ? `${endpoint.versionId}:` : '';
+  if (versionPrefix && endpoint.id.startsWith(versionPrefix)) {
+    return endpoint.id.slice(versionPrefix.length);
+  }
+  return endpoint.id;
+}
+
 interface ApiViewProps {
   sources: ApiSource[];
   endpoints: ApiEndpoint[];
@@ -78,15 +107,20 @@ interface ApiViewProps {
   imported: boolean;
   variables: Variable[];
   activeEnvironmentId: string;
-  onImport: (config: ImportConfig) => void;
+  /** Opens the persisted Control Plane import path after a catalog import action. */
+  onImport: () => void;
   onCreate: (endpoint: ApiEndpoint, detail: EndpointDetail) => void;
   onUpdate: (endpoint: ApiEndpoint, detail: EndpointDetail) => void;
   onDelete: (endpointId: string) => void;
-  onAddToWorkflow?: (endpointId: string) => void;
   onCreateSchema?: (schema: SchemaDisplayNode) => void;
   onCreateVariable?: (v: Variable) => void;
   onManageSources?: () => void;
   onSourceCreated?: (source: ApiSource) => void;
+  /** A failed Control Plane catalog request. Kept separate from browser-only import errors. */
+  loadError?: string | null;
+  onRetryLoad?: () => void | Promise<void>;
+  /** Imported API versions are immutable; hides browser-local edit affordances. */
+  readOnly?: boolean;
 }
 
 /**
@@ -113,16 +147,22 @@ export function ApiView({
   onCreate,
   onUpdate,
   onDelete,
-  onAddToWorkflow,
   onCreateSchema,
   onCreateVariable,
   onManageSources,
   onSourceCreated,
+  loadError,
+  onRetryLoad,
+  readOnly = false,
 }: ApiViewProps) {
+  const navigate = useNavigate();
+  const workspaceId = useAuthStore((state) => state.user?.workspaceId);
+  const notify = useUIStore((state) => state.notify);
   const [importOpen, setImportOpen] = useState(false);
   const [diffOpen, setDiffOpen] = useState(false);
   const [panelMode, setPanelMode] = useState<PanelMode>('view');
   const [selectedEndpointId, setSelectedEndpointId] = useState<string | null>(null);
+  const [openRequestComposer, setOpenRequestComposer] = useState(false);
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
 
   // ── Import worker state ──
@@ -136,6 +176,8 @@ export function ApiView({
     isRunning,
   } = useImportWorker();
   const [importedEndpoints, setImportedEndpoints] = useState<ApiEndpoint[]>([]);
+  const [importedDetails, setImportedDetails] = useState<Record<string, EndpointDetail>>({});
+  const [importedSchemas, setImportedSchemas] = useState<Record<string, SchemaDisplayNode>>({});
   const [importedVersions, setImportedVersions] = useState<ApiVersionInfo[]>([]);
   const [conflicts, setConflicts] = useState<EndpointConflict[]>([]);
   const [showConflictDialog, setShowConflictDialog] = useState(false);
@@ -143,6 +185,8 @@ export function ApiView({
   const [pendingImportData, setPendingImportData] = useState<{
     endpoints: ApiEndpoint[];
     version: ApiVersionInfo;
+    details: Record<string, EndpointDetail>;
+    schemas: Record<string, SchemaDisplayNode>;
   } | null>(null);
   const importConfigRef = useRef<ImportConfig | null>(null);
 
@@ -162,6 +206,24 @@ export function ApiView({
     return merged.filter((ep) => ep.versionId && sourceVersionIds.has(ep.versionId));
   }, [endpoints, importedEndpoints, selectedSourceId, allVersions]);
   const activeVersion = useMemo(() => allVersions.find((v) => v.isActive) ?? null, [allVersions]);
+  const allDetails = useMemo(
+    () => ({ ...details, ...importedDetails }),
+    [details, importedDetails],
+  );
+  const allSchemas = useMemo(
+    () => ({ ...schemas, ...importedSchemas }),
+    [schemas, importedSchemas],
+  );
+  const selectedEndpoint = useMemo(
+    () => allEndpoints.find((endpoint) => endpoint.id === selectedEndpointId),
+    [allEndpoints, selectedEndpointId],
+  );
+  // Browser-only imports and demo data do not have immutable Control Plane
+  // versions. Definition export and generated drafts are limited to persisted
+  // ApiVersions, whose IDs are minted with the av_ prefix.
+  const persistedApiVersionId = selectedEndpoint?.versionId?.startsWith('av_')
+    ? selectedEndpoint.versionId
+    : undefined;
 
   // Host-tagged variables available for endpoint base URL selection
   const hostVariables = useMemo(
@@ -175,29 +237,40 @@ export function ApiView({
     if (!selectedEndpointId) return null;
     const ep = allEndpoints.find((e) => e.id === selectedEndpointId);
     if (!ep) return null;
-    return detailFromEndpoint(ep, details);
-  }, [panelMode, selectedEndpointId, allEndpoints, details]);
+    return detailFromEndpoint(ep, allDetails);
+  }, [panelMode, selectedEndpointId, allEndpoints, allDetails]);
 
   // ── Handlers ──
 
   const handleViewDetail = useCallback((id: string) => {
     setSelectedEndpointId(id);
     setPanelMode('view');
+    setOpenRequestComposer(false);
+  }, []);
+
+  const handleSend = useCallback((id: string) => {
+    setSelectedEndpointId(id);
+    setPanelMode('view');
+    setOpenRequestComposer(true);
   }, []);
 
   const handleEdit = useCallback((id: string) => {
     setSelectedEndpointId(id);
     setPanelMode('edit');
+    setOpenRequestComposer(false);
   }, []);
 
   const handleCreate = useCallback(() => {
+    if (readOnly) return;
     setSelectedEndpointId(null);
     setPanelMode('create');
-  }, []);
+    setOpenRequestComposer(false);
+  }, [readOnly]);
 
   const handleClose = useCallback(() => {
     setSelectedEndpointId(null);
     setPanelMode('view');
+    setOpenRequestComposer(false);
   }, []);
 
   const handleSave = useCallback(
@@ -247,12 +320,19 @@ export function ApiView({
     [onDelete],
   );
 
-  const handleAddToWorkflow = useCallback(
-    (endpointId: string) => {
-      setSelectedEndpointId(null);
-      onAddToWorkflow?.(endpointId);
+  const handleGenerateTests = useCallback(
+    async (strategy: GenerationStrategy) => {
+      const endpoint = selectedEndpoint;
+      if (!workspaceId || !endpoint?.versionId) {
+        throw new Error('只有已导入的接口版本可以生成用例草稿');
+      }
+      const job = await cpClient.startGeneration(workspaceId, endpoint.versionId, strategy, [
+        generationEndpointId(endpoint),
+      ]);
+      notify('已创建用例生成任务，正在打开草稿审核区');
+      navigate(`/cases?generationJobId=${encodeURIComponent(job.id)}`);
     },
-    [onAddToWorkflow],
+    [navigate, notify, selectedEndpoint, workspaceId],
   );
 
   /** Create a Host-tagged variable from a manually entered URL. */
@@ -312,10 +392,16 @@ export function ApiView({
   /** Called by ImportDialog when the user initiates an import. */
   const handleImport = useCallback(
     (config: ImportConfig) => {
+      if (readOnly) {
+        onImport();
+        return;
+      }
       importConfigRef.current = config;
       setImportErrorMessage(null);
       setImportedEndpoints([]);
       setImportedVersions([]);
+      setImportedDetails({});
+      setImportedSchemas({});
 
       // Create new source if needed
       if (!config.sourceId && config.newSourceName) {
@@ -337,15 +423,22 @@ export function ApiView({
         startImport(config);
       }
     },
-    [startImport, onSourceCreated],
+    [readOnly, onImport, startImport, onSourceCreated],
   );
 
   /** Apply the imported data to local state and signal the parent. */
   const applyImportedData = useCallback(
-    (newEndpoints: ApiEndpoint[], newVersion: ApiVersionInfo) => {
+    (
+      newEndpoints: ApiEndpoint[],
+      newVersion: ApiVersionInfo,
+      newDetails: Record<string, EndpointDetail>,
+      newSchemas: Record<string, SchemaDisplayNode>,
+    ) => {
       setImportedEndpoints((prev) => [...prev, ...newEndpoints]);
       setImportedVersions((prev) => [...prev, newVersion]);
-      if (importConfigRef.current) onImport(importConfigRef.current);
+      setImportedDetails((prev) => ({ ...prev, ...newDetails }));
+      setImportedSchemas((prev) => ({ ...prev, ...newSchemas }));
+      if (importConfigRef.current) onImport();
     },
     [onImport],
   );
@@ -354,12 +447,22 @@ export function ApiView({
   const handleConflictResolve = useCallback(
     (resolutions: Map<string, ConflictResolution>) => {
       if (!pendingImportData) return;
-      const { endpoints: newEndpoints, version: newVersion } = pendingImportData;
+      const {
+        endpoints: newEndpoints,
+        version: newVersion,
+        details: newDetails,
+        schemas: newSchemas,
+      } = pendingImportData;
       const finalEndpoints = newEndpoints.filter((ep) => {
         const resolution = resolutions.get(ep.id);
         return resolution !== 'skip';
       });
-      applyImportedData(finalEndpoints, newVersion);
+      applyImportedData(
+        finalEndpoints,
+        newVersion,
+        selectImportedDetails(finalEndpoints, newDetails),
+        newSchemas,
+      );
       setShowConflictDialog(false);
       setPendingImportData(null);
     },
@@ -423,6 +526,13 @@ export function ApiView({
       deprecated: ep.deprecated,
       versionId: versionId as ApiEndpoint['versionId'],
     }));
+    const newSchemas = schemaDisplayNodesFromCanonical(model.schemas);
+    const newDetails = Object.fromEntries(
+      model.endpoints.map((endpoint) => [
+        endpoint.id,
+        endpointDetailFromCanonical(endpoint, newSchemas, model.security),
+      ]),
+    );
 
     const newVersion: ApiVersionInfo = {
       id: versionId,
@@ -457,7 +567,12 @@ export function ApiView({
           },
         })),
       );
-      setPendingImportData({ endpoints: newEndpoints, version: newVersion });
+      setPendingImportData({
+        endpoints: newEndpoints,
+        version: newVersion,
+        details: newDetails,
+        schemas: newSchemas,
+      });
       setShowConflictDialog(true);
       return;
     }
@@ -467,7 +582,12 @@ export function ApiView({
     const finalEndpoints =
       strategy === 'skip' ? newEndpoints.filter((ep) => !existingIds.has(ep.id)) : newEndpoints;
 
-    applyImportedData(finalEndpoints, newVersion);
+    applyImportedData(
+      finalEndpoints,
+      newVersion,
+      selectImportedDetails(finalEndpoints, newDetails),
+      newSchemas,
+    );
   }, [result, allEndpoints, applyImportedData]);
 
   // Clear import error when starting a new import
@@ -486,20 +606,15 @@ export function ApiView({
 
   return (
     <main className="page-view">
-      {/* Page header */}
-      <div className="page-intro">
-        <div>
-          <span className="eyebrow">API CATALOG</span>
-          <h2>接口资产</h2>
-          <p>管理接口定义，支持从 OpenAPI 导入或手动录入。</p>
-        </div>
-        <div className="page-intro-actions">
-          <SourceSelector
-            sources={sources}
-            selectedSourceId={selectedSourceId}
-            onSelect={setSelectedSourceId}
-            onManage={onManageSources ?? (() => {})}
-          />
+      {/* The shell owns page identity. Keep catalog controls compact so the title is not repeated. */}
+      <div className="api-catalog-actions">
+        <SourceSelector
+          sources={sources}
+          selectedSourceId={selectedSourceId}
+          onSelect={setSelectedSourceId}
+          onManage={onManageSources ?? (() => {})}
+        />
+        {diff ? (
           <button
             className="button button--outline"
             type="button"
@@ -508,26 +623,39 @@ export function ApiView({
             <GitBranch size={17} />
             比较版本
           </button>
+        ) : null}
+        {!readOnly ? (
           <button className="button button--outline" type="button" onClick={handleCreate}>
             <Plus size={17} />
             新建接口
           </button>
-          <button
-            className="button button--primary"
-            type="button"
-            onClick={() => setImportOpen(true)}
-          >
-            <FileArrowUp size={18} />
-            导入文档
-          </button>
-        </div>
+        ) : null}
+        <button
+          className="button button--primary"
+          type="button"
+          onClick={() => (readOnly ? onImport() : setImportOpen(true))}
+        >
+          <FileArrowUp size={18} />
+          导入文档
+        </button>
       </div>
+
+      {loadError ? (
+        <ErrorCallout title="接口目录暂不可用" message={loadError} onRetry={onRetryLoad} />
+      ) : null}
 
       {/* Import error banner */}
       {importErrorMessage ? (
-        <div className="notice notice--danger">
-          <span>导入失败：{importErrorMessage}</span>
-        </div>
+        <ErrorCallout
+          title="接口文档未能导入"
+          message={importErrorMessage}
+          onRetry={() => {
+            setImportErrorMessage(null);
+            if (readOnly) onImport();
+            else setImportOpen(true);
+          }}
+          retryLabel="重新选择文档"
+        />
       ) : null}
 
       {/* Import success banner */}
@@ -535,7 +663,7 @@ export function ApiView({
         <div className="notice notice--success">
           <CheckCircle size={20} weight="fill" />
           <span>
-            <strong>openapi.yaml 已导入</strong>
+            <strong>{activeVersion?.fileName ?? '接口文档'} 已导入</strong>
             {activeVersion
               ? `· 已识别 ${activeVersion.endpointCount} 个接口和 ${activeVersion.schemaCount} 个 Schema`
               : '已识别 6 个接口和 18 个 Schema'}
@@ -582,8 +710,9 @@ export function ApiView({
         endpoints={allEndpoints}
         activeVersion={activeVersion}
         onViewDetail={handleViewDetail}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
+        onSend={handleSend}
+        onEdit={readOnly ? undefined : handleEdit}
+        onDelete={readOnly ? undefined : handleDelete}
       />
 
       {/* Endpoint detail panel (slide-over) — view / edit / create */}
@@ -591,16 +720,22 @@ export function ApiView({
         <EndpointDetailPanel
           detail={currentDetail}
           mode={panelMode}
-          schemas={schemas}
+          apiVersionId={selectedEndpoint?.versionId}
+          startRequestComposer={openRequestComposer}
+          schemas={allSchemas}
           existingIds={allEndpoints.map((e) => e.id)}
           hostVariables={hostVariables}
           activeEnvironmentId={activeEnvironmentId}
-          onCreateHostVariable={onCreateVariable ? handleCreateHostVariable : undefined}
+          onCreateHostVariable={
+            !readOnly && onCreateVariable ? handleCreateHostVariable : undefined
+          }
           onSave={handleSave}
           onDelete={panelMode === 'edit' ? handleDelete : undefined}
-          onAddToWorkflow={panelMode === 'view' ? handleAddToWorkflow : undefined}
+          onGenerateTests={
+            panelMode === 'view' && persistedApiVersionId ? handleGenerateTests : undefined
+          }
           onClose={handleClose}
-          onCreateSchema={onCreateSchema}
+          onCreateSchema={readOnly ? undefined : onCreateSchema}
         />
       ) : null}
 

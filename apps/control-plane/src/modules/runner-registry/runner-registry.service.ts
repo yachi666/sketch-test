@@ -6,9 +6,6 @@
  * raw tokens are never persisted. Token verification hashes the incoming token
  * and looks up the hash.
  *
- * A legacy in-memory fallback (runnerTokens Map) is retained for dev convenience
- * but new registrations use the database.
- *
  * Invariants:
  * - Tokens are generated with crypto.randomBytes for unpredictability.
  * - Only SHA-256(token) is stored — raw tokens are not recoverable from DB.
@@ -25,10 +22,6 @@ import { runnerId } from '../../shared/id.js';
 function hashToken(token: string): string {
   return crypto.createHash('sha256').update(token).digest('hex');
 }
-
-// ── Legacy in-memory token store (for backward compat) ──────────────
-
-export const runnerTokens = new Map<string, { runnerId: string; workspaceId: string }>();
 
 export interface RunnerRecord {
   id: string;
@@ -103,8 +96,6 @@ export async function registerRunner(
      ON CONFLICT (token_hash) DO NOTHING`,
     [tokenHash, id, workspaceId],
   );
-  // Also keep in legacy map for transition
-  runnerTokens.set(token, { runnerId: id, workspaceId });
   return { id, token };
 }
 
@@ -158,20 +149,12 @@ export async function deleteRunner(id: string): Promise<void> {
   await pool.query(`DELETE FROM runner_tokens WHERE runner_id = $1`, [id]);
   await pool.query(`DELETE FROM runner_heartbeats WHERE runner_id = $1`, [id]);
   await pool.query(`DELETE FROM runners WHERE id = $1`, [id]);
-  // Legacy in-memory cleanup
-  for (const [token, data] of runnerTokens) {
-    if (data.runnerId === id) {
-      runnerTokens.delete(token);
-    }
-  }
 }
 
-/** Verify a runner token and return the associated runner info.
- *  Checks the `runner_tokens` DB table first, then falls back to in-memory legacy store. */
+/** Verify a persisted runner token and return its workspace-scoped identity. */
 export async function verifyRunnerToken(
   token: string,
 ): Promise<{ runnerId: string; workspaceId: string } | null> {
-  // Check DB first (hashing the token)
   const tokenHash = hashToken(token);
   const result = await pool.query(
     `SELECT runner_id, workspace_id FROM runner_tokens WHERE token_hash = $1`,
@@ -183,8 +166,7 @@ export async function verifyRunnerToken(
       workspaceId: result.rows[0].workspace_id,
     };
   }
-  // Fall back to legacy in-memory store
-  return runnerTokens.get(token) ?? null;
+  return null;
 }
 
 /** Find runners by label in a workspace. */

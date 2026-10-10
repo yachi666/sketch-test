@@ -1,0 +1,65 @@
+{
+  "checks": [
+    {
+      "name": "PostgreSQL interruption degrades readiness while CP remains alive without restart",
+      "status": "passed",
+      "value": {
+        "before": "0",
+        "after": "0",
+        "down": {
+          "ready": {
+            "status": 503,
+            "body": {
+              "status": "not_ready",
+              "db": "disconnected",
+              "objectStore": "connected",
+              "timestamp": "2026-10-08T15:59:06.283Z"
+            }
+          },
+          "live": {
+            "status": 200,
+            "body": {
+              "status": "ok",
+              "timestamp": "2026-10-08T15:59:06.295Z"
+            }
+          }
+        },
+        "ready": {
+          "status": 200,
+          "body": {
+            "status": "ready",
+            "db": "connected",
+            "objectStore": "connected",
+            "timestamp": "2026-10-08T15:59:07.454Z"
+          }
+        }
+      }
+    },
+    {
+      "name": "persistent cron dispatch across minute boundary",
+      "status": "passed",
+      "value": {
+        "before": 68,
+        "after": 70,
+        "dispatches": [
+          {
+            "schedule_id": "sched_19858afb",
+            "scheduled_at": "2026-10-08T15:59:00+00:00",
+            "run_ids": [
+              "run_44895576"
+            ]
+          },
+          {
+            "schedule_id": "sched_19858afb",
+            "scheduled_at": "2026-10-08T16:00:00+00:00",
+            "run_ids": [
+              "run_917733c9"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "startedAt": "2026-10-08T15:59:01.116Z",
+  "completedAt": "2026-10-08T16:00:14.588Z"
+}

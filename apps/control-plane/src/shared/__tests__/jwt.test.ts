@@ -4,7 +4,7 @@
  * Tests the minimal JWT sign/verify implementation.
  */
 import { describe, expect, test } from 'vitest';
-import { signJwt, verifyJwt, type JwtPayload } from '../jwt';
+import { type JwtPayload, signJwt, verifyJwt } from '../jwt';
 
 describe('signJwt', () => {
   test('produces a three-part token', () => {

@@ -1,0 +1,19 @@
+{
+  "id": "gj_9c6997d5",
+  "workspaceId": "ws_02eaec7b",
+  "apiVersionId": "av_ea093aaa",
+  "strategy": "pi",
+  "status": "completed",
+  "config": {
+    "model": "deepseek-v4-flash",
+    "provider": "deepseek",
+    "objective": "依据这个公开仓库的 GET 接口生成一条只读正向测试草稿，保留源代码证据；不执行，不生成写操作。",
+    "endpointIds": [
+      "code_GET_406629bb093dcd7a89ac"
+    ]
+  },
+  "attempt": 1,
+  "errorCode": null,
+  "createdAt": "2026-10-08T15:09:59.003Z",
+  "completedAt": "2026-10-08T15:10:02.952Z"
+}

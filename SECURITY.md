@@ -4,7 +4,6 @@
 
 | Version | Supported |
 |---------|-----------|
-| M0 (feasibility) | ✅ Active development |
 | Unreleased | ⚠️ Pre-release only |
 
 ## Reporting a vulnerability

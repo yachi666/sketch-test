@@ -1,7 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
-import type { Environment } from '../../types';
+import { useEffect, useRef, useState } from 'react';
+import { cpClient } from '../../lib/cp-client';
+import { useAuthStore } from '../../stores/authStore';
 import { useEnvironmentStore } from '../../stores/environmentStore';
 import { useUIStore } from '../../stores/uiStore';
+import type { Environment } from '../../types';
 
 export function EnvironmentDialog({
   open,
@@ -15,11 +17,16 @@ export function EnvironmentDialog({
   onClose: () => void;
 }) {
   const { createEnvironment, updateEnvironment } = useEnvironmentStore();
+  const workspaceId = useAuthStore((s) => s.user?.workspaceId);
   const notify = useUIStore((s) => s.notify);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [tags, setTags] = useState('');
-  const [isProduction, setIsProduction] = useState(false);
+  const [baseUrl, setBaseUrl] = useState('');
+  const [variablesText, setVariablesText] = useState('{}');
+  const [busy, setBusy] = useState(false);
+  const createdId = useRef<string | null>(null);
+  const versions = useEnvironmentStore((s) => s.versions);
+  const refresh = useEnvironmentStore((s) => s.fetchFromServer);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const nameRef = useRef<HTMLInputElement>(null);
 
@@ -27,16 +34,16 @@ export function EnvironmentDialog({
     if (mode === 'edit' && environment) {
       setName(environment.name);
       setDescription(environment.description || '');
-      setTags((environment.tags || []).join(', '));
-      setIsProduction(environment.tags?.includes('生产') ?? false);
     } else {
       setName('');
       setDescription('');
-      setTags('');
-      setIsProduction(false);
     }
+    createdId.current = null;
+    const latest = environment ? versions[environment.id]?.[0] : undefined;
+    setBaseUrl(latest?.baseUrl ?? '');
+    setVariablesText(JSON.stringify(latest?.variables ?? {}, null, 2));
     setErrors({});
-  }, [open, mode, environment]);
+  }, [open, mode, environment, versions]);
 
   useEffect(() => {
     if (open && nameRef.current) nameRef.current.focus();
@@ -45,41 +52,59 @@ export function EnvironmentDialog({
   const validate = (): boolean => {
     const errs: Record<string, string> = {};
     if (!name.trim()) errs['name'] = '环境名称不能为空';
+    try {
+      const url = new URL(baseUrl);
+      if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password)
+        errs['baseUrl'] = '使用不含凭证的 HTTP(S) 基础地址';
+    } catch {
+      errs['baseUrl'] = '填写有效的 HTTP(S) 基础地址';
+    }
+    try {
+      const value = JSON.parse(variablesText);
+      if (
+        !value ||
+        Array.isArray(value) ||
+        typeof value !== 'object' ||
+        Object.values(value).some((v) => typeof v !== 'string')
+      )
+        errs['variables'] = '变量必须是字符串键值 JSON 对象';
+    } catch {
+      errs['variables'] = '填写有效的 JSON 对象';
+    }
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validate()) return;
-    const tagList = tags
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean);
-    if (isProduction && !tagList.includes('生产')) tagList.push('生产');
-    const now = new Date().toISOString();
-    if (mode === 'create') {
-      const env: Environment = {
-        id: `env-${Date.now()}`,
-        name: name.trim(),
-        description: description.trim(),
-        tags: tagList,
-        isProduction,
-        updatedAt: now,
-        updatedBy: 'user',
-      };
-      createEnvironment(env);
-      notify(`环境 "${env['name']}" 创建成功`);
-    } else if (environment) {
-      const updated: Environment = {
-        ...environment,
-        name: name.trim(),
-        description: description.trim(),
-        tags: tagList,
-      };
-      updateEnvironment(updated);
-      notify(`环境 "${updated.name}" 更新成功`);
+    if (!workspaceId) return;
+    setBusy(true);
+    try {
+      let id = mode === 'edit' ? environment?.id : createdId.current;
+      if (!id) {
+        const env = await createEnvironment(workspaceId, name.trim(), description.trim());
+        if (!env) throw new Error('创建环境失败');
+        id = env.id;
+        createdId.current = id;
+      } else if (mode === 'edit') {
+        const env = await updateEnvironment(id, name.trim(), description.trim());
+        if (!env) throw new Error('更新环境失败');
+      }
+      const previous = versions[id]?.[0];
+      await cpClient.createEnvironmentVersion(id, {
+        baseUrl: baseUrl.trim(),
+        variables: JSON.parse(variablesText),
+        runnerLabels: previous?.runnerLabels ?? [],
+        requireApproval: previous?.requireApproval ?? false,
+      });
+      await refresh(workspaceId);
+      notify('环境版本已保存，已有运行继续使用原版本。');
+      onClose();
+    } catch (e) {
+      setErrors({ save: e instanceof Error ? e.message : '保存环境版本失败' });
+    } finally {
+      setBusy(false);
     }
-    onClose();
   };
 
   if (!open) return null;
@@ -126,28 +151,43 @@ export function EnvironmentDialog({
               placeholder="简短描述环境用途"
             />
           </label>
+        </div>
+        <div className="form-grid">
           <label>
-            标签（逗号分隔）
+            基础地址
             <input
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-              placeholder="staging, docker"
+              aria-label="环境基础地址"
+              value={baseUrl}
+              onChange={(e) => setBaseUrl(e.target.value)}
+              placeholder="https://staging.example.com"
             />
+            {errors['baseUrl'] ? <span className="field-error">{errors['baseUrl']}</span> : null}
           </label>
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={isProduction}
-              onChange={(e) => setIsProduction(e.target.checked)}
+          <label>
+            运行变量（JSON）
+            <textarea
+              aria-label="环境变量"
+              value={variablesText}
+              onChange={(e) => setVariablesText(e.target.value)}
+              rows={4}
             />
-            生产环境
+            {errors['variables'] ? (
+              <span className="field-error">{errors['variables']}</span>
+            ) : null}
           </label>
+          <p>每次保存创建新环境版本；敏感凭证请使用 Secret。</p>
+          {errors['save'] ? <p role="alert">{errors['save']}</p> : null}
         </div>
         <div className="modal-actions">
           <button className="button button--ghost" type="button" onClick={onClose}>
             取消
           </button>
-          <button className="button button--primary" type="button" onClick={handleSave}>
+          <button
+            className="button button--primary"
+            type="button"
+            disabled={busy}
+            onClick={() => void handleSave()}
+          >
             {mode === 'create' ? '创建环境' : '保存更改'}
           </button>
         </div>

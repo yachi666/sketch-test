@@ -1,0 +1,65 @@
+{
+  "runId": "run_84626abc",
+  "eventCount": 7,
+  "totalSizeBytes": 7733,
+  "manifestHash": "44268d69e2dad526c0907caf47c9e487ebc18c028733d8f0f6e9a0a7160595c4",
+  "events": [
+    {
+      "id": "run_84626abc-evt-2",
+      "stepIndex": 0,
+      "eventType": "step.started",
+      "contentHash": "437382a04cce0c99d798cef0a312ab9792c7c588872e65fed6d98e745d2e4186",
+      "sizeBytes": 239,
+      "createdAt": "2026-10-08T15:09:57.998Z"
+    },
+    {
+      "id": "run_84626abc-evt-3",
+      "stepIndex": 0,
+      "eventType": "request.prepared",
+      "contentHash": "560314a08f0d7cb39de765954ec0199a5a1d77766d6f3cc32386dc272591a715",
+      "sizeBytes": 373,
+      "createdAt": "2026-10-08T15:09:57.999Z"
+    },
+    {
+      "id": "run_84626abc-evt-4",
+      "stepIndex": 0,
+      "eventType": "request.sent",
+      "contentHash": "c97520d437c1123bf79781b4e9aa99b665a7aff6e437c4bc1c022064ec4966f3",
+      "sizeBytes": 218,
+      "createdAt": "2026-10-08T15:09:58.000Z"
+    },
+    {
+      "id": "run_84626abc-evt-5",
+      "stepIndex": 0,
+      "eventType": "response.received",
+      "contentHash": "c570ae6e88ca430a374ab4f418a2364d6766eadd3020ddeacd9f85d171174e20",
+      "sizeBytes": 6040,
+      "createdAt": "2026-10-08T15:09:58.000Z"
+    },
+    {
+      "id": "run_84626abc-evt-6",
+      "stepIndex": 0,
+      "eventType": "assertion.evaluated",
+      "contentHash": "248805bf4d542e9305fed602f4760e4620c4c3016b486da18c5a3e295ecc4272",
+      "sizeBytes": 281,
+      "createdAt": "2026-10-08T15:09:58.001Z"
+    },
+    {
+      "id": "run_84626abc-evt-7",
+      "stepIndex": 0,
+      "eventType": "assertion.evaluated",
+      "contentHash": "3ca12b77bf6a1aa935f39c42bd73b95eaff1a78469705858ec1782b1088bc859",
+      "sizeBytes": 305,
+      "createdAt": "2026-10-08T15:09:58.001Z"
+    },
+    {
+      "id": "run_84626abc-evt-8",
+      "stepIndex": 0,
+      "eventType": "step.finished",
+      "contentHash": "dcdb98d606d5f0a4e26c56a216e0810f2e1b6b41c9a1b97984aa22460b4c8c4f",
+      "sizeBytes": 277,
+      "createdAt": "2026-10-08T15:09:58.002Z"
+    }
+  ],
+  "objectKey": "runs/run_84626abc/manifests/44268d69e2dad526c0907caf47c9e487ebc18c028733d8f0f6e9a0a7160595c4.json"
+}

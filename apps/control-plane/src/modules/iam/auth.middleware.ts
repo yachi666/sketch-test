@@ -6,15 +6,14 @@
  * - Server restart without logging out users
  * - Multiple CP instances sharing the same JWT_SECRET
  *
- * The legacy in-memory session store is preserved as a fallback channel
- * (e.g., for service accounts issued via the old path), but new user
- * sessions use JWTs exclusively.
+ * User-facing routes accept signed JWTs exclusively. Runner and service
+ * account credentials use their own explicit channels and must never be
+ * treated as browser sessions.
  */
 
-import crypto from 'node:crypto';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { sendError } from '../../shared/errors.js';
-import { verifyJwt, type JwtPayload } from '../../shared/jwt.js';
+import { type JwtPayload, verifyJwt } from '../../shared/jwt.js';
 import type { User } from './iam.service.js';
 
 // ── Session types ──────────────────────────────────────────────────
@@ -27,79 +26,41 @@ export interface AuthUser {
   workspaceId: string;
 }
 
-// ── Legacy session store (kept for transition) ─────────────────────
-
-interface SessionEntry {
-  userId: string;
-  user: AuthUser;
-  createdAt: number;
-}
-
-const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
-
-export const authSessions = new Map<string, SessionEntry>();
-
-export function createSession(user: AuthUser): string {
-  const now = Date.now();
-  for (const [tok, entry] of authSessions) {
-    if (now - entry.createdAt > SESSION_TTL_MS) {
-      authSessions.delete(tok);
-    }
-  }
-  const token = crypto.randomBytes(32).toString('base64url');
-  authSessions.set(token, { userId: user.id, user, createdAt: now });
-  return token;
-}
-
-export function destroySession(token: string): void {
-  authSessions.delete(token);
-}
-
-/** Look up a session by legacy token. */
-function lookupSession(token: string): AuthUser | null {
-  const entry = authSessions.get(token);
-  if (!entry) return null;
-  if (Date.now() - entry.createdAt > SESSION_TTL_MS) {
-    authSessions.delete(token);
-    return null;
-  }
-  return entry.user;
-}
-
 // ── Token lookup ───────────────────────────────────────────────────
 
-/**
- * Try to authenticate using JWT first, then fall back to legacy sessions.
- */
-function authenticate(header: string): AuthUser | null {
+/** Authenticate a user-facing bearer JWT. */
+export function authenticateBearer(header: string): AuthUser | null {
   const parts = header.split(' ');
   if (parts.length !== 2 || parts[0]?.toLowerCase() !== 'bearer') return null;
 
-  const token = parts[1]!;
+  const token = parts[1];
+  if (!token) return null;
 
-  // Try JWT first (stateless, preferred)
-  if (token.split('.').length === 3) {
-    const payload: JwtPayload | null = verifyJwt(token);
-    if (payload) {
-      return {
-        id: payload.sub,
-        email: payload.email,
-        displayName: payload.displayName,
-        role: payload.role as User['role'],
-        workspaceId: payload.workspaceId,
-      };
-    }
+  if (token.split('.').length !== 3) return null;
+  const payload: JwtPayload | null = verifyJwt(token);
+  if (!payload) return null;
+  return {
+    id: payload.sub,
+    email: payload.email,
+    displayName: payload.displayName,
+    role: payload.role as User['role'],
+    workspaceId: payload.workspaceId,
+  };
+}
+
+/** Return the user attached by the global authorization hook. */
+export function authenticatedUser(request: FastifyRequest): AuthUser {
+  if (!request.user) {
+    throw new Error('Authorization invariant violated: authenticated user is missing');
   }
-
-  // Fall back to legacy session token
-  return lookupSession(token);
+  return request.user;
 }
 
 // ── Fastify preHandler hook ────────────────────────────────────────
 
 /**
- * Fastify preHandler hook factory. Validates bearer token (JWT or legacy
- * session), attaches `request.user`, and optionally checks roles.
+ * Fastify preHandler hook factory. Validates a bearer JWT, attaches
+ * `request.user`, and optionally checks roles.
  */
 export function requireAuth(options?: { roles?: User['role'][] }) {
   return async function preHandler(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -109,7 +70,7 @@ export function requireAuth(options?: { roles?: User['role'][] }) {
       return;
     }
 
-    const user = authenticate(header);
+    const user = authenticateBearer(header);
     if (!user) {
       sendError(reply, 401, 'UNAUTHORIZED', 'Invalid or expired token');
       return;

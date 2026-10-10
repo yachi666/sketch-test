@@ -3,22 +3,19 @@
  * SketchTest CLI — trigger runs and check results from CI pipelines.
  *
  * Commands:
- *   sketchtest run <testSuiteId>         Trigger a test suite run and wait for results
- *   sketchtest run-workflow <workflowId>  Trigger a workflow run and wait
+ *   sketchtest run <workflowVersionId>         Trigger a published workflow version and wait
+ *   sketchtest run-workflow <workflowVersionId> Alias for run
  *   sketchtest status <runId>             Check run status
  *   sketchtest report <runId>             Get run report (JSON/text/github)
- *   sketchtest cancel <runId>             Cancel a running run
  *
  * Options:
  *   --cp-url <url>          Control Plane URL (default: http://localhost:3802)
- *   --environment <id>      Environment version ID to use
  *   --token <token>         Auth token (or set SKETCHTEST_TOKEN env var)
  *   --wait                  Wait for run to complete (default: true)
  *   --no-wait               Exit immediately after triggering
  *   --timeout <seconds>     Max wait time (default: 300)
  *   --poll-interval <s>     Poll interval in seconds (default: 3)
  *   --output <format>       Output format: json | text | github (default: text)
- *   --idempotency-key <k>   Prevent duplicate runs
  */
 
 import { configureClient, request } from './cp-client.js';
@@ -75,7 +72,8 @@ function parseArgs(argv: string[]): ParsedArgs {
   let i = 2;
 
   while (i < argv.length) {
-    const arg = argv[i]!;
+    const arg = argv[i];
+    if (!arg) break;
     if (arg.startsWith('--')) {
       const eqIndex = arg.indexOf('=');
       if (eqIndex !== -1) {
@@ -86,8 +84,10 @@ function parseArgs(argv: string[]): ParsedArgs {
         const key = arg.slice(2);
         if (key.startsWith('no-') && i + 1 >= argv.length) {
           options[key.slice(3)] = false;
-        } else if (i + 1 < argv.length && !argv[i + 1]!.startsWith('--')) {
-          options[key] = argv[i + 1]!;
+        } else if (i + 1 < argv.length && !argv[i + 1]?.startsWith('--')) {
+          const value = argv[i + 1];
+          if (value === undefined) break;
+          options[key] = value;
           i++;
         } else {
           if (key.startsWith('no-')) {
@@ -106,13 +106,6 @@ function parseArgs(argv: string[]): ParsedArgs {
   return { command: positional[0] ?? '', args: positional.slice(1), options };
 }
 
-function flag(options: Record<string, string | boolean>, key: string): boolean {
-  const val = options[key];
-  if (val === undefined) return false;
-  if (typeof val === 'boolean') return val;
-  return val === 'true' || val === '1';
-}
-
 function strOpt(
   options: Record<string, string | boolean>,
   key: string,
@@ -127,7 +120,7 @@ function numOpt(options: Record<string, string | boolean>, key: string, fallback
   const val = options[key];
   if (typeof val === 'string') {
     const n = parseInt(val, 10);
-    if (!isNaN(n) && n > 0) return n;
+    if (!Number.isNaN(n) && n > 0) return n;
   }
   return fallback;
 }
@@ -200,21 +193,18 @@ async function main(): Promise<void> {
     outputError('Usage: sketchtest <command> [options]');
     outputError('');
     outputError('Commands:');
-    outputError('  run <testSuiteId>        Trigger a test suite run and wait');
-    outputError('  run-workflow <workflowId> Trigger a workflow run and wait');
+    outputError('  run <workflowVersionId>         Trigger a published workflow version');
+    outputError('  run-workflow <workflowVersionId> Alias for run');
     outputError('  status <runId>            Check run status');
     outputError('  report <runId>            Get run report');
-    outputError('  cancel <runId>            Cancel a running run');
     outputError('');
     outputError('Options:');
     outputError('  --cp-url <url>          Control Plane URL (default: http://localhost:3802)');
-    outputError('  --environment <id>      Environment version ID');
     outputError('  --token <token>         Auth token (or set SKETCHTEST_TOKEN)');
     outputError('  --wait / --no-wait      Wait for run completion (default: --wait)');
     outputError('  --timeout <seconds>     Max wait time (default: 300)');
     outputError('  --poll-interval <s>     Poll interval in seconds (default: 3)');
     outputError('  --output <format>       json | text | github (default: text)');
-    outputError('  --idempotency-key <k>   Prevent duplicate runs');
     process.exit(EXIT.ERROR);
   }
 
@@ -225,42 +215,36 @@ async function main(): Promise<void> {
   const shouldWait = options['wait'] !== false;
   const timeoutSec = numOpt(options, 'timeout', 300);
   const pollIntervalSec = numOpt(options, 'poll-interval', 3);
-  const environmentId = strOpt(options, 'environment');
-  const idempotencyKey = strOpt(options, 'idempotency-key');
 
   configureClient({ baseUrl: cpUrl, token });
 
   switch (command) {
     case 'run': {
-      const testSuiteId = args[0];
-      if (!testSuiteId) {
-        outputError('Error: testSuiteId is required for "run" command');
-        outputError('Usage: sketchtest run <testSuiteId> [options]');
+      const workflowVersionId = args[0];
+      if (!workflowVersionId) {
+        outputError('Error: workflowVersionId is required for "run" command');
+        outputError('Usage: sketchtest run <workflowVersionId> [options]');
         process.exit(EXIT.ERROR);
       }
-      await handleRun(testSuiteId, {
+      await handleRun(workflowVersionId, {
         shouldWait,
         timeoutSec,
         pollIntervalSec,
-        environmentId,
-        idempotencyKey,
         output,
       });
       break;
     }
     case 'run-workflow': {
-      const workflowId = args[0];
-      if (!workflowId) {
-        outputError('Error: workflowId is required for "run-workflow" command');
-        outputError('Usage: sketchtest run-workflow <workflowId> [options]');
+      const workflowVersionId = args[0];
+      if (!workflowVersionId) {
+        outputError('Error: workflowVersionId is required for "run-workflow" command');
+        outputError('Usage: sketchtest run-workflow <workflowVersionId> [options]');
         process.exit(EXIT.ERROR);
       }
-      await handleRunWorkflow(workflowId, {
+      await handleRunWorkflow(workflowVersionId, {
         shouldWait,
         timeoutSec,
         pollIntervalSec,
-        environmentId,
-        idempotencyKey,
         output,
       });
       break;
@@ -283,15 +267,6 @@ async function main(): Promise<void> {
       await handleReport(runId, output);
       break;
     }
-    case 'cancel': {
-      const runId = args[0];
-      if (!runId) {
-        outputError('Error: runId is required for "cancel" command');
-        process.exit(EXIT.ERROR);
-      }
-      await handleCancel(runId, output);
-      break;
-    }
     default:
       outputError(`Error: unknown command "${command}"`);
       outputError('Run "sketchtest" without arguments to see usage.');
@@ -307,18 +282,14 @@ interface RunOptions {
   shouldWait: boolean;
   timeoutSec: number;
   pollIntervalSec: number;
-  environmentId?: string;
-  idempotencyKey?: string;
   output: OutputFormat;
 }
 
-async function handleRun(testSuiteId: string, opts: RunOptions): Promise<void> {
+async function handleRun(workflowVersionId: string, opts: RunOptions): Promise<void> {
   try {
-    const body: Record<string, unknown> = { testSuiteId };
-    if (opts.environmentId) body['environmentId'] = opts.environmentId;
-    if (opts.idempotencyKey) body['idempotencyKey'] = opts.idempotencyKey;
+    const body = { workflowVersionId };
 
-    const result = await request<TriggerResult>('/api/runs', {
+    const result = await request<TriggerResult>('/api/runs/from-workflow', {
       method: 'POST',
       body: JSON.stringify(body),
     });
@@ -358,11 +329,9 @@ async function handleRun(testSuiteId: string, opts: RunOptions): Promise<void> {
   }
 }
 
-async function handleRunWorkflow(workflowId: string, opts: RunOptions): Promise<void> {
+async function handleRunWorkflow(workflowVersionId: string, opts: RunOptions): Promise<void> {
   try {
-    const body: Record<string, unknown> = { workflowId };
-    if (opts.environmentId) body['environmentId'] = opts.environmentId;
-    if (opts.idempotencyKey) body['idempotencyKey'] = opts.idempotencyKey;
+    const body = { workflowVersionId };
 
     const result = await request<TriggerResult>('/api/runs/from-workflow', {
       method: 'POST',
@@ -408,7 +377,8 @@ async function handleRunWorkflow(workflowId: string, opts: RunOptions): Promise<
 
 async function handleStatus(runId: string, output: OutputFormat): Promise<void> {
   try {
-    const run = await request<RunSummary>(`/api/runs/${runId}`);
+    const response = await request<{ run: RunSummary }>(`/api/runs/${runId}`);
+    const run = response.run;
     if (output === 'json') {
       outputText(JSON.stringify(run));
     } else if (output === 'github') {
@@ -445,28 +415,11 @@ async function handleReport(runId: string, output: OutputFormat): Promise<void> 
   }
 }
 
-async function handleCancel(runId: string, output: OutputFormat): Promise<void> {
-  try {
-    await request(`/api/runs/${runId}/cancel`, { method: 'POST' });
-    if (output === 'json') {
-      outputText(JSON.stringify({ runId, action: 'cancelled' }));
-    } else if (output === 'github') {
-      githubNotice(`Run ${runId} cancelled`);
-    } else {
-      outputText(`Run ${runId} cancelled`);
-    }
-    process.exit(EXIT.CANCELLED);
-  } catch (err) {
-    outputError(`Error: ${err instanceof Error ? err.message : String(err)}`);
-    process.exit(EXIT.ERROR);
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Polling
 // ---------------------------------------------------------------------------
 
-const TERMINAL_STATES = new Set(['passed', 'failed', 'inconclusive', 'cancelled', 'orphaned']);
+const TERMINAL_STATES = new Set(['passed', 'failed', 'inconclusive', 'cancelled', 'lost']);
 
 interface PollOptions {
   timeoutSec: number;
@@ -478,7 +431,8 @@ async function pollRun(runId: string, opts: PollOptions): Promise<RunSummary> {
   let lastStatus = 'queued';
 
   while (Date.now() < deadline) {
-    const run = await request<RunSummary>(`/api/runs/${runId}`);
+    const response = await request<{ run: RunSummary }>(`/api/runs/${runId}`);
+    const run = response.run;
 
     if (run.status !== lastStatus) {
       process.stderr.write(`  Status: ${run.status}\n`);

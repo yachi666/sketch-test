@@ -1,0 +1,26 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`plan generation boundary > serializes the versioned proposal golden shape 1`] = `
+{
+  "blockOnInfraError": true,
+  "explanation": "基于发布版本",
+  "gaps": [
+    {
+      "key": "d1",
+      "reason": "待审核",
+    },
+  ],
+  "members": [
+    {
+      "key": "t1",
+      "reason": "已发布",
+    },
+  ],
+  "name": "员工计划",
+  "noNewFailures": true,
+  "objective": "保护员工管理",
+  "precautions": [
+    "准备可清理数据",
+  ],
+}
+`;

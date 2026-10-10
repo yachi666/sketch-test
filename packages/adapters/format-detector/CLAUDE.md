@@ -1,4 +1,4 @@
-# @sketch-test/adapter-format-detector
+# @sketch-test/format-detector
 
 > Auto-detect import format — the first stage of the import pipeline
 
@@ -19,7 +19,7 @@ Examines unknown content and identifies its format (OpenAPI, Postman Collection,
 ## API
 
 ```typescript
-import { detectFormat, type DetectionResult } from '@sketch-test/adapter-format-detector';
+import { detectFormat, type DetectionResult } from '@sketch-test/format-detector';
 
 // Returns ALL matching formats, sorted by confidence descending.
 // Content can be a parsed JSON object or a raw string.

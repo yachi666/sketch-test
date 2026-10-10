@@ -101,7 +101,7 @@ describe('InstantSchema', () => {
 
 describe('HttpMethodSchema', () => {
   test('accepts all standard methods', () => {
-    for (const m of ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']) {
+    for (const m of ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'QUERY']) {
       expect(HttpMethodSchema.safeParse(m).success).toBe(true);
     }
   });

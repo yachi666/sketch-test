@@ -4,7 +4,7 @@
 
 ## Role
 
-This adapter converts OpenAPI 3.0 / 3.1 documents into the platform's unified `CanonicalApiModel`. It is an **adapter seam**: every API source format must produce a canonical model. Consumers (test generation, workflow compiler, API browser) never see OpenAPI-specific types.
+This adapter converts supported OpenAPI 3.0, 3.1, and 3.2 documents into the platform's unified `CanonicalApiModel`. It is an **adapter seam**: every API source format must produce a canonical model. Consumers (test generation, workflow compiler, API browser) never see OpenAPI-specific types.
 
 ## Quick start
 
@@ -13,9 +13,10 @@ pnpm test        # Run vitest unit tests
 pnpm check       # TypeScript type-check
 ```
 
-## M0 scope
+## Supported scope
 
-- OpenAPI 3.0 / 3.1 JSON documents
+- OpenAPI 3.0.0–3.0.4, 3.1.0–3.1.2, and 3.2.0 JSON or YAML 1.2 documents
+- Published OpenAPI schema-family validation on the production import entry
 - Paths → Endpoints (with stable identifiers)
 - Parameters (path, query, header, cookie)
 - Request bodies (with content → schema refs)
@@ -33,7 +34,7 @@ pnpm check       # TypeScript type-check
 | `{param}` in path | `:param` in normalized path | `{userId}` → `:userId` |
 | `#/components/schemas/X` | `ApiSchemaNode` at `/schemas/X` | Flat registry, JSON Pointer paths |
 | `parameters[].in` | `Parameter.in` | path/query/header/cookie |
-| `responses.{status}` | `Response` with statusCode | "default" mapped to 200 |
+| `responses.{status}` | `Response` with statusCode | Default and range responses fail closed until the canonical seam represents them. |
 | `securitySchemes` | `SecurityScheme` | 5 types mapped |
 
 ## Source locations
@@ -46,7 +47,7 @@ Every structural element carries a `SourceLocation` with:
 ## Key invariants
 
 1. **Failed imports never create a valid ApiVersion** — `ImportResult.success === false` when any error diagnostic exists.
-2. **Warnings are never silently dropped** — unsupported HTTP methods, unknown security types, and OpenAPI 3.1 webhooks all produce diagnostics.
+2. **Unsupported semantics are never silently dropped** — unsupported methods, custom operations, streaming media, response ranges, server overrides, security types, and webhooks produce diagnostics.
 3. **Endpoint identifiers are deterministic** — `METHOD-normalized-path`, no UUIDs, no database row IDs.
 4. **Schema references are stable** — `$ref` resolution produces `/schemas/{name}` paths.
 
@@ -54,10 +55,17 @@ Every structural element carries a `SourceLocation` with:
 
 | Code | Severity | Trigger |
 |------|----------|---------|
-| `UNSUPPORTED_OPENAPI_VERSION` | error | Not 3.x |
+| `UNSUPPORTED_OPENAPI_VERSION` | error | Not in the exact supported version list |
+| `OPENAPI_SCHEMA_VALIDATION_FAILED` | error | Published OpenAPI schema-family validation failed |
+| `EXTERNAL_REFERENCE_NOT_ALLOWED` | error | External reference encountered before bounded resolution exists |
+| `OPENAPI_DEPTH_BUDGET_EXCEEDED` | error | Parsed document nesting exceeded the configured bound |
+| `OPENAPI_NODE_BUDGET_EXCEEDED` | error | Parsed document node count exceeded the configured bound |
+| `UNSUPPORTED_ADDITIONAL_OPERATION` | error | OpenAPI 3.2 custom method cannot be executed |
+| `QUERYSTRING_PARAMETER_NOT_EXECUTABLE` | error | OpenAPI 3.2 query-string content serialization is not implemented |
+| `STREAMING_ITEM_SCHEMA_NOT_EXECUTABLE` | error | Sequential or streaming media cannot be executed safely |
 | `UNSUPPORTED_HTTP_METHOD` | warning | Non-standard HTTP method |
 | `UNSUPPORTED_SECURITY_TYPE` | warning | Unknown security scheme type |
-| `WEBHOOKS_NOT_SUPPORTED` | warning | OpenAPI 3.1 webhooks present |
+| `WEBHOOKS_NOT_SUPPORTED` | warning | OpenAPI 3.1+ webhooks present |
 | `POLL_CANDIDATE` | info | GET endpoint with status-related summary |
 
 ## Dependencies
@@ -71,3 +79,11 @@ Every structural element carries a `SourceLocation` with:
 - **Add a new mapping**: Follow the `mapEndpoints`/`mapSecuritySchemes`/`extractSchemas` pattern — each produces structured output + diagnostics.
 - **Change schema extraction**: Update `extractSchemas()` and verify golden tests against known specs.
 - **Change endpoint id format**: This is a **breaking change** — coordinate with all consumers of `Endpoint.id`.
+
+## Compatibility verification (2026-10-09)
+
+Numeric source labels such as `1` and `1.0` are normalized to the existing semantic
+version seam, with the original label retained in `metadata.extra.originalSourceVersion`
+and an explicit diagnostic. Raw source custody is unchanged. Uniform effective path /
+operation server sets are promoted to the root server list; heterogeneous overrides
+still fail closed. No published ApiVersion is rewritten.

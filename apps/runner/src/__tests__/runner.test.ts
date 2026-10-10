@@ -394,6 +394,145 @@ describe('evaluateAssertions', () => {
     expect(results).toHaveLength(3);
     expect(results.every((r) => r.passed)).toBe(true);
   });
+
+  test('schema assertion passes for a matching draft-07 schema', () => {
+    const step: FrozenStep = {
+      ...baseStep,
+      assertions: [
+        {
+          id: 'schema-pass',
+          target: 'schema',
+          operator: 'schema',
+          expected: {
+            type: 'object',
+            required: ['code', 'data'],
+            properties: {
+              code: { type: 'integer' },
+              data: {
+                type: 'object',
+                required: ['userId'],
+                properties: { userId: { type: 'string' } },
+              },
+            },
+          },
+          severity: 'block',
+        },
+      ],
+    };
+
+    const [result] = evaluateAssertions(step, response);
+    expect(result?.passed).toBe(true);
+    expect(result?.actual).toBe('response body matches schema');
+    expect(result?.schemaDiff).toBeUndefined();
+  });
+
+  test('schema assertion fails with bounded validation diagnostics', () => {
+    const step: FrozenStep = {
+      ...baseStep,
+      assertions: [
+        {
+          id: 'schema-fail',
+          target: 'schema',
+          operator: 'schema',
+          expected: {
+            type: 'object',
+            required: ['code'],
+            properties: { code: { type: 'string' } },
+          },
+          severity: 'block',
+        },
+      ],
+    };
+
+    const [result] = evaluateAssertions(step, response);
+    expect(result?.passed).toBe(false);
+    expect(result?.actual).toBe('response body does not match schema');
+    expect(result?.schemaDiff).toContain('must be string');
+    expect(result?.schemaDiff?.length).toBeLessThanOrEqual(1024);
+  });
+
+  test('schema assertion supports draft 2020-12', () => {
+    const step: FrozenStep = {
+      ...baseStep,
+      assertions: [
+        {
+          id: 'schema-2020',
+          target: 'schema',
+          operator: 'schema',
+          expected: {
+            $schema: 'https://json-schema.org/draft/2020-12/schema',
+            type: 'object',
+            required: ['message'],
+            properties: { message: { type: 'string' } },
+          },
+          severity: 'block',
+        },
+      ],
+    };
+
+    const [result] = evaluateAssertions(step, response);
+    expect(result?.passed).toBe(true);
+    expect(result?.expected).toBe('2020-12 JSON Schema');
+  });
+
+  test('schema assertion fails when expected schema is missing', () => {
+    const step: FrozenStep = {
+      ...baseStep,
+      assertions: [
+        {
+          id: 'schema-missing',
+          target: 'schema',
+          operator: 'schema',
+          severity: 'block',
+        },
+      ],
+    };
+
+    const [result] = evaluateAssertions(step, response);
+    expect(result?.passed).toBe(false);
+    expect(result?.actual).toBe('missing or invalid JSON Schema');
+  });
+
+  test('schema assertion fails explicitly for an unsupported dialect', () => {
+    const step: FrozenStep = {
+      ...baseStep,
+      assertions: [
+        {
+          id: 'schema-unsupported',
+          target: 'schema',
+          operator: 'schema',
+          expected: {
+            $schema: 'https://example.com/custom-schema',
+            type: 'object',
+          },
+          severity: 'block',
+        },
+      ],
+    };
+
+    const [result] = evaluateAssertions(step, response);
+    expect(result?.passed).toBe(false);
+    expect(result?.schemaDiff).toContain('Unsupported JSON Schema dialect');
+  });
+
+  test('schema assertion fails explicitly for an invalid schema', () => {
+    const step: FrozenStep = {
+      ...baseStep,
+      assertions: [
+        {
+          id: 'schema-invalid',
+          target: 'schema',
+          operator: 'schema',
+          expected: { type: 'not-a-json-schema-type' },
+          severity: 'block',
+        },
+      ],
+    };
+
+    const [result] = evaluateAssertions(step, response);
+    expect(result?.passed).toBe(false);
+    expect(result?.actual).toBe('schema could not be compiled');
+  });
 });
 
 // ─── Event Validation ─────────────────────────────────────────────

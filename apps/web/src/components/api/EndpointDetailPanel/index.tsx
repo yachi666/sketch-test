@@ -1,15 +1,18 @@
-import { FloppyDisk, Globe, Plus, Tag, Trash, X } from '@phosphor-icons/react';
+import { FileCode, FloppyDisk, Globe, Plus, Sparkle, Tag, Trash, X } from '@phosphor-icons/react';
 import type { HttpMethod } from '@sketch-test/contracts-common';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EndpointDetail, SchemaDisplayNode, Variable } from '../../../types';
 import { resolveVariableValue } from '../../../types';
 import { ConfirmDialog } from '../../shared/ConfirmDialog';
 import { MethodBadge } from '../../shared/MethodBadge';
+import { EndpointDefinitionPanel } from './EndpointDefinitionDialog';
+import { GenerateTestsDialog, type GenerationStrategy } from './GenerateTestsDialog';
 import { ParameterEditor } from './ParameterEditor';
 import { ParameterTable } from './ParameterTable';
 import { PreviewView } from './PreviewView';
 import { RequestBodyEditor } from './RequestBodyEditor';
 import { RequestBodyView } from './RequestBodyView';
+import { RequestSendPanel } from './RequestSendPanel';
 import { ResponseEditor } from './ResponseEditor';
 import { ResponseList } from './ResponseList';
 import { SchemaTab } from './SchemaTab';
@@ -29,8 +32,6 @@ interface EndpointDetailPanelProps {
   onSave: (detail: EndpointDetail) => void;
   /** Called when user deletes this endpoint (edit mode only). */
   onDelete?: (endpointId: string) => void;
-  /** Called when user wants to add this endpoint to a workflow. */
-  onAddToWorkflow?: (endpointId: string) => void;
   /** Called when user creates a new schema (e.g., from JSON body paste). */
   onCreateSchema?: (schema: SchemaDisplayNode) => void;
   /** Host-tagged variables available for selection as the endpoint's base URL. */
@@ -39,6 +40,12 @@ interface EndpointDetailPanelProps {
   activeEnvironmentId?: string;
   /** Called when user types a manual host URL — should create a new Host-tagged Variable and return it. */
   onCreateHostVariable?: (url: string) => Variable | Promise<Variable>;
+  /** Open directly in the one-off request composer. */
+  startRequestComposer?: boolean;
+  /** Immutable API version that supplied this endpoint. */
+  apiVersionId?: string;
+  /** Create generated drafts for just this endpoint. */
+  onGenerateTests?: (strategy: GenerationStrategy) => Promise<void>;
   onClose: () => void;
 }
 
@@ -69,11 +76,13 @@ export function EndpointDetailPanel({
   existingIds: _existingIds,
   onSave,
   onDelete,
-  onAddToWorkflow,
   onCreateSchema,
   hostVariables = [],
   activeEnvironmentId,
   onCreateHostVariable,
+  startRequestComposer = false,
+  apiVersionId,
+  onGenerateTests,
   onClose,
 }: EndpointDetailPanelProps) {
   const [tab, setTab] = useState<'params' | 'request' | 'responses' | 'schema'>('params');
@@ -82,6 +91,9 @@ export function EndpointDetailPanel({
   const [closing, setClosing] = useState(false);
   const [manualHostUrl, setManualHostUrl] = useState('');
   const [saving, setSaving] = useState(false);
+  const [sendingRequest, setSendingRequest] = useState(false);
+  const [definitionOpen, setDefinitionOpen] = useState(false);
+  const [generationOpen, setGenerationOpen] = useState(false);
   const [confirmState, setConfirmState] = useState<{
     title: string;
     message: string;
@@ -156,6 +168,10 @@ export function EndpointDetailPanel({
     setDraft(structuredClone(initialDetail));
     setHasChanges(false);
   }, [initialDetail]);
+
+  useEffect(() => {
+    setSendingRequest(startRequestComposer);
+  }, [initialDetail.endpointId, startRequestComposer]);
 
   // ── Auto-focus first input in edit/create mode ──
 
@@ -301,6 +317,35 @@ export function EndpointDetailPanel({
 
   const titleText = mode === 'create' ? '新建接口' : mode === 'edit' ? '编辑接口' : '接口详情';
   const saveLabel = mode === 'create' ? '创建' : '保存';
+  const directRequestUrl = useMemo(() => {
+    const baseUrl = previewUrl.hasBase
+      ? `${previewUrl.scheme}${previewUrl.hostPart}`
+      : (resolvedHost?.replace(/\/+$/, '') ?? '');
+    const replacePathParameter = (placeholder: string, name: string) => {
+      const example = draft.parameters.find(
+        (parameter) => parameter.in === 'path' && parameter.name === name,
+      )?.example;
+      return example ? encodeURIComponent(example) : placeholder;
+    };
+    const path = draft.path
+      .replace(/\{([^}]+)\}/g, replacePathParameter)
+      .replace(/:([A-Za-z0-9_-]+)/g, replacePathParameter);
+    const query = draft.parameters
+      .filter((parameter) => parameter.in === 'query' && parameter.example !== undefined)
+      .map(
+        (parameter) =>
+          `${encodeURIComponent(parameter.name)}=${encodeURIComponent(parameter.example ?? '')}`,
+      )
+      .join('&');
+    return `${baseUrl}${path}${query ? `?${query}` : ''}`;
+  }, [
+    draft.parameters,
+    draft.path,
+    previewUrl.hasBase,
+    previewUrl.hostPart,
+    previewUrl.scheme,
+    resolvedHost,
+  ]);
 
   // ── Render ──
 
@@ -373,7 +418,7 @@ export function EndpointDetailPanel({
               )}
             </div>
             <div className="endpoint-dialog-titlebar-right">
-              {isEditing ? (
+              {sendingRequest ? null : isEditing ? (
                 <button
                   className="button button--primary button--sm"
                   type="button"
@@ -383,14 +428,25 @@ export function EndpointDetailPanel({
                   <FloppyDisk size={15} />
                   {saveLabel}
                 </button>
-              ) : onAddToWorkflow ? (
+              ) : null}
+              {mode === 'view' ? (
+                <button
+                  className="button button--outline button--sm"
+                  type="button"
+                  onClick={() => setDefinitionOpen((visible) => !visible)}
+                >
+                  <FileCode size={15} />
+                  {definitionOpen ? '收起 YAML' : '展示 YAML'}
+                </button>
+              ) : null}
+              {mode === 'view' && apiVersionId && onGenerateTests ? (
                 <button
                   className="button button--primary button--sm"
                   type="button"
-                  onClick={() => onAddToWorkflow(draft.endpointId)}
+                  onClick={() => setGenerationOpen(true)}
                 >
-                  <Plus size={15} />
-                  加入流程
+                  <Sparkle size={15} />
+                  生成用例
                 </button>
               ) : null}
               <button
@@ -405,7 +461,7 @@ export function EndpointDetailPanel({
           </div>
 
           {/* ── View mode: URL preview bar (full-width, outside identity) ── */}
-          {mode === 'view' ? (
+          {mode === 'view' && !sendingRequest ? (
             <div className="preview-url-bar">
               <MethodBadge method={draft.method} />
               {previewUrl.hasBase ? (
@@ -593,17 +649,31 @@ export function EndpointDetailPanel({
           ) : null}
 
           {/* ── View mode ── */}
-          {mode === 'view' ? (
-            <PreviewView
-              deprecated={draft.deprecated}
-              tags={draft.tags}
-              security={draft.security}
-              parameters={draft.parameters}
-              requestBody={requestBody}
-              responses={draft.responses}
-              schemas={schemas}
-              responseSchema={responseSchema}
+          {sendingRequest ? (
+            <RequestSendPanel
+              detail={draft}
+              defaultUrl={directRequestUrl}
+              onBack={() => setSendingRequest(false)}
             />
+          ) : mode === 'view' ? (
+            definitionOpen ? (
+              <EndpointDefinitionPanel
+                apiVersionId={apiVersionId}
+                endpointId={draft.endpointId}
+                detail={draft}
+              />
+            ) : (
+              <PreviewView
+                deprecated={draft.deprecated}
+                tags={draft.tags}
+                security={draft.security}
+                parameters={draft.parameters}
+                requestBody={requestBody}
+                responses={draft.responses}
+                schemas={schemas}
+                responseSchema={responseSchema}
+              />
+            )
           ) : (
             <>
               {/* ── Tabs ── */}
@@ -748,6 +818,12 @@ export function EndpointDetailPanel({
           variant={confirmState.variant}
           onConfirm={confirmState.onConfirm}
           onCancel={() => setConfirmState(null)}
+        />
+      ) : null}
+      {generationOpen && onGenerateTests ? (
+        <GenerateTestsDialog
+          onGenerate={onGenerateTests}
+          onClose={() => setGenerationOpen(false)}
         />
       ) : null}
     </>

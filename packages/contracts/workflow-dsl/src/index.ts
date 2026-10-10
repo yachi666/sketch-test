@@ -20,8 +20,9 @@ import {
   HttpMethodSchema,
   HttpStatusCodeSchema,
   ImmutableVersionMetaSchema,
+  SideEffectLevelSchema,
 } from '@sketch-test/contracts-common';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 // ─── Schema Version ─────────────────────────────────────────────
 
@@ -112,6 +113,37 @@ export const StepInputSchema = z.object({
 });
 export type StepInput = z.infer<typeof StepInputSchema>;
 
+export const WorkflowAssertionSchema = z.object({
+  target: z.enum(['status', 'header', 'jsonPath', 'body', 'responseTime', 'schema']),
+  path: z.string().max(1024).optional(),
+  operator: z.enum([
+    'equals',
+    'notEquals',
+    'contains',
+    'notContains',
+    'exists',
+    'notExists',
+    'greaterThan',
+    'lessThan',
+    'matches',
+    'type',
+    'schema',
+    'hasItems',
+    'isEmpty',
+  ]),
+  expected: z.unknown().optional(),
+  description: z.string().max(1024).optional(),
+});
+export type WorkflowAssertion = z.infer<typeof WorkflowAssertionSchema>;
+
+export const WorkflowExtractionSchema = z.object({
+  name: z.string().min(1).max(128),
+  source: z.enum(['body', 'header', 'cookie', 'status']),
+  expression: z.string().min(1).max(1024),
+  scope: z.enum(['step', 'workflow']).default('workflow'),
+});
+export type WorkflowExtraction = z.infer<typeof WorkflowExtractionSchema>;
+
 // ─── Workflow Step ──────────────────────────────────────────────
 
 /**
@@ -127,6 +159,10 @@ export const WorkflowStepSchema = z
     useTest: StepTestRefSchema,
     /** Input mappings from previous steps or environment. */
     inputs: z.array(StepInputSchema).optional(),
+    /** Assertions compiled into the immutable Runner plan. */
+    assertions: z.array(WorkflowAssertionSchema).optional(),
+    /** Named values extracted for later workflow steps. */
+    extract: z.array(WorkflowExtractionSchema).optional(),
     /** Condition for execution. */
     condition: ConditionConfigSchema.optional(),
     /** Retry configuration. */
@@ -139,6 +175,10 @@ export const WorkflowStepSchema = z
     gotoLabel: z.string().min(1).max(256).optional(),
     /** Whether this step is enabled. */
     enabled: z.boolean().default(true),
+    /** Request deadline compiled into the immutable Runner plan. */
+    timeoutMs: z.number().int().positive().max(300_000).optional(),
+    /** Side-effect classification used by safety policy. */
+    sideEffect: SideEffectLevelSchema.optional(),
     /** Human-readable description. */
     description: z.string().max(1024).optional(),
   })
@@ -190,6 +230,15 @@ export const TeardownStepSchema = z.object({
 });
 export type TeardownStep = z.infer<typeof TeardownStepSchema>;
 
+export const WorkflowSourceProvenanceSchema = z.object({
+  type: z.literal('arazzo'),
+  sourceLabel: z.string().min(1).max(4096),
+  sourceObjectKey: z.string().min(1).max(1024),
+  contentHash: ContentHashSchema,
+  specificationVersion: z.literal('1.1.0'),
+});
+export type WorkflowSourceProvenance = z.infer<typeof WorkflowSourceProvenanceSchema>;
+
 // ─── Workflow Definition ────────────────────────────────────────
 
 /**
@@ -203,6 +252,8 @@ export const WorkflowDefinitionSchema = z.object({
   name: z.string().min(1).max(256),
   description: z.string().max(4096).optional(),
   tags: z.array(z.string().max(64)).optional(),
+  /** Immutable provenance for adapter-imported editor documents. */
+  source: WorkflowSourceProvenanceSchema.optional(),
   /** Sequential steps in the main workflow. */
   steps: z.array(WorkflowStepSchema).min(1).max(50), // V1 hard limit
   /** Teardown phase. */

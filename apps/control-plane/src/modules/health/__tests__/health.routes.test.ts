@@ -7,8 +7,9 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 // ─── Mock DB health check ──────────────────────────────────────────
 
-const { mockHealthCheck } = vi.hoisted(() => ({
+const { mockHealthCheck, mockObjectStorageHealthCheck } = vi.hoisted(() => ({
   mockHealthCheck: vi.fn(),
+  mockObjectStorageHealthCheck: vi.fn(),
 }));
 
 vi.mock('../../../db/db.js', () => ({
@@ -16,10 +17,14 @@ vi.mock('../../../db/db.js', () => ({
   healthCheck: (...args: unknown[]) => mockHealthCheck(...args),
 }));
 
+vi.mock('../../../shared/object-storage.js', () => ({
+  objectStorageHealthCheck: (...args: unknown[]) => mockObjectStorageHealthCheck(...args),
+}));
+
 // ─── Mock Fastify app ──────────────────────────────────────────────
 
-import { healthRoutes } from '../health.routes';
 import type { FastifyInstance } from 'fastify';
+import { healthRoutes } from '../health.routes';
 
 // Build a lightweight test app with the health route registered
 async function buildTestApp(): Promise<FastifyInstance> {
@@ -38,6 +43,7 @@ describe('healthRoutes', () => {
 
   beforeEach(async () => {
     mockHealthCheck.mockReset();
+    mockObjectStorageHealthCheck.mockReset().mockResolvedValue(true);
     app = await buildTestApp();
   });
 
@@ -106,5 +112,32 @@ describe('healthRoutes', () => {
     // Timestamp should be within a reasonable window (with some tolerance)
     expect(timestamp.getTime()).toBeGreaterThanOrEqual(before.getTime() - 1000);
     expect(timestamp.getTime()).toBeLessThanOrEqual(after.getTime() + 1000);
+  });
+
+  test('GET /health/live reports process liveness without dependency checks', async () => {
+    const response = await app.inject({ method: 'GET', url: '/health/live' });
+    expect(response.statusCode).toBe(200);
+    expect(response.json().status).toBe('ok');
+    expect(mockHealthCheck).not.toHaveBeenCalled();
+  });
+
+  test('GET /ready requires both PostgreSQL and object storage', async () => {
+    mockHealthCheck.mockResolvedValue(true);
+    mockObjectStorageHealthCheck.mockResolvedValue(false);
+    const response = await app.inject({ method: 'GET', url: '/ready' });
+    expect(response.statusCode).toBe(503);
+    expect(response.json()).toMatchObject({
+      status: 'not_ready',
+      db: 'connected',
+      objectStore: 'disconnected',
+    });
+  });
+
+  test('GET /ready reports ready only when every dependency responds', async () => {
+    mockHealthCheck.mockResolvedValue(true);
+    mockObjectStorageHealthCheck.mockResolvedValue(true);
+    const response = await app.inject({ method: 'GET', url: '/ready' });
+    expect(response.statusCode).toBe(200);
+    expect(response.json().status).toBe('ready');
   });
 });

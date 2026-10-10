@@ -5,7 +5,7 @@
  * Each HAR entry (request + response pair) becomes an endpoint with its
  * response recorded.
  *
- * M0 scope:
+ * Supported scope:
  * - HAR 1.2 JSON
  * - Entries with request (method, url, headers, postData) → Endpoint
  * - Entries with response (status, headers, content) → Response

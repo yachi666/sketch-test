@@ -203,3 +203,74 @@ describe('getRunReport', () => {
     }
   });
 });
+
+describe('evidence interpretation regressions', () => {
+  afterEach(() => mockQuery.mockReset());
+  test('keeps missing plan steps, skips run events, uses immutable step names, never exposes raw request secrets', async () => {
+    mockQuery.mockResolvedValueOnce({
+      rows: [
+        makeRunRow({
+          plan_json: {
+            steps: [
+              {
+                stepId: 'check',
+                method: 'GET',
+                urlTemplate: 'https://secret.invalid/?token=secret',
+              },
+              { stepId: 'next', method: 'GET' },
+            ],
+          },
+          workflow_definition: {
+            steps: [
+              { id: 'check', name: '检查订单状态' },
+              { id: 'next', name: '检查付款' },
+            ],
+          },
+        }),
+      ],
+    });
+    mockQuery.mockResolvedValueOnce({
+      rows: [
+        makeStepEvent(-1, 'run.started'),
+        makeStepEvent(0, 'request.prepared', {
+          method: 'GET',
+          url: 'https://secret.invalid/?token=[REDACTED]',
+        }),
+        makeStepEvent(0, 'step.finished', { status: 'failed' }),
+      ],
+    });
+    const report = await getRunReport('run-001');
+    expect(report!.steps.map((step) => [step.name, step.status])).toEqual([
+      ['检查订单状态', 'failed'],
+      ['检查付款', 'not_run'],
+    ]);
+    expect(report!.runEvents).toHaveLength(1);
+    expect(JSON.stringify(report)).not.toContain('token=secret');
+  });
+  test('uses Runner sequence for retries and exposes assertion evidence and skipped status', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [makeRunRow()] });
+    mockQuery.mockResolvedValueOnce({
+      rows: [
+        makeStepEvent(0, 'step.finished', { sequence: 8, status: 'passed' }),
+        makeStepEvent(0, 'step.finished', { sequence: 4, status: 'failed' }),
+        makeStepEvent(0, 'assertion.evaluated', {
+          sequence: 7,
+          assertionId: 'a',
+          expected: 'paid',
+          actual: 'paid',
+          passed: true,
+          attempt: 2,
+        }),
+        makeStepEvent(1, 'step.finished', { status: 'skipped' }),
+      ],
+    });
+    const report = await getRunReport('run-001');
+    expect(report!.steps[0]!.status).toBe('passed');
+    expect(report!.steps[0]!.assertions[0]).toMatchObject({
+      expected: 'paid',
+      actual: 'paid',
+      attempt: 2,
+    });
+    expect(report!.steps[1]!.status).toBe('skipped');
+  });
+});
