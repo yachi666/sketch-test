@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/yachi666/sketch-test/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/yachi666/sketch-test/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/yachi666/sketch-test/actions/workflows/codeql.yml/badge.svg?branch=master)](https://github.com/yachi666/sketch-test/actions/workflows/codeql.yml)
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 [English](README.md) · 简体中文
 
@@ -149,5 +149,5 @@ ops/        对象存储 · 监控 · 告警
 
 ## 许可证
 
-SketchTest 源码使用 [Apache-2.0](LICENSE)。第三方组件遵循各自许可证；
+SketchTest 源码使用 [MIT](LICENSE)。第三方组件遵循各自许可证；
 随容器构建的 MinIO 服务端与客户端采用 AGPL-3.0。
