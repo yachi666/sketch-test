@@ -75,9 +75,11 @@ PR CI builds workspace dependencies before Web, sets the project URL base path,
 and generates a `404.html` fallback. The router uses Vite's base URL; normal local
 and container builds continue to use `/`.
 
-The Pages workflow deploys only after successful CI for a `master` push from this
-repository, checking out that exact tested SHA. Manual dispatch is restricted to
-`master`. Deployment uses the `github-pages` environment and OIDC.
+CI uploads the frontend artifact only for `master` builds. After the required
+code, automation, and Pages build gates pass, a separate reusable workflow deploys
+that same run's artifact, with no checkout or repository code execution in the
+privileged deployment job. Manual CI dispatch can also deploy `master`; branch
+builds cannot deploy. Deployment uses the `github-pages` environment and OIDC.
 
 Pages hosts **only the static frontend**, not the Control Plane, PostgreSQL,
 object storage, Runner, or AI Worker. It is not a self-contained live demo.

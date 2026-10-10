@@ -1,5 +1,10 @@
 name: Build Pages frontend
 description: Build workspace dependencies and the Web frontend for a project Pages URL
+inputs:
+  control-plane-url:
+    description: Public HTTPS Control Plane origin, if configured
+    required: false
+    default: ''
 runs:
   using: composite
   steps:
@@ -10,7 +15,7 @@ runs:
       shell: bash
       env:
         PAGES_BASE_PATH: /${{ github.event.repository.name }}/
-        VITE_CP_BASE: ${{ vars.PUBLIC_CONTROL_PLANE_URL }}
+        VITE_CP_BASE: ${{ inputs.control-plane-url }}
       run: |
         pnpm --filter web exec vite build --base "$PAGES_BASE_PATH"
         cp apps/web/dist/index.html apps/web/dist/404.html

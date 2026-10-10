@@ -107,6 +107,13 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup
       - uses: ./.github/actions/build-pages
+        with:
+          control-plane-url: ${{ vars.PUBLIC_CONTROL_PLANE_URL }}
+      - name: Upload Pages artifact from the tested master build
+        if: github.ref == 'refs/heads/master'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+        with:
+          path: apps/web/dist
 
   dependency-review:
     if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/master')
@@ -165,3 +172,12 @@ jobs:
         run: |
           branch=$(gh api "repos/$GH_REPO/pulls/$PR_NUMBER" --jq '.head.ref')
           gh workflow run ci.yml --ref "$branch"
+
+  pages-deploy:
+    if: github.ref == 'refs/heads/master'
+    needs: [lint, typecheck, test, product-e2e, compose-smoke, automation, pages-build]
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/deploy-pages.yml
