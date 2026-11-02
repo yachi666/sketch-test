@@ -15,7 +15,7 @@
     "clean": "rm -rf dist/ tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1149.0",
+    "@aws-sdk/client-s3": "^3.1156.0",
     "@fastify/cors": "^11.3.1",
     "@sketch-test/adapter-arazzo": "workspace:*",
     "@sketch-test/adapter-openapi": "workspace:*",
@@ -24,7 +24,7 @@
     "@sketch-test/runner-protocol": "workspace:*",
     "@sketch-test/test-dsl": "workspace:*",
     "@sketch-test/workflow-dsl": "workspace:*",
-    "fastify": "^5.12.5",
+    "fastify": "^5.12.7",
     "pg": "^8.23.1",
     "yaml": "^2.9.1",
     "zod": "catalog:",
