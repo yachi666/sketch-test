@@ -22,7 +22,7 @@ catalog:
   "@phosphor-icons/react": ^2.1.10
   # Build
   typescript: ^7.0.2
-  vite: 8.3.4
+  vite: 8.3.5
   "@vitejs/plugin-react": 6.1.2
   tsx: ^4.23.15
   # Test
